@@ -5,8 +5,10 @@ window.newCanvasEngine = (function () {
         var height = options.height || 200;
         var container = options.container || document.body;
 
-        var el = createCanvasEl();
-        var engine = createEngine();
+        var canvas = createCanvasEl(width, height);
+        var engine = createEngine(canvas);
+
+        container.appendChild(canvas);
 
         return engine;
     };
