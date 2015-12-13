@@ -1,25 +1,22 @@
 window.newGame = (function () {
 
-    function startRenderLoopForGame(gameInstance) {
-        gameInstance.renderLoop = window.startRenderLoop(function (dTime) {
-            gameInstance.frameHook(dTime);
-        });
-    }
-
-    function Game(renderer) {
+    function Game(renderer, renderLoop) {
         this.renderer = renderer;
+        this.renderLoop = renderLoop;
+
+        this.renderLoop.addFrameHook(this.frameHook.bind(this));
+        this.renderLoop.start();
     }
     Game.prototype = {
-        frameHook: Function (dTime) {
-
+        frameHook: function (dtime) {
+            console.log('frame', dtime);
         }
     };
 
     return function () {
         var renderer = window.newCanvasRenderer();
-        var game = new Game(renderer);
-        
-        startRenderLoopForGame(game);
+        var renderLoop = window.startRenderLoop();
+        var game = new Game(renderer, renderLoop);
 
         return game;
     };

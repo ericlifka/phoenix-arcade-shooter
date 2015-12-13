@@ -5,12 +5,12 @@ window.startRenderLoop = (function () {
     };
 
     return function (frameHook) {
+        frameHook = frameHook || function () { };
         var active = false;
         var lastFrameTime = now();
-        var renderContext = { start: start, stop: stop };
+        var renderContext = { start: start, stop: stop, addFrameHook: addFrameHook };
 
         function animationFrameHandler() {
-            console.log(browserTime);
             if (!active) { return; }
 
             var currentTime = now();
@@ -31,7 +31,10 @@ window.startRenderLoop = (function () {
             active = false;
             return renderContext;
         }
+        function addFrameHook(hook) {
+            frameHook = hook;
+        }
 
-        return renderContext.start();
+        return renderContext;
     };
 }());
