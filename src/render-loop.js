@@ -10,6 +10,7 @@ window.startRenderLoop = (function () {
         var renderContext = { start: start, stop: stop };
 
         function animationFrameHandler() {
+            console.log(browserTime);
             if (!active) { return; }
 
             var currentTime = now();
