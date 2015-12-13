@@ -1,4 +1,4 @@
-window.newCanvasEngine = (function () {
+window.newCanvasRenderer = (function () {
 
     function createCanvasEl(width, height) {
         var el = document.createElement('canvas');
@@ -9,7 +9,7 @@ window.newCanvasEngine = (function () {
         return el;
     }
 
-    function createEngine(canvas) {
+    function createRenderer(canvas) {
         return {
             canvas: canvas
         };
@@ -21,10 +21,10 @@ window.newCanvasEngine = (function () {
         var container = options.container || document.body;
 
         var canvas = createCanvasEl(width, height);
-        var engine = createEngine(canvas);
+        var renderer = createRenderer(canvas);
 
         container.appendChild(canvas);
 
-        return engine;
+        return renderer;
     };
 }());
