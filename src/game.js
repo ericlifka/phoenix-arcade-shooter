@@ -4,11 +4,11 @@ window.newGame = (function () {
         this.renderer = renderer;
     }
     Game.prototype = {
-        
+
     };
 
     return function () {
-        var renderer = window.newCanvasEngine();
+        var renderer = window.newCanvasRenderer();
         var game = new Game(renderer);
 
         return game;
