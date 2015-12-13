@@ -5,14 +5,32 @@ window.startRenderLoop = (function () {
     };
 
     return function (frameHook) {
-        var current = now();
-        window.requestAnimationFrame(function animationFrameHandler() {
-            var now = now();
-            var dtime = now - current;
-            current = now;
+        var active = false;
+        var lastFrameTime = now();
+        var renderContext = { start: start, stop: stop };
+
+        function animationFrameHandler() {
+            if (!active) { return; }
+
+            var currentTime = now();
+            var dtime = currentTime - lastFrameTime;
+            lastFrameTime = currentTime;
 
             frameHook(dtime);
             window.requestAnimationFrame(animationFrameHandler);
-        });
+        }
+        function start() {
+            if (!active) {
+                active = true;
+                window.requestAnimationFrame(animationFrameHandler);
+            }
+            return renderContext;
+        }
+        function stop() {
+            active = false;
+            return renderContext;
+        }
+
+        return renderContext.start();
     };
 }());
