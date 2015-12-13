@@ -9,6 +9,12 @@ window.newCanvasEngine = (function () {
         return el;
     }
 
+    function createEngine(canvas) {
+        return {
+            canvas: canvas
+        };
+    }
+
     return function (options) {
         var width = options.width || 320;
         var height = options.height || 200;
