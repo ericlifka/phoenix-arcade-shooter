@@ -1,5 +1,14 @@
 window.newCanvasEngine = (function () {
 
+    function createCanvasEl(width, height) {
+        var el = document.createElement('canvas');
+        el.width = width;
+        el.height = height;
+        el.classList.add('pixel-engine-canvas');
+
+        return el;
+    }
+
     return function (options) {
         var width = options.width || 320;
         var height = options.height || 200;
