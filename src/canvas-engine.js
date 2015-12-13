@@ -16,6 +16,7 @@ window.newCanvasRenderer = (function () {
     }
 
     return function (options) {
+        options = options || {};
         var width = options.width || 320;
         var height = options.height || 200;
         var container = options.container || document.body;
