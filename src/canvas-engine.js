@@ -48,19 +48,28 @@ window.newCanvasRenderer = (function () {
         newRenderFrame: function () {
             return this.frames[this.nextFrame];
         },
-        renderFrame: function (frame) {
-            var self = this;
-            var pixelSize = self.dimensions.pixelSize;
+        renderFrame: function () {
+            var frame = this.frames[this.nextFrame];
+            var lastFrame = this.frames[+!this.nextFrame];
+            var pixelSize = this.dimensions.pixelSize;
+
             var ctx = this.canvas.getContext("2d", { alpha: false });
 
-            frame.iterateCells(function (cell) {
-                ctx.fillStyle = cell.color;
-                ctx.fillRect(
-                    self.cellToXOffset(cell),
-                    self.cellToYOffset(cell),
-                    pixelSize,
-                    pixelSize);
-            });
+            for (var x = 0; x < this.dimensions.width; x++) {
+                for (var y = 0; y < this.dimensions.height; y++) {
+                    var cell = frame.cells[x][y];
+                    var last = lastFrame.cells[x][y];
+
+                    if (cell.color !== last.color) {
+                        ctx.fillStyle = cell.color;
+                        ctx.fillRect(
+                            cell.x * pixelSize,
+                            cell.y * pixelSize,
+                            pixelSize,
+                            pixelSize);
+                    }
+                }
+            }
 
             this.nextFrame = +!this.nextFrame; // switch the frames
         },
