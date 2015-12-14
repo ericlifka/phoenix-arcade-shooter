@@ -9,18 +9,17 @@ window.newCanvasRenderer = (function () {
         return el;
     }
 
-    function createRenderer(canvas) {
-        return {
-            canvas: canvas,
-
-            getEmptyFrame: function () {
-
-            },
-            renderFrame: function () {
-                
-            }
-        };
+    function Renderer(canvas) {
+        this.canvas = canvas;
     }
+    Renderer.prototype = {
+        getEmptyFrame: function () {
+
+        },
+        renderFrame: function (frame) {
+
+        }
+    };
 
     return function (options) {
         options = options || {};
@@ -29,7 +28,7 @@ window.newCanvasRenderer = (function () {
         var container = options.container || document.body;
 
         var canvas = createCanvasEl(width, height);
-        var renderer = createRenderer(canvas);
+        var renderer = new Renderer(canvas);
 
         container.appendChild(canvas);
 
