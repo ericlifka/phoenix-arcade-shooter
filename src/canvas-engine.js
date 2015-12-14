@@ -22,7 +22,11 @@ window.newCanvasRenderer = (function () {
         return pixelSize;
     }
 
-    function createCanvasEl(width, height, pixelSize) {
+    function createCanvasEl(dimensions) {
+        var width = dimensions.width;
+        var height = dimensions.height;
+        var pixelSize = dimensions.pixelSize;
+
         var el = document.createElement('canvas');
         el.width = width * pixelSize;
         el.height = height * pixelSize;
@@ -31,10 +35,9 @@ window.newCanvasRenderer = (function () {
         return el;
     }
 
-    function Renderer(canvas, width, height) {
+    function Renderer(canvas, dimensions) {
         this.canvas = canvas;
-        this.width = width;
-        this.height = height;
+        this.dimensions = dimensions;
     }
     Renderer.prototype = {
         getEmptyFrame: function () {
@@ -51,9 +54,10 @@ window.newCanvasRenderer = (function () {
         var height = options.height || 200;
         var pixelSize = maximumPixelSize(width, height);
         var container = options.container || document.body;
+        var dimensions = { width: width, height: height, pixelSize: pixelSize };
 
-        var canvas = createCanvasEl(width, height, pixelSize);
-        var renderer = new Renderer(canvas, width, height);
+        var canvas = createCanvasEl(dimensions);
+        var renderer = new Renderer(canvas, dimensions);
 
         container.appendChild(canvas);
 
