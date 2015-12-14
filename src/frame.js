@@ -20,6 +20,15 @@ window.Frame = (function () {
         }
     }
     Frame.prototype = {
+        iterateCells: function (handler, context) {
+            for (var x = 0; x < this.width; x++) {
+                var column = this.cells[x];
+
+                for (var y = 0; y < this.height; y++) {
+                    handler(column[y], x, y);
+                }
+            }
+        }
     };
 
     return Frame;

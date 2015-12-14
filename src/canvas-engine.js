@@ -55,29 +55,18 @@ window.newCanvasRenderer = (function () {
 
             var ctx = this.canvas.getContext("2d", { alpha: false });
 
-            for (var x = 0; x < this.dimensions.width; x++) {
-                for (var y = 0; y < this.dimensions.height; y++) {
-                    var cell = frame.cells[x][y];
-                    var last = lastFrame.cells[x][y];
-
-                    if (cell.color !== last.color) {
-                        ctx.fillStyle = cell.color;
-                        ctx.fillRect(
-                            cell.x * pixelSize,
-                            cell.y * pixelSize,
-                            pixelSize,
-                            pixelSize);
-                    }
+            frame.iterateCells(function (cell, x, y) {
+                if (cell.color !== lastFrame.cells[x][y].color) {
+                    ctx.fillStyle = cell.color;
+                    ctx.fillRect(
+                        cell.x * pixelSize,
+                        cell.y * pixelSize,
+                        pixelSize,
+                        pixelSize);
                 }
-            }
+            });
 
             this.nextFrame = +!this.nextFrame; // switch the frames
-        },
-        cellToXOffset: function (cell) {
-            return cell.x * this.dimensions.pixelSize;
-        },
-        cellToYOffset: function (cell) {
-            return cell.y * this.dimensions.pixelSize;
         }
     };
 
