@@ -11,7 +11,7 @@ window.newGame = (function () {
         frameHook: function (dtime) {
             var frame = this.renderer.newRenderFrame();
 
-            //frame.clear("black");
+            frame.clear("black");
 
             var x = Math.floor(Math.random() * (frame.width));
             var y = Math.floor(Math.random() * (frame.height));

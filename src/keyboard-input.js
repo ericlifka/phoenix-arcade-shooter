@@ -1,0 +1,3 @@
+ window.newKeyboardInputManager = (function () {
+     
+ }());
