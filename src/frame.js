@@ -1,21 +1,21 @@
 window.Frame = (function () {
 
-    function Cell(x, y, color) {
-        this.x = x;
-        this.y = y;
-        this.color = color;
-    }
-
-    function Frame(width, height) {
-        this.width = width;
-        this.height = height;
+    function Frame(dimensions) {
+        this.width = dimensions.width;
+        this.height = dimensions.height;
         this.cells = [];
 
-        for (var x = 0; x < width; x++) {
+        for (var x = 0; x < this.width; x++) {
             this.cells[x] = [];
 
-            for (var y = 0; y < height; y++) {
-                this.cells[x][y] = new Cell(x, y, "#000000");
+            for (var y = 0; y < this.height; y++) {
+                this.cells[x][y] = {
+                    x: x,
+                    y: y,
+                    render_x: x * dimensions.pixelSize,
+                    render_y: y * dimensions.pixelSize,
+                    color: "#000000"
+                };
             }
         }
     }

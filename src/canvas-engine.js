@@ -40,8 +40,8 @@ window.newCanvasRenderer = (function () {
         this.ctx = canvas.getContext("2d", { alpha: false });
         this.dimensions = dimensions;
         this.frames = [
-            new Frame(dimensions.width, dimensions.height),
-            new Frame(dimensions.width, dimensions.height)
+            new Frame(dimensions),
+            new Frame(dimensions)
         ];
         this.nextFrame = 0;
     }
@@ -58,7 +58,7 @@ window.newCanvasRenderer = (function () {
             frame.iterateCells(function (cell, x, y) {
                 if (cell.color !== lastFrame.cells[x][y].color) {
                     ctx.beginPath();
-                    ctx.rect(cell.x * pixelSize, cell.y * pixelSize, pixelSize, pixelSize);
+                    ctx.rect(cell.render_x, cell.render_y, pixelSize, pixelSize);
                     ctx.fillStyle = cell.color;
                     ctx.fill();
                     ctx.closePath();
