@@ -35,9 +35,31 @@ window.newCanvasRenderer = (function () {
         return el;
     }
 
+    function createFrame(dimensions) {
+        var frame = {};
+        frame.width = dimensions.width;
+        frame.height = dimensions.height;
+        frame.cells = [];
+
+        for (var x = 0; x < dimensions.width; x++) {
+            var column = [];
+
+            for (var y = 0; y < dimensions.height; y++) {
+                column[y] = { x: x, y: y, color: "#000000" };
+            }
+
+            frame.cells[x] = column;
+        }
+        return frame;
+    }
+
     function Renderer(canvas, dimensions) {
         this.canvas = canvas;
         this.dimensions = dimensions;
+        this.frames = [
+            createFrame(this.dimensions),
+            createFrame(this.dimensions)
+        ];
     }
     Renderer.prototype = {
         getEmptyFrame: function () {
