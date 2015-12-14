@@ -1,4 +1,11 @@
 window.Frame = (function () {
+
+    function Cell(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+    }
+
     function Frame(width, height) {
         this.width = width;
         this.height = height;
@@ -8,7 +15,7 @@ window.Frame = (function () {
             this.cells[x] = [];
 
             for (var y = 0; y < height; y++) {
-                this.cells[x][y] = { x: x, y: y, color: "#000000" };
+                this.cells[x][y] = new Cell(x, y, "#000000");
             }
         }
     }
