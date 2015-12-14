@@ -20,7 +20,7 @@ window.Frame = (function () {
         }
     }
     Frame.prototype = {
-        iterateCells: function (handler, context) {
+        iterateCells: function (handler) {
             for (var x = 0; x < this.width; x++) {
                 var column = this.cells[x];
 
@@ -28,6 +28,11 @@ window.Frame = (function () {
                     handler(column[y], x, y);
                 }
             }
+        },
+        clear: function (color) {
+            this.iterateCells(function (cell) {
+                cell.color = color;
+            });
         }
     };
 
