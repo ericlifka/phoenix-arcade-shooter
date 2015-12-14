@@ -37,6 +37,7 @@ window.newCanvasRenderer = (function () {
 
     function Renderer(canvas, dimensions) {
         this.canvas = canvas;
+        this.ctx = canvas.getContext("2d", { alpha: false });
         this.dimensions = dimensions;
         this.frames = [
             new Frame(dimensions.width, dimensions.height),
@@ -52,17 +53,15 @@ window.newCanvasRenderer = (function () {
             var frame = this.frames[this.nextFrame];
             var lastFrame = this.frames[+!this.nextFrame];
             var pixelSize = this.dimensions.pixelSize;
-
-            var ctx = this.canvas.getContext("2d", { alpha: false });
+            var ctx = this.ctx;
 
             frame.iterateCells(function (cell, x, y) {
                 if (cell.color !== lastFrame.cells[x][y].color) {
+                    ctx.beginPath();
+                    ctx.rect(cell.x * pixelSize, cell.y * pixelSize, pixelSize, pixelSize);
                     ctx.fillStyle = cell.color;
-                    ctx.fillRect(
-                        cell.x * pixelSize,
-                        cell.y * pixelSize,
-                        pixelSize,
-                        pixelSize);
+                    ctx.fill();
+                    ctx.closePath();
                 }
             });
 
