@@ -11,7 +11,14 @@ window.newCanvasRenderer = (function () {
 
     function createRenderer(canvas) {
         return {
-            canvas: canvas
+            canvas: canvas,
+
+            getEmptyFrame: function () {
+
+            },
+            renderFrame: function () {
+                
+            }
         };
     }
 
