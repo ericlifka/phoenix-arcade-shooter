@@ -1,7 +1,25 @@
 window.newCanvasRenderer = (function () {
 
     function maximumPixelSize(width, height) {
+        var maxWidth = window.innerWidth;
+        var maxHeight = window.innerHeight;
+        var pixelSize = 1;
+        while (true) {
+            if (width * pixelSize > maxWidth ||
+                height * pixelSize > maxHeight) {
 
+                pixelSize--;
+                break;
+            }
+
+            pixelSize++;
+        }
+
+        if (pixelSize <= 0) {
+            pixelSize = 1;
+        }
+
+        return pixelSize;
     }
 
     function createCanvasEl(width, height, pixelSize) {
