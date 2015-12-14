@@ -42,13 +42,16 @@ window.newCanvasRenderer = (function () {
             new Frame(dimensions.width, dimensions.height),
             new Frame(dimensions.width, dimensions.height)
         ];
+        this.nextFrame = 0;
     }
     Renderer.prototype = {
-        getEmptyFrame: function () {
-
+        newRenderFrame: function () {
+            return this.frames[this.nextFrame];
         },
         renderFrame: function (frame) {
+            /* do stuff */
 
+            this.nextFrame = +!this.nextFrame; // switch the frames
         }
     };
 

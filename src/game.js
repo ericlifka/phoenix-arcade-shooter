@@ -9,7 +9,7 @@ window.newGame = (function () {
     }
     Game.prototype = {
         frameHook: function (dtime) {
-            var frame = this.renderer.getEmptyFrame();
+            var frame = this.renderer.newRenderFrame();
 
             /* do stuff */
 
