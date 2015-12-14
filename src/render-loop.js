@@ -2,7 +2,7 @@ window.startRenderLoop = (function () {
 
     function now() {
         return (new Date()).valueOf();
-    };
+    }
 
     return function (frameHook) {
         frameHook = frameHook || function () { };
