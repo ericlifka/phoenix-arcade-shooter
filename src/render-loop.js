@@ -17,6 +17,7 @@ window.startRenderLoop = (function () {
             var dtime = currentTime - lastFrameTime;
             lastFrameTime = currentTime;
 
+            console.log('frame', dtime);
             frameHook(dtime);
             window.requestAnimationFrame(animationFrameHandler);
         }

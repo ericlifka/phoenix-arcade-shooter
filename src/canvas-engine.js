@@ -49,9 +49,26 @@ window.newCanvasRenderer = (function () {
             return this.frames[this.nextFrame];
         },
         renderFrame: function (frame) {
-            /* do stuff */
+            var self = this;
+            var pixelSize = self.dimensions.pixelSize;
+            var ctx = this.canvas.getContext("2d", { alpha: false });
+
+            frame.iterateCells(function (cell) {
+                ctx.fillStyle = cell.color;
+                ctx.fillRect(
+                    self.cellToXOffset(cell),
+                    self.cellToYOffset(cell),
+                    pixelSize,
+                    pixelSize);
+            });
 
             this.nextFrame = +!this.nextFrame; // switch the frames
+        },
+        cellToXOffset: function (cell) {
+            return cell.x * this.dimensions.pixelSize;
+        },
+        cellToYOffset: function (cell) {
+            return cell.y * this.dimensions.pixelSize;
         }
     };
 
