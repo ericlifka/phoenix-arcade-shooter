@@ -1,11 +1,13 @@
 window.newCanvasRenderer = (function () {
 
-    var PIXEL_SIZE = 5;
+    function maximumPixelSize(width, height) {
 
-    function createCanvasEl(width, height) {
+    }
+
+    function createCanvasEl(width, height, pixelSize) {
         var el = document.createElement('canvas');
-        el.width = width * PIXEL_SIZE;
-        el.height = height * PIXEL_SIZE;
+        el.width = width * pixelSize;
+        el.height = height * pixelSize;
         el.classList.add('pixel-engine-canvas');
 
         return el;
@@ -29,9 +31,10 @@ window.newCanvasRenderer = (function () {
         options = options || {};
         var width = options.width || 320;
         var height = options.height || 200;
+        var pixelSize = maximumPixelSize(width, height);
         var container = options.container || document.body;
 
-        var canvas = createCanvasEl(width, height);
+        var canvas = createCanvasEl(width, height, pixelSize);
         var renderer = new Renderer(canvas, width, height);
 
         container.appendChild(canvas);
