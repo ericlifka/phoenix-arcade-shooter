@@ -1,4 +1,4 @@
-window.onload = function () {
+window.addEventListener('load', function () {
     var gameView = window.newCanvasRenderer();
     var runLoop = window.newRunLoop();
     var inputController = window.newKeyboardInputController();
@@ -8,4 +8,4 @@ window.onload = function () {
         input: inputController,
         runLoop: runLoop
     });
-};
+});
