@@ -24,6 +24,7 @@ window.newGame = (function () {
     return function () {
         var renderer = window.newCanvasRenderer();
         var renderLoop = window.startRenderLoop();
+        var input = window.newKeyboardInputManager();
         var game = new Game(renderer, renderLoop);
 
         return game;
