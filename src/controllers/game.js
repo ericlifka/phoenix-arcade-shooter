@@ -16,7 +16,9 @@ window.newGameController = (function () {
             var frame = this.renderer.newRenderFrame();
             frame.clear("black");
 
-            this.processInput(inputState);
+            this.model.processInput(inputState);
+            this.model.update(dtime);
+            this.model.renderToFrame(frame);
 
             var x = Math.floor(Math.random() * (frame.width));
             var y = Math.floor(Math.random() * (frame.height));
