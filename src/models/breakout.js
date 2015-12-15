@@ -1,6 +1,10 @@
-window.Breakout = (function () {
-    function Breakout() {}
+window.newBreakoutModel = (function () {
+    function Breakout() {
+    }
+
     Breakout.prototype = {};
 
-    return Breakout;
+    return function () {
+        return new Breakout();
+    };
 }());

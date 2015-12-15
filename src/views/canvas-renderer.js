@@ -40,8 +40,8 @@ window.newCanvasRenderer = (function () {
         this.ctx = canvas.getContext("2d", { alpha: false });
         this.dimensions = dimensions;
         this.frames = [
-            new Frame(dimensions),
-            new Frame(dimensions)
+            newFrameModel(dimensions),
+            newFrameModel(dimensions)
         ];
         this.nextFrame = 0;
     }

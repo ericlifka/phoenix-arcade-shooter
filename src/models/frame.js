@@ -1,8 +1,8 @@
-window.Frame = (function () {
+window.newFrameModel = (function () {
 
-    function Frame(dimensions) {
-        this.width = dimensions.width;
-        this.height = dimensions.height;
+    function Frame(width, height, pixelSize) {
+        this.width = width;
+        this.height = height;
         this.cells = [];
 
         for (var x = 0; x < this.width; x++) {
@@ -12,8 +12,8 @@ window.Frame = (function () {
                 this.cells[ x ][ y ] = {
                     x: x,
                     y: y,
-                    render_x: x * dimensions.pixelSize,
-                    render_y: y * dimensions.pixelSize,
+                    render_x: x * pixelSize,
+                    render_y: y * pixelSize,
                     color: "#000000"
                 };
             }
@@ -37,5 +37,10 @@ window.Frame = (function () {
         }
     };
 
-    return Frame;
+    return function (dimensions) {
+        return new Frame(
+            dimensions.width,
+            dimensions.height,
+            dimensions.pixelSize);
+    };
 }());
