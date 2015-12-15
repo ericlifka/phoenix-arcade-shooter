@@ -23,13 +23,12 @@ window.newCanvasRenderer = (function () {
     }
 
     function createCanvasEl(dimensions) {
-        var width = dimensions.width;
-        var height = dimensions.height;
-        var pixelSize = dimensions.pixelSize;
+        dimensions.fullWidth = dimensions.width * dimensions.pixelSize;
+        dimensions.fullHeight = dimensions.height * dimensions.pixelSize;
 
         var el = document.createElement('canvas');
-        el.width = width * pixelSize;
-        el.height = height * pixelSize;
+        el.width = dimensions.fullWidth;
+        el.height = dimensions.fullHeight;
         el.classList.add('pixel-engine-canvas');
 
         return el;
@@ -56,10 +55,19 @@ window.newCanvasRenderer = (function () {
             var pixelSize = this.dimensions.pixelSize;
             var ctx = this.ctx;
 
+            //ctx.fillRect(0, 0, this.dimensions.fullWidth, this.dimensions.fullHeight);
             frame.iterateCells(function (cell, x, y) {
                 if (cell.color !== lastFrame.cells[ x ][ y ].color) {
+                    var size = pixelSize;
+                    var rx = cell.render_x;
+                    var ry = cell.render_y;
+                    if (cell.color === "black") {
+                        size += 2;
+                        rx--;
+                        ry--;
+                    }
                     ctx.beginPath();
-                    ctx.rect(cell.render_x, cell.render_y, pixelSize, pixelSize);
+                    ctx.rect(rx, ry, size, size);
                     ctx.fillStyle = cell.color;
                     ctx.fill();
                     ctx.closePath();
