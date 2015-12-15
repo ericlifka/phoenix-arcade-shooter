@@ -21,6 +21,9 @@ window.newGame = (function () {
             frame.cells[x][y].color = "blue";
 
             this.renderer.renderFrame(frame);
+        },
+        processInput: function (inputState) {
+
         }
     };
 
