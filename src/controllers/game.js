@@ -1,9 +1,10 @@
 window.newGameController = (function () {
 
-    function Game(renderer, renderLoop, input) {
-        this.renderer = renderer;
-        this.runLoop = renderLoop;
-        this.input = input;
+    function Game(injections) {
+        this.renderer = injections.renderer;
+        this.runLoop = injections.runLoop;
+        this.input = injections.input;
+        this.model = injections.model;
 
         this.runLoop.addCallback(this.renderFrame.bind(this));
         this.runLoop.start();
@@ -28,7 +29,7 @@ window.newGameController = (function () {
         }
     };
 
-    return function (injections) {
-        return new Game(injections.renderer, injections.runLoop, injections.input);
+    return function (injectedInterfaces) {
+        return new Game(injectedInterfaces);
     };
 }());
