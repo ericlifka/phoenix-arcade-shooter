@@ -5,7 +5,19 @@ window.newPhoenixModel = (function () {
     }
 
     Phoenix.prototype = {
-        processInput: function () {
+        processInput: function (input) {
+            if (input.W) {
+                this.position_y--;
+            }
+            if (input.A) {
+                this.position_x--;
+            }
+            if (input.S) {
+                this.position_y++;
+            }
+            if (input.D) {
+                this.position_x++;
+            }
         },
         update: function () {
         },
