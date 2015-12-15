@@ -30,6 +30,14 @@ window.newFrameModel = (function () {
                 }
             }
         },
+        cellAt: function (x, y) {
+            if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
+                return this.cells[ x ][ y ];
+            }
+            else {
+                return { x: -1, y: -1, color: "#000000" };
+            }
+        },
         clear: function (color) {
             this.iterateCells(function (cell) {
                 cell.color = color;

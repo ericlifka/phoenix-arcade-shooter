@@ -21,7 +21,7 @@ window.newPhoenixModel = (function () {
         },
         update: function () { },
         renderToFrame: function (frame) {
-            frame.cells[ this.position_x ][ this.position_y ].color = "white";
+            frame.cellAt(this.position_x, this.position_y).color = "white";
         }
     };
 
