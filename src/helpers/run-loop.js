@@ -20,7 +20,11 @@ window.newRunLoop = (function () {
             lastFrameTime = currentTime;
 
             console.log('frame', dtime);
-            runLoopCallback(dtime);
+            try {
+                runLoopCallback(dtime);
+            } catch (e) {
+                console.error("Error running frame: ", e);
+            }
             window.requestAnimationFrame(animationFrameHandler);
         }
 
