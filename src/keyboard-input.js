@@ -23,8 +23,8 @@
       }
 
      var KEYS = {
-         87: W, 65: A, 83: S, 68: D,
-         32: SPACE
+         87: 'W', 65: 'A', 83: 'S', 68: 'D',
+         32: 'SPACE'
      };
 
      var inputState = newInputDescriptor();
