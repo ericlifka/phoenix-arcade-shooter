@@ -6,15 +6,23 @@
 </head>
 <body>
 
-    <script src="src/keyboard-input.js"></script>
-    <script src="src/canvas-engine.js"></script>
-    <script src="src/render-loop.js"></script>
+    <script src="src/keyboard-input-controller.js"></script>
+    <script src="src/canvas-renderer.js"></script>
+    <script src="src/run-loop.js"></script>
     <script src="src/frame.js"></script>
-    <script src="src/game.js"></script>
+    <script src="src/game-controller.js"></script>
 
     <script>
     window.onload = function () {
-        window.game = window.newGame();
+        var gameView = window.newCanvasRenderer();
+        var runLoop = window.newRunLoop();
+        var inputController = window.newKeyboardInputController();
+
+        window.game = window.newGameController({
+            renderer: gameView,
+            input: inputController,
+            runLoop: runLoop
+        });
     };
     </script>
 </body>

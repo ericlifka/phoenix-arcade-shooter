@@ -1,4 +1,4 @@
- window.newKeyboardInputManager = (function () {
+ window.newKeyboardInputController = (function () {
 
       function cloneObj(obj) {
           var nObj = { };
