@@ -12,10 +12,10 @@
 
      return function () {
          document.body.addEventListener('keydown', function (event) {
-             console.log('down', event.keyCode);
+             inputState[ KEYS[ event.keyCode ] ] = true;
          });
          document.body.addEventListener('keyup', function (event) {
-            //  console.log('up', event);
+            inputState[ KEYS[ event.keyCode ] ] = false;
          });
      };
  }());
