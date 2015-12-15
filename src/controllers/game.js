@@ -8,6 +8,7 @@ window.newGameController = (function () {
         this.runLoop.addCallback(this.renderFrame.bind(this));
         this.runLoop.start();
     }
+
     Game.prototype = {
         renderFrame: function (dtime) {
             var inputState = this.input.getInputState();
@@ -18,7 +19,7 @@ window.newGameController = (function () {
 
             var x = Math.floor(Math.random() * (frame.width));
             var y = Math.floor(Math.random() * (frame.height));
-            frame.cells[x][y].color = "blue";
+            frame.cells[ x ][ y ].color = "blue";
 
             this.renderer.renderFrame(frame);
         },

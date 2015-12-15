@@ -6,10 +6,10 @@ window.Frame = (function () {
         this.cells = [];
 
         for (var x = 0; x < this.width; x++) {
-            this.cells[x] = [];
+            this.cells[ x ] = [];
 
             for (var y = 0; y < this.height; y++) {
-                this.cells[x][y] = {
+                this.cells[ x ][ y ] = {
                     x: x,
                     y: y,
                     render_x: x * dimensions.pixelSize,
@@ -19,13 +19,14 @@ window.Frame = (function () {
             }
         }
     }
+
     Frame.prototype = {
         iterateCells: function (handler) {
             for (var x = 0; x < this.width; x++) {
-                var column = this.cells[x];
+                var column = this.cells[ x ];
 
                 for (var y = 0; y < this.height; y++) {
-                    handler(column[y], x, y);
+                    handler(column[ y ], x, y);
                 }
             }
         },

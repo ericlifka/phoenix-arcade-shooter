@@ -5,13 +5,15 @@ window.newRunLoop = (function () {
     }
 
     return function (runLoopCallback) {
-        runLoopCallback = runLoopCallback || function () { };
+        runLoopCallback = runLoopCallback || function () {};
         var active = false;
         var lastFrameTime = now();
         var renderContext = { start: start, stop: stop, addCallback: addCallback };
 
         function animationFrameHandler() {
-            if (!active) { return; }
+            if (!active) {
+                return;
+            }
 
             var currentTime = now();
             var dtime = currentTime - lastFrameTime;
@@ -21,6 +23,7 @@ window.newRunLoop = (function () {
             runLoopCallback(dtime);
             window.requestAnimationFrame(animationFrameHandler);
         }
+
         function start() {
             if (!active) {
                 active = true;
@@ -28,10 +31,12 @@ window.newRunLoop = (function () {
             }
             return renderContext;
         }
+
         function stop() {
             active = false;
             return renderContext;
         }
+
         function addCallback(hook) {
             runLoopCallback = hook;
         }

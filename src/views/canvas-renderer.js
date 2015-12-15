@@ -45,18 +45,19 @@ window.newCanvasRenderer = (function () {
         ];
         this.nextFrame = 0;
     }
+
     Renderer.prototype = {
         newRenderFrame: function () {
-            return this.frames[this.nextFrame];
+            return this.frames[ this.nextFrame ];
         },
         renderFrame: function () {
-            var frame = this.frames[this.nextFrame];
-            var lastFrame = this.frames[+!this.nextFrame];
+            var frame = this.frames[ this.nextFrame ];
+            var lastFrame = this.frames[ +!this.nextFrame ];
             var pixelSize = this.dimensions.pixelSize;
             var ctx = this.ctx;
 
             frame.iterateCells(function (cell, x, y) {
-                if (cell.color !== lastFrame.cells[x][y].color) {
+                if (cell.color !== lastFrame.cells[ x ][ y ].color) {
                     ctx.beginPath();
                     ctx.rect(cell.render_x, cell.render_y, pixelSize, pixelSize);
                     ctx.fillStyle = cell.color;
