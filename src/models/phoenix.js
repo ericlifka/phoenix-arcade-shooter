@@ -3,6 +3,7 @@ window.newPhoenixModel = (function () {
     function Player() {
         this.position_x = 10;
         this.position_y = 10;
+        this.sprite = newPhoenixPlayerShip();
     }
     Player.prototype = {
         processInput: function (input) {
@@ -21,7 +22,7 @@ window.newPhoenixModel = (function () {
         },
         update: function () { },
         renderToFrame: function (frame) {
-            frame.cellAt(this.position_x, this.position_y).color = "white";
+            this.sprite.renderToFrame(this.position_x, this.position_y, frame);
         }
     };
 
