@@ -12,8 +12,9 @@ window.newGame = (function () {
         frameHook: function (dtime) {
             var inputState = this.inputManager.getInputState();
             var frame = this.renderer.newRenderFrame();
-
             frame.clear("black");
+
+            this.processInput(inputState);
 
             var x = Math.floor(Math.random() * (frame.width));
             var y = Math.floor(Math.random() * (frame.height));
