@@ -78,10 +78,8 @@ window.newCanvasRenderer = (function () {
         var dimensions = { width: width, height: height, pixelSize: pixelSize };
 
         var canvas = createCanvasEl(dimensions);
-        var renderer = new Renderer(canvas, dimensions);
-
         container.appendChild(canvas);
 
-        return renderer;
+        return new Renderer(canvas, dimensions);
     };
 }());

@@ -28,8 +28,7 @@ window.newGame = (function () {
         var renderer = window.newCanvasRenderer();
         var renderLoop = window.startRenderLoop();
         var inputManager = window.newKeyboardInputManager();
-        var game = new Game(renderer, renderLoop, inputManager);
 
-        return game;
+        return new Game(renderer, renderLoop, inputManager);
     };
 }());
