@@ -1,4 +1,4 @@
-window.Phoenix = (function () {
+window.newPhoenixModel = (function () {
     function Phoenix() {
 
     }
@@ -6,5 +6,7 @@ window.Phoenix = (function () {
 
     };
 
-    return Phoenix;
+    return function () {
+        return new Phoenix();
+    };
 }());

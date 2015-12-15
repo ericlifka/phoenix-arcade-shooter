@@ -1,11 +1,13 @@
 window.addEventListener('load', function () {
-    var gameView = window.newCanvasRenderer();
-    var runLoop = window.newRunLoop();
-    var inputController = window.newKeyboardInputController();
+    var gameView = newCanvasRenderer();
+    var runLoop = newRunLoop();
+    var inputController = newKeyboardInputController();
+    var gameModel = newPhoenixModel();
 
-    window.game = window.newGameController({
+    window.activeGame = newGameController({
         renderer: gameView,
         input: inputController,
-        runLoop: runLoop
+        runLoop: runLoop,
+        model: gameModel
     });
 });
