@@ -43,6 +43,7 @@ window.newCanvasRenderer = (function () {
             newFrameModel(dimensions)
         ];
         this.nextFrame = 0;
+        this.fillColor = "white";
     }
 
     Renderer.prototype = {
@@ -75,6 +76,9 @@ window.newCanvasRenderer = (function () {
             });
 
             this.nextFrame = +!this.nextFrame; // switch the frames
+        },
+        setFillColor: function (fillColor) {
+            this.fillColor = fillColor;
         }
     };
 

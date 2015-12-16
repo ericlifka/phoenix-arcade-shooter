@@ -1,8 +1,6 @@
 window.newPhoenixModel = (function () {
 
-    function Player(gameDimensions) {
-        this.width = gameDimensions.width;
-        this.height = gameDimensions.height;
+    function Player() {
         this.position_x = 10;
         this.position_y = 10;
         this.sprite = newPhoenixPlayerShip().rotateRight();
@@ -28,7 +26,10 @@ window.newPhoenixModel = (function () {
         }
     };
 
-    function Phoenix() {
+    function Phoenix(gameDimensions) {
+        this.width = gameDimensions.width;
+        this.height = gameDimensions.height;
+
         this.player = new Player();
 
         this.children = [
@@ -37,6 +38,7 @@ window.newPhoenixModel = (function () {
     }
 
     Phoenix.prototype = {
+        FILL_COLOR: "black",
         processInput: function (input) {
             this.children.forEach(function (child) {
                 child.processInput(input);

@@ -6,6 +6,9 @@ window.newGameController = (function () {
         this.input = injections.input;
         this.model = injections.model;
 
+        this.fillColor = this.model.FILL_COLOR || "white";
+        this.renderer.setFillColor(this.fillColor);
+
         this.runLoop.addCallback(this.renderFrame.bind(this));
         this.runLoop.start();
     }
@@ -14,7 +17,7 @@ window.newGameController = (function () {
         renderFrame: function (dtime) {
             var inputState = this.input.getInputState();
             var frame = this.renderer.newRenderFrame();
-            frame.clear("black");
+            frame.clear(this.fillColor);
 
             this.model.processInput(inputState);
             this.model.update(dtime);
