@@ -49,19 +49,28 @@ window.newSprite = (function () {
         this.width = height;
         this.height = width;
         this.cells = newCells;
-
         return this;
-    };
-    Sprite.prototype.invert = function () {
-        return this
-            .rotateLeft()
-            .rotateLeft();
     };
     Sprite.prototype.rotateRight = function () {
         return this
             .rotateLeft()
             .rotateLeft()
             .rotateLeft();
+    };
+    Sprite.prototype.invertX = function () {
+        for (var x = 0; x < this.width / 2; x++) {
+            var left = this.cells[ x ];
+            var right = this.cells[ this.width - x - 1 ];
+            this.cells[ x ] = right;
+            this.cells[ this.width - x - 1 ] = left;
+        }
+        return this;
+    };
+    Sprite.prototype.invertY = function () {
+        for (var x = 0; x < this.width; x++) {
+            this.cells[x].reverse();
+        }
+        return this;
     };
 
     return function (spritePixels) {
