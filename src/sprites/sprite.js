@@ -25,7 +25,7 @@ window.newSprite = (function () {
             }
         });
     };
-    Sprite.prototype.rotateRight = function () {
+    Sprite.prototype.rotateLeft = function () {
         var width = this.width;
         var height = this.height;
         var oldCells = this.cells;
@@ -54,14 +54,14 @@ window.newSprite = (function () {
     };
     Sprite.prototype.invert = function () {
         return this
-            .rotateRight()
-            .rotateRight();
+            .rotateLeft()
+            .rotateLeft();
     };
-    Sprite.prototype.rotateLeft = function () {
+    Sprite.prototype.rotateRight = function () {
         return this
-            .rotateRight()
-            .rotateRight()
-            .rotateRight();
+            .rotateLeft()
+            .rotateLeft()
+            .rotateLeft();
     };
 
     return function (spritePixels) {
