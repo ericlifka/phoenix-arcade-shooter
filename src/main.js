@@ -1,8 +1,9 @@
 window.addEventListener('load', function () {
-    var gameView = newCanvasRenderer({ width: 100, height: 75 });
+    var gameDimensions = { width: 100, height: 75 };
+    var gameModel = newPhoenixModel(gameDimensions);
+    var gameView = newCanvasRenderer(gameDimensions);
     var runLoop = newRunLoop();
     var inputController = newKeyboardInputController();
-    var gameModel = newPhoenixModel();
 
     window.activeGame = newGameController({
         renderer: gameView,

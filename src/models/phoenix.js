@@ -1,6 +1,8 @@
 window.newPhoenixModel = (function () {
 
-    function Player() {
+    function Player(gameDimensions) {
+        this.width = gameDimensions.width;
+        this.height = gameDimensions.height;
         this.position_x = 10;
         this.position_y = 10;
         this.sprite = newPhoenixPlayerShip().rotateRight();
