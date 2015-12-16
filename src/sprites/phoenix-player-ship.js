@@ -1,6 +1,10 @@
 window.newPhoenixPlayerShip = (function () {
 
     return function () {
-        return newSprite();
+        var w = "white";
+        return newSprite([
+            [w, w],
+            [w, w]
+        ]);
     }
 }());
