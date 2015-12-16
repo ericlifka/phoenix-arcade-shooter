@@ -5,8 +5,8 @@ window.newPhoenixModel = (function () {
         this.position_y = 10;
         // this.sprite = newPhoenixPlayerShip();
         // this.sprite = newPhoenixPlayerShip().rotateRight();
-        // this.sprite = newPhoenixPlayerShip().rotateLeft();
-        this.sprite = newPhoenixPlayerShip().invert();
+        this.sprite = newPhoenixPlayerShip().rotateLeft();
+        // this.sprite = newPhoenixPlayerShip().invert();
     }
     Player.prototype = {
         processInput: function (input) {

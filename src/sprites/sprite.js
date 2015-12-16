@@ -30,13 +30,17 @@ window.newSprite = (function () {
         var height = this.height;
         var oldCells = this.cells;
         var newCells = [];
+        var x, y;
 
-        for (var y = 0; y < height; y++) {
-            newCells[ y ] = [];
-            for (var x = 0; x < width; x++) {
-                newCells[ y ][ x ] = {
+        for (x = 0; x < height; x++) {
+            newCells[ x ] = [];
+        }
+
+        for (x = 0; x < width; x++) {
+            for (y = 0; y < height; y++) {
+                newCells[ y ][ width - x - 1 ] = {
                     x: y,
-                    y: x,
+                    y: width - x - 1,
                     color: oldCells[ x ][ y ].color
                 };
             }
