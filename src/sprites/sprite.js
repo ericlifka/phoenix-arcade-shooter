@@ -25,6 +25,29 @@ window.newSprite = (function () {
             }
         });
     };
+    Sprite.prototype.rotateRight = function () {
+        var width = this.width;
+        var height = this.height;
+        var oldCells = this.cells;
+        var newCells = [];
+
+        for (var y = 0; y < height; y++) {
+            newCells[ y ] = [];
+            for (var x = 0; x < width; x++) {
+                newCells[ y ][ x ] = {
+                    x: y,
+                    y: x,
+                    color: oldCells[ x ][ y ].color
+                };
+            }
+        }
+
+        this.width = height;
+        this.height = width;
+        this.cells = newCells;
+
+        return this;
+    };
 
     return function (spritePixels) {
         return new Sprite(spritePixels);

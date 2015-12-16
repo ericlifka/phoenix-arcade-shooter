@@ -3,7 +3,7 @@ window.newPhoenixModel = (function () {
     function Player() {
         this.position_x = 10;
         this.position_y = 10;
-        this.sprite = newPhoenixPlayerShip();
+        this.sprite = newPhoenixPlayerShip().rotateRight();
     }
     Player.prototype = {
         processInput: function (input) {
