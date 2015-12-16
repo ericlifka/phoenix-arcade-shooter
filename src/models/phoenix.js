@@ -54,7 +54,7 @@ window.newPhoenixModel = (function () {
         }
     };
 
-    return function () {
-        return new Phoenix();
+    return function (gameDimensions) {
+        return new Phoenix(gameDimensions);
     };
 }());
