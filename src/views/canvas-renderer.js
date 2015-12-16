@@ -54,21 +54,16 @@ window.newCanvasRenderer = (function () {
             var frame = this.frames[ this.nextFrame ];
             var lastFrame = this.frames[ +!this.nextFrame ];
             var pixelSize = this.dimensions.pixelSize;
+            var fillColor = this.fillColor;
             var ctx = this.ctx;
 
-            //ctx.fillRect(0, 0, this.dimensions.fullWidth, this.dimensions.fullHeight);
+            ctx.fillStyle = fillColor;
+            ctx.fillRect(0, 0, this.dimensions.fullWidth, this.dimensions.fullHeight);
+
             frame.iterateCells(function (cell, x, y) {
-                if (cell.color !== lastFrame.cells[ x ][ y ].color) {
-                    var size = pixelSize;
-                    var rx = cell.render_x;
-                    var ry = cell.render_y;
-                    if (cell.color === "black") {
-                        size += 2;
-                        rx--;
-                        ry--;
-                    }
+                if (cell.color !== fillColor) {
                     ctx.beginPath();
-                    ctx.rect(rx, ry, size, size);
+                    ctx.rect(cell.render_x, cell.render_y, pixelSize, pixelSize);
                     ctx.fillStyle = cell.color;
                     ctx.fill();
                     ctx.closePath();
