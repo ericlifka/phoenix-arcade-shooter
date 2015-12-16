@@ -20,7 +20,9 @@ window.newSprite = (function () {
     Sprite.prototype = new CellGrid();
     Sprite.prototype.renderToFrame = function (x, y, frame) {
         this.iterateCells(function (cell, _x, _y) {
-            frame.cellAt(x + _x, y + _y).color = cell.color;
+            if (cell.color) {
+                frame.cellAt(x + _x, y + _y).color = cell.color;
+            }
         });
     };
 
