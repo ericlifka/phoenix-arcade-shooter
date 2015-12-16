@@ -48,6 +48,17 @@ window.newSprite = (function () {
 
         return this;
     };
+    Sprite.prototype.invert = function () {
+        return this
+            .rotateRight()
+            .rotateRight();
+    };
+    Sprite.prototype.rotateLeft = function () {
+        return this
+            .rotateRight()
+            .rotateRight()
+            .rotateRight();
+    };
 
     return function (spritePixels) {
         return new Sprite(spritePixels);
