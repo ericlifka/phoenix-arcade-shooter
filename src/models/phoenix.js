@@ -99,20 +99,20 @@ window.newPhoenixModel = (function () {
         processInput: function (input) {
             this.children.forEach(function (child) {
                 child.processInput(input);
-            })
+            });
         },
         update: function (dtime) {
             this.children.forEach(function (child) {
                 child.update(dtime);
-            })
+            });
         },
         renderToFrame: function (frame) {
             this.children.forEach(function (child) {
                 child.renderToFrame(frame);
-            })
+            });
         },
         spawnBullet: function (position, velocity, acceleration) {
-            
+
         }
     };
 
