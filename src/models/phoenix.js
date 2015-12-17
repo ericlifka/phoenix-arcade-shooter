@@ -35,6 +35,8 @@ window.newPhoenixModel = (function () {
 
             this.position.x += this.velocity.x * dtime / 1000;
             this.position.y += this.velocity.y * dtime / 1000;
+
+            this.checkBoundaries();
         },
         renderToFrame: function (frame) {
             this.sprite.renderToFrame(Math.floor(this.position.x), Math.floor(this.position.y), frame);
@@ -48,6 +50,20 @@ window.newPhoenixModel = (function () {
                 x: 0,
                 y: 0
             };
+        },
+        checkBoundaries: function () {
+            if (this.position.x < 0) {
+                this.position.x = 0;
+            }
+            if (this.position.y < 0) {
+                this.position.y = 0;
+            }
+            if (this.position.x + this.sprite.width > this.parent.width) {
+                this.position.x = this.parent.width - this.sprite.width;
+            }
+            if (this.position.y + this.sprite.height > this.parent.height) {
+                this.position.y = this.parent.height - this.sprite.height;
+            }
         }
     };
 
