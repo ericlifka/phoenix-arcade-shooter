@@ -104,7 +104,15 @@ window.newPhoenixModel = (function () {
         renderToFrame: function (frame) {
             this.sprite.renderToFrame(Math.floor(this.position.x), Math.floor(this.position.y), frame);
         },
-        checkBoundaries: function () {}
+        checkBoundaries: function () {
+            if (this.position.x < 0
+                || this.position.y < 0
+                || this.position.x + this.sprite.width > this.parent.width
+                || this.position.y + this.sprite.height > this.parent.height)
+            {
+                this.parent.removeChild(this);
+            }
+        }
     };
 
     function Phoenix(gameDimensions) {
@@ -137,6 +145,12 @@ window.newPhoenixModel = (function () {
         },
         spawnBullet: function (position, velocity, acceleration) {
             this.children.push(new Bullet(position, velocity, acceleration, this));
+        },
+        removeChild: function (child) {
+            var index = this.children.indexOf(child);
+            if (index >= 0) {
+                this.children.splice(index, 1);
+            }
         }
     };
 
