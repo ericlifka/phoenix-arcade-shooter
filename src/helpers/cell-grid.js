@@ -1,10 +1,8 @@
 window.CellGrid = DefineClass({
     iterateCells: function (handler) {
         for (var x = 0; x < this.width; x++) {
-            var column = this.cells[ x ];
-
             for (var y = 0; y < this.height; y++) {
-                handler(column[ y ], x, y);
+                handler(this.cells[ x ][ y ], x, y);
             }
         }
     },
