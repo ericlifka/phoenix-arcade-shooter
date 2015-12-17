@@ -5,8 +5,10 @@ window.newPhoenixModel = (function () {
         this.sprite = newPhoenixPlayerShip().rotateRight();
 
         this.setStartingPosition();
+        this.timeSinceMoved = 0;
     }
     Player.prototype = {
+        MOVEMENT_DELAY: 20,
         processInput: function (input) {
             this.velocity.x = 0;
             this.velocity.y = 0;
@@ -24,9 +26,16 @@ window.newPhoenixModel = (function () {
                 this.velocity.x++;
             }
         },
-        update: function () {
-            this.position.x += this.velocity.x;
-            this.position.y += this.velocity.y;
+        update: function (dtime) {
+            this.timeSinceMoved += dtime;
+
+            if ((this.velocity.x || this.velocity.y)
+                && this.timeSinceMoved > this.MOVEMENT_DELAY)
+            {
+                this.position.x += this.velocity.x;
+                this.position.y += this.velocity.y;
+                this.timeSinceMoved = 0;
+            }
         },
         renderToFrame: function (frame) {
             this.sprite.renderToFrame(this.position.x, this.position.y, frame);
