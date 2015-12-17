@@ -1,5 +1,4 @@
-window.GameObject = function GameObject() {};
-GameObject.prototype = {
+window.GameObject = DefineClass({
     processInput: function (input) {
         if (this.children) {
             this.children.forEach(function (child) {
@@ -52,4 +51,4 @@ GameObject.prototype = {
             }
         }
     }
-};
+});
