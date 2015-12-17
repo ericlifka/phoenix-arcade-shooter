@@ -17,7 +17,15 @@ GameObject.prototype = {
                 }
             });
         }
+
+        if (this.position && this.velocity) {
+            this.position.x += this.velocity.x * dtime / 1000;
+            this.position.y += this.velocity.y * dtime / 1000;
+        }
+
+        this.checkBoundaries();
     },
+    checkBoundaries: function () { },
     renderToFrame: function (frame) {
         if (this.children) {
             this.children.forEach(function (child) {
@@ -25,6 +33,10 @@ GameObject.prototype = {
                     child.renderToFrame(frame);
                 }
             });
+        }
+
+        if (this.sprite && this.position) {
+            this.sprite.renderToFrame(Math.floor(this.position.x), Math.floor(this.position.y), frame);
         }
     },
     addChild: function (child) {
