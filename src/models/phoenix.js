@@ -24,6 +24,11 @@ window.newPhoenixModel = (function () {
             if (input.D) {
                 this.velocity.x += this.SPEED;
             }
+
+            if (this.velocity.x && this.velocity.y) {
+                this.velocity.x *= .707;
+                this.velocity.y *= .707;
+            }
         },
         update: function (dtime) {
             this.timeSinceMoved += dtime;
