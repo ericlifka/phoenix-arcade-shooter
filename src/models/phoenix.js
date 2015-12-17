@@ -5,40 +5,34 @@ window.newPhoenixModel = (function () {
         this.sprite = newPhoenixPlayerShip().rotateRight();
 
         this.setStartingPosition();
-        this.timeSinceMoved = 0;
     }
     Player.prototype = {
-        MOVEMENT_DELAY: 20,
+        SPEED: 50,
         processInput: function (input) {
             this.velocity.x = 0;
             this.velocity.y = 0;
 
             if (input.W) {
-                this.velocity.y--;
+                this.velocity.y -= this.SPEED;
             }
             if (input.A) {
-                this.velocity.x--;
+                this.velocity.x -= this.SPEED;
             }
             if (input.S) {
-                this.velocity.y++;
+                this.velocity.y += this.SPEED;
             }
             if (input.D) {
-                this.velocity.x++;
+                this.velocity.x += this.SPEED;
             }
         },
         update: function (dtime) {
             this.timeSinceMoved += dtime;
 
-            if ((this.velocity.x || this.velocity.y)
-                && this.timeSinceMoved > this.MOVEMENT_DELAY)
-            {
-                this.position.x += this.velocity.x;
-                this.position.y += this.velocity.y;
-                this.timeSinceMoved = 0;
-            }
+            this.position.x += this.velocity.x * dtime / 1000;
+            this.position.y += this.velocity.y * dtime / 1000;
         },
         renderToFrame: function (frame) {
-            this.sprite.renderToFrame(this.position.x, this.position.y, frame);
+            this.sprite.renderToFrame(Math.floor(this.position.x), Math.floor(this.position.y), frame);
         },
         setStartingPosition: function () {
             this.position = {
