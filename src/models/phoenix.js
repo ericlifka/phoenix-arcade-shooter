@@ -2,13 +2,14 @@ window.newPhoenixModel = (function () {
 
     function Player(parent) {
         this.parent = parent;
-        this.sprite = newPhoenixPlayerShip().rotateRight();
+        this.sprite = newPhoenixPlayerShipSprite().rotateRight();
 
         this.setStartingPosition();
         this.timeSinceFired = 0;
     }
     Player.prototype = {
         SPEED: 50,
+        BULLET_SPEED: 1,
         FIRE_RATE: 1000,
         processInput: function (input) {
             this.velocity.x = 0;
@@ -76,11 +77,32 @@ window.newPhoenixModel = (function () {
                 x: this.position.x + Math.floor(this.sprite.width / 2),
                 y: this.position.y
             };
-            var velocity = { x: 0, y: -1 };
+            var velocity = { x: 0, y: -this.BULLET_SPEED };
             var acceleration = { x: 0, y: 0 };
 
             this.parent.spawnBullet(position, velocity, acceleration);
         }
+    };
+
+    function Bullet(position, velocity, acceleration, parent) {
+        this.position = position;
+        this.velocity = velocity;
+        this.acceleration = acceleration;
+        this.parent = parent;
+        this.sprite = newBulletSprite();
+    }
+    Bullet.prototype = {
+        processInput: function (input) {},
+        update: function (dtime) {
+            this.position.x += this.velocity.x * dtime / 1000;
+            this.position.y += this.velocity.y * dtime / 1000;
+
+            this.checkBoundaries();
+        },
+        renderToFrame: function (frame) {
+            this.sprite.renderToFrame(Math.floor(this.position.x), Math.floor(this.position.y), frame);
+        },
+        checkBoundaries: function () {}
     };
 
     function Phoenix(gameDimensions) {
@@ -112,7 +134,7 @@ window.newPhoenixModel = (function () {
             });
         },
         spawnBullet: function (position, velocity, acceleration) {
-
+            this.children.push(new Bullet(position, velocity, acceleration, this));
         }
     };
 

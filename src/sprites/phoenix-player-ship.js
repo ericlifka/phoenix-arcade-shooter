@@ -1,4 +1,4 @@
-window.newPhoenixPlayerShip = (function () {
+window.newPhoenixPlayerShipSprite = (function () {
     return function () {
         var w = "white";
         var n = null;
