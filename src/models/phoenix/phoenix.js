@@ -112,6 +112,7 @@ window.newPhoenixModel = (function () {
             this.width = gameDimensions.width;
             this.height = gameDimensions.height;
 
+            this.levelManager = newPhoenixLevelManager();
             this.player = new Player(this);
 
             this.addChild(this.player);
