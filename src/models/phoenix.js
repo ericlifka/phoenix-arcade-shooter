@@ -9,8 +9,8 @@ window.newPhoenixModel = (function () {
     }
     Player.prototype = {
         SPEED: 50,
-        BULLET_SPEED: 1,
-        FIRE_RATE: 1000,
+        BULLET_SPEED: 100,
+        FIRE_RATE: 500,
         processInput: function (input) {
             this.velocity.x = 0;
             this.velocity.y = 0;
@@ -42,6 +42,8 @@ window.newPhoenixModel = (function () {
 
             this.timeSinceFired += dtime;
             if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
+                this.timeSinceFired = 0;
+
                 this.fire();
             }
         },
