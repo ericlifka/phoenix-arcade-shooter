@@ -1,17 +1,16 @@
 window.newPhoenixModel = (function () {
 
-    function Player(parent) {
-        this.parent = parent;
-        this.sprite = newPhoenixPlayerShipSprite().rotateRight();
-
-        this.setStartingPosition();
-        this.timeSinceFired = 0;
-    }
-    Player.prototype = new GameObject();
-    MixIn(Player, {
+    var Player = DefineClass(GameObject, {
         SPEED: 50,
         BULLET_SPEED: 100,
         FIRE_RATE: 500,
+        constructor: function (parent) {
+            this.parent = parent;
+            this.sprite = newPhoenixPlayerShipSprite().rotateRight();
+
+            this.setStartingPosition();
+            this.timeSinceFired = 0;
+        },
         processInput: function (input) {
             this.velocity.x = 0;
             this.velocity.y = 0;
