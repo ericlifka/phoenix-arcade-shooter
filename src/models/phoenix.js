@@ -1,28 +1,45 @@
 window.newPhoenixModel = (function () {
 
-    function Player() {
-        this.position_x = 10;
-        this.position_y = 10;
+    function Player(parent) {
+        this.parent = parent;
         this.sprite = newPhoenixPlayerShip().rotateRight();
+
+        this.setStartingPosition();
     }
     Player.prototype = {
         processInput: function (input) {
+            this.velocity.x = 0;
+            this.velocity.y = 0;
+
             if (input.W) {
-                this.position_y--;
+                this.velocity.y--;
             }
             if (input.A) {
-                this.position_x--;
+                this.velocity.x--;
             }
             if (input.S) {
-                this.position_y++;
+                this.velocity.y++;
             }
             if (input.D) {
-                this.position_x++;
+                this.velocity.x++;
             }
         },
-        update: function () { },
+        update: function () {
+            this.position.x += this.velocity.x;
+            this.position.y += this.velocity.y;
+        },
         renderToFrame: function (frame) {
-            this.sprite.renderToFrame(this.position_x, this.position_y, frame);
+            this.sprite.renderToFrame(this.position.x, this.position.y, frame);
+        },
+        setStartingPosition: function () {
+            this.position = {
+                x: Math.floor(this.parent.width / 2 - this.sprite.width / 2),
+                y: this.parent.height - this.sprite.height - 1
+            };
+            this.velocity = {
+                x: 0,
+                y: 0
+            };
         }
     };
 
@@ -30,7 +47,7 @@ window.newPhoenixModel = (function () {
         this.width = gameDimensions.width;
         this.height = gameDimensions.height;
 
-        this.player = new Player();
+        this.player = new Player(this);
 
         this.children = [
             this.player
@@ -38,7 +55,7 @@ window.newPhoenixModel = (function () {
     }
 
     Phoenix.prototype = {
-        FILL_COLOR: "black",
+        FILL_COLOR: "#020031",
         processInput: function (input) {
             this.children.forEach(function (child) {
                 child.processInput(input);
