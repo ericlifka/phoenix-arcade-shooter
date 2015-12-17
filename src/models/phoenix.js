@@ -12,6 +12,8 @@ window.newPhoenixModel = (function () {
             this.timeSinceFired = 0;
         },
         processInput: function (input) {
+            this.super('processInput', arguments);
+
             this.velocity.x = 0;
             this.velocity.y = 0;
 
@@ -37,7 +39,6 @@ window.newPhoenixModel = (function () {
         },
         update: function (dtime) {
             this.super('update', arguments);
-            
 
             this.timeSinceFired += dtime;
             if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
