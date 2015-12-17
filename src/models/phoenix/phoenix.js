@@ -112,9 +112,10 @@ window.newPhoenixModel = (function () {
             this.width = gameDimensions.width;
             this.height = gameDimensions.height;
 
-            this.levelManager = newPhoenixLevelManager();
+            this.levelManager = new PhoenixLevelManager();
             this.player = new Player(this);
 
+            this.addChild(this.levelManager);
             this.addChild(this.player);
         },
         spawnBullet: function (position, velocity, acceleration) {
