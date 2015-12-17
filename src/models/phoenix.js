@@ -83,15 +83,14 @@ window.newPhoenixModel = (function () {
         }
     });
 
-    function Bullet(position, velocity, acceleration, parent) {
-        this.position = position;
-        this.velocity = velocity;
-        this.acceleration = acceleration;
-        this.parent = parent;
-        this.sprite = newBulletSprite();
-    }
-    Bullet.prototype = new GameObject();
-    MixIn(Bullet, {
+    var Bullet = DefineClass(GameObject, {
+        constructor: function (position, velocity, acceleration, parent) {
+            this.position = position;
+            this.velocity = velocity;
+            this.acceleration = acceleration;
+            this.parent = parent;
+            this.sprite = newBulletSprite();
+        },
         checkBoundaries: function () {
             if (this.position.x < 0
                 || this.position.y < 0
@@ -103,19 +102,18 @@ window.newPhoenixModel = (function () {
         }
     });
 
-    function Phoenix(gameDimensions) {
-        this.width = gameDimensions.width;
-        this.height = gameDimensions.height;
-
-        this.player = new Player(this);
-
-        this.children = [
-            this.player
-        ];
-    }
-    Phoenix.prototype = new GameObject();
-    MixIn(Phoenix, {
+    var Phoenix = DefineClass(GameObject, {
         FILL_COLOR: "#020031",
+        constructor: function (gameDimensions) {
+            this.width = gameDimensions.width;
+            this.height = gameDimensions.height;
+
+            this.player = new Player(this);
+
+            this.children = [
+                this.player
+            ];
+        },
         spawnBullet: function (position, velocity, acceleration) {
             this.addChild(new Bullet(position, velocity, acceleration, this));
         }
