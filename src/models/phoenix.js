@@ -31,11 +31,8 @@ window.newPhoenixModel = (function () {
             }
         },
         update: function (dtime) {
-            this.timeSinceMoved += dtime;
-
             this.position.x += this.velocity.x * dtime / 1000;
             this.position.y += this.velocity.y * dtime / 1000;
-
             this.checkBoundaries();
         },
         renderToFrame: function (frame) {
