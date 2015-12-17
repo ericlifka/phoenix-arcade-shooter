@@ -125,34 +125,13 @@ window.newPhoenixModel = (function () {
             this.player
         ];
     }
-
-    Phoenix.prototype = {
+    Phoenix.prototype = new GameObject();
+    MixIn(Phoenix, {
         FILL_COLOR: "#020031",
-        processInput: function (input) {
-            this.children.forEach(function (child) {
-                child.processInput(input);
-            });
-        },
-        update: function (dtime) {
-            this.children.forEach(function (child) {
-                child.update(dtime);
-            });
-        },
-        renderToFrame: function (frame) {
-            this.children.forEach(function (child) {
-                child.renderToFrame(frame);
-            });
-        },
         spawnBullet: function (position, velocity, acceleration) {
-            this.children.push(new Bullet(position, velocity, acceleration, this));
-        },
-        removeChild: function (child) {
-            var index = this.children.indexOf(child);
-            if (index >= 0) {
-                this.children.splice(index, 1);
-            }
+            this.addChild(new Bullet(position, velocity, acceleration, this));
         }
-    };
+    });
 
     return function (gameDimensions) {
         return new Phoenix(gameDimensions);
