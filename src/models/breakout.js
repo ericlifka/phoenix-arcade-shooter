@@ -1,13 +1,12 @@
 window.newBreakoutModel = (function () {
-    function Breakout() { }
-    Breakout.prototype = {
+    var Breakout = DefineClass({
         processInput: function () {
         },
         update: function () {
         },
         renderToFrame: function () {
         }
-    };
+    });
 
     return function () {
         return new Breakout();

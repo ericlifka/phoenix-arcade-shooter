@@ -1,19 +1,18 @@
 window.newGameController = (function () {
 
-    function Game(injections) {
-        this.renderer = injections.renderer;
-        this.runLoop = injections.runLoop;
-        this.input = injections.input;
-        this.model = injections.model;
+    var Game = DefineClass({
+        constructor: function Game(injections) {
+            this.renderer = injections.renderer;
+            this.runLoop = injections.runLoop;
+            this.input = injections.input;
+            this.model = injections.model;
 
-        this.fillColor = this.model.FILL_COLOR || "white";
-        this.renderer.setFillColor(this.fillColor);
+            this.fillColor = this.model.FILL_COLOR || "white";
+            this.renderer.setFillColor(this.fillColor);
 
-        this.runLoop.addCallback(this.renderFrame.bind(this));
-        this.runLoop.start();
-    }
-
-    Game.prototype = {
+            this.runLoop.addCallback(this.renderFrame.bind(this));
+            this.runLoop.start();
+        },
         renderFrame: function (dtime) {
             var inputState = this.input.getInputState();
             var frame = this.renderer.newRenderFrame();
@@ -28,7 +27,7 @@ window.newGameController = (function () {
         processInput: function (inputState) {
 
         }
-    };
+    });
 
     return function (injectedInterfaces) {
         return new Game(injectedInterfaces);
