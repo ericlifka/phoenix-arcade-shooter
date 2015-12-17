@@ -36,9 +36,8 @@ window.newPhoenixModel = (function () {
             this.firing = input.SPACE;
         },
         update: function (dtime) {
-            this.position.x += this.velocity.x * dtime / 1000;
-            this.position.y += this.velocity.y * dtime / 1000;
-            this.checkBoundaries();
+            this.super('update', arguments);
+            
 
             this.timeSinceFired += dtime;
             if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
