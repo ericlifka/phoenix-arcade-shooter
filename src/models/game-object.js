@@ -1,4 +1,8 @@
 window.GameObject = DefineClass({
+    constructor: function (parentObj) {
+        this.parent = parentObj;
+        this.children = [];
+    },
     processInput: function (input) {
         if (this.children) {
             this.children.forEach(function (child) {

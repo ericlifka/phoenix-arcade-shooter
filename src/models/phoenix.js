@@ -5,9 +5,9 @@ window.newPhoenixModel = (function () {
         BULLET_SPEED: 100,
         FIRE_RATE: 500,
         constructor: function (parent) {
-            this.parent = parent;
-            this.sprite = newPhoenixPlayerShipSprite().rotateRight();
+            this.super('constructor', arguments);
 
+            this.sprite = newPhoenixPlayerShipSprite().rotateRight();
             this.setStartingPosition();
             this.timeSinceFired = 0;
         },
@@ -84,11 +84,13 @@ window.newPhoenixModel = (function () {
     });
 
     var Bullet = DefineClass(GameObject, {
-        constructor: function (position, velocity, acceleration, parent) {
+        constructor: function (parent, position, velocity, acceleration) {
+            this.super('constructor', arguments);
+
             this.position = position;
             this.velocity = velocity;
             this.acceleration = acceleration;
-            this.parent = parent;
+
             this.sprite = newBulletSprite();
         },
         checkBoundaries: function () {
@@ -105,17 +107,17 @@ window.newPhoenixModel = (function () {
     var Phoenix = DefineClass(GameObject, {
         FILL_COLOR: "#020031",
         constructor: function (gameDimensions) {
+            this.super('constructor');
+
             this.width = gameDimensions.width;
             this.height = gameDimensions.height;
 
             this.player = new Player(this);
 
-            this.children = [
-                this.player
-            ];
+            this.addChild(this.player);
         },
         spawnBullet: function (position, velocity, acceleration) {
-            this.addChild(new Bullet(position, velocity, acceleration, this));
+            this.addChild(new Bullet(this, position, velocity, acceleration));
         }
     });
 
