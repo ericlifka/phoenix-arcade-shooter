@@ -1,6 +1,8 @@
 (function () {
 
     var FlyPlayerInFromBottom = DefineClass(GameObject, {
+        TIME_STEP: 100,
+        ELAPSED: 0,
         constructor: function (parent, game) {
             this.super('constructor', arguments);
 
@@ -9,11 +11,22 @@
         },
         start: function () {
             this.player.processUpdates = false;
-            
+
             this.setStartingPosition();
         },
         update: function (dtime) {
             this.super('update', arguments);
+
+            this.ELAPSED += dtime;
+            if (this.ELAPSED > this.TIME_STEP) {
+                this.player.position.y--;
+                this.ELAPSED = 0;
+            }
+
+            if (this.player.position.y < this.game.height - this.player.sprite.height - 2) {
+                this.player.processUpdates = true;
+                this.parent.removeChild(this);
+            }
         },
         setStartingPosition: function () {
             var position = this.player.position;
