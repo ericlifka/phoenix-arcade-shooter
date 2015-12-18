@@ -8,6 +8,8 @@
             this.player = game.player;
         },
         start: function () {
+            this.player.processUpdates = false;
+            
             this.setStartingPosition();
         },
         update: function (dtime) {
@@ -18,7 +20,7 @@
             var velocity = this.player.velocity;
 
             position.x = Math.floor(this.game.width / 2 - this.player.sprite.width / 2);
-            position.y = this.game.height - this.player.sprite.height - 1;
+            position.y = this.game.height;
             velocity.x = 0;
             velocity.y = 0;
         },

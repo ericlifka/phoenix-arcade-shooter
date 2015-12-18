@@ -39,6 +39,11 @@ window.newPhoenixModel = (function () {
             this.firing = input.SPACE;
         },
         update: function (dtime) {
+            if (!this.processUpdates) {
+                // a script is in control of this object
+                return;
+            }
+
             this.super('update', arguments);
 
             this.timeSinceFired += dtime;
