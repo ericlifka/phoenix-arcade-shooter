@@ -42,6 +42,11 @@
             this.activeScripts.forEach(function (script) {
                 script.start();
             });
+        },
+        update: function (dtime) {
+            this.activeScripts.forEach(function (script) {
+                script.update(dtime);
+            });
         }
     });
 }());
