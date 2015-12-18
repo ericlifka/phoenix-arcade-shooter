@@ -19,7 +19,7 @@
 
             if (this.player.position.y < this.game.height - this.player.sprite.height - 2) {
                 this.player.preventInputControl = false;
-                this.parent.removeChild(this);
+                this.parent.signalScriptFinished(this);
             }
         },
         setStartingPosition: function () {
@@ -52,8 +52,13 @@
             this.children.push(new FlyPlayerInFromBottom(this, this.game));
 
             this.children.forEach(function (script) {
+                script.active = true;
                 script.start();
             });
+        },
+        signalScriptFinished: function (script) {
+            script.active = false;
+            this.removeChild(script);
         }
     });
 }());
