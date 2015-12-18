@@ -15,8 +15,8 @@
             var position = this.player.position;
             var velocity = this.player.velocity;
 
-            position.x = Math.floor(this.game.width / 2 - this.sprite.width / 2);
-            position.y = this.game.height - this.sprite.height - 1;
+            position.x = Math.floor(this.game.width / 2 - this.player.sprite.width / 2);
+            position.y = this.game.height - this.player.sprite.height - 1;
             velocity.x = 0;
             velocity.y = 0;
         },
