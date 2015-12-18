@@ -10,21 +10,15 @@
             this.player = game.player;
         },
         start: function () {
-            this.player.processUpdates = false;
+            this.player.preventInputControl = true;
 
             this.setStartingPosition();
         },
         update: function (dtime) {
             this.super('update', arguments);
 
-            this.ELAPSED += dtime;
-            if (this.ELAPSED > this.TIME_STEP) {
-                this.player.position.y--;
-                this.ELAPSED = 0;
-            }
-
             if (this.player.position.y < this.game.height - this.player.sprite.height - 2) {
-                this.player.processUpdates = true;
+                this.player.preventInputControl = false;
                 this.parent.removeChild(this);
             }
         },
@@ -33,9 +27,9 @@
             var velocity = this.player.velocity;
 
             position.x = Math.floor(this.game.width / 2 - this.player.sprite.width / 2);
-            position.y = this.game.height;
+            position.y = this.game.height + 2;
             velocity.x = 0;
-            velocity.y = 0;
+            velocity.y = -this.player.SPEED / 5;
         },
     });
 

@@ -14,6 +14,10 @@ window.newPhoenixModel = (function () {
         },
         processInput: function (input) {
             this.super('processInput', arguments);
+            if (this.preventInputControl) {
+                // a script is in control of this object
+                return;
+            }
 
             this.velocity.x = 0;
             this.velocity.y = 0;
@@ -39,11 +43,6 @@ window.newPhoenixModel = (function () {
             this.firing = input.SPACE;
         },
         update: function (dtime) {
-            if (!this.processUpdates) {
-                // a script is in control of this object
-                return;
-            }
-
             this.super('update', arguments);
 
             this.timeSinceFired += dtime;
@@ -54,6 +53,11 @@ window.newPhoenixModel = (function () {
             }
         },
         checkBoundaries: function () {
+            if (this.preventInputControl) {
+                // don't check screen boundaries when an external script is controlling the player
+                return;
+            }
+
             if (this.position.x < 0) {
                 this.position.x = 0;
             }
