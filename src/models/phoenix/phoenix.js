@@ -8,7 +8,8 @@ window.newPhoenixModel = (function () {
             this.super('constructor', arguments);
 
             this.sprite = newPhoenixPlayerShipSprite().rotateRight();
-            this.setStartingPosition();
+            this.position = { x: 0, y: 0 };
+            this.velocity = { x: 0, y: 0 };
             this.timeSinceFired = 0;
         },
         processInput: function (input) {
@@ -46,16 +47,6 @@ window.newPhoenixModel = (function () {
 
                 this.fire();
             }
-        },
-        setStartingPosition: function () {
-            this.position = {
-                x: Math.floor(this.parent.width / 2 - this.sprite.width / 2),
-                y: this.parent.height - this.sprite.height - 1
-            };
-            this.velocity = {
-                x: 0,
-                y: 0
-            };
         },
         checkBoundaries: function () {
             if (this.position.x < 0) {
