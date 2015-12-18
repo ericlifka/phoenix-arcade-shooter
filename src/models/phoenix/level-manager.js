@@ -1,7 +1,9 @@
 (function () {
 
-    var FlyPlayerInFromBottom = DefineClass({
-        constructor: function (game) {
+    var FlyPlayerInFromBottom = DefineClass(GameObject, {
+        constructor: function (parent, game) {
+            this.super('constructor', arguments);
+
             this.game = game;
             this.player = game.player;
         },
@@ -9,7 +11,7 @@
             this.setStartingPosition();
         },
         update: function (dtime) {
-
+            this.super('update', arguments);
         },
         setStartingPosition: function () {
             var position = this.player.position;
@@ -22,30 +24,26 @@
         },
     });
 
-    window.PhoenixLevelManager = DefineClass({
+    window.PhoenixLevelManager = DefineClass(GameObject, {
         levels: [
             {
 
             }
         ],
         constructor: function (game) {
+            this.super('constructor', arguments);
+
             this.game = game;
-            this.activeScripts = [ ];
             this.nextLevel = 0;
         },
         startLevel: function () {
             this.currentLevel = this.levels[ this.nextLevel ];
             this.nextLevel++;
 
-            this.activeScripts.push(new FlyPlayerInFromBottom(this.game));
+            this.children.push(new FlyPlayerInFromBottom(this, this.game));
 
-            this.activeScripts.forEach(function (script) {
+            this.children.forEach(function (script) {
                 script.start();
-            });
-        },
-        update: function (dtime) {
-            this.activeScripts.forEach(function (script) {
-                script.update(dtime);
             });
         }
     });
