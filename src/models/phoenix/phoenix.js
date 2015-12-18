@@ -112,11 +112,13 @@ window.newPhoenixModel = (function () {
             this.width = gameDimensions.width;
             this.height = gameDimensions.height;
 
-            this.levelManager = new PhoenixLevelManager();
+            this.levelManager = new PhoenixLevelManager(this);
             this.player = new Player(this);
 
             this.addChild(this.levelManager);
             this.addChild(this.player);
+
+            this.levelManager.startLevel();
         },
         spawnBullet: function (position, velocity, acceleration) {
             this.addChild(new Bullet(this, position, velocity, acceleration));
