@@ -1,0 +1,3 @@
+window.DefineModule = (function () {
+
+}());
