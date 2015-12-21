@@ -1,10 +1,19 @@
 (function () {
     var moduleDefinitions = { };
+    var evaluatedModules = { };
 
     function require(moduleName) {
+        var module = evaluatedModules[ moduleName ];
+        if (module) {
+            return module;
+        }
+
         var moduleDefinition = moduleDefinitions[ moduleName ];
         if (moduleDefinition) {
-            return moduleDefinition(require);
+            evaluatedModules[ moduleName ] = moduleDefinition(require);
+        }
+        else {
+            throw "No module found: " + moduleName;
         }
     }
 
