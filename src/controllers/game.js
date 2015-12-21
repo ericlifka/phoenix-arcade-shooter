@@ -1,7 +1,7 @@
-window.newGameController = (function () {
+DefineModule('controllers/game', function (require) {
 
-    var Game = DefineClass({
-        constructor: function Game(injections) {
+    var GameController = DefineClass({
+        constructor: function GameController(injections) {
             this.renderer = injections.renderer;
             this.runLoop = injections.runLoop;
             this.input = injections.input;
@@ -23,13 +23,10 @@ window.newGameController = (function () {
             this.model.renderToFrame(frame);
 
             this.renderer.renderFrame(frame);
-        },
-        processInput: function (inputState) {
-
         }
     });
 
     return function (injectedInterfaces) {
-        return new Game(injectedInterfaces);
+        return new GameController(injectedInterfaces);
     };
-}());
+});
