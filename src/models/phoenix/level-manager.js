@@ -33,6 +33,21 @@
         },
     });
 
+    var LevelOneEnemies = DefineClass(GameObject, {
+        constructor: function (parent, game) {
+            this.super('constructor', arguments);
+
+            this.game = game;
+            this.ship = new PhoenixEnemyShip(game);
+        },
+        start: function () {
+            this.ship.position.x =  Math.floor(this.game.width / 2);
+            this.ship.position.y = 2;
+            
+            this.game.addChild(this.ship);
+        },
+    });
+
     window.PhoenixLevelManager = DefineClass(GameObject, {
         levels: [
             {
