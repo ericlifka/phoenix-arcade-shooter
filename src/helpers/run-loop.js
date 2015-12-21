@@ -1,4 +1,4 @@
-window.newRunLoop = (function () {
+DefineModule('helpers/run-loop', function (require) {
 
     function now() {
         return (new Date()).valueOf();
@@ -47,4 +47,4 @@ window.newRunLoop = (function () {
 
         return renderContext;
     };
-}());
+});
