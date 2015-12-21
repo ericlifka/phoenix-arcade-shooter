@@ -1,8 +1,14 @@
 (function () {
     var moduleDefinitions = { };
     var evaluatedModules = { };
+    var evaluationStack = [ ];
 
     function require(moduleName) {
+        if (evaluationStack.indexOf(moduleName) > -1) {
+            throw "Circular dependencies not supported: " + moduleName
+             + " required while still being evaluated";
+        }
+
         var module = evaluatedModules[ moduleName ];
         if (module) {
             return module;
@@ -10,7 +16,13 @@
 
         var moduleDefinition = moduleDefinitions[ moduleName ];
         if (moduleDefinition) {
+            evaluationStack.push(moduleName);
+            console.log(evaluationStack);
+
             evaluatedModules[ moduleName ] = moduleDefinition(require);
+
+            evaluationStack.pop();
+            console.log(evaluationStack);
         }
         else {
             throw "No module found: " + moduleName;
