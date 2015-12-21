@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>test modules helper</title>
+</head>
+<body>
+
+<script src="modules.js"></script>
+
+<script>
+
+DefineModule("module-a", function (require) {
+    console.log('defining module-a');
+
+    return {
+        name: 'module-a'
+    };
+});
+
+</script>
+
+</body>
+</html>
