@@ -10,4 +10,11 @@
 
         moduleDefinitions[ moduleName ] = moduleDefinition;
     };
+
+    window.addEventListener('load', function () {
+        var main = moduleDefinitions[ 'main' ];
+        if (main) {
+            main();
+        }
+    });
 }());
