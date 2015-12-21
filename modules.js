@@ -17,12 +17,8 @@
         var moduleDefinition = moduleDefinitions[ moduleName ];
         if (moduleDefinition) {
             evaluationStack.push(moduleName);
-            console.log(evaluationStack);
-
             evaluatedModules[ moduleName ] = moduleDefinition(require);
-
             evaluationStack.pop();
-            console.log(evaluationStack);
         }
         else {
             throw "No module found: " + moduleName;
@@ -30,8 +26,6 @@
     }
 
     window.DefineModule = function (moduleName, moduleDefinition) {
-        console.log('registering ' + moduleName);
-
         if (moduleDefinitions[ moduleName ]) {
             throw "Duplicate module definition: " + moduleName;
         }
