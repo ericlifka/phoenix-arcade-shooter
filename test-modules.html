@@ -9,6 +9,13 @@
 
 <script>
 
+DefineModule('main', function (require) {
+    console.log('defining main');
+
+    var moduleA = require('module-a');
+    var moduleB = require('module-b');
+});
+
 DefineModule("module-a", function (require) {
     console.log('defining module-a');
 
@@ -26,12 +33,6 @@ DefineModule('module-b', function (require) {
     };
 });
 
-DefineModule('main', function (require) {
-    console.log('defining main');
-
-    var moduleA = require('module-a');
-    var moduleB = require('module-b');
-});
 
 </script>
 
