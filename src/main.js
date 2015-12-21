@@ -1,4 +1,4 @@
-window.addEventListener('load', function () {
+DefineModule('main', function () {
     var gameDimensions = { width: 100, height: 75 };
     var gameModel = newPhoenixModel(gameDimensions);
     var gameView = newCanvasRenderer(gameDimensions);
