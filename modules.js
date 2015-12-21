@@ -28,9 +28,6 @@
     };
 
     window.addEventListener('load', function () {
-        var main = moduleDefinitions[ 'main' ];
-        if (main) {
-            main(require);
-        }
+        require('main');
     });
 }());
