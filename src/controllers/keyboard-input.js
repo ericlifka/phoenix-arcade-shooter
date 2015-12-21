@@ -1,4 +1,4 @@
-window.newKeyboardInputController = (function () {
+DefineModule('helpers/keyboard-input', function (require) {
 
     function cloneObj(obj) {
         var nObj = {};
@@ -50,4 +50,4 @@ window.newKeyboardInputController = (function () {
             }
         };
     };
-}());
+});
