@@ -17,8 +17,10 @@
         var moduleDefinition = moduleDefinitions[ moduleName ];
         if (moduleDefinition) {
             evaluationStack.push(moduleName);
-            evaluatedModules[ moduleName ] = moduleDefinition(require);
+            module = evaluatedModules[ moduleName ] = moduleDefinition(require);
             evaluationStack.pop();
+
+            return module;
         }
         else {
             throw "No module found: " + moduleName;

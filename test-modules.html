@@ -14,6 +14,9 @@ DefineModule('main', function (require) {
 
     var moduleA = require('module-a');
     var moduleB = require('module-b');
+
+    console.log(moduleA.name);
+    console.log(moduleB.name);
 });
 
 DefineModule("module-a", function (require) {
