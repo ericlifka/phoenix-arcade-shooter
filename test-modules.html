@@ -27,7 +27,9 @@ DefineModule('module-b', function (require) {
 
 DefineModule('main', function (require) {
     console.log('defining main');
-    
+
+    var moduleA = require('module-a');
+    var moduleB = require('module-b');
 });
 
 </script>
