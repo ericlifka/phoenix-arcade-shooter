@@ -43,7 +43,7 @@
         start: function () {
             this.ship.position.x =  Math.floor(this.game.width / 2);
             this.ship.position.y = 2;
-            
+
             this.game.addChild(this.ship);
         },
     });
@@ -65,6 +65,7 @@
             this.nextLevel++;
 
             this.children.push(new FlyPlayerInFromBottom(this, this.game));
+            this.children.push(new LevelOneEnemies(this, this.game));
 
             this.children.forEach(function (script) {
                 script.active = true;
