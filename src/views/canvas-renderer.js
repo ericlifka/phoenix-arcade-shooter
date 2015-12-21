@@ -1,4 +1,4 @@
-window.newCanvasRenderer = (function () {
+ DefineModule('views/canvas-renderer', function (require) {
 
     function maximumPixelSize(width, height) {
         var maxWidth = window.innerWidth;
@@ -90,4 +90,4 @@ window.newCanvasRenderer = (function () {
 
         return new Renderer(canvas, dimensions);
     };
-}());
+});

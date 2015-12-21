@@ -1,4 +1,6 @@
-DefineModule('main', function () {
+DefineModule('main', function (require) {
+    var newCanvasRenderer = require('views/canvas-renderer');
+
     var gameDimensions = { width: 100, height: 75 };
     var gameModel = newPhoenixModel(gameDimensions);
     var gameView = newCanvasRenderer(gameDimensions);
