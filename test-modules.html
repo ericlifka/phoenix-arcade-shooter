@@ -17,6 +17,19 @@ DefineModule("module-a", function (require) {
     };
 });
 
+DefineModule('module-b', function (require) {
+    console.log('defining module-b');
+
+    return {
+        name: 'module-b'
+    };
+});
+
+DefineModule('main', function (require) {
+    console.log('defining main');
+    
+});
+
 </script>
 
 </body>
