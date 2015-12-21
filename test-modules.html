@@ -19,6 +19,7 @@ DefineModule("module-a", function (require) {
 
 DefineModule('module-b', function (require) {
     console.log('defining module-b');
+    var moduleA = require('module-a');
 
     return {
         name: 'module-b'
