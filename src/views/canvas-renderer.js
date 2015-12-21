@@ -34,19 +34,18 @@
         return el;
     }
 
-    function Renderer(canvas, dimensions) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext("2d", { alpha: false });
-        this.dimensions = dimensions;
-        this.frames = [
-            newFrameModel(dimensions),
-            newFrameModel(dimensions)
-        ];
-        this.nextFrame = 0;
-        this.fillColor = "white";
-    }
-
-    Renderer.prototype = {
+    var Renderer = DefineClass({
+        constructor: function Renderer(canvas, dimensions) {
+            this.canvas = canvas;
+            this.ctx = canvas.getContext("2d", { alpha: false });
+            this.dimensions = dimensions;
+            this.frames = [
+                newFrameModel(dimensions),
+                newFrameModel(dimensions)
+            ];
+            this.nextFrame = 0;
+            this.fillColor = "white";
+        },
         newRenderFrame: function () {
             return this.frames[ this.nextFrame ];
         },
@@ -75,7 +74,7 @@
         setFillColor: function (fillColor) {
             this.fillColor = fillColor;
         }
-    };
+    });
 
     return function (options) {
         options = options || {};
