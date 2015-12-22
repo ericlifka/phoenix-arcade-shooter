@@ -1,6 +1,7 @@
 DefineModule('phoenix/game', function (require) {
     var LevelManager = require('phoenix/level-manager');
     var playerShipSprite = require('phoenix/sprites/player-ship');
+    var bulletSprite = require('phoenix/sprites/bullet');
 
     var Player = DefineClass(GameObject, {
         SPEED: 50,
@@ -93,7 +94,7 @@ DefineModule('phoenix/game', function (require) {
             this.velocity = velocity;
             this.acceleration = acceleration;
 
-            this.sprite = newBulletSprite();
+            this.sprite = bulletSprite();
         },
         checkBoundaries: function () {
             if (this.position.x < 0
