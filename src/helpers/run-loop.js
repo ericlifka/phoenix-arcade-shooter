@@ -8,7 +8,7 @@ DefineModule('helpers/run-loop', function (require) {
         runLoopCallback = runLoopCallback || function () {};
         var active = false;
         var lastFrameTime = now();
-        var renderContext = { start: start, stop: stop, addCallback: addCallback };
+        var runLoopHandle = { start: start, stop: stop, addCallback: addCallback };
 
         function animationFrameHandler() {
             if (!active) {
@@ -33,18 +33,18 @@ DefineModule('helpers/run-loop', function (require) {
                 active = true;
                 window.requestAnimationFrame(animationFrameHandler);
             }
-            return renderContext;
+            return runLoopHandle;
         }
 
         function stop() {
             active = false;
-            return renderContext;
+            return runLoopHandle;
         }
 
         function addCallback(hook) {
             runLoopCallback = hook;
         }
 
-        return renderContext;
+        return runLoopHandle;
     };
 });
