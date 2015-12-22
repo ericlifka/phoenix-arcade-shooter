@@ -1,5 +1,6 @@
 DefineModule('phoenix/game', function (require) {
     var LevelManager = require('phoenix/level-manager');
+    var playerShipSprite = require('phoenix/sprites/player-ship');
 
     var Player = DefineClass(GameObject, {
         SPEED: 50,
@@ -8,7 +9,7 @@ DefineModule('phoenix/game', function (require) {
         constructor: function (parent) {
             this.super('constructor', arguments);
 
-            this.sprite = newPhoenixPlayerShipSprite().rotateRight();
+            this.sprite = playerShipSprite().rotateRight();
             this.position = { x: 0, y: 0 };
             this.velocity = { x: 0, y: 0 };
             this.timeSinceFired = 0;

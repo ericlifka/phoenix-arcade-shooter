@@ -1,4 +1,4 @@
-window.newPhoenixPlayerShipSprite = (function () {
+DefineModule('phoenix/sprites/player-ship', function (require) {
     return function () {
         var w = "white";
         var n = null;
@@ -14,4 +14,4 @@ window.newPhoenixPlayerShipSprite = (function () {
             [n, n, n, w, n, n, n]
         ]);
     }
-}());
+});
