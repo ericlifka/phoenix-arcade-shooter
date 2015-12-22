@@ -1,4 +1,5 @@
  DefineModule('views/canvas-renderer', function (require) {
+     var Frame = require('models/frame');
 
     function maximumPixelSize(width, height) {
         var maxWidth = window.innerWidth;
@@ -40,8 +41,8 @@
             this.ctx = canvas.getContext("2d", { alpha: false });
             this.dimensions = dimensions;
             this.frames = [
-                newFrameModel(dimensions),
-                newFrameModel(dimensions)
+                new Frame(dimensions),
+                new Frame(dimensions)
             ];
             this.nextFrame = 0;
             this.fillColor = "white";

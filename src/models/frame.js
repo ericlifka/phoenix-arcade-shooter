@@ -1,9 +1,8 @@
-window.newFrameModel = (function () {
-
-    var Frame = DefineClass(CellGrid, {
-        constructor: function Frame(width, height, pixelSize) {
-            this.width = width;
-            this.height = height;
+DefineModule('models/frame', function (require) {
+    return DefineClass(CellGrid, {
+        constructor: function Frame(dimensions) {
+            this.width = dimensions.width;
+            this.height = dimensions.height;
             this.cells = [];
 
             for (var x = 0; x < this.width; x++) {
@@ -13,8 +12,8 @@ window.newFrameModel = (function () {
                     this.cells[ x ][ y ] = {
                         x: x,
                         y: y,
-                        render_x: x * pixelSize,
-                        render_y: y * pixelSize,
+                        render_x: x * dimensions.pixelSize,
+                        render_y: y * dimensions.pixelSize,
                         color: "#000000"
                     };
                 }
@@ -26,11 +25,4 @@ window.newFrameModel = (function () {
             });
         }
     });
-
-    return function (dimensions) {
-        return new Frame(
-            dimensions.width,
-            dimensions.height,
-            dimensions.pixelSize);
-    };
-}());
+});
