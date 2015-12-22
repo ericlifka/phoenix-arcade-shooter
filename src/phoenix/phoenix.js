@@ -1,4 +1,5 @@
 DefineModule('phoenix/game', function (require) {
+    var GameObject = require('models/game-object');
     var LevelManager = require('phoenix/level-manager');
     var playerShipSprite = require('phoenix/sprites/player-ship');
     var bulletSprite = require('phoenix/sprites/bullet');

@@ -1,4 +1,5 @@
 DefineModule('phoenix/define-ship', function (require) {
+    var GameObject = require('models/game-object');
     var playerShipSprite = require('phoenix/sprites/player-ship');
 
     return DefineClass(GameObject, {

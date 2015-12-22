@@ -1,4 +1,5 @@
 DefineModule('phoenix/level-manager', function (require) {
+    var GameObject = require('models/game-object');
     var EnemyShip = require('phoenix/define-ship');
 
     var FlyPlayerInFromBottom = DefineClass(GameObject, {
