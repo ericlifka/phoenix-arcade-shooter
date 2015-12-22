@@ -1,4 +1,5 @@
 DefineModule('phoenix/level-manager', function (require) {
+    var EnemyShip = require('phoenix/define-ship');
 
     var FlyPlayerInFromBottom = DefineClass(GameObject, {
         TIME_STEP: 100,
@@ -38,7 +39,7 @@ DefineModule('phoenix/level-manager', function (require) {
             this.super('constructor', arguments);
 
             this.game = game;
-            this.ship = new PhoenixEnemyShip(game);
+            this.ship = new EnemyShip(game);
         },
         start: function () {
             this.ship.position.x =  Math.floor(this.game.width / 2);
