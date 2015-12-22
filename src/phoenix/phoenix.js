@@ -1,4 +1,4 @@
-window.newPhoenixModel = (function () {
+DefineModule('phoenix/game', function (require) {
 
     var Player = DefineClass(GameObject, {
         SPEED: 50,
@@ -128,4 +128,4 @@ window.newPhoenixModel = (function () {
     return function (gameDimensions) {
         return new Phoenix(gameDimensions);
     };
-}());
+});
