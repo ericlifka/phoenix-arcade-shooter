@@ -1,8 +1,10 @@
 DefineModule('phoenix/sprites/player-ship', function (require) {
+    var Sprite = require('models/sprite');
+
     return function () {
         var w = "white";
         var n = null;
-        return newSprite([
+        return new Sprite([
             [n, n, n, w, n, n, n],
             [n, n, n, w, n, n, n],
             [n, n, w, w, w, n, n],

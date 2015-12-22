@@ -1,5 +1,5 @@
-window.newSprite = (function () {
-    var Sprite = DefineClass(CellGrid, {
+DefineModule('models/sprite', function (require) {
+    return DefineClass(CellGrid, {
         constructor: function Sprite(pixels) {
             this.width = pixels.length;
             this.height = pixels[ 0 ].length;
@@ -71,8 +71,4 @@ window.newSprite = (function () {
             return this;
         }
     });
-
-    return function (spritePixels) {
-        return new Sprite(spritePixels);
-    }
-}());
+});
