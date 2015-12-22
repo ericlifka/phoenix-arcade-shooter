@@ -1,4 +1,6 @@
 DefineModule('models/frame', function (require) {
+    var CellGrid = require('models/cell-grid');
+
     return DefineClass(CellGrid, {
         constructor: function Frame(dimensions) {
             this.width = dimensions.width;
