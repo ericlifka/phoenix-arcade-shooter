@@ -1,4 +1,5 @@
 DefineModule('phoenix/game', function (require) {
+    var LevelManager = require('phoenix/level-manager');
 
     var Player = DefineClass(GameObject, {
         SPEED: 50,
@@ -112,7 +113,7 @@ DefineModule('phoenix/game', function (require) {
             this.width = gameDimensions.width;
             this.height = gameDimensions.height;
 
-            this.levelManager = new PhoenixLevelManager(this);
+            this.levelManager = new LevelManager(this);
             this.player = new Player(this);
 
             this.addChild(this.levelManager);

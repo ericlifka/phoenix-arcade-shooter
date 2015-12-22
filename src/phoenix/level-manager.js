@@ -1,4 +1,4 @@
-(function () {
+DefineModule('phoenix/level-manager', function (require) {
 
     var FlyPlayerInFromBottom = DefineClass(GameObject, {
         TIME_STEP: 100,
@@ -30,7 +30,7 @@
             position.y = this.game.height + 2;
             velocity.x = 0;
             velocity.y = -this.player.SPEED / 5;
-        },
+        }
     });
 
     var LevelOneEnemies = DefineClass(GameObject, {
@@ -45,10 +45,10 @@
             this.ship.position.y = 2;
 
             this.game.addChild(this.ship);
-        },
+        }
     });
 
-    window.PhoenixLevelManager = DefineClass(GameObject, {
+    return DefineClass(GameObject, {
         levels: [
             {
 
@@ -77,4 +77,4 @@
             this.removeChild(script);
         }
     });
-}());
+});
