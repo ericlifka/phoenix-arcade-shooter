@@ -4,7 +4,7 @@ DefineModule('main', function (require) {
     var newKeyboardInputController = require('helpers/keyboard-input');
     var GameController = require('controllers/game');
     var newPhoenixGame = require('phoenix/game');
-    var gameDimensions = { width: 100, height: 75 };
+    var gameDimensions = { width: 200, height: 150 };
 
     window.activeGame = new GameController({
         renderer: newCanvasRenderer(gameDimensions),
