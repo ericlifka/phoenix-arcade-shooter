@@ -1,12 +1,12 @@
 DefineModule('phoenix/define-ship', function (require) {
     var GameObject = require('models/game-object');
-    var playerShipSprite = require('phoenix/sprites/player-ship');
+    var shipSprite = require('phoenix/sprites/dagger-ship');
 
     return DefineClass(GameObject, {
         constructor: function () {
             this.super('constructor', arguments);
 
-            this.sprite = playerShipSprite().rotateLeft();
+            this.sprite = shipSprite().rotateLeft();
             this.position = { x: 0, y: 0 };
         }
     });
