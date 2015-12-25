@@ -36,6 +36,7 @@ DefineModule('phoenix/level-manager', function (require) {
     });
 
     var LevelOneEnemies = DefineClass(GameObject, {
+        speed: 20,
         constructor: function (parent, game) {
             this.super('constructor', arguments);
 
@@ -47,6 +48,11 @@ DefineModule('phoenix/level-manager', function (require) {
             this.ship.position.y = 2;
 
             this.game.addChild(this.ship);
+        },
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            this.ship.velocity.y = this.speed;
         }
     });
 

@@ -8,6 +8,7 @@ DefineModule('phoenix/enemy-ship', function (require) {
 
             this.sprite = shipSprite().rotateLeft();
             this.position = { x: 0, y: 0 };
+            this.velocity = { x: 0, y: 0 };
         }
     });
 });
