@@ -46,13 +46,12 @@ DefineModule('phoenix/level-manager', function (require) {
         start: function () {
             this.ship.position.x =  Math.floor(this.game.width / 2);
             this.ship.position.y = -20;
+            this.ship.velocity.y = this.speed;
 
             this.game.addChild(this.ship);
         },
         update: function (dtime) {
             this.super('update', arguments);
-
-            this.ship.velocity.y = this.speed;
         }
     });
 
