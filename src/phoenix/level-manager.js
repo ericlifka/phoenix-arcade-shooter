@@ -52,6 +52,11 @@ DefineModule('phoenix/level-manager', function (require) {
         },
         update: function (dtime) {
             this.super('update', arguments);
+
+            if (this.ship.position.y > 20) {
+                this.ship.velocity.y = 0;
+                this.parent.signalScriptFinished(this);
+            }
         }
     });
 
