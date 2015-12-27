@@ -62,22 +62,12 @@ DefineModule('phoenix/level-manager', function (require) {
             var yPositive = this.yPositive;
             var position = this.object.position;
             var target = this.target;
-            var finished = false;
 
-            if (xPositive && position.x > target.x) {
-                finished = true;
-            }
-            if (!xPositive && position.x < target.x) {
-                finished = true;
-            }
-            if (yPositive && position.y > target.y) {
-                finished = true;
-            }
-            if (!yPositive && position.y < target.y) {
-                finished = true;
-            }
-
-            if (finished) {
+            if (xPositive && position.x > target.x ||
+                !xPositive && position.x < target.x ||
+                yPositive && position.y > target.y ||
+                !yPositive && position.y < target.y)
+            {
                 this.object.velocity.x = 0;
                 this.object.velocity.y = 0;
             }
