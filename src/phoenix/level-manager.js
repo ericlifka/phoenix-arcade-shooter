@@ -50,8 +50,8 @@ DefineModule('phoenix/level-manager', function (require) {
             var xDiff = target.x - current.x;
             var yDiff = target.y - current.y;
 
-            var xSpeed = xDiff / this.timeDelta;
-            var ySpeed = yDiff / this.timeDelta;
+            var xSpeed = xDiff / this.delta;
+            var ySpeed = yDiff / this.delta;
 
             this.object.velocity.x = xSpeed;
             this.object.velocity.y = ySpeed;
@@ -71,7 +71,7 @@ DefineModule('phoenix/level-manager', function (require) {
 
             this.ship.position.x =  Math.floor(this.game.width / 2);
             this.ship.position.y = -20;
-            this.helper = new MoveObjectToPoint(game, this.ship, {x:this.ship.position.x, y:this.ship.position.y + 20}, 2000);
+            this.helper = new MoveObjectToPoint(game, this.ship, {x:this.ship.position.x, y:this.ship.position.y + 40}, 2);
         },
         start: function () {
             this.helper.start();
