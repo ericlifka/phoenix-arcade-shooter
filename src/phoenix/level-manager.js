@@ -44,20 +44,43 @@ DefineModule('phoenix/level-manager', function (require) {
             this.delta = timeDelta;
         },
         start: function () {
-            var target = this.target;
             var current = this.object.position;
 
-            var xDiff = target.x - current.x;
-            var yDiff = target.y - current.y;
+            var xDiff = this.target.x - current.x;
+            var yDiff = this.target.y - current.y;
 
-            var xSpeed = xDiff / this.delta;
-            var ySpeed = yDiff / this.delta;
+            this.object.velocity.x = xDiff / this.delta;
+            this.object.velocity.y = yDiff / this.delta;
 
-            this.object.velocity.x = xSpeed;
-            this.object.velocity.y = ySpeed;
+            this.xPositive = xDiff > 0;
+            this.yPositive = yDiff > 0;
         },
         update: function (dtime) {
             this.super('update', arguments);
+
+            var xPositive = this.xPositive;
+            var yPositive = this.yPositive;
+            var position = this.object.position;
+            var target = this.target;
+            var finished = false;
+
+            if (xPositive && position.x > target.x) {
+                finished = true;
+            }
+            if (!xPositive && position.x < target.x) {
+                finished = true;
+            }
+            if (yPositive && position.y > target.y) {
+                finished = true;
+            }
+            if (!yPositive && position.y < target.y) {
+                finished = true;
+            }
+
+            if (finished) {
+                this.object.velocity.x = 0;
+                this.object.velocity.y = 0;
+            }
         }
     });
 
