@@ -80,17 +80,29 @@ DefineModule('phoenix/level-manager', function (require) {
             this.super('constructor', arguments);
 
             this.game = game;
-            this.ship = new EnemyShip(game);
+            this.ships = [];
 
-            this.ship.position.x =  Math.floor(this.game.width / 2);
-            this.ship.position.y = -20;
-            this.helper = new MoveObjectToPoint(game, this.ship, {x:this.ship.position.x, y:this.ship.position.y + 40}, 2);
+            for (var i = 0; i < 10; i++) {
+                var ship = new EnemyShip(game);
+                ship.position.x = 10 * (i + 1);
+                ship.position.y = -20;
+                
+                this.addChild(new MoveObjectToPoint(game, ship, {
+                    x: ship.position.x,
+                    y: 20
+                }, 2));
+                this.ships.push(ship);
+            }
         },
         start: function () {
-            this.helper.start();
+            var game = this.game;
+            this.ships.forEach(function (ship) {
+                game.addChild(ship);
+            });
 
-            this.addChild(this.helper);
-            this.game.addChild(this.ship);
+            this.children.forEach(function (script) {
+                script.start();
+            });
         }
     });
 
