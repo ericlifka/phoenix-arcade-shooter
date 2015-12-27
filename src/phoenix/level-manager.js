@@ -94,12 +94,12 @@ DefineModule('phoenix/level-manager', function (require) {
             for (var i = 0; i < 10; i++) {
                 var ship = new EnemyShip(game);
                 ship.position.x = 10 * (i + 1);
-                ship.position.y = -20;
+                ship.position.y = -20 * (i + 1);
 
                 this.addChild(new MoveObjectToPoint(game, ship, {
                     x: ship.position.x,
                     y: 20
-                }, 2));
+                }, 2 + i * .5));
                 this.ships.push(ship);
             }
         },
