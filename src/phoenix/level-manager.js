@@ -35,6 +35,32 @@ DefineModule('phoenix/level-manager', function (require) {
         }
     });
 
+    var MoveObjectToPoint = DefineClass(GameObject, {
+        constructor: function (parent, object, targetPoint, timeDelta) {
+            this.super('constructor', arguments);
+
+            this.object = object;
+            this.target = targetPoint;
+            this.delta = timeDelta;
+        },
+        start: function () {
+            var target = this.target;
+            var current = this.object.position;
+
+            var xDiff = target.x - current.x;
+            var yDiff = target.y - current.y;
+
+            var xSpeed = xDiff / timeDelta;
+            var ySpeed = yDiff / timeDelta;
+
+            this.object.velocity.x = xSpeed;
+            this.object.velocity.y = ySpeed;
+        },
+        update: function (dtime) {
+            this.super('update', arguments);
+        }
+    });
+
     var LevelOneEnemies = DefineClass(GameObject, {
         speed: 10,
         constructor: function (parent, game) {
