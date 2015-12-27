@@ -88,20 +88,10 @@ DefineModule('phoenix/level-manager', function (require) {
         },
         start: function () {
             this.helper.start();
-            //
-            // this.ship.velocity.y = this.speed;
 
             this.addChild(this.helper);
             this.game.addChild(this.ship);
-        },
-        // update: function (dtime) {
-        //     this.super('update', arguments);
-        //
-        //     if (this.ship.position.y > 20) {
-        //         this.ship.velocity.y = 0;
-        //         this.parent.signalScriptFinished(this);
-        //     }
-        // }
+        }
     });
 
     return DefineClass(GameObject, {
