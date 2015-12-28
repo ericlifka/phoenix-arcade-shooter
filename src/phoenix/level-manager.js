@@ -3,53 +3,7 @@ DefineModule('phoenix/level-manager', function (require) {
     var EnemyShip = require('phoenix/enemy-ship');
     var FlyPlayerInFromBottom = require('phoenix/scripts/fly-player-in-from-bottom');
 
-    var MoveObjectToPoint = DefineClass(GameObject, {
-        active: false,
-        constructor: function (parent, object, targetPoint, timeDelta) {
-            this.super('constructor', arguments);
-
-            this.object = object;
-            this.target = targetPoint;
-            this.delta = timeDelta;
-        },
-        start: function () {
-            var current = this.object.position;
-
-            var xDiff = this.target.x - current.x;
-            var yDiff = this.target.y - current.y;
-
-            this.object.velocity.x = xDiff / this.delta;
-            this.object.velocity.y = yDiff / this.delta;
-
-            this.xPositive = xDiff > 0;
-            this.yPositive = yDiff > 0;
-
-            this.active = true;
-        },
-        update: function (dtime) {
-            if (!this.active) {
-                return;
-            }
-
-            this.super('update', arguments);
-
-            var xPositive = this.xPositive;
-            var yPositive = this.yPositive;
-            var position = this.object.position;
-            var target = this.target;
-
-            if (xPositive && position.x > target.x ||
-                !xPositive && position.x < target.x ||
-                yPositive && position.y > target.y ||
-                !yPositive && position.y < target.y)
-            {
-                this.object.velocity.x = 0;
-                this.object.velocity.y = 0;
-
-                this.active = false;
-            }
-        }
-    });
+    var MoveObjectToPoint = require('phoenix/scripts/move-object-to-point');
 
     var LevelOneEnemies = DefineClass(GameObject, {
         speed: 10,
