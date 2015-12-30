@@ -2,7 +2,7 @@ DefineModule('phoenix/game', function (require) {
     var GameObject = require('models/game-object');
     var LevelManager = require('phoenix/level-manager');
     var playerShipSprite = require('phoenix/sprites/player-ship');
-    var bulletSprite = require('phoenix/sprites/bullet');
+    var Bullet = require('phoenix/bullet');
 
     var Player = DefineClass(GameObject, {
         SPEED: 50,
@@ -84,27 +84,6 @@ DefineModule('phoenix/game', function (require) {
             var acceleration = { x: 0, y: 0 };
 
             this.parent.spawnBullet(position, velocity, acceleration);
-        }
-    });
-
-    var Bullet = DefineClass(GameObject, {
-        constructor: function (parent, position, velocity, acceleration) {
-            this.super('constructor', arguments);
-
-            this.position = position;
-            this.velocity = velocity;
-            this.acceleration = acceleration;
-
-            this.sprite = bulletSprite();
-        },
-        checkBoundaries: function () {
-            if (this.position.x < 0
-                || this.position.y < 0
-                || this.position.x + this.sprite.width > this.parent.width
-                || this.position.y + this.sprite.height > this.parent.height)
-            {
-                this.parent.removeChild(this);
-            }
         }
     });
 
