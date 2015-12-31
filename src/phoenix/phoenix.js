@@ -22,6 +22,9 @@ DefineModule('phoenix/game', function (require) {
         },
         spawnBullet: function (position, velocity, acceleration) {
             this.addChild(new Bullet(this, position, velocity, acceleration));
+        },
+        despawnBullet: function (bullet) {
+            this.removeChild(bullet);
         }
     });
 
