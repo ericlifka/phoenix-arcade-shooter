@@ -2,7 +2,7 @@ DefineModule('phoenix/game', function (require) {
     var GameObject = require('models/game-object');
     var LevelManager = require('phoenix/level-manager');
     var Bullet = require('phoenix/bullet');
-    var Player = require('phoenix/player');
+    var PlayerShip = require('phoenix/player-controlled-ship');
 
     var Phoenix = DefineClass(GameObject, {
         FILL_COLOR: "#020031",
@@ -13,7 +13,7 @@ DefineModule('phoenix/game', function (require) {
             this.height = gameDimensions.height;
 
             this.levelManager = new LevelManager(this);
-            this.player = new Player(this);
+            this.player = new PlayerShip(this);
 
             this.addChild(this.levelManager);
             this.addChild(this.player);
