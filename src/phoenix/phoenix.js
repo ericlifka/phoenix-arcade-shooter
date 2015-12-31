@@ -25,6 +25,34 @@ DefineModule('phoenix/game', function (require) {
         },
         despawnBullet: function (bullet) {
             this.removeChild(bullet);
+        },
+        update: function (dtime) {
+            this.super('update', arguments);
+            this.checkCollisions();
+        },
+        checkCollisions: function () {
+            var physicalEntities = this.children.filter(function (child) {
+                return child.position && child.sprite;
+            });
+
+            var collisions = [ ];
+            physicalEntities.forEach(function (entity) {
+                physicalEntities.forEach(function (otherEntity) {
+                    if (entity === otherEntity) {
+                        return;
+                    }
+
+                    if (/* box collision */ false) {
+                        collisions.push([entity, otherEntity]);
+                    }
+                });
+            });
+
+            collisions.forEach(function (entityPair) {
+                if (/* deep collision */) {
+                    /* figure out what the fuck to do with this */
+                }
+            });
         }
     });
 
