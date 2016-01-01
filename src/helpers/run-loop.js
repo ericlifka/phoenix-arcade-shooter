@@ -31,11 +31,9 @@ DefineModule('helpers/run-loop', function (require) {
                 this.active = true;
                 window.requestAnimationFrame(this.animationFrameHandler.bind(this));
             }
-            return this;
         },
         stop: function () {
             this.active = false;
-            return this;
         },
         addCallback: function (callback) {
             this.callback = callback;
