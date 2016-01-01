@@ -21,7 +21,7 @@ DefineModule('helpers/collisions', function (require) {
             );
         },
         spriteCollision: function (entityA, entityB) {
-            return false;
+            return true;
         }
     };
 });
