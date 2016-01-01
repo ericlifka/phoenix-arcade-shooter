@@ -3,6 +3,7 @@ DefineModule('phoenix/game', function (require) {
     var LevelManager = require('phoenix/level-manager');
     var Bullet = require('phoenix/bullet');
     var PlayerShip = require('phoenix/player-controlled-ship');
+    var Collisions = require('helpers/collisions');
 
     var Phoenix = DefineClass(GameObject, {
         FILL_COLOR: "#020031",
@@ -42,14 +43,14 @@ DefineModule('phoenix/game', function (require) {
                         return;
                     }
 
-                    if (/* box collision */ false) {
+                    if (Collisions.boxCollision(entity, otherEntity)) {
                         collisions.push([entity, otherEntity]);
                     }
                 });
             });
 
             collisions.forEach(function (entityPair) {
-                if (/* deep collision */) {
+                if (Collisions.spriteCollision(entityPair[0], entityPair[1])) {
                     /* figure out what the fuck to do with this */
                 }
             });
