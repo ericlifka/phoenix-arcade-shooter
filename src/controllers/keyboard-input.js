@@ -1,4 +1,4 @@
-DefineModule('helpers/keyboard-input', function (require) {
+DefineModule('controllers/keyboard-input', function (require) {
 
     function cloneObj(obj) {
         var nObj = {};
@@ -32,22 +32,20 @@ DefineModule('helpers/keyboard-input', function (require) {
     var inputState = newInputDescriptor();
     var clearAfterNext = newInputDescriptor();
 
-
-    return function () {
-        document.body.addEventListener('keydown', function (event) {
-            inputState[ KEYS[ event.keyCode ] ] = true;
-            clearAfterNext[ KEYS[ event.keyCode ] ] = false;
-        });
-        document.body.addEventListener('keyup', function (event) {
-            clearAfterNext[ KEYS[ event.keyCode ] ] = true;
-        });
-
-        return {
-            getInputState: function () {
-                var state = cloneObj(inputState);
-                propagateInputClears();
-                return state;
-            }
-        };
-    };
+    return DefineClass({
+        constructor: function () {
+            document.body.addEventListener('keydown', function (event) {
+                inputState[ KEYS[ event.keyCode ] ] = true;
+                clearAfterNext[ KEYS[ event.keyCode ] ] = false;
+            });
+            document.body.addEventListener('keyup', function (event) {
+                clearAfterNext[ KEYS[ event.keyCode ] ] = true;
+            });
+        },
+        getInputState: function () {
+            var state = cloneObj(inputState);
+            propagateInputClears();
+            return state;
+        }
+    });
 });
