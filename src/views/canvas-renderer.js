@@ -36,39 +36,42 @@
     }
 
     return DefineClass({
+        width: 80,
+        height: 50,
+        pixelSize: 1,
+        nextFrame: 0,
+        fillColor: "white",
+
         constructor: function Renderer(options) {
             options = options || {};
-            var width = options.width || 80;
-            var height = options.height || 50;
-            var pixelSize = maximumPixelSize(width, height);
-            var container = options.container || document.body;
-            var dimensions = { width: width, height: height, pixelSize: pixelSize };
 
-            var canvas = createCanvasEl(dimensions);
-            container.appendChild(canvas);
+            this.width = options.width || this.width;
+            this.height = options.height || this.height;
+            this.pixelSize = maximumPixelSize(this.width, this.height);
 
-            this.canvas = canvas;
-            this.ctx = canvas.getContext("2d", { alpha: false });
-            this.dimensions = dimensions;
+            this.container = options.container || document.body;
+            this.canvas = createCanvasEl(this);
+            this.container.appendChild(this.canvas);
+
+            this.ctx = this.canvas.getContext("2d", { alpha: false });
             this.frames = [
-                new Frame(dimensions),
-                new Frame(dimensions)
+                new Frame(this),
+                new Frame(this)
             ];
-            this.nextFrame = 0;
-            this.fillColor = "white";
         },
+
         newRenderFrame: function () {
             return this.frames[ this.nextFrame ];
         },
         renderFrame: function () {
             var frame = this.frames[ this.nextFrame ];
             var lastFrame = this.frames[ +!this.nextFrame ];
-            var pixelSize = this.dimensions.pixelSize;
+            var pixelSize = this.pixelSize;
             var fillColor = this.fillColor;
             var ctx = this.ctx;
 
             ctx.fillStyle = fillColor;
-            ctx.fillRect(0, 0, this.dimensions.fullWidth, this.dimensions.fullHeight);
+            ctx.fillRect(0, 0, this.fullWidth, this.fullHeight);
 
             frame.iterateCells(function (cell, x, y) {
                 if (cell.color !== fillColor) {
