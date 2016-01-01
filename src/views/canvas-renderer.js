@@ -35,8 +35,18 @@
         return el;
     }
 
-    var Renderer = DefineClass({
-        constructor: function Renderer(canvas, dimensions) {
+    return DefineClass({
+        constructor: function Renderer(options) {
+            options = options || {};
+            var width = options.width || 80;
+            var height = options.height || 50;
+            var pixelSize = maximumPixelSize(width, height);
+            var container = options.container || document.body;
+            var dimensions = { width: width, height: height, pixelSize: pixelSize };
+
+            var canvas = createCanvasEl(dimensions);
+            container.appendChild(canvas);
+
             this.canvas = canvas;
             this.ctx = canvas.getContext("2d", { alpha: false });
             this.dimensions = dimensions;
@@ -76,18 +86,4 @@
             this.fillColor = fillColor;
         }
     });
-
-    return function (options) {
-        options = options || {};
-        var width = options.width || 80;
-        var height = options.height || 50;
-        var pixelSize = maximumPixelSize(width, height);
-        var container = options.container || document.body;
-        var dimensions = { width: width, height: height, pixelSize: pixelSize };
-
-        var canvas = createCanvasEl(dimensions);
-        container.appendChild(canvas);
-
-        return new Renderer(canvas, dimensions);
-    };
 });
