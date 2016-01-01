@@ -18,8 +18,6 @@ DefineModule('helpers/run-loop', function (require) {
             var dtime = currentTime - this.lastFrameTime;
             this.lastFrameTime = currentTime;
 
-            console.log('frame', dtime);
-
             try {
                 this.callback(dtime);
             } catch (e) {
