@@ -10,8 +10,9 @@ DefineModule('helpers/run-loop', function (require) {
 
             this.active = false;
             this.lastFrameTime = now();
+            this.boundFrameHandler = this.frameHandler.bind(this);
         },
-        animationFrameHandler: function () {
+        frameHandler: function () {
             if (!this.active) return;
 
             var currentTime = now();
@@ -24,12 +25,12 @@ DefineModule('helpers/run-loop', function (require) {
                 console.error('Error running frame: ', e);
             }
 
-            window.requestAnimationFrame(this.animationFrameHandler.bind(this));
+            window.requestAnimationFrame(this.boundFrameHandler);
         },
         start: function () {
             if (!this.active) {
                 this.active = true;
-                window.requestAnimationFrame(this.animationFrameHandler.bind(this));
+                window.requestAnimationFrame(this.boundFrameHandler);
             }
         },
         stop: function () {
