@@ -15,37 +15,36 @@ DefineModule('controllers/keyboard-input', function (require) {
         };
     }
 
-    function propagateInputClears() {
-        Object.keys(clearAfterNext).forEach(function (key) {
-            if (clearAfterNext[ key ]) {
-                inputState[ key ] = false;
-                clearAfterNext[ key ] = false;
-            }
-        });
-    }
-
     var KEYS = {
         87: 'W', 65: 'A', 83: 'S', 68: 'D',
         32: 'SPACE'
     };
 
-    var inputState = newInputDescriptor();
-    var clearAfterNext = newInputDescriptor();
-
     return DefineClass({
         constructor: function () {
+            this.inputState = newInputDescriptor();
+            this.clearAfterNext = newInputDescriptor();
+
             document.body.addEventListener('keydown', function (event) {
-                inputState[ KEYS[ event.keyCode ] ] = true;
-                clearAfterNext[ KEYS[ event.keyCode ] ] = false;
-            });
+                this.inputState[ KEYS[ event.keyCode ] ] = true;
+                this.clearAfterNext[ KEYS[ event.keyCode ] ] = false;
+            }.bind(this));
             document.body.addEventListener('keyup', function (event) {
-                clearAfterNext[ KEYS[ event.keyCode ] ] = true;
-            });
+                this.clearAfterNext[ KEYS[ event.keyCode ] ] = true;
+            }.bind(this));
         },
         getInputState: function () {
-            var state = cloneObj(inputState);
-            propagateInputClears();
+            var state = cloneObj(this.inputState);
+            this.propagateInputClears();
             return state;
+        },
+        propagateInputClears: function () {
+            Object.keys(this.clearAfterNext).forEach(function (key) {
+                if (this.clearAfterNext[ key ]) {
+                    this.inputState[ key ] = false;
+                    this.clearAfterNext[ key ] = false;
+                }
+            }.bind(this));
         }
     });
 });
