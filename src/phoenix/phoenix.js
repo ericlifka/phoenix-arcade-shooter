@@ -5,7 +5,7 @@ DefineModule('phoenix/game', function (require) {
     var PlayerShip = require('phoenix/player-controlled-ship');
     var Collisions = require('helpers/collisions');
 
-    var Phoenix = DefineClass(GameObject, {
+    return DefineClass(GameObject, {
         FILL_COLOR: "#020031",
         constructor: function (gameDimensions) {
             this.super('constructor');
@@ -62,8 +62,4 @@ DefineModule('phoenix/game', function (require) {
             }.bind(this));
         }
     });
-
-    return function (gameDimensions) {
-        return new Phoenix(gameDimensions);
-    };
 });

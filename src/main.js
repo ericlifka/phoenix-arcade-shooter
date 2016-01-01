@@ -3,13 +3,14 @@ DefineModule('main', function (require) {
     var newRunLoop = require('helpers/run-loop');
     var newKeyboardInputController = require('helpers/keyboard-input');
     var GameController = require('controllers/game');
-    var newPhoenixGame = require('phoenix/game');
+    var Phoenix = require('phoenix/game');
+
     var gameDimensions = { width: 200, height: 150 };
 
     window.activeGame = new GameController({
         renderer: newCanvasRenderer(gameDimensions),
         input: newKeyboardInputController(),
         runLoop: newRunLoop(),
-        model: newPhoenixGame(gameDimensions)
+        model: new Phoenix(gameDimensions)
     });
 });
