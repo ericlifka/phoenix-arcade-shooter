@@ -53,7 +53,7 @@
             this.canvas = createCanvasEl(this);
             this.container.appendChild(this.canvas);
 
-            this.ctx = this.canvas.getContext("2d", { alpha: false });
+            this.canvasDrawContext = this.canvas.getContext("2d", { alpha: false });
             this.frames = [
                 new Frame(this),
                 new Frame(this)
@@ -68,7 +68,7 @@
             var lastFrame = this.frames[ +!this.nextFrame ];
             var pixelSize = this.pixelSize;
             var fillColor = this.fillColor;
-            var ctx = this.ctx;
+            var ctx = this.canvasDrawContext;
 
             ctx.fillStyle = fillColor;
             ctx.fillRect(0, 0, this.fullWidth, this.fullHeight);
