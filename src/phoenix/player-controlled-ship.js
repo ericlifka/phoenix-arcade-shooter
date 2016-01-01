@@ -77,7 +77,7 @@ DefineModule('phoenix/player-controlled-ship', function (require) {
         fire: function () {
             var position = {
                 x: this.position.x + Math.floor(this.sprite.width / 2),
-                y: this.position.y
+                y: this.position.y - 2
             };
             var velocity = { x: 0, y: -this.BULLET_SPEED };
             var acceleration = { x: 0, y: 0 };
