@@ -4,47 +4,43 @@ DefineModule('helpers/run-loop', function (require) {
         return (new Date()).valueOf();
     }
 
-    return function (runLoopCallback) {
-        runLoopCallback = runLoopCallback || function () {};
-        var active = false;
-        var lastFrameTime = now();
-        var runLoopHandle = { start: start, stop: stop, addCallback: addCallback };
+    return DefineClass({
+        constructor: function (callback) {
+            this.callback = callback || function () {};
 
-        function animationFrameHandler() {
-            if (!active) {
-                return;
-            }
+            this.active = false;
+            this.lastFrameTime = now();
+        },
+        animationFrameHandler: function () {
+            if (!this.active) return;
 
             var currentTime = now();
-            var dtime = currentTime - lastFrameTime;
-            lastFrameTime = currentTime;
+            var dtime = currentTime - this.lastFrameTime;
+            this.lastFrameTime = currentTime;
 
             console.log('frame', dtime);
+
             try {
-                runLoopCallback(dtime);
+                this.callback(dtime);
             } catch (e) {
-                console.error("Error running frame: ", e);
+                console.error('Error running frame: ', e);
             }
-            window.requestAnimationFrame(animationFrameHandler);
-        }
 
-        function start() {
-            if (!active) {
-                active = true;
-                window.requestAnimationFrame(animationFrameHandler);
+            window.requestAnimationFrame(this.animationFrameHandler.bind(this));
+        },
+        start: function () {
+            if (!this.active) {
+                this.active = true;
+                window.requestAnimationFrame(this.animationFrameHandler.bind(this));
             }
-            return runLoopHandle;
+            return this;
+        },
+        stop: function () {
+            this.active = false;
+            return this;
+        },
+        addCallback: function (callback) {
+            this.callback = callback;
         }
-
-        function stop() {
-            active = false;
-            return runLoopHandle;
-        }
-
-        function addCallback(hook) {
-            runLoopCallback = hook;
-        }
-
-        return runLoopHandle;
-    };
+    });
 });

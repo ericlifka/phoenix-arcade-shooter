@@ -1,6 +1,6 @@
 DefineModule('main', function (require) {
     var newCanvasRenderer = require('views/canvas-renderer');
-    var newRunLoop = require('helpers/run-loop');
+    var RunLoop = require('helpers/run-loop');
     var KeyboardInputController = require('controllers/keyboard-input');
     var GameController = require('controllers/game');
     var Phoenix = require('phoenix/game');
@@ -10,7 +10,7 @@ DefineModule('main', function (require) {
     window.activeGame = new GameController({
         renderer: newCanvasRenderer(gameDimensions),
         input: new KeyboardInputController(),
-        runLoop: newRunLoop(),
+        runLoop: new RunLoop(),
         model: new Phoenix(gameDimensions)
     });
 });
