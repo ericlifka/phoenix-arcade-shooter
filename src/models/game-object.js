@@ -50,6 +50,13 @@ DefineModule('models/game-object', function (require) {
                     this.children.splice(index, 1);
                 }
             }
+        },
+        destroy: function () {
+            if (this.parent && this.parent.removeChild) {
+                this.parent.removeChild(this);
+            }
+
+            this.destroyed = true;
         }
     });
 });
