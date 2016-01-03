@@ -4,6 +4,7 @@ DefineModule('phoenix/bullet', function (require) {
     var smallExplosion = require('phoenix/animations/small-explosion');
 
     return DefineClass(GameObject, {
+        damage: 1,
         constructor: function (parent, position, velocity, acceleration) {
             this.super('constructor', arguments);
 
@@ -21,6 +22,10 @@ DefineModule('phoenix/bullet', function (require) {
             {
                 this.destroy();
             }
+        },
+        applyDamage: function (damage) {
+            this.exploding = true;
+            this.sprite = smallExplosion();
         }
     });
 });
