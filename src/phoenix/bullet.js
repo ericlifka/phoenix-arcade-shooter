@@ -25,6 +25,7 @@ DefineModule('phoenix/bullet', function (require) {
         },
         applyDamage: function (damage) {
             this.exploding = true;
+            this.velocity = { x: 0, y: 0 };
             this.sprite = smallExplosion();
         }
     });
