@@ -6,8 +6,8 @@ DefineModule('models/animation', function (require) {
             this.currentFrame = options.offsetIndex || 0;
             this.loop = options.loop;
 
-            this.width = this.frames[ 0 ].length;
-            this.height = this.frames[ 0 ].length;
+            this.width = this.frames[ 0 ].width;
+            this.height = this.frames[ 0 ].height;
             this.millisEllapsedOnFrame = 0;
         },
         update: function (dtime) {
