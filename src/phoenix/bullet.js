@@ -19,7 +19,7 @@ DefineModule('phoenix/bullet', function (require) {
                 || this.position.x + this.sprite.width > this.parent.width
                 || this.position.y + this.sprite.height > this.parent.height)
             {
-                this.parent.despawnBullet(this);
+                this.destroy();
             }
         }
     });
