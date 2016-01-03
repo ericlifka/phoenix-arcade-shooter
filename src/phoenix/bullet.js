@@ -37,8 +37,7 @@ DefineModule('phoenix/bullet', function (require) {
             this.velocity.x = 0;
             this.velocity.y = 0;
             this.position.x -= Math.floor(this.sprite.width / 2);
-            //this.position.y -= Math.floor(this.sprite.height / 2);
-            console.log('applyDamage');
+            this.position.y -= Math.floor(this.sprite.height / 2);
         }
     });
 });
