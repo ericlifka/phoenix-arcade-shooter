@@ -14,6 +14,13 @@ DefineModule('phoenix/bullet', function (require) {
 
             this.sprite = bulletSprite();
         },
+        update: function () {
+            this.super('update', arguments);
+
+            if (this.exploding && this.sprite.finished) {
+                this.destroy();
+            }
+        },
         checkBoundaries: function () {
             if (this.position.x < 0
                 || this.position.y < 0
