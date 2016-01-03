@@ -23,10 +23,9 @@ DefineModule('phoenix/bullet', function (require) {
             }
         },
         destroy: function () {
-            this.super('destroy', arguments);
+            //this.super('destroy', arguments);
 
-            var animation = smallExplosion(this.parent);
-            this.parent.addChild(animation);
+            this.sprite = smallExplosion();
         }
     });
 });

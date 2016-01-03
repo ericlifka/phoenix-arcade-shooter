@@ -26,7 +26,7 @@ DefineModule('phoenix/sprites/small-explosion', function (require) {
     ];
 
 
-    return function (parent) {
-        return new Animation(parent, frames);
+    return function () {
+        return new Animation(frames);
     }
 });

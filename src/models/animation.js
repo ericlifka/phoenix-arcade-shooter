@@ -1,18 +1,14 @@
 DefineModule('models/animation', function (require) {
-    var GameObject = require('models/game-object');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, frames) {
-            this.super('constructor', arguments);
-
+    return DefineClass({
+        constructor: function (frames) {
             this.frames = frames;
             this.currentFrame = 0;
 
             this.width = frames[ 0 ].length;
             this.height = frames[ 0 ].length;
         },
-        renderToFrame: function (frame) {
-            this.frames[ 0 ].renderToFrame(0, 0, frame);
+        renderToFrame: function (x, y, frame) {
+            this.frames[ 0 ].renderToFrame(x, y, frame);
         }
     });
 });
