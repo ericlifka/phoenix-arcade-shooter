@@ -21,11 +21,6 @@ DefineModule('phoenix/bullet', function (require) {
             {
                 this.parent.despawnBullet(this);
             }
-        },
-        destroy: function () {
-            //this.super('destroy', arguments);
-
-            this.sprite = smallExplosion();
         }
     });
 });

@@ -50,9 +50,12 @@ DefineModule('phoenix/game', function (require) {
             });
 
             collisions.forEach(function (entityPair) {
-                if (Collisions.spriteCollision(entityPair[0], entityPair[1])) {
-                    entityPair[0].destroy();
-                    entityPair[1].destroy();
+                var a = entityPair[ 0 ];
+                var b = entityPair[ 1 ];
+
+                if (Collisions.spriteCollision(a, b)) {
+                    a.applyDamage(b.damage);
+                    b.applyDamage(a.damage);
                 }
             });
         }

@@ -1,5 +1,6 @@
 DefineModule('models/game-object', function (require) {
     return DefineClass({
+        damage: 0,
         constructor: function (parentObj) {
             this.parent = parentObj;
             this.children = [];
@@ -57,6 +58,9 @@ DefineModule('models/game-object', function (require) {
             }
 
             this.destroyed = true;
+        },
+        applyDamage: function (damage) {
+            /* no good base implementation, needs to be overridden */
         }
     });
 });
