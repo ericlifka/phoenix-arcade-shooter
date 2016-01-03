@@ -26,7 +26,7 @@ DefineModule('phoenix/sprites/bullet-explosion', function (require) {
     ];
 
 
-    return function () {
-        return new Animation(frames);
+    return function (parent) {
+        return new Animation(parent, frames);
     }
 });
