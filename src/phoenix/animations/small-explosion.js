@@ -27,6 +27,9 @@ DefineModule('phoenix/animations/small-explosion', function (require) {
 
 
     return function () {
-        return new Animation(frames);
+        return new Animation({
+            frames: frames,
+            loop: true
+        });
     }
 });

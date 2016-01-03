@@ -1,11 +1,13 @@
 DefineModule('models/animation', function (require) {
     return DefineClass({
-        constructor: function (frames) {
-            this.frames = frames;
-            this.currentFrame = 0;
+        constructor: function (options) {
+            this.frames = options.frames;
+            this.millisPerFrame = options.millisPerFrame || 100;
+            this.currentFrame = options.offsetIndex || 0;
+            this.loop = options.loop;
 
-            this.width = frames[ 0 ].length;
-            this.height = frames[ 0 ].length;
+            this.width = this.frames[ 0 ].length;
+            this.height = this.frames[ 0 ].length;
         },
         renderToFrame: function (x, y, frame) {
             this.frames[ this.currentFrame ].renderToFrame(x, y, frame);
