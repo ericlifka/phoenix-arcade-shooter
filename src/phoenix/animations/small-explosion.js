@@ -19,41 +19,42 @@ DefineModule('phoenix/animations/small-explosion', function (require) {
 
         new Sprite([
             [n, n, n, n, n],
-            [n, n, o, n, n],
-            [n, o, o, o, n],
+            [n, n, r, n, n],
+            [n, y, y, o, n],
             [n, n, o, n, n],
             [n, n, n, n, n]
         ]),
 
         new Sprite([
-            [n, n, y, n, n],
+            [y, n, r, n, n],
             [n, y, y, y, n],
-            [y, y, y, y, y],
-            [n, y, y, y, n],
-            [n, n, y, n, n]
+            [o, y, n, y, o],
+            [n, o, r, n, n],
+            [n, n, y, y, n]
         ]),
 
         new Sprite([
-            [n, n, y, n, n],
-            [n, y, y, y, n],
-            [y, y, n, y, y],
-            [n, y, y, y, n],
-            [n, n, y, n, n]
+            [y, n, y, n, n],
+            [n, n, n, n, y],
+            [n, n, n, n, y],
+            [n, y, n, n, n],
+            [n, n, y, y, n]
         ]),
 
         new Sprite([
-            [n, n, y, n, n],
-            [n, y, n, y, n],
-            [y, n, n, n, y],
-            [n, y, n, y, n],
-            [n, n, y, n, n]
+            [n, n, n, y, n],
+            [n, y, n, n, n],
+            [n, n, n, n, n],
+            [n, n, n, n, n],
+            [y, n, n, n, y]
         ])
     ];
 
 
     return function () {
         return new Animation({
-            frames: frames
+            frames: frames,
+            millisPerFrame: 50
         });
     }
 });
