@@ -11,8 +11,8 @@ DefineModule('models/animation', function (require) {
             this.width = frames[ 0 ].length;
             this.height = frames[ 0 ].length;
         },
-        renderToFrame: function (x, y, frame) {
-
+        renderToFrame: function (frame) {
+            this.frames[ 0 ].renderToFrame(0, 0, frame);
         }
     });
 });
