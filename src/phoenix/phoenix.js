@@ -30,7 +30,7 @@ DefineModule('phoenix/game', function (require) {
         },
         checkCollisions: function () {
             var physicalEntities = this.children.filter(function (child) {
-                return child.position && child.sprite;
+                return child.position && child.sprite && !child.exploding;
             });
 
             var collisions = [ ];
