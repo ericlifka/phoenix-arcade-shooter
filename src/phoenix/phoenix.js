@@ -33,20 +33,21 @@ DefineModule('phoenix/game', function (require) {
                 return child.position && child.sprite && !child.exploding;
             });
 
-            var collisions = [ ];
-            physicalEntities.forEach(function (entity) {
-                physicalEntities.forEach(function (otherEntity) {
-                    if (entity === otherEntity) {
-                        return;
-                    }
+            var collisionPairs = [ ];
 
-                    if (Collisions.boxCollision(entity, otherEntity)) {
-                        collisions.push([entity, otherEntity]);
-                    }
-                });
-            });
+            for (var i = 0; i < physicalEntities.length - 1; i++) {
+                var outer = physicalEntities[ i ];
 
-            collisions.forEach(function (entityPair) {
+                for (var j = i + 1; j < physicalEntities.length; j++) {
+                    var inner = physicalEntities[ j ];
+
+                    if (Collisions.boxCollision(outer, inner)) {
+                        collisionPairs.push([outer, inner]);
+                    }
+                }
+            }
+
+            collisionPairs.forEach(function (entityPair) {
                 var a = entityPair[ 0 ];
                 var b = entityPair[ 1 ];
 
