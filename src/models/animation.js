@@ -8,7 +8,12 @@ DefineModule('models/animation', function (require) {
             this.height = frames[ 0 ].length;
         },
         renderToFrame: function (x, y, frame) {
-            this.frames[ 0 ].renderToFrame(x, y, frame);
+            this.frames[ this.currentFrame ].renderToFrame(x, y, frame);
+
+            this.currentFrame += 1;
+            if (this.currentFrame >= this.frames.length) {
+                this.currentFrame = 0;
+            }
         }
     });
 });
