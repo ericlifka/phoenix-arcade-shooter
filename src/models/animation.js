@@ -11,18 +11,27 @@ DefineModule('models/animation', function (require) {
             this.millisEllapsedOnFrame = 0;
         },
         update: function (dtime) {
+            if (this.finished) return;
+
             this.millisEllapsedOnFrame += dtime;
 
             if (this.millisEllapsedOnFrame >= this.millisPerFrame) {
                 this.millisEllapsedOnFrame -= this.millisPerFrame;
-
                 this.currentFrame += 1;
+
                 if (this.currentFrame >= this.frames.length) {
-                    this.currentFrame = 0;
+                    if (this.loop) {
+                        this.currentFrame = 0;
+                    }
+                    else {
+                        this.finished = true;
+                    }
                 }
             }
         },
         renderToFrame: function (x, y, frame) {
+            if (this.finished) return;
+
             this.frames[ this.currentFrame ].renderToFrame(x, y, frame);
         }
     });
