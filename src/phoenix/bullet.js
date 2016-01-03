@@ -1,7 +1,7 @@
 DefineModule('phoenix/bullet', function (require) {
     var GameObject = require('models/game-object');
     var bulletSprite = require('phoenix/sprites/bullet');
-    var smallExplosion = require('phoenix/sprites/small-explosion');
+    var smallExplosion = require('phoenix/animations/small-explosion');
 
     return DefineClass(GameObject, {
         constructor: function (parent, position, velocity, acceleration) {
