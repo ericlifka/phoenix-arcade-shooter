@@ -1,14 +1,26 @@
 DefineModule('helpers/collisions', function (require) {
 
+    var DUMMY_CELL = { x: -1, y: -1, color: null };
     var CollisionDetectionFrame = DefineClass({
         collisionDetected: false,
 
         constructor: function () {
-
+            this.cells = [ ];
         },
 
-        cellAt: function () {
-            return { };
+        cellAt: function (x, y) {
+            if (!this.cells[ x ]) {
+                this.cells[ x ] = [ ];
+            }
+
+            if (!this.cells[ x ][ y ]) {
+                this.cells[ x ][ y ] = true;
+            }
+            else {
+                this.collisionDetected = true;
+            }
+
+            return DUMMY_CELL;
         }
     });
 
