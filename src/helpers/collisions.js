@@ -1,4 +1,17 @@
 DefineModule('helpers/collisions', function (require) {
+
+    var CollisionDetectionFrame = DefineClass({
+        collisionDetected: false,
+
+        constructor: function () {
+
+        },
+
+        cellAt: function () {
+            return { };
+        }
+    });
+
     function entityToBoundingBox(entity) {
         return {
             x1: entity.position.x,
@@ -21,7 +34,7 @@ DefineModule('helpers/collisions', function (require) {
             );
         },
         spriteCollision: function (entityA, entityB) {
-            var collisionFrame;
+            var collisionFrame = new CollisionDetectionFrame();
 
             entityA.renderToFrame(collisionFrame);
             entityB.renderToFrame(collisionFrame);
