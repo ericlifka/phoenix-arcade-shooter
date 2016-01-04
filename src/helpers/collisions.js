@@ -21,7 +21,12 @@ DefineModule('helpers/collisions', function (require) {
             );
         },
         spriteCollision: function (entityA, entityB) {
-            return true;
+            var collisionFrame;
+
+            entityA.renderToFrame(collisionFrame);
+            entityB.renderToFrame(collisionFrame);
+
+            return collisionFrame.collisionDetected;
         }
     };
 });
