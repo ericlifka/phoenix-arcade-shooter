@@ -9,15 +9,17 @@ DefineModule('helpers/collisions', function (require) {
         },
 
         cellAt: function (x, y) {
-            if (!this.cells[ x ]) {
-                this.cells[ x ] = [ ];
-            }
+            if (!this.collisionDetected) {
+                if (!this.cells[ x ]) {
+                    this.cells[ x ] = [ ];
+                }
 
-            if (!this.cells[ x ][ y ]) {
-                this.cells[ x ][ y ] = true;
-            }
-            else {
-                this.collisionDetected = true;
+                if (!this.cells[ x ][ y ]) {
+                    this.cells[ x ][ y ] = true;
+                }
+                else {
+                    this.collisionDetected = true;
+                }
             }
 
             return DUMMY_CELL;
