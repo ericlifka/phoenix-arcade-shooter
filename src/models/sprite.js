@@ -18,6 +18,12 @@ DefineModule('models/sprite', function (require) {
                 }
             }
         },
+        update: function (dtime) {
+            /*
+            sprites ignore updates by default, but accept the event
+            so that the api signature of sprites and animations matches
+             */
+        },
         renderToFrame: function (x, y, frame) {
             this.iterateCells(function (cell, _x, _y) {
                 if (cell.color) {

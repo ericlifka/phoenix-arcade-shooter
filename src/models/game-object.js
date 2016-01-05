@@ -19,8 +19,7 @@ DefineModule('models/game-object', function (require) {
                 }
             });
 
-            if (this.sprite && typeof this.sprite.update === "function") {
-                // Animations need to recieve updates so they can account for time elapsed
+            if (this.sprite) {
                 this.sprite.update(dtime);
             }
 
