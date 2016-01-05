@@ -13,9 +13,17 @@ DefineModule('models/sprite-group', function (require) {
         },
 
         update: function (dtime) {
+            var finished = true;
+
             this.spriteDescriptors.forEach(function (descriptor) {
                 descriptor.sprite.update(dtime);
+
+                if (!descriptor.sprite.finished) {
+                    finished = false;
+                }
             });
+
+            this.finished = finished;
         },
 
         renderToFrame: function (x, y, frame) {

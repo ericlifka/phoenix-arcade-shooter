@@ -1,5 +1,6 @@
 DefineModule('models/animation', function (require) {
     return DefineClass({
+        finished: false,
         constructor: function (options) {
             this.frames = options.frames;
             this.millisPerFrame = options.millisPerFrame || 100;

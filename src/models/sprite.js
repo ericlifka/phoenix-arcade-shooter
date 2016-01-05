@@ -2,6 +2,7 @@ DefineModule('models/sprite', function (require) {
     var CellGrid = require('models/cell-grid');
 
     return DefineClass(CellGrid, {
+        finished: true,
         constructor: function Sprite(pixels) {
             this.width = pixels.length;
             this.height = pixels[ 0 ].length;
