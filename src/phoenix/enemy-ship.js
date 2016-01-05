@@ -11,6 +11,13 @@ DefineModule('phoenix/enemy-ship', function (require) {
             this.position = { x: 0, y: 0 };
             this.velocity = { x: 0, y: 0 };
         },
+        update: function () {
+            this.super('update', arguments);
+
+            if (this.exploding && this.sprite.finished) {
+                this.destroy();
+            }
+        },
         applyDamage: function (damage) {
             this.exploding = true;
             this.sprite = smallExplosion();
