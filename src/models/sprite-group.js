@@ -13,7 +13,13 @@ DefineModule('models/sprite-group', function (require) {
         },
 
         renderToFrame: function (x, y, frame) {
-
+            this.spriteDescriptors.forEach(function (descriptor) {
+                descriptor.sprite.renderToFrame(
+                    x + descriptor.x,
+                    y + descriptor.y,
+                    frame
+                );
+            });
         }
     });
 });
