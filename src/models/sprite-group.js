@@ -12,6 +12,14 @@ DefineModule('models/sprite-group', function (require) {
             }));
         },
 
+        update: function (dtime) {
+            this.spriteDescriptors.forEach(function (descriptor) {
+                if (typeof descriptor.sprite.update === "function") {
+                    descriptor.sprite.update(dtime);
+                }
+            });
+        },
+
         renderToFrame: function (x, y, frame) {
             this.spriteDescriptors.forEach(function (descriptor) {
                 descriptor.sprite.renderToFrame(
