@@ -4,7 +4,6 @@ DefineModule('phoenix/levels/level-01', function (require) {
     var MoveObjectToPoint = require('phoenix/scripts/move-object-to-point');
 
     return DefineClass(GameObject, {
-        speed: 10,
         constructor: function (parent, game) {
             this.super('constructor', arguments);
 
