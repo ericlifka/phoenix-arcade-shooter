@@ -1,7 +1,7 @@
 DefineModule('phoenix/enemy-ship', function (require) {
     var GameObject = require('models/game-object');
     var shipSprite = require('phoenix/sprites/arrow-ship');
-    var smallExplosion = require('phoenix/animations/small-explosion');
+    var mediumExplosion = require('phoenix/animations/medium-explosion');
 
     return DefineClass(GameObject, {
         constructor: function () {
@@ -20,7 +20,7 @@ DefineModule('phoenix/enemy-ship', function (require) {
         },
         applyDamage: function (damage) {
             this.exploding = true;
-            this.sprite = smallExplosion();
+            this.sprite = mediumExplosion();
 
             this.velocity.x = 0;
             this.velocity.y = 0;
