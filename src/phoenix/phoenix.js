@@ -4,6 +4,7 @@ DefineModule('phoenix/game', function (require) {
     var Bullet = require('phoenix/bullet');
     var PlayerShip = require('phoenix/player-controlled-ship');
     var Collisions = require('helpers/collisions');
+    var InputInterpretter = require('phoenix/input-interpretter');
 
     return DefineClass(GameObject, {
         FILL_COLOR: "#020031",
