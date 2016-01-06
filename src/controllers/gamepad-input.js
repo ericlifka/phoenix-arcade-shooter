@@ -33,7 +33,9 @@ DefineModule('controllers/gamepad-input', function (require) {
         },
         getInputState: function () {
             var gamepad = navigator.getGamepads()[ 0 ];
-            var gamepadState = { };
+            var gamepadState = {
+                INPUT_TYPE: "gamepad"
+            };
 
             if (gamepad && gamepad.connected) {
                 gamepad.buttons.forEach(function (button, index) {

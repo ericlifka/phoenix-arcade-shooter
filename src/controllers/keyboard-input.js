@@ -10,6 +10,7 @@ DefineModule('controllers/keyboard-input', function (require) {
 
     function newInputDescriptor() {
         return {
+            INPUT_TYPE: "keyboard",
             W: false, A: false, S: false, D: false,
             SPACE: false
         };
