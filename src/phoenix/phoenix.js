@@ -1,10 +1,10 @@
 DefineModule('phoenix/game', function (require) {
-    var GameObject = require('models/game-object');
-    var LevelManager = require('phoenix/level-manager');
     var Bullet = require('phoenix/bullet');
-    var PlayerShip = require('phoenix/player-controlled-ship');
     var Collisions = require('helpers/collisions');
+    var GameObject = require('models/game-object');
     var InputInterpretter = require('phoenix/input-interpretter');
+    var LevelManager = require('phoenix/level-manager');
+    var PlayerShip = require('phoenix/player-controlled-ship');
 
     return DefineClass(GameObject, {
         FILL_COLOR: "#020031",
