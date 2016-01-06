@@ -17,6 +17,8 @@ DefineModule('controllers/game', function (require) {
         },
         renderFrame: function (dtime) {
             var inputState = this.input.getInputState();
+            var gamepadState = this.gamepad.getInputState();
+
             var frame = this.renderer.newRenderFrame();
             frame.clear(this.fillColor);
 
