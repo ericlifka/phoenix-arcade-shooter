@@ -12,11 +12,15 @@ DefineModule('controllers/gamepad-input', function (require) {
             });
         },
         getInputState: function () {
-            var gamepads = Array.prototype.slice.call(navigator.getGamepads(), 0);
+            var gamepads = Array.prototype.slice.call(navigator.getGamepads());
             gamepads.forEach(function (gamepad) {
                 if (gamepad && gamepad.connected) {
 
-                    console.log(gamepad);
+                    gamepad.buttons.forEach(function (button, index) {
+                        if (button.pressed || button.value == 1.0) {
+                            console.log(index);
+                        }
+                    });
 
                 }
             });
