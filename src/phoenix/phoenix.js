@@ -13,6 +13,7 @@ DefineModule('phoenix/game', function (require) {
             this.width = gameDimensions.width;
             this.height = gameDimensions.height;
 
+            this.inputInterpretter = new InputInterpretter();
             this.levelManager = new LevelManager(this);
             this.player = new PlayerShip(this);
 
@@ -23,6 +24,11 @@ DefineModule('phoenix/game', function (require) {
         },
         spawnBullet: function (position, velocity, acceleration) {
             this.addChild(new Bullet(this, position, velocity, acceleration));
+        },
+        processInput: function (rawInput) {
+            var input = this.inputInterpretter.interpret(rawInput);
+
+            this.super('processInput', [ input ]);
         },
         update: function (dtime) {
             this.super('update', arguments);
