@@ -1,9 +1,12 @@
 DefineModule('controllers/game', function (require) {
+    var GamepadController = require('controllers/gamepad-input');
+
     return DefineClass({
         constructor: function GameController(injections) {
             this.renderer = injections.renderer;
             this.runLoop = injections.runLoop;
             this.input = injections.input;
+            this.gamepad = new GamepadController();
             this.model = injections.model;
 
             this.fillColor = this.model.FILL_COLOR || "white";
