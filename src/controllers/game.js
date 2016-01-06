@@ -3,25 +3,27 @@ DefineModule('controllers/game', function (require) {
         constructor: function GameController(injections) {
             this.renderer = injections.renderer;
             this.runLoop = injections.runLoop;
-            this.input = injections.input;
+            this.inputSources = injections.inputSources;
             this.model = injections.model;
 
-            this.fillColor = this.model.FILL_COLOR || "white";
-            this.renderer.setFillColor(this.fillColor);
-
+            this.renderer.setFillColor(this.model.FILL_COLOR || "white");
             this.runLoop.addCallback(this.renderFrame.bind(this));
             this.runLoop.start();
         },
         renderFrame: function (dtime) {
-            var inputState = this.input.getInputState();
-            var frame = this.renderer.newRenderFrame();
-            frame.clear(this.fillColor);
-
-            this.model.processInput(inputState);
+            this.model.processInput(this.getInputState());
             this.model.update(dtime);
-            this.model.renderToFrame(frame);
 
+            var frame = this.renderer.newRenderFrame();
+            frame.clear();
+
+            this.model.renderToFrame(frame);
             this.renderer.renderFrame(frame);
+        },
+        getInputState: function () {
+            return this.inputSources.map(function (inputSource) {
+                return inputSource.getInputState();
+            });
         }
     });
 });

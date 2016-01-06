@@ -40,7 +40,6 @@
         height: 50,
         pixelSize: 1,
         nextFrame: 0,
-        fillColor: "white",
 
         constructor: function Renderer(options) {
             options = options || {};
@@ -65,10 +64,9 @@
         },
         renderFrame: function () {
             var frame = this.frames[ this.nextFrame ];
-            var lastFrame = this.frames[ +!this.nextFrame ];
             var pixelSize = this.pixelSize;
-            var fillColor = this.fillColor;
             var ctx = this.canvasDrawContext;
+            var fillColor = frame.fillColor;
 
             ctx.fillStyle = fillColor;
             ctx.fillRect(0, 0, this.fullWidth, this.fullHeight);
@@ -86,7 +84,9 @@
             this.nextFrame = +!this.nextFrame; // switch the frames
         },
         setFillColor: function (fillColor) {
-            this.fillColor = fillColor;
+            this.frames.forEach(function (frame) {
+                frame.setFillColor(fillColor);
+            });
         }
     });
 });

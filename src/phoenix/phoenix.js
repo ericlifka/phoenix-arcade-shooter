@@ -1,9 +1,10 @@
 DefineModule('phoenix/game', function (require) {
-    var GameObject = require('models/game-object');
-    var LevelManager = require('phoenix/level-manager');
     var Bullet = require('phoenix/bullet');
-    var PlayerShip = require('phoenix/player-controlled-ship');
     var Collisions = require('helpers/collisions');
+    var GameObject = require('models/game-object');
+    var InputInterpretter = require('phoenix/input-interpretter');
+    var LevelManager = require('phoenix/level-manager');
+    var PlayerShip = require('phoenix/player-controlled-ship');
 
     return DefineClass(GameObject, {
         FILL_COLOR: "#020031",
@@ -13,6 +14,7 @@ DefineModule('phoenix/game', function (require) {
             this.width = gameDimensions.width;
             this.height = gameDimensions.height;
 
+            this.inputInterpretter = new InputInterpretter();
             this.levelManager = new LevelManager(this);
             this.player = new PlayerShip(this);
 
@@ -23,6 +25,11 @@ DefineModule('phoenix/game', function (require) {
         },
         spawnBullet: function (position, velocity, acceleration) {
             this.addChild(new Bullet(this, position, velocity, acceleration));
+        },
+        processInput: function (rawInput) {
+            var input = this.inputInterpretter.interpret(rawInput);
+
+            this.super('processInput', [ input ]);
         },
         update: function (dtime) {
             this.super('update', arguments);
