@@ -37,10 +37,7 @@ DefineModule('controllers/gamepad-input', function (require) {
 
             if (gamepad && gamepad.connected) {
                 gamepad.buttons.forEach(function (button, index) {
-                    if (button.pressed) {
-                        console.log(BUTTON_MAP[ index ], button.value);
-                        
-                    }
+                    buttonState[ BUTTON_MAP[ index ] ] = button.pressed;
                 });
             }
         }
