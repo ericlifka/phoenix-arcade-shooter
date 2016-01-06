@@ -21,10 +21,16 @@ DefineModule('models/frame', function (require) {
                 }
             }
         },
-        clear: function (color) {
-            this.iterateCells(function (cell) {
-                cell.color = color;
-            });
+        clear: function () {
+            var color = this.fillColor;
+            if (color) {
+                this.iterateCells(function (cell) {
+                    cell.color = color;
+                });
+            }
+        },
+        setFillColor: function (fillColor) {
+            this.fillColor = fillColor;
         }
     });
 });

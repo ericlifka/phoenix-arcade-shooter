@@ -6,9 +6,7 @@ DefineModule('controllers/game', function (require) {
             this.inputSources = injections.inputSources;
             this.model = injections.model;
 
-            this.fillColor = this.model.FILL_COLOR || "white";
-            this.renderer.setFillColor(this.fillColor);
-
+            this.renderer.setFillColor(this.model.FILL_COLOR || "white");
             this.runLoop.addCallback(this.renderFrame.bind(this));
             this.runLoop.start();
         },
@@ -17,7 +15,7 @@ DefineModule('controllers/game', function (require) {
             this.model.update(dtime);
 
             var frame = this.renderer.newRenderFrame();
-            frame.clear(this.fillColor);
+            frame.clear();
 
             this.model.renderToFrame(frame);
             this.renderer.renderFrame(frame);
