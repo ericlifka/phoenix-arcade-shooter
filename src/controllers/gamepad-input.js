@@ -33,13 +33,19 @@ DefineModule('controllers/gamepad-input', function (require) {
         },
         getInputState: function () {
             var gamepad = navigator.getGamepads()[ 0 ];
-            var buttonState = { };
+            var gamepadState = { };
 
             if (gamepad && gamepad.connected) {
                 gamepad.buttons.forEach(function (button, index) {
-                    buttonState[ BUTTON_MAP[ index ] ] = button.pressed;
+                    gamepadState[ BUTTON_MAP[ index ] ] = button.pressed;
                 });
+                gamepadState['left-stick-x'] = gamepad.axes[ 0 ];
+                gamepadState['left-stick-y'] = gamepad.axes[ 1 ];
+                gamepadState['right-stick-x'] = gamepad.axes[ 2 ];
+                gamepadState['right-stick-y'] = gamepad.axes[ 3 ];
             }
+
+            return gamepadState;
         }
     });
 });
