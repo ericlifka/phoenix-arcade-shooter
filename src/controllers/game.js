@@ -13,15 +13,13 @@ DefineModule('controllers/game', function (require) {
             this.runLoop.start();
         },
         renderFrame: function (dtime) {
-            var inputState = this.getInputState();
+            this.model.processInput(this.getInputState());
+            this.model.update(dtime);
 
             var frame = this.renderer.newRenderFrame();
             frame.clear(this.fillColor);
 
-            this.model.processInput(inputState);
-            this.model.update(dtime);
             this.model.renderToFrame(frame);
-
             this.renderer.renderFrame(frame);
         },
         getInputState: function () {
