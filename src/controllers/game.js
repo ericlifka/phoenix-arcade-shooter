@@ -1,12 +1,9 @@
 DefineModule('controllers/game', function (require) {
-    var GamepadController = require('controllers/gamepad-input');
-
     return DefineClass({
         constructor: function GameController(injections) {
             this.renderer = injections.renderer;
             this.runLoop = injections.runLoop;
-            this.input = injections.input;
-            this.gamepad = new GamepadController();
+            this.inputSources = injections.inputSources;
             this.model = injections.model;
 
             this.fillColor = this.model.FILL_COLOR || "white";
@@ -16,8 +13,7 @@ DefineModule('controllers/game', function (require) {
             this.runLoop.start();
         },
         renderFrame: function (dtime) {
-            var inputState = this.input.getInputState();
-            var gamepadState = this.gamepad.getInputState();
+            var inputState = this.getInputState();
 
             var frame = this.renderer.newRenderFrame();
             frame.clear(this.fillColor);
@@ -27,6 +23,9 @@ DefineModule('controllers/game', function (require) {
             this.model.renderToFrame(frame);
 
             this.renderer.renderFrame(frame);
+        },
+        getInputState: function () {
+
         }
     });
 });
