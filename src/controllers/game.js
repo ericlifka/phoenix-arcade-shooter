@@ -21,7 +21,9 @@ DefineModule('controllers/game', function (require) {
             this.renderer.renderFrame(frame);
         },
         getInputState: function () {
-
+            return this.inputSources.map(function (inputSource) {
+                return inputSource.getInputState();
+            });
         }
     });
 });
