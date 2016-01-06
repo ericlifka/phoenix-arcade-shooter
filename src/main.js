@@ -11,7 +11,7 @@ DefineModule('main', function (require) {
     window.activeGame = new GameController({
         renderer: new CanvasRenderer(gameDimensions),
         inputSources: [
-            new KeyboardInputController(),
+            new KeyboardController(),
             new GamepadController()
         ],
         runLoop: new RunLoop(),
