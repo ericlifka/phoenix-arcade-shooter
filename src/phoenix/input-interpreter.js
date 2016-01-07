@@ -62,8 +62,8 @@ DefineModule('phoenix/input-interpreter', function (require) {
                 gameInput.fire = true;
             }
 
-            gameInput.movementVector.x += gamepad.axes[ 'left-stick-x' ];
-            gameInput.movementVector.y += gamepad.axes[ 'left-stick-y' ];
+            gameInput.movementVector.x += gamepad[ 'left-stick-x' ];
+            gameInput.movementVector.y += gamepad[ 'left-stick-y' ];
         }
     });
 });
