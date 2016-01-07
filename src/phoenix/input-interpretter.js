@@ -32,7 +32,7 @@ DefineModule('phoenix/input-interpretter', function (require) {
 
             normalizeVector(gameInput.movementVector);
 
-            return null;
+            return gameInput;
         },
 
         addKeyboardInput: function (keyboard, gameInput) {
