@@ -22,28 +22,10 @@ DefineModule('phoenix/player-controlled-ship', function (require) {
                 return;
             }
 
-            this.velocity.x = 0;
-            this.velocity.y = 0;
+            this.velocity.x = input.movementVector.x;
+            this.velocity.y = input.movementVector.y;
 
-            if (input.W) {
-                this.velocity.y -= this.SPEED;
-            }
-            if (input.A) {
-                this.velocity.x -= this.SPEED;
-            }
-            if (input.S) {
-                this.velocity.y += this.SPEED;
-            }
-            if (input.D) {
-                this.velocity.x += this.SPEED;
-            }
-
-            if (this.velocity.x && this.velocity.y) {
-                this.velocity.x *= .707;
-                this.velocity.y *= .707;
-            }
-
-            this.firing = input.SPACE;
+            this.firing = input.fire;
         },
         update: function (dtime) {
             this.super('update', arguments);
