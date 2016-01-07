@@ -8,6 +8,15 @@ DefineModule('phoenix/input-interpretter', function (require) {
         };
     }
 
+    function normalizeVector(vector) {
+        var x = vector.x;
+        var y = vector.y;
+        var length = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+
+        vector.x = x / length;
+        vector.y = y / length;
+    }
+
     return DefineClass({
         interpret: function (inputSources) {
             var gameInput = newInputDescriptor();
@@ -20,6 +29,8 @@ DefineModule('phoenix/input-interpretter', function (require) {
                         console.error("Unsupported input type: ", inputSource.INPUT_TYPE);
                 }
             }.bind(this));
+
+            normalizeVector(gameInput.movementVector);
 
             return null;
         },
