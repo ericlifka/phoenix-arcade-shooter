@@ -21,14 +21,14 @@ DefineModule('controllers/gamepad-input', function (require) {
 
     return DefineClass({
         constructor: function () {
-            window.addEventListener("gamepadconnected", function(e) {
+            window.addEventListener("gamepadconnected", function (e) {
                 console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
-                e.gamepad.index, e.gamepad.id,
-                e.gamepad.buttons.length, e.gamepad.axes.length);
+                    e.gamepad.index, e.gamepad.id,
+                    e.gamepad.buttons.length, e.gamepad.axes.length);
             });
-            window.addEventListener("gamepaddisconnected", function(e) {
+            window.addEventListener("gamepaddisconnected", function (e) {
                 console.log("Gamepad disconnected from index %d: %s",
-                e.gamepad.index, e.gamepad.id);
+                    e.gamepad.index, e.gamepad.id);
             });
         },
         getInputState: function () {
@@ -41,10 +41,10 @@ DefineModule('controllers/gamepad-input', function (require) {
                 gamepad.buttons.forEach(function (button, index) {
                     gamepadState[ BUTTON_MAP[ index ] ] = button.pressed;
                 });
-                gamepadState['left-stick-x'] = gamepad.axes[ 0 ];
-                gamepadState['left-stick-y'] = gamepad.axes[ 1 ];
-                gamepadState['right-stick-x'] = gamepad.axes[ 2 ];
-                gamepadState['right-stick-y'] = gamepad.axes[ 3 ];
+                gamepadState[ 'left-stick-x' ] = gamepad.axes[ 0 ];
+                gamepadState[ 'left-stick-y' ] = gamepad.axes[ 1 ];
+                gamepadState[ 'right-stick-x' ] = gamepad.axes[ 2 ];
+                gamepadState[ 'right-stick-y' ] = gamepad.axes[ 3 ];
             }
 
             return gamepadState;
