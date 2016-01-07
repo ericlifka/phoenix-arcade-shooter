@@ -1,4 +1,4 @@
-DefineModule('phoenix/input-interpretter', function (require) {
+DefineModule('phoenix/input-interpreter', function (require) {
 
     function newInputDescriptor() {
         return {

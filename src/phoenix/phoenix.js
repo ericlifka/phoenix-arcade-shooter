@@ -2,7 +2,7 @@ DefineModule('phoenix/game', function (require) {
     var Bullet = require('phoenix/bullet');
     var Collisions = require('helpers/collisions');
     var GameObject = require('models/game-object');
-    var InputInterpretter = require('phoenix/input-interpretter');
+    var InputInterpreter = require('phoenix/input-interpreter');
     var LevelManager = require('phoenix/level-manager');
     var PlayerShip = require('phoenix/player-controlled-ship');
 
@@ -14,7 +14,7 @@ DefineModule('phoenix/game', function (require) {
             this.width = gameDimensions.width;
             this.height = gameDimensions.height;
 
-            this.inputInterpretter = new InputInterpretter();
+            this.inputInterpreter = new InputInterpreter();
             this.levelManager = new LevelManager(this);
             this.player = new PlayerShip(this);
 
@@ -27,7 +27,7 @@ DefineModule('phoenix/game', function (require) {
             this.addChild(new Bullet(this, position, velocity, acceleration));
         },
         processInput: function (rawInput) {
-            var input = this.inputInterpretter.interpret(rawInput);
+            var input = this.inputInterpreter.interpret(rawInput);
 
             this.super('processInput', [ input ]);
         },
