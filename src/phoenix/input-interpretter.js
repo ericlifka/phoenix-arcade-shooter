@@ -13,7 +13,7 @@ DefineModule('phoenix/input-interpretter', function (require) {
             var gameInput = newInputDescriptor();
 
             inputSources.forEach(function (inputSource) {
-                switch(inputSource.INPUT_TYPE) {
+                switch (inputSource.INPUT_TYPE) {
                     case 'gamepad': return this.addGamepadInput(inputSource, gameInput);
                     case 'keyboard': return this.addKeyboardInput(inputSource, gameInput);
                     default:
@@ -22,6 +22,32 @@ DefineModule('phoenix/input-interpretter', function (require) {
             }.bind(this));
 
             return null;
+        },
+
+        addKeyboardInput: function (keyboard, gameInput) {
+            if (keyboard[ 'SPACE' ]) {
+                gameInput.fire = true;
+            }
+
+            if (keyboard[ 'W' ]) {
+                gameInput.movementVector.y -= 1;
+            }
+
+            if (keyboard[ 'A' ]) {
+                gameInput.movementVector.x -= 1;
+            }
+
+            if (keyboard[ 'S' ]) {
+                gameInput.movementVector.y += 1;
+            }
+
+            if (keyboard[ 'D' ]) {
+                gameInput.movementVector.x += 1;
+            }
+        },
+
+        addGamepadInput: function (inputSource, gameInput) {
+
         }
     });
 });
