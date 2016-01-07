@@ -10,7 +10,6 @@ DefineModule('controllers/keyboard-input', function (require) {
 
     function newInputDescriptor() {
         return {
-            INPUT_TYPE: "keyboard",
             W: false, A: false, S: false, D: false,
             SPACE: false
         };
@@ -24,6 +23,8 @@ DefineModule('controllers/keyboard-input', function (require) {
     return DefineClass({
         constructor: function () {
             this.inputState = newInputDescriptor();
+            this.inputState.INPUT_TYPE = "keyboard";
+
             this.clearAfterNext = newInputDescriptor();
 
             document.body.addEventListener('keydown', function (event) {
