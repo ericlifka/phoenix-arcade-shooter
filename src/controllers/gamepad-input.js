@@ -19,6 +19,21 @@ DefineModule('controllers/gamepad-input', function (require) {
         15: 'd-pad-right'
     };
 
+    function gamepadDescriptor() {
+        var descriptor = { INPUT_TYPE: 'gamepad' };
+
+        Object.keys(BUTTON_MAP).forEach(function (key) {
+            descriptor[ BUTTON_MAP[ key ] ] = false;
+        });
+
+        descriptor[ 'left-stick-x' ] = 0;
+        descriptor[ 'left-stick-y' ] = 0;
+        descriptor[ 'right-stick-x' ] = 0;
+        descriptor[ 'right-stick-y' ] = 0;
+
+        return descriptor;
+    }
+
     return DefineClass({
         constructor: function () {
             window.addEventListener("gamepadconnected", function (e) {
@@ -33,9 +48,7 @@ DefineModule('controllers/gamepad-input', function (require) {
         },
         getInputState: function () {
             var gamepad = navigator.getGamepads()[ 0 ];
-            var gamepadState = {
-                INPUT_TYPE: "gamepad"
-            };
+            var gamepadState = gamepadDescriptor();
 
             if (gamepad && gamepad.connected) {
                 gamepad.buttons.forEach(function (button, index) {
