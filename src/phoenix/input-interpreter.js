@@ -66,6 +66,19 @@ DefineModule('phoenix/input-interpreter', function (require) {
 
             gameInput.movementVector.x += gamepad[ 'left-stick-x' ];
             gameInput.movementVector.y += gamepad[ 'left-stick-y' ];
+
+            if (gamepad[ 'd-pad-up' ]) {
+                gameInput.movementVector.y -= 1;
+            }
+            if (gamepad[ 'd-pad-left' ]) {
+                gameInput.movementVector.x -= 1;
+            }
+            if (gamepad[ 'd-pad-down' ]) {
+                gameInput.movementVector.y += 1;
+            }
+            if (gamepad[ 'd-pad-right' ]) {
+                gameInput.movementVector.x += 1;
+            }
         }
     });
 });
