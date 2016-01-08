@@ -34,6 +34,10 @@ DefineModule('controllers/gamepad-input', function (require) {
         return descriptor;
     }
 
+    function normalize(axisTilt) {
+        return Math.round(axisTilt * 10) / 10;
+    }
+
     return DefineClass({
         constructor: function () {
             window.addEventListener("gamepadconnected", function (e) {
@@ -54,10 +58,11 @@ DefineModule('controllers/gamepad-input', function (require) {
                 gamepad.buttons.forEach(function (button, index) {
                     gamepadState[ BUTTON_MAP[ index ] ] = button.pressed;
                 });
-                gamepadState[ 'left-stick-x' ] = gamepad.axes[ 0 ];
-                gamepadState[ 'left-stick-y' ] = gamepad.axes[ 1 ];
-                gamepadState[ 'right-stick-x' ] = gamepad.axes[ 2 ];
-                gamepadState[ 'right-stick-y' ] = gamepad.axes[ 3 ];
+                
+                gamepadState[ 'left-stick-x' ] = normalize(gamepad.axes[ 0 ]);
+                gamepadState[ 'left-stick-y' ] = normalize(gamepad.axes[ 1 ]);
+                gamepadState[ 'right-stick-x' ] = normalize(gamepad.axes[ 2 ]);
+                gamepadState[ 'right-stick-y' ] = normalize(gamepad.axes[ 3 ]);
             }
 
             return gamepadState;
