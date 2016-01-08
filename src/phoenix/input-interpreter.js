@@ -13,7 +13,7 @@ DefineModule('phoenix/input-interpreter', function (require) {
         var y = vector.y;
         var length = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 
-        if (length !== 0) {
+        if (length > 1) {
             vector.x = x / length;
             vector.y = y / length;
         }
