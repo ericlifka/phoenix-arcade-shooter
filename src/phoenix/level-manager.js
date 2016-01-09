@@ -25,6 +25,13 @@ DefineModule('phoenix/level-manager', function (require) {
                 script.start();
             });
         },
+        update: function () {
+            this.super('update', arguments);
+
+            if (this.currentLevel.checkIfLevelComplete()) {
+                /* clear level and stuff */
+            }
+        },
         signalScriptFinished: function (script) {
             script.active = false;
             this.removeChild(script);

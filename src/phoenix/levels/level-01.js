@@ -31,6 +31,9 @@ DefineModule('phoenix/levels/level-01', function (require) {
             this.children.forEach(function (script) {
                 script.start();
             });
+        },
+        checkIfLevelComplete: function () {
+
         }
     });
 });
