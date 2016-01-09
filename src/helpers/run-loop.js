@@ -6,12 +6,17 @@ DefineModule('helpers/run-loop', function (require) {
         if (!fpsCounterDOM) {
             fpsCounterDOM = document.createElement('div');
             fpsCounterDOM.classList.add('fps-counter');
+            fpsCounterDOM.oldfps = 0;
             document.body.appendChild(fpsCounterDOM);
         }
 
-        var fps = Math.floor(1000 / dtime * 10) / 10 + "";
-        var display = fps + (fps.length <= 2 ? ".0" : "") + " fps";
-        fpsCounterDOM.innerHTML = display;
+        var fps = Math.floor(1000 / dtime * 10) / 10;
+        if (Math.abs(fps - fpsCounterDOM.oldfps) > .2) {
+            fpsCounterDOM.oldfps = fps;
+            fps = fps + "";
+            fps += (fps.length <= 2 ? ".0" : "") + " fps";
+            fpsCounterDOM.innerHTML = fps;
+        }
     }
 
     function now() {
