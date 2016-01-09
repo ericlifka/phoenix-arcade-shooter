@@ -9,12 +9,22 @@ DefineModule('helpers/run-loop', function (require) {
         return (new Date()).valueOf();
     }
 
+    function defaultFrameTimeArray() {
+        var frameTimes = [ ];
+
+        for (var i = 0; i < 100; i++) {
+            frameTimes.push(20);
+        }
+        frameTimes.totalTime = 20 * 100;
+
+        return frameTimes;
+    }
+
     return DefineClass({
         constructor: function (callback) {
             this.callback = callback || function () {};
 
-            this.previousFrameTimes = [];
-            this.runningFrameTotal = 0;
+            this.previousFrameTimes = defaultFrameTimeArray();
             this.active = false;
             this.lastFrameTime = now();
             this.boundFrameHandler = this.frameHandler.bind(this);
@@ -50,9 +60,9 @@ DefineModule('helpers/run-loop', function (require) {
         },
         updateFPScounter: function (dtime) {
             this.previousFrameTimes.push(dtime);
-            this.runningFrameTotal += dtime;
+            this.previousFrameTimes.totalTime += dtime;
 
-            updateFPScounter(this.runningFrameTotal / this.previousFrameTimes.length);
+            updateFPScounter(this.previousFrameTimes.totalTime / this.previousFrameTimes.length);
         }
     });
 });
