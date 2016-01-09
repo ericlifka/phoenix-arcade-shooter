@@ -18,7 +18,7 @@ DefineModule('helpers/run-loop', function (require) {
         frameTimes.totalTime = 20 * 100;
 
         frameTimes.push = function (ftime) {
-            var overflow = this.pop();
+            var overflow = this.shift();
             this.totalTime += ftime - overflow;
             return Array.prototype.push.call(this, ftime);
         };
