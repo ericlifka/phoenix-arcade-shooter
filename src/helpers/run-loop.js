@@ -13,6 +13,8 @@ DefineModule('helpers/run-loop', function (require) {
         constructor: function (callback) {
             this.callback = callback || function () {};
 
+            this.previousFrameTimes = [];
+            this.runningFrameTotal = 0;
             this.active = false;
             this.lastFrameTime = now();
             this.boundFrameHandler = this.frameHandler.bind(this);
@@ -24,7 +26,7 @@ DefineModule('helpers/run-loop', function (require) {
             var dtime = currentTime - this.lastFrameTime;
 
             this.lastFrameTime = currentTime;
-            updateFPScounter(dtime);
+            this.updateFPScounter(dtime);
 
             try {
                 this.callback(dtime);
@@ -45,6 +47,12 @@ DefineModule('helpers/run-loop', function (require) {
         },
         addCallback: function (callback) {
             this.callback = callback;
+        },
+        updateFPScounter: function (dtime) {
+            this.previousFrameTimes.push(dtime);
+            this.runningFrameTotal += dtime;
+
+            updateFPScounter(this.runningFrameTotal / this.previousFrameTimes.length);
         }
     });
 });
