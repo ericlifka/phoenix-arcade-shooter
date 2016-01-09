@@ -9,7 +9,7 @@ DefineModule('helpers/run-loop', function (require) {
         return (new Date()).valueOf();
     }
 
-    function defaultFrameTimeArray() {
+    function fpsTracker() {
         var frameTimes = [ ];
 
         for (var i = 0; i < 100; i++) {
@@ -33,7 +33,7 @@ DefineModule('helpers/run-loop', function (require) {
         constructor: function (callback) {
             this.callback = callback || function () {};
 
-            this.previousFrameTimes = defaultFrameTimeArray();
+            this.fpsTracker = fpsTracker();
             this.active = false;
             this.lastFrameTime = now();
             this.boundFrameHandler = this.frameHandler.bind(this);
@@ -68,9 +68,9 @@ DefineModule('helpers/run-loop', function (require) {
             this.callback = callback;
         },
         updateFPScounter: function (dtime) {
-            this.previousFrameTimes.push(dtime);
+            this.fpsTracker.push(dtime);
 
-            updateFPScounter(this.previousFrameTimes.average());
+            updateFPScounter(this.fpsTracker.average());
         }
     });
 });
