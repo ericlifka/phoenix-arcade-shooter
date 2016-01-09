@@ -4,23 +4,21 @@ DefineModule('phoenix/level-manager', function (require) {
     var Level_01 = require('phoenix/levels/level-01');
 
     return DefineClass(GameObject, {
-        levels: [
-            {
+        levels: [null, Level_01],
 
-            }
-        ],
         constructor: function (game) {
             this.super('constructor', arguments);
 
             this.game = game;
-            this.nextLevel = 0;
+            this.levelIndex = 1;
         },
-        startLevel: function () {
-            this.currentLevel = this.levels[ this.nextLevel ];
-            this.nextLevel++;
 
+        startLevel: function () {
+            var LevelClass = this.levels[ this.levelIndex ];
+            this.currentLevel = new LevelClass(this, this.game);
+
+            this.children.push(this.currentLevel);
             this.children.push(new FlyPlayerInFromBottom(this, this.game));
-            this.children.push(new Level_01(this, this.game));
 
             this.children.forEach(function (script) {
                 script.active = true;
