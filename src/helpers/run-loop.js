@@ -17,6 +17,14 @@ DefineModule('helpers/run-loop', function (require) {
         }
         frameTimes.totalTime = 20 * 100;
 
+        frameTimes.push = function (ftime) {
+            this.totalTime += ftime;
+            return Array.prototype.push.call(this, ftime);
+        };
+        frameTimes.average = function () {
+            return this.totalTime / this.length;
+        };
+
         return frameTimes;
     }
 
@@ -60,9 +68,8 @@ DefineModule('helpers/run-loop', function (require) {
         },
         updateFPScounter: function (dtime) {
             this.previousFrameTimes.push(dtime);
-            this.previousFrameTimes.totalTime += dtime;
 
-            updateFPScounter(this.previousFrameTimes.totalTime / this.previousFrameTimes.length);
+            updateFPScounter(this.previousFrameTimes.average());
         }
     });
 });
