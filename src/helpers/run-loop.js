@@ -1,8 +1,16 @@
 DefineModule('helpers/run-loop', function (require) {
 
+    var fpsCounterDOM = null;
+
     function updateFPScounter(dtime) {
-        var fps = 1000 / dtime;
-        console.log(fps);
+        if (!fpsCounterDOM) {
+            fpsCounterDOM = document.createElement('div');
+            fpsCounterDOM.classList.add('fps-counter');
+            document.body.appendChild(fpsCounterDOM);
+        }
+
+        var fps = (1000 / dtime);
+        fpsCounterDOM.innerHTML = fps;
     }
 
     function now() {
