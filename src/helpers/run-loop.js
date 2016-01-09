@@ -1,5 +1,10 @@
 DefineModule('helpers/run-loop', function (require) {
 
+    function updateFPScounter(dtime) {
+        var fps = 1000 / dtime;
+        console.log(fps);
+    }
+
     function now() {
         return (new Date()).valueOf();
     }
@@ -17,7 +22,9 @@ DefineModule('helpers/run-loop', function (require) {
 
             var currentTime = now();
             var dtime = currentTime - this.lastFrameTime;
+
             this.lastFrameTime = currentTime;
+            updateFPScounter(dtime);
 
             try {
                 this.callback(dtime);
