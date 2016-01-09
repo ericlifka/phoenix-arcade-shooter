@@ -9,8 +9,9 @@ DefineModule('helpers/run-loop', function (require) {
             document.body.appendChild(fpsCounterDOM);
         }
 
-        var fps = (1000 / dtime);
-        fpsCounterDOM.innerHTML = fps;
+        var fps = Math.floor(1000 / dtime * 10) / 10 + "";
+        var display = fps + (fps.length <= 2 ? ".0" : "") + " fps";
+        fpsCounterDOM.innerHTML = display;
     }
 
     function now() {
