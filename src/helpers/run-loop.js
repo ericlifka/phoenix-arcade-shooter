@@ -18,7 +18,8 @@ DefineModule('helpers/run-loop', function (require) {
         frameTimes.totalTime = 20 * 100;
 
         frameTimes.push = function (ftime) {
-            this.totalTime += ftime;
+            var overflow = this.pop();
+            this.totalTime += ftime - overflow;
             return Array.prototype.push.call(this, ftime);
         };
         frameTimes.average = function () {
