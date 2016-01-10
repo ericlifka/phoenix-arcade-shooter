@@ -21,7 +21,7 @@ DefineModule('phoenix/level-manager', function (require) {
             this.currentLevel.start();
 
             this.addChild(new TextDisplay(this, {
-                message: "bob"
+                message: "A"
             }));
         },
         update: function () {
