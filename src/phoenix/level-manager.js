@@ -22,10 +22,12 @@ DefineModule('phoenix/level-manager', function (require) {
         update: function () {
             this.super('update', arguments);
 
-            if (this.currentLevel.checkIfLevelComplete()) {
+            if (this.currentLevel && this.currentLevel.checkIfLevelComplete()) {
                 /* clear level and stuff */
                 this.currentLevel.cleanup();
                 this.removeChild(this.currentLevel);
+                this.currentLevel = null;
+                console.log('level finished');
             }
         }
     });
