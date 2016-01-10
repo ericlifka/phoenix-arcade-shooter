@@ -17,8 +17,8 @@ DefineModule('phoenix/level-manager', function (require) {
             var LevelClass = this.levels[ this.levelIndex ];
             this.currentLevel = new LevelClass(this, this.game);
 
-            this.children.push(this.currentLevel);
-            this.children.push(new FlyPlayerInFromBottom(this, this.game));
+            this.addChild(this.currentLevel);
+            this.addChild(new FlyPlayerInFromBottom(this, this.game));
 
             this.children.forEach(function (script) {
                 script.active = true;
