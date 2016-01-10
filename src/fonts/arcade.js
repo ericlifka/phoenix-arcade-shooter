@@ -1,13 +1,16 @@
 DefineModule('fonts/arcade', function (require) {
     var Sprite = require('models/sprite');
 
+    var b = "black";
+    var n = null;
+
     return {
         meta: {
             width: 7,
             height: 7,
             credit: "http://www.urbanfonts.com/fonts/Arcade.htm"
         },
-        A: new Sprite([ [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n]     ]),
+        A: new Sprite([ [n,n,b,b,b,n,n], [n,b,b,n,b,b,n], [b,b,n,n,n,b,b], [b,b,n,n,n,b,b], [b,b,b,b,b,b,b], [b,b,n,n,n,b,b], [b,b,n,n,n,b,b]     ]),
         B: new Sprite([ [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n]     ]),
         C: new Sprite([ [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n]     ]),
         D: new Sprite([ [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n]     ]),
