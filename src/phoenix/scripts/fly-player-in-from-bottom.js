@@ -2,8 +2,6 @@ DefineModule('phoenix/scripts/fly-player-in-from-bottom', function (require) {
     var GameObject = require('models/game-object');
 
     return DefineClass(GameObject, {
-        TIME_STEP: 100,
-        ELAPSED: 0,
         constructor: function (parent, game) {
             this.super('constructor', arguments);
 
