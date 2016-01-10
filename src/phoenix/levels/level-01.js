@@ -33,7 +33,11 @@ DefineModule('phoenix/levels/level-01', function (require) {
             });
         },
         checkIfLevelComplete: function () {
+            var remainingShips = this.ships.filter(function (ship) {
+                return !ship.destroyed;
+            });
 
+            return remainingShips.length === 0;
         }
     });
 });
