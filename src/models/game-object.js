@@ -31,6 +31,7 @@ DefineModule('models/game-object', function (require) {
             this.checkBoundaries();
         },
         checkBoundaries: function () {
+            /* a place to verify that objects are within the screen constraints */
         },
         renderToFrame: function (frame) {
             this.children.forEach(function (child) {
@@ -55,6 +56,9 @@ DefineModule('models/game-object', function (require) {
                     this.children.splice(index, 1);
                 }
             }
+        },
+        cleanup: function () {
+            /* a place to unload any children that need to be dealt with */
         },
         destroy: function () {
             if (this.parent && this.parent.removeChild) {

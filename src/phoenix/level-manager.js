@@ -30,6 +30,8 @@ DefineModule('phoenix/level-manager', function (require) {
 
             if (this.currentLevel.checkIfLevelComplete()) {
                 /* clear level and stuff */
+                this.currentLevel.cleanup();
+                this.removeChild(this.currentLevel);
             }
         },
         signalScriptFinished: function (script) {
