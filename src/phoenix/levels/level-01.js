@@ -1,5 +1,6 @@
 DefineModule('phoenix/levels/level-01', function (require) {
     var EnemyShip = require('phoenix/enemy-ship');
+    var FlyPlayerInFromBottom = require('phoenix/scripts/fly-player-in-from-bottom');
     var GameObject = require('models/game-object');
     var MoveObjectToPoint = require('phoenix/scripts/move-object-to-point');
 
@@ -15,12 +16,14 @@ DefineModule('phoenix/levels/level-01', function (require) {
                 ship.position.x = 10 * i;
                 ship.position.y = -20 * i;
 
-                this.addChild(new MoveObjectToPoint(game, ship, {
+                this.addChild(new MoveObjectToPoint(this, ship, {
                     x: ship.position.x,
                     y: 20
                 }, 2 + i * .5));
                 this.ships.push(ship);
             }
+
+            this.addChild(new FlyPlayerInFromBottom(this, this.game));
         },
         start: function () {
             var game = this.game;
