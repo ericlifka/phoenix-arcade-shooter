@@ -7,6 +7,12 @@ DefineModule('models/text-display', function (require) {
             this.super('constructor', arguments);
 
             this.message = options.message || "";
+        },
+
+        renderToFrame: function (frame) {
+            var sprite = ArcadeFont[ this.message[ 0 ] ];
+
+            sprite.renderToFrame(0, 0, frame);
         }
     });
 });
