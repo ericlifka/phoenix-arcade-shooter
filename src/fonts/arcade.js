@@ -19,7 +19,15 @@ DefineModule('fonts/arcade', function (require) {
             [n,w,w,w,w,w,w],
             [n,n,w,w,w,w,w]
         ]),
-        B: new Sprite([ [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n]     ]),
+        B: new Sprite([
+            [w,w,w,w,w,w,w],
+            [w,w,w,w,w,w,w],
+            [w,n,n,w,n,n,w],
+            [w,n,n,w,n,n,w],
+            [w,n,n,w,n,n,w],
+            [w,w,w,w,w,w,w],
+            [n,w,w,n,w,w,n]
+        ]),
         C: new Sprite([ [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n]     ]),
         D: new Sprite([ [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n]     ]),
         E: new Sprite([ [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n]     ]),
