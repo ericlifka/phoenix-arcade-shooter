@@ -6,13 +6,20 @@ DefineModule('models/text-display', function (require) {
         constructor: function (parent, options) {
             this.super('constructor', arguments);
 
-            this.message = options.message || "";
+            this.message = (options.message || "").split('');
         },
 
         renderToFrame: function (frame) {
-            var sprite = ArcadeFont[ this.message[ 0 ] ];
+            this.message.forEach(function (char, i) {
+                var sprite = ArcadeFont[ char ];
 
-            sprite.renderToFrame(0, 0, frame);
+                if (sprite) {
+                    sprite.renderToFrame(i * (ArcadeFont.meta.width + 1), 0, frame);
+                }
+                else {
+                    console.error("Tried to print an unsupported letter: ", char);
+                }
+            });
         }
     });
 });
