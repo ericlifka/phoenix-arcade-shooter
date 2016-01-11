@@ -10,7 +10,15 @@ DefineModule('fonts/arcade', function (require) {
             height: 7,
             credit: "http://www.urbanfonts.com/fonts/Arcade.htm"
         },
-        A: new Sprite([ [n,n,w,w,w,n,n], [n,w,w,n,w,w,n], [w,w,n,n,n,w,w], [w,w,n,n,n,w,w], [w,w,w,w,w,w,w], [w,w,n,n,n,w,w], [w,w,n,n,n,w,w]     ]),
+        A: new Sprite([
+            [n,n,w,w,w,w,w],
+            [n,w,w,w,w,w,w],
+            [w,w,n,n,w,n,n],
+            [w,n,n,n,w,n,n],
+            [w,w,n,n,w,n,n],
+            [n,w,w,w,w,w,w],
+            [n,n,w,w,w,w,w]
+        ]),
         B: new Sprite([ [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n]     ]),
         C: new Sprite([ [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n]     ]),
         D: new Sprite([ [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n], [n,n,n,n,n,n,n]     ]),
