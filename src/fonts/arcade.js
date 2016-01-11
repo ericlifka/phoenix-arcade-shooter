@@ -314,21 +314,13 @@ DefineModule('fonts/arcade', function (require) {
         ]),
         i: new Sprite([
             [w,n,w,w,w,w,w],
-            [w,n,w,w,w,w,w],
-            [n,n,n,n,n,n,n],
-            [n,n,n,n,n,n,n],
-            [n,n,n,n,n,n,n],
-            [n,n,n,n,n,n,n],
-            [n,n,n,n,n,n,n]
+            [w,n,w,w,w,w,w]
         ]),
         j: new Sprite([
             [n,n,n,n,n,n,w],
             [n,n,w,n,n,n,w],
             [w,n,w,w,w,w,w],
-            [w,n,w,w,w,w,n],
-            [n,n,n,n,n,n,n],
-            [n,n,n,n,n,n,n],
-            [n,n,n,n,n,n,n]
+            [w,n,w,w,w,w,n]
         ]),
         k: new Sprite([
             [w,w,w,w,w,w,w],
@@ -336,17 +328,11 @@ DefineModule('fonts/arcade', function (require) {
             [n,n,n,n,w,n,n],
             [n,n,n,w,w,w,n],
             [n,n,w,w,n,w,w],
-            [n,n,w,n,n,n,w],
-            [n,n,n,n,n,n,n]
+            [n,n,w,n,n,n,w]
         ]),
         l: new Sprite([
             [w,w,w,w,w,w,w],
-            [w,w,w,w,w,w,w],
-            [n,n,n,n,n,n,n],
-            [n,n,n,n,n,n,n],
-            [n,n,n,n,n,n,n],
-            [n,n,n,n,n,n,n],
-            [n,n,n,n,n,n,n]
+            [w,w,w,w,w,w,w]
         ]),
         m: new Sprite([
             [n,n,w,w,w,w,w],
@@ -363,8 +349,7 @@ DefineModule('fonts/arcade', function (require) {
             [n,n,w,n,n,n,n],
             [n,n,w,n,n,n,n],
             [n,n,w,w,w,w,w],
-            [n,n,n,w,w,w,w],
-            [n,n,n,n,n,n,n]
+            [n,n,n,w,w,w,w]
         ]),
         o: new Sprite([
             [n,n,n,w,w,w,n],
@@ -376,31 +361,29 @@ DefineModule('fonts/arcade', function (require) {
             [n,n,n,w,w,w,n]
         ]),
         p: new Sprite([
-            [w,w,w,w,w,w,w],
-            [w,w,w,w,w,w,w],
-            [w,n,n,n,w,n,n],
-            [w,n,n,n,w,n,n],
-            [w,n,n,n,w,n,n],
-            [w,w,w,w,w,n,n],
-            [n,w,w,w,n,n,n]
+            [n,n,w,w,w,w,w,w,w],
+            [n,n,w,w,w,w,w,w,w],
+            [n,n,w,n,n,n,w,n,n],
+            [n,n,w,n,n,n,w,n,n],
+            [n,n,w,n,n,n,w,n,n],
+            [n,n,w,w,w,w,w,n,n],
+            [n,n,n,w,w,w,n,n,n]
         ]),
         q: new Sprite([
-            [n,w,w,w,n,n,n],
-            [w,w,w,w,w,n,n],
-            [w,n,n,n,w,n,n],
-            [w,n,n,n,w,n,n],
-            [w,n,n,n,w,n,n],
-            [w,w,w,w,w,w,w],
-            [w,w,w,w,w,w,w]
+            [n,n,n,w,w,w,n,n,n],
+            [n,n,w,w,w,w,w,n,n],
+            [n,n,w,n,n,n,w,n,n],
+            [n,n,w,n,n,n,w,n,n],
+            [n,n,w,n,n,n,w,n,n],
+            [n,n,w,w,w,w,w,w,w],
+            [n,n,w,w,w,w,w,w,w]
         ]),
         r: new Sprite([
             [n,n,w,w,w,w,w],
             [n,n,w,w,w,w,w],
             [n,n,n,w,n,n,n],
             [n,n,w,n,n,n,n],
-            [n,n,w,n,n,n,n],
-            [n,n,n,n,n,n,n],
-            [n,n,n,n,n,n,n]
+            [n,n,w,n,n,n,n]
         ]),
         s: new Sprite([
             [n,n,n,w,n,n,n],
@@ -416,9 +399,7 @@ DefineModule('fonts/arcade', function (require) {
             [w,w,w,w,w,w,n],
             [w,w,w,w,w,w,w],
             [n,n,w,n,n,n,w],
-            [n,n,n,n,n,n,w],
-            [n,n,n,n,n,n,n],
-            [n,n,n,n,n,n,n]
+            [n,n,n,n,n,n,w]
         ]),
         u: new Sprite([
             [n,n,w,w,w,w,w],
@@ -457,13 +438,13 @@ DefineModule('fonts/arcade', function (require) {
             [n,n,w,n,n,n,w]
         ]),
         y: new Sprite([
-            [w,w,w,w,n,n,n],
-            [w,w,w,w,w,n,w],
-            [n,n,n,n,w,n,w],
-            [n,n,n,n,w,n,w],
-            [n,n,n,n,w,n,w],
-            [w,w,w,w,w,w,w],
-            [w,w,w,w,w,w,n]
+            [n,n,w,w,w,w,n,n,n],
+            [n,n,w,w,w,w,w,n,w],
+            [n,n,n,n,n,n,w,n,w],
+            [n,n,n,n,n,n,w,n,w],
+            [n,n,n,n,n,n,w,n,w],
+            [n,n,w,w,w,w,w,w,w],
+            [n,n,w,w,w,w,w,w,n]
         ]),
         z: new Sprite([
             [n,n,w,n,n,n,w],
