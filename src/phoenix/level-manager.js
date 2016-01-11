@@ -21,7 +21,12 @@ DefineModule('phoenix/level-manager', function (require) {
             this.currentLevel.start();
 
             this.addChild(new TextDisplay(this, {
-                message: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+                message: "ABCDEFGHIJKLMNOPQRSTUVWXY",
+                position: { x: 0, y: 0 }
+            }));
+            this.addChild(new TextDisplay(this, {
+                message: "Zabcdefghijklmnopqrstuvwxyz",
+                position: { x: 0, y: 10 }
             }));
         },
         update: function () {
