@@ -463,6 +463,95 @@ DefineModule('fonts/arcade', function (require) {
             [n,n,n,n,n,n,n],
             [n,n,n,n,n,n,n],
             [n,n,n,n,n,n,n]
-        ])
+        ]),
+        '0': new Sprite([
+            [n,w,w,w,w,w,n],
+            [w,w,w,w,w,w,w],
+            [w,n,n,n,n,n,w],
+            [w,n,n,n,n,n,w],
+            [w,w,w,w,w,w,w],
+            [n,w,w,w,w,w,n]
+        ]),
+        '1': new Sprite([
+            [n,n,n,n,n,n,w],
+            [n,w,n,n,n,n,w],
+            [w,w,w,w,w,w,w],
+            [w,w,w,w,w,w,w],
+            [n,n,n,n,n,n,w],
+            [n,n,n,n,n,n,w]
+        ]),
+        '2': new Sprite([
+            [n,w,n,n,n,w,w],
+            [w,w,n,n,w,w,w],
+            [w,n,n,w,w,n,w],
+            [w,n,n,w,n,n,w],
+            [w,n,w,w,n,n,w],
+            [w,w,w,n,n,n,w],
+            [n,w,n,n,n,n,w]
+        ]),
+        '3': new Sprite([
+            [n,w,n,n,n,w,n],
+            [w,w,n,n,n,w,w],
+            [w,n,n,n,n,n,w],
+            [w,n,n,w,n,n,w],
+            [w,n,n,w,n,n,w],
+            [w,w,w,w,w,w,w],
+            [n,w,w,n,w,w,n]
+        ]),
+        '4': new Sprite([
+            [n,n,n,w,w,n,n],
+            [n,n,w,w,w,n,n],
+            [n,w,w,n,w,n,n],
+            [w,w,n,n,w,n,n],
+            [w,w,w,w,w,w,w],
+            [w,w,w,w,w,w,w],
+            [n,n,n,n,w,n,n]
+        ]),
+        '5': new Sprite([
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n]
+        ]),
+        '6': new Sprite([
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n]
+        ]),
+        '7': new Sprite([
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n]
+        ]),
+        '8': new Sprite([
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n]
+        ]),
+        '9': new Sprite([
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n],
+            [n,n,n,n,n,n,n]
+        ]),
+
     };
 });

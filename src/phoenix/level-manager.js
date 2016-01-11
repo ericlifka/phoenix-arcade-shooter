@@ -25,11 +25,11 @@ DefineModule('phoenix/level-manager', function (require) {
                 position: { x: 0, y: 0 }
             }));
             this.addChild(new TextDisplay(this, {
-                message: "Zabcdefghijklmnopqrstuvwx",
+                message: "Zabcdefghijklmnopqrstuvwxyz",
                 position: { x: 0, y: 10 }
             }));
             this.addChild(new TextDisplay(this, {
-                message: "yz",
+                message: "0123456789",
                 position: { x: 0, y: 20 }
             }));
         },
