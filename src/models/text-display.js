@@ -1,5 +1,6 @@
 DefineModule('models/text-display', function (require) {
     var ArcadeFont = require('fonts/arcade');
+    var ArcadeSmallFont = require('fonts/arcade-small');
     var GameObject = require('models/game-object');
 
     return DefineClass(GameObject, {
@@ -14,7 +15,7 @@ DefineModule('models/text-display', function (require) {
 
             this.message = message;
             this.position = options.position;
-            this.font = ArcadeFont;
+            this.font = ArcadeSmallFont;
         },
 
         renderToFrame: function (frame) {

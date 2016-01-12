@@ -12,6 +12,17 @@ DefineModule('fonts/arcade-small', function (require) {
             letterSpacing: 1,
             credit: "me"
         },
+        A: new Sprite([
+            [n,w,w,w,w],
+            [w,n,w,n,n],
+            [n,w,w,w,w]
+        ]),
 
+
+        ' ': new Sprite([
+            [n,n,n,n,n],
+            [n,n,n,n,n],
+            [n,n,n,n,n]
+        ])
     };
 });
