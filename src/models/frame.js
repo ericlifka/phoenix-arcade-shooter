@@ -16,7 +16,8 @@ DefineModule('models/frame', function (require) {
                         y: y,
                         render_x: x * dimensions.pixelSize,
                         render_y: y * dimensions.pixelSize,
-                        color: "#000000"
+                        color: "#000000",
+                        index: -1
                     };
                 }
             }
@@ -26,6 +27,7 @@ DefineModule('models/frame', function (require) {
             if (color) {
                 this.iterateCells(function (cell) {
                     cell.color = color;
+                    cell.index = -1;
                 });
             }
         },

@@ -12,7 +12,7 @@ DefineModule('models/cell-grid', function (require) {
                 return this.cells[ x ][ y ];
             }
             else {
-                return { x: -1, y: -1, color: "#000000" };
+                return { x: -1, y: -1, color: "#000000", index: -1 };
             }
         }
     });
