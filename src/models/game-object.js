@@ -41,7 +41,7 @@ DefineModule('models/game-object', function (require) {
             });
 
             if (this.sprite && this.position) {
-                this.sprite.renderToFrame(Math.floor(this.position.x), Math.floor(this.position.y), frame);
+                this.sprite.renderToFrame(frame, Math.floor(this.position.x), Math.floor(this.position.y), this.index || 0);
             }
         },
         addChild: function (child) {

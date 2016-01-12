@@ -25,7 +25,9 @@ DefineModule('models/sprite', function (require) {
             so that the api signature of sprites and animations matches
              */
         },
-        renderToFrame: function (x, y, frame) {
+        renderToFrame: function (frame, x, y, index) {
+            index = index || 0;
+
             this.iterateCells(function (cell, _x, _y) {
                 if (cell.color) {
                     frame.cellAt(x + _x, y + _y).color = cell.color;

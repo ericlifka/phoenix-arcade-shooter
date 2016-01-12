@@ -28,7 +28,7 @@ DefineModule('models/text-display', function (require) {
                 line.forEach(function (char) {
                     var sprite = font[ char ];
                     if (sprite) {
-                        sprite.renderToFrame(offsetX, offsetY, frame);
+                        sprite.renderToFrame(frame, offsetX, offsetY, 10);
                         offsetX += sprite.width + font.meta.letterSpacing;
                     }
                     else {

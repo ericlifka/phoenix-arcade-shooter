@@ -26,12 +26,13 @@ DefineModule('models/sprite-group', function (require) {
             this.finished = finished;
         },
 
-        renderToFrame: function (x, y, frame) {
+        renderToFrame: function (frame, x, y, index) {
             this.spriteDescriptors.forEach(function (descriptor) {
                 descriptor.sprite.renderToFrame(
+                    frame,
                     x + descriptor.x,
                     y + descriptor.y,
-                    frame
+                    index
                 );
             });
         }

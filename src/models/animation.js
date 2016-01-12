@@ -30,10 +30,10 @@ DefineModule('models/animation', function (require) {
                 }
             }
         },
-        renderToFrame: function (x, y, frame) {
+        renderToFrame: function (frame, x, y, index) {
             if (this.finished) return;
 
-            this.frames[ this.currentFrame ].renderToFrame(x, y, frame);
+            this.frames[ this.currentFrame ].renderToFrame(frame, x, y, index);
         }
     });
 });
