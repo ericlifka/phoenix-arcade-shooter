@@ -65,7 +65,7 @@ DefineModule('fonts/arcade-small', function (require) {
         K: new Sprite([
             [w,w,w,w,w],
             [n,n,w,n,n],
-            [n,w,n,w,w]
+            [w,w,n,w,w]
         ]),
         L: new Sprite([
             [w,w,w,w,w],
@@ -98,6 +98,7 @@ DefineModule('fonts/arcade-small', function (require) {
         Q: new Sprite([
             [n,w,w,w,n],
             [w,n,n,n,w],
+            [w,n,n,w,w],
             [n,w,w,w,w]
         ]),
         R: new Sprite([
