@@ -28,7 +28,10 @@ DefineModule('phoenix/level-manager', function (require) {
                     "This is a test sentence.","THIS IS A TEST SENTENCE.",
                     "How readable is this text?","HOW READABLE IS THIS TEXT?"
                 ],
-                position: { x: 0, y: 0 }
+                position: { x: 0, y: 0 },
+                border: true,
+                padding: 5,
+                background: "black"
             }));
         },
         update: function () {

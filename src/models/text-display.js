@@ -16,6 +16,12 @@ DefineModule('models/text-display', function (require) {
             this.message = message;
             this.position = options.position;
             this.font = ArcadeSmallFont;
+            this.border = !!options.border;
+            this.padding = !!options.padding;
+            this.borderColor = options.borderColor || "white";
+            this.background = options.background || null;
+
+            this.createBackgroundSprite();
         },
 
         renderToFrame: function (frame) {
@@ -39,6 +45,39 @@ DefineModule('models/text-display', function (require) {
 
                 offsetY += font.meta.lineHeight;
             });
+        },
+
+        createBackgroundSprite: function () {
+            var spriteRows = [];
+            var dimensions = this.calculateMessageDimensions();
+
+            if (this.padding) {
+                dimensions.width += this.padding * 2;
+                dimensions.height += this.padding * 2;
+            }
+
+            if (this.border) {
+                dimensions.width += 2;
+                dimensions.width += 2;
+            }
+
+            for (var y = 0; y < dimensions.height; y++) {
+                var row = [ ];
+
+                for (var x = 0; x < dimensions.width; x++) {
+
+                    if (this.border && (x === 0 || y === 0)) {
+                        row.push(this.borderColor);
+                    } else {
+                        row.push(this.background);
+                    }
+
+                }
+
+                spriteRows.push(row);
+            }
+
+            
         }
     });
 });
