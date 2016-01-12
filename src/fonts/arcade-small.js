@@ -8,7 +8,7 @@ DefineModule('fonts/arcade-small', function (require) {
         meta: {
             width: 3,
             height: 5,
-            lineHeight: 7,
+            lineHeight: 8,
             letterSpacing: 1,
             credit: "me"
         },
@@ -265,6 +265,56 @@ DefineModule('fonts/arcade-small', function (require) {
             [n,n,w,n,n],
             [n,n,w,w,w],
             [n,n,n,n,w]
+        ]),
+        '0': new Sprite([
+            [w,w,w,w,w],
+            [w,n,n,n,w],
+            [w,w,w,w,w]
+        ]),
+        '1': new Sprite([
+            [w,n,n,n,w],
+            [w,w,w,w,w],
+            [n,n,n,n,w]
+        ]),
+        '2': new Sprite([
+            [w,n,w,w,w],
+            [w,n,w,n,w],
+            [n,w,w,n,w]
+        ]),
+        '3': new Sprite([
+            [w,n,w,n,w],
+            [w,n,w,n,w],
+            [n,w,n,w,n]
+        ]),
+        '4': new Sprite([
+            [w,w,n,n,n],
+            [n,n,w,n,n],
+            [w,w,w,w,w]
+        ]),
+        '5': new Sprite([
+            [w,w,w,n,w],
+            [w,n,w,n,w],
+            [w,n,n,w,n]
+        ]),
+        '6': new Sprite([
+            [n,w,w,w,n],
+            [w,n,w,n,w],
+            [w,n,n,w,n]
+        ]),
+        '7': new Sprite([
+            [w,n,n,w,w],
+            [w,n,w,n,n],
+            [w,w,n,n,n]
+        ]),
+        '8': new Sprite([
+            [n,w,n,w,n],
+            [w,n,w,n,w],
+            [n,w,n,w,n]
+        ]),
+        '9': new Sprite([
+            [n,w,n,n,n],
+            [w,n,w,n,w],
+            [n,w,w,w,n]
         ]),
 
 
