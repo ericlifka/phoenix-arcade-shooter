@@ -15,7 +15,7 @@ DefineModule('models/text-display', function (require) {
 
             this.message = message;
             this.position = options.position;
-            this.font = ArcadeFont;
+            this.font = ArcadeSmallFont;
         },
 
         renderToFrame: function (frame) {

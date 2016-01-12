@@ -22,9 +22,9 @@ DefineModule('phoenix/level-manager', function (require) {
 
             this.addChild(new TextDisplay(this, {
                 message: [
-                    //"ABCDEFGHIJKLMNOPQRSTUVWXY",
-                    //"Zabcdefghijklmnopqrstuvwxyz",
-                    //"0123456789 !.,?"
+                    "ABCDEFGHIJKLMNOPQRSTUVWXY",
+                    "Zabcdefghijklmnopqrstuvwxyz",
+                    "0123456789 !.,?",
                     "This is a test sentence.","THIS IS A TEST SENTENCE.",
                     "How readable is this text?","HOW READABLE IS THIS TEXT?"
                 ],
