@@ -2,6 +2,7 @@ DefineModule('models/text-display', function (require) {
     var ArcadeFont = require('fonts/arcade');
     var ArcadeSmallFont = require('fonts/arcade-small');
     var GameObject = require('models/game-object');
+    var Sprite = require('models/sprite');
 
     return DefineClass(GameObject, {
         constructor: function (parent, options) {
@@ -25,6 +26,8 @@ DefineModule('models/text-display', function (require) {
         },
 
         renderToFrame: function (frame) {
+            this.super('renderToFrame', arguments);
+
             var font = this.font;
             var position = this.position;
             var offsetY = position.y;
@@ -77,7 +80,14 @@ DefineModule('models/text-display', function (require) {
                 spriteRows.push(row);
             }
 
-            
+            this.sprite = new Sprite(spriteRows);
+        },
+
+        calculateMessageDimensions: function () {
+            return {
+                width: 20,
+                height: 20
+            };
         }
     });
 });
