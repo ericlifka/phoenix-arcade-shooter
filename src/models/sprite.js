@@ -30,7 +30,10 @@ DefineModule('models/sprite', function (require) {
 
             this.iterateCells(function (cell, _x, _y) {
                 if (cell.color) {
-                    frame.cellAt(x + _x, y + _y).color = cell.color;
+                    var frameCell = frame.cellAt(x + _x, y + _y);
+                    if (index >= frameCell.index) {
+                        frameCell.color = cell.color;
+                    }
                 }
             });
         },
