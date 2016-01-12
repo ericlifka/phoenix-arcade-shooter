@@ -14,9 +14,11 @@ DefineModule('models/text-display', function (require) {
 
             this.message = message;
             this.position = options.position;
+            this.font = ArcadeFont;
         },
 
         renderToFrame: function (frame) {
+            var font = this.font;
             var position = this.position;
             var offsetY = position.y;
 
@@ -24,17 +26,17 @@ DefineModule('models/text-display', function (require) {
                 var offsetX = position.x;
 
                 line.forEach(function (char) {
-                    var sprite = ArcadeFont[ char ];
+                    var sprite = font[ char ];
                     if (sprite) {
                         sprite.renderToFrame(offsetX, offsetY, frame);
-                        offsetX += sprite.width + 1;
+                        offsetX += sprite.width + font.meta.letterSpacing;
                     }
                     else {
                         console.error("Tried to print an unsupported letter: '" + char + "'");
                     }
                 });
 
-                offsetY += ArcadeFont.meta.height + 4;
+                offsetY += font.meta.lineHeight;
             });
         }
     });

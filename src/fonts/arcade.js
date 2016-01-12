@@ -8,6 +8,8 @@ DefineModule('fonts/arcade', function (require) {
         meta: {
             width: 7,
             height: 7,
+            lineHeight: 11,
+            letterSpacing: 1,
             credit: "http://www.urbanfonts.com/fonts/Arcade.htm"
         },
         A: new Sprite([
