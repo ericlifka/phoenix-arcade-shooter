@@ -30,8 +30,8 @@ DefineModule('models/text-display', function (require) {
             var self = this;
             var width = 0;
             var height = 0;
-            var xOffset = 0;
-            var yOffset = 0;
+            var xOffset = this.position.x;
+            var yOffset = this.position.y;
             var lineWidths = [ ];
 
             if (this.padding) {
