@@ -21,18 +21,12 @@ DefineModule('phoenix/level-manager', function (require) {
             this.currentLevel.start();
 
             this.addChild(new TextDisplay(this, {
-                message: [
-                    "ABCDEFGHIJKLMNOPQRSTUVWXY",
-                    "Zabcdefghijklmnopqrstuvwxyz",
-                    "0123456789 !.,?",
-                    "This is a test sentence.","THIS IS A TEST SENTENCE.",
-                    "How readable is this text?","HOW READABLE IS THIS TEXT?"
-                ],
-                position: { x: 60, y: 40 },
+                message: "LEVEL 01",
+                position: { x: 55, y: 50 },
                 border: true,
-                padding: 5,
+                padding: 15,
                 background: this.game.FILL_COLOR,
-                font: "arcade-small"
+                font: "arcade"
             }));
         },
         update: function () {

@@ -18,7 +18,7 @@ DefineModule('models/text-display', function (require) {
             this.message = message;
             this.position = options.position;
             this.border = !!options.border;
-            this.padding = !!options.padding;
+            this.padding = options.padding || 0;
             this.borderColor = options.borderColor || "white";
             this.background = options.background || null;
             this.index = options.index || 10;
