@@ -109,10 +109,10 @@ DefineModule('models/text-display', function (require) {
         createBackgroundSprite: function (width, height) {
             var spriteRows = [];
 
-            for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
                 var row = [ ];
 
-                for (var x = 0; x < width; x++) {
+                for (var y = 0; y < height; y++) {
 
                     if (this.border && (x === 0 || y === 0)) {
                         row.push(this.borderColor);
