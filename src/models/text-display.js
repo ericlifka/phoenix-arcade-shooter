@@ -56,7 +56,7 @@ DefineModule('models/text-display', function (require) {
                     var sprite = self.font[ char ];
                     if (sprite) {
                         var entity = new GameObject(self);
-                        entity.sprite = sprite;
+                        entity.sprite = sprite.clone();
                         entity.index = self.index + 1;
                         entity.position = {
                             x: xLineOffset,
