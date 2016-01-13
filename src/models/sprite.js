@@ -1,15 +1,15 @@
 DefineModule('models/sprite', function (require) {
     var CellGrid = require('models/cell-grid');
 
-    return DefineClass(CellGrid, {
+    var Sprite = DefineClass(CellGrid, {
         finished: true,
         constructor: function Sprite(pixels) {
             this.width = pixels.length;
             this.height = pixels[ 0 ].length;
 
-            this.cells = [];
+            this.cells = [ ];
             for (var x = 0; x < this.width; x++) {
-                this.cells[ x ] = [];
+                this.cells[ x ] = [ ];
                 for (var y = 0; y < this.height; y++) {
                     this.cells[ x ][ y ] = {
                         x: x,
@@ -37,6 +37,17 @@ DefineModule('models/sprite', function (require) {
                     }
                 }
             });
+        },
+        clone: function () {
+            var colorGrid = [ ];
+            for (var x = 0; x < this.width; x++) {
+                colorGrid[ x ] = [ ];
+                for (var y = 0; y < this.height; y++) {
+                    colorGrid[ x ][ y ] = this.cells[ x ][ y ].color;
+                }
+            }
+
+            return new Sprite(colorGrid);
         },
         rotateLeft: function () {
             var width = this.width;
@@ -86,4 +97,6 @@ DefineModule('models/sprite', function (require) {
             return this;
         }
     });
+
+    return Sprite;
 });
