@@ -19,6 +19,13 @@ DefineModule('models/sprite', function (require) {
                 }
             }
         },
+        applyColor: function (color) {
+            this.iterateCells(function (cell) {
+                if (cell.color) {
+                    cell.color = color;
+                }
+            });
+        },
         update: function (dtime) {
             /*
             sprites ignore updates by default, but accept the event
