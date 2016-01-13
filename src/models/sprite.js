@@ -33,6 +33,7 @@ DefineModule('models/sprite', function (require) {
                     var frameCell = frame.cellAt(x + _x, y + _y);
                     if (index >= frameCell.index) {
                         frameCell.color = cell.color;
+                        frameCell.index = index;
                     }
                 }
             });

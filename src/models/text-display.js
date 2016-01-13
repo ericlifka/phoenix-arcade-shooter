@@ -21,6 +21,7 @@ DefineModule('models/text-display', function (require) {
             this.padding = !!options.padding;
             this.borderColor = options.borderColor || "white";
             this.background = options.background || null;
+            this.index = options.index || 10;
 
             this.populateSprites();
         },
