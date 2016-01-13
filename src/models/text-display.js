@@ -113,7 +113,8 @@ DefineModule('models/text-display', function (require) {
                 var row = [ ];
 
                 for (var y = 0; y < height; y++) {
-                    if (this.border && (x === 0 || y === 0)) {
+                    if (this.border &&
+                        (x === 0 || y === 0 || x === width-1 || y === height-1)) {
                         row.push(this.borderColor);
                     } else {
                         row.push(this.background);
