@@ -7,17 +7,17 @@ DefineModule('controllers/game', function (require) {
             this.model = injections.model;
 
             this.renderer.setFillColor(this.model.FILL_COLOR || "white");
-            this.runLoop.addCallback(this.renderFrame.bind(this));
+            this.runLoop.addCallback(this.processGameFrame.bind(this));
             this.runLoop.start();
         },
-        renderFrame: function (dtime) {
-            this.model.processInput(this.getInputState());
-            this.model.update(dtime);
-
+        processGameFrame: function (dtime) {
             var frame = this.renderer.newRenderFrame();
             frame.clear();
 
+            this.model.processInput(this.getInputState());
+            this.model.update(dtime);
             this.model.renderToFrame(frame);
+
             this.renderer.renderFrame(frame);
         },
         getInputState: function () {
