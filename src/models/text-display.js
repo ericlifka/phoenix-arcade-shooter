@@ -14,9 +14,9 @@ DefineModule('models/text-display', function (require) {
             }
             message = message.map(function (str) { return str.split(''); });
 
+            this.font = require("fonts/" + (options.font || "arcade-small"));
             this.message = message;
             this.position = options.position;
-            this.font = ArcadeSmallFont;
             this.border = !!options.border;
             this.padding = !!options.padding;
             this.borderColor = options.borderColor || "white";
