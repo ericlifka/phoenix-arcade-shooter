@@ -25,31 +25,6 @@ DefineModule('models/text-display', function (require) {
             this.populateSprites();
         },
 
-        //renderToFrame: function (frame) {
-        //    this.super('renderToFrame', arguments);
-        //
-        //    var font = this.font;
-        //    var position = this.position;
-        //    var offsetY = position.y;
-        //
-        //    this.message.forEach(function (line) {
-        //        var offsetX = position.x;
-        //
-        //        line.forEach(function (char) {
-        //            var sprite = font[ char ];
-        //            if (sprite) {
-        //                sprite.renderToFrame(frame, offsetX, offsetY, 10);
-        //                offsetX += sprite.width + font.meta.letterSpacing;
-        //            }
-        //            else {
-        //                console.error("Tried to print an unsupported letter: '" + char + "'");
-        //            }
-        //        });
-        //
-        //        offsetY += font.meta.lineHeight;
-        //    });
-        //},
-
         populateSprites: function () {
             var self = this;
             var width = 0;
