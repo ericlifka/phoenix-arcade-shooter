@@ -85,17 +85,10 @@ DefineModule('models/text-display', function (require) {
 
         createBackgroundSprite: function (width, height) {
             var spriteRows = [ ];
-
             for (var x = 0; x < width; x++) {
                 var row = [ ];
-
                 for (var y = 0; y < height; y++) {
-                    if (this.border &&
-                        (x === 0 || y === 0 || x === width-1 || y === height-1)) {
-                        row.push("white");
-                    } else {
-                        row.push(this.background);
-                    }
+                    row.push(this.background);
                 }
                 spriteRows.push(row);
             }
