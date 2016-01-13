@@ -1,4 +1,5 @@
 DefineModule('phoenix/levels/level-01', function (require) {
+    var Banner = require('phoenix/scripts/fadeout-banner');
     var EnemyShip = require('phoenix/enemy-ship');
     var FlyPlayerInFromBottom = require('phoenix/scripts/fly-player-in-from-bottom');
     var GameObject = require('models/game-object');
@@ -24,6 +25,7 @@ DefineModule('phoenix/levels/level-01', function (require) {
             }
 
             this.addChild(new FlyPlayerInFromBottom(this, this.game));
+            this.addChild(new Banner(this, "LEVEL 1", 2000));
         },
         start: function () {
             var game = this.game;
