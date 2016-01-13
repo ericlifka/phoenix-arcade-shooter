@@ -19,11 +19,11 @@ DefineModule('models/text-display', function (require) {
             this.position = options.position;
             this.border = !!options.border;
             this.padding = options.padding || 0;
-            this.borderColor = options.borderColor || "white";
             this.background = options.background || null;
             this.index = options.index || 10;
 
             this.populateSprites();
+            this.updateColor(options.color || "white");
         },
 
         populateSprites: function () {
@@ -92,7 +92,7 @@ DefineModule('models/text-display', function (require) {
                 for (var y = 0; y < height; y++) {
                     if (this.border &&
                         (x === 0 || y === 0 || x === width-1 || y === height-1)) {
-                        row.push(this.borderColor);
+                        row.push("white");
                     } else {
                         row.push(this.background);
                     }
@@ -100,6 +100,22 @@ DefineModule('models/text-display', function (require) {
                 spriteRows.push(row);
             }
             this.sprite = new Sprite(spriteRows);
+        },
+
+        updateColor: function (color) {
+            this.color = color;
+
+            this.children.forEach(function (sprite) {
+                sprite.applyColor(color);
+            });
+
+            if (this.border) {
+                this.sprite.iterateCells(function (cell, x, y) {
+                    if (x === 0 || y === 0 || x === width-1 || y === height-1) {
+                        cell.color = color;
+                    }
+                });
+            }
         }
     });
 });
