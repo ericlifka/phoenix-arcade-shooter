@@ -79,6 +79,8 @@ DefineModule('models/text-display', function (require) {
             });
 
             width += Math.max.apply(null, lineWidths);
+            this.width = width;
+            this.height = height;
 
             this.createBackgroundSprite(width, height);
         },
@@ -97,9 +99,11 @@ DefineModule('models/text-display', function (require) {
 
         updateColor: function (color) {
             this.color = color;
+            var width = this.width;
+            var height = this.height;
 
-            this.children.forEach(function (sprite) {
-                sprite.applyColor(color);
+            this.children.forEach(function (entity) {
+                entity.sprite.applyColor(color);
             });
 
             if (this.border) {
