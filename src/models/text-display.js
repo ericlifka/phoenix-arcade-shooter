@@ -57,6 +57,7 @@ DefineModule('models/text-display', function (require) {
                     if (sprite) {
                         var entity = new GameObject(self);
                         entity.sprite = sprite;
+                        entity.index = self.index + 1;
                         entity.position = {
                             x: xLineOffset,
                             y: yOffset
