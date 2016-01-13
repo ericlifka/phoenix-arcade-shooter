@@ -31,7 +31,7 @@ DefineModule('phoenix/level-manager', function (require) {
                 position: { x: 0, y: 0 },
                 border: true,
                 padding: 5,
-                background: "black"
+                background: this.game.FILL_COLOR
             }));
         },
         update: function () {
