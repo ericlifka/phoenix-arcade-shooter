@@ -1,5 +1,5 @@
 DefineModule('phoenix/levels/level-01', function (require) {
-    var Banner = require('phoenix/scripts/fadeout-banner');
+    var Banner = require('components/fadeout-banner');
     var EnemyShip = require('phoenix/enemy-ship');
     var FlyPlayerInFromBottom = require('phoenix/scripts/fly-player-in-from-bottom');
     var GameObject = require('models/game-object');

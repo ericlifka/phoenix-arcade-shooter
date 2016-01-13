@@ -1,6 +1,6 @@
-DefineModule('phoenix/scripts/fadeout-banner', function (require) {
+DefineModule('components/fadeout-banner', function (require) {
     var GameObject = require('models/game-object');
-    var TextDisplay = require('models/text-display');
+    var TextDisplay = require('components/text-display');
 
     return DefineClass(GameObject, {
         constructor: function (parent, text, time) {

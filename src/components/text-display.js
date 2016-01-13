@@ -1,6 +1,4 @@
-DefineModule('models/text-display', function (require) {
-    var ArcadeFont = require('fonts/arcade');
-    var ArcadeSmallFont = require('fonts/arcade-small');
+DefineModule('components/text-display', function (require) {
     var GameObject = require('models/game-object');
     var Sprite = require('models/sprite');
 
