@@ -14,9 +14,9 @@ DefineModule('phoenix/levels/level-01', function (require) {
             this.ships = [];
 
             for (var i = 1; i <= 10; i++) {
-                this.newShip(10 * i + 39, -20, 50, 3);
-                this.newShip(10 * i + 39, -50, 40, 4);
-                this.newShip(10 * i + 39, -100, 30, 5);
+                this.newShip(10 * i + 39, -20, 60, 3);
+                this.newShip(10 * i + 39, -30, 50, 3);
+                this.newShip(10 * i + 39, -40, 40, 3);
             }
 
             this.addChild(new FlyPlayerInFromBottom(this, this.game));
@@ -46,11 +46,14 @@ DefineModule('phoenix/levels/level-01', function (require) {
             ship.position.y = startY;
 
             this.addChild(new ScriptChain(this, false, [
-                new MoveObjectToPoint(null, ship, { x: startX, y: endY }, time),
-                new MoveObjectToPoint(null, ship, { x: startX-50, y: endY }, time)
-                //new ScriptChain(this, true, [
-                //    new MoveObjectToPoint(this, ship, { x: startX, y: endY }, time),
-                //])
+                new MoveObjectToPoint(null, ship, { x: startX, y: endY }, time*2),
+                new MoveObjectToPoint(null, ship, { x: startX-40, y: endY }, time),
+                new ScriptChain(this, true, [
+                    new MoveObjectToPoint(null, ship, { x: startX-40, y: endY-30 }, time),
+                    new MoveObjectToPoint(null, ship, { x: startX+40, y: endY-30 }, time*2),
+                    new MoveObjectToPoint(null, ship, { x: startX+40, y: endY }, time),
+                    new MoveObjectToPoint(null, ship, { x: startX-40, y: endY }, time*2)
+                ])
             ]));
             this.ships.push(ship);
         }
