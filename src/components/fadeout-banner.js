@@ -3,23 +3,15 @@ DefineModule('components/fadeout-banner', function (require) {
     var TextDisplay = require('components/text-display');
 
     var colorGradient = [
-        "#000031",
-        "#111131",
-        "#222231",
-        "#333331",
-        "#444431",
-        "#555531",
-        "#666631",
-        "#777731",
-        "#888831",
-        "#999931",
-        "#aaaa31",
-        "#bbbb31",
-        "#cccc31",
-        "#dddd31",
-        "#eeee31",
-        "#ffff31",
-        "#ffffff"
+        "rgb(255,255,255)",
+        "rgb(226,226,232)",
+        "rgb(171,171,189)",
+        "rgb(142,142,165)",
+        "rgb(114,113,142)",
+        "rgb(85,84,119)",
+        "rgb(58,57,97)",
+        "rgb(29,27,74)",
+        "rgb(1,0,51)"
     ];
 
     return DefineClass(GameObject, {
