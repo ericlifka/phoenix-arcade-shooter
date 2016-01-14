@@ -12,6 +12,9 @@ DefineModule('phoenix/levels/level-01', function (require) {
 
             this.game = game;
             this.ships = [];
+        },
+        start: function () {
+            var game = this.game;
 
             for (var i = 1; i <= 10; i++) {
                 this.newShip(10 * i + 39, -20, 60, 3);
@@ -19,11 +22,9 @@ DefineModule('phoenix/levels/level-01', function (require) {
                 this.newShip(10 * i + 39, -40, 40, 3);
             }
 
-            this.addChild(new FlyPlayerInFromBottom(this, this.game));
+            this.addChild(new FlyPlayerInFromBottom(this, game));
             this.addChild(new Banner(this, "LEVEL 1", 2000));
-        },
-        start: function () {
-            var game = this.game;
+
             this.ships.forEach(function (ship) {
                 game.addChild(ship);
             });
