@@ -4,6 +4,7 @@ DefineModule('phoenix/levels/level-01', function (require) {
     var FlyPlayerInFromBottom = require('phoenix/scripts/fly-player-in-from-bottom');
     var GameObject = require('models/game-object');
     var MoveObjectToPoint = require('phoenix/scripts/move-object-to-point');
+    var ScriptChain = require('models/script-chain');
 
     return DefineClass(GameObject, {
         constructor: function (parent, game) {
@@ -44,7 +45,9 @@ DefineModule('phoenix/levels/level-01', function (require) {
             ship.position.x = startX;
             ship.position.y = startY;
 
-            this.addChild(new MoveObjectToPoint(this, ship, { x: startX, y: endY }, time));
+            this.addChild(new ScriptChain(this, false, [
+                new MoveObjectToPoint(this, ship, { x: startX, y: endY }, time)
+            ]));
             this.ships.push(ship);
         }
     });
