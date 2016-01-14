@@ -59,6 +59,7 @@ DefineModule('models/game-object', function (require) {
         },
         cleanup: function () {
             /* a place to unload any children that need to be dealt with */
+            this.children = null;
         },
         destroy: function () {
             if (this.parent && this.parent.removeChild) {
