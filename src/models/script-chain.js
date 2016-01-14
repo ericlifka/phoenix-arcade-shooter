@@ -8,6 +8,11 @@ DefineModule('models/script-chain', function (require) {
             this.scripts = scripts;
             this.scriptIndex = 0;
             this.activeScript = null;
+
+            var self = this;
+            scripts.forEach(function (script) {
+                script.parent = self;
+            });
         },
 
         start: function () {
@@ -21,7 +26,7 @@ DefineModule('models/script-chain', function (require) {
 
         removeChild: function () {
             this.scriptIndex++;
-            if (this.scriptIndex > this.scripts.length) {
+            if (this.scriptIndex >= this.scripts.length) {
                 if (this.repeat) {
                     this.scriptIndex = 0;
                 } else {
