@@ -32,7 +32,6 @@ DefineModule('components/fadeout-banner', function (require) {
                 border: true,
                 padding: 15,
                 color: colorGradient[ this.colorIndex ],
-                background: this.parent.game.FILL_COLOR,
                 font: "arcade"
             });
             this.addChild(this.textDisplay);

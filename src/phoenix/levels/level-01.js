@@ -13,9 +13,9 @@ DefineModule('phoenix/levels/level-01', function (require) {
             this.ships = [];
 
             for (var i = 1; i <= 10; i++) {
-                this.newShip(10 * i + 39, -20, 30, 2);
-                this.newShip(10 * i + 39, -30, 20, 3);
-                this.newShip(10 * i + 39, -40, 10, 4);
+                this.newShip(10 * i + 39, -20, 50, 3);
+                this.newShip(10 * i + 39, -50, 40, 4);
+                this.newShip(10 * i + 39, -100, 30, 5);
             }
 
             this.addChild(new FlyPlayerInFromBottom(this, this.game));
