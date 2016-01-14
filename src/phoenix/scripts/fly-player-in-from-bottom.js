@@ -11,7 +11,13 @@ DefineModule('phoenix/scripts/fly-player-in-from-bottom', function (require) {
         start: function () {
             this.player.preventInputControl = true;
 
-            this.setStartingPosition();
+            var position = this.player.position;
+            var velocity = this.player.velocity;
+
+            position.x = Math.floor(this.game.width / 2 - this.player.sprite.width / 2);
+            position.y = this.game.height + 30;
+            velocity.x = 0;
+            velocity.y = -this.player.SPEED / 5;
         },
         update: function (dtime) {
             this.super('update', arguments);
@@ -20,15 +26,6 @@ DefineModule('phoenix/scripts/fly-player-in-from-bottom', function (require) {
                 this.player.preventInputControl = false;
                 this.parent.removeChild(this);
             }
-        },
-        setStartingPosition: function () {
-            var position = this.player.position;
-            var velocity = this.player.velocity;
-
-            position.x = Math.floor(this.game.width / 2 - this.player.sprite.width / 2);
-            position.y = this.game.height + 2;
-            velocity.x = 0;
-            velocity.y = -this.player.SPEED / 5;
         }
     });
 });
