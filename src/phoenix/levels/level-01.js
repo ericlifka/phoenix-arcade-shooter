@@ -13,15 +13,9 @@ DefineModule('phoenix/levels/level-01', function (require) {
             this.ships = [];
 
             for (var i = 1; i <= 10; i++) {
-                var ship = new EnemyShip(game);
-                ship.position.x = 10 * i;
-                ship.position.y = -20 * i;
-
-                this.addChild(new MoveObjectToPoint(this, ship, {
-                    x: ship.position.x,
-                    y: 20
-                }, 2 + i * .5));
-                this.ships.push(ship);
+                this.newShip(10 * i + 39, -20, 30, 2);
+                this.newShip(10 * i + 39, -30, 20, 3);
+                this.newShip(10 * i + 39, -40, 10, 4);
             }
 
             this.addChild(new FlyPlayerInFromBottom(this, this.game));
@@ -43,6 +37,15 @@ DefineModule('phoenix/levels/level-01', function (require) {
             });
 
             return remainingShips.length === 0;
+        },
+        newShip: function (startX, startY, endY, time) {
+            var ship = new EnemyShip(this.game);
+
+            ship.position.x = startX;
+            ship.position.y = startY;
+
+            this.addChild(new MoveObjectToPoint(this, ship, { x: startX, y: endY }, time));
+            this.ships.push(ship);
         }
     });
 });
