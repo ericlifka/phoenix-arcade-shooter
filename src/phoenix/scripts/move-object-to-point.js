@@ -2,7 +2,6 @@ DefineModule('phoenix/scripts/move-object-to-point', function (require) {
     var GameObject = require('models/game-object');
 
     return DefineClass(GameObject, {
-        active: false,
         constructor: function (parent, object, targetPoint, timeDelta) {
             this.super('constructor', arguments);
 
@@ -21,14 +20,8 @@ DefineModule('phoenix/scripts/move-object-to-point', function (require) {
 
             this.xPositive = xDiff > 0;
             this.yPositive = yDiff > 0;
-
-            this.active = true;
         },
         update: function (dtime) {
-            if (!this.active) {
-                return;
-            }
-
             this.super('update', arguments);
 
             var xPositive = this.xPositive;
@@ -44,7 +37,7 @@ DefineModule('phoenix/scripts/move-object-to-point', function (require) {
                 this.object.velocity.x = 0;
                 this.object.velocity.y = 0;
 
-                this.active = false;
+                this.parent.removeChild(this);
             }
         }
     });
