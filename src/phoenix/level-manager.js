@@ -31,8 +31,10 @@ DefineModule('phoenix/level-manager', function (require) {
                 /* clear level and stuff */
                 this.currentLevel.cleanup();
                 this.removeChild(this.currentLevel);
-                this.currentLevel = null;
-                console.log('level finished');
+
+                this.levelIndex++;
+                this.startLevel();
+
             }
         }
     });
