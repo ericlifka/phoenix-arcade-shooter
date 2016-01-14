@@ -1,4 +1,4 @@
-DefineModule('phoenix/levels/level-01', function (require) {
+DefineModule('phoenix/levels/level-group-01', function (require) {
     var Banner = require('components/fadeout-banner');
     var EnemyShip = require('phoenix/enemy-ship');
     var FlyPlayerInFromBottom = require('phoenix/scripts/fly-player-in-from-bottom');
@@ -11,7 +11,7 @@ DefineModule('phoenix/levels/level-01', function (require) {
             this.super('constructor', arguments);
 
             this.game = game;
-            this.ships = [];
+            this.ships = [ ];
         },
         start: function () {
             var game = this.game;
