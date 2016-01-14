@@ -46,13 +46,13 @@ DefineModule('phoenix/levels/level-01', function (require) {
             ship.position.y = startY;
 
             this.addChild(new ScriptChain(this, false, [
-                new MoveObjectToPoint(null, ship, { x: startX, y: endY }, time*2),
-                new MoveObjectToPoint(null, ship, { x: startX-40, y: endY }, time),
+                new MoveObjectToPoint(null, ship, { x: startX, y: endY }, time * 2),
+                new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time),
                 new ScriptChain(this, true, [
-                    new MoveObjectToPoint(null, ship, { x: startX-40, y: endY-30 }, time),
-                    new MoveObjectToPoint(null, ship, { x: startX+40, y: endY-30 }, time*2),
-                    new MoveObjectToPoint(null, ship, { x: startX+40, y: endY }, time),
-                    new MoveObjectToPoint(null, ship, { x: startX-40, y: endY }, time*2)
+                    new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY - 30 }, time),
+                    new MoveObjectToPoint(null, ship, { x: startX + 40, y: endY - 30 }, time * 2),
+                    new MoveObjectToPoint(null, ship, { x: startX + 40, y: endY }, time),
+                    new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time * 2)
                 ])
             ]));
             this.ships.push(ship);
