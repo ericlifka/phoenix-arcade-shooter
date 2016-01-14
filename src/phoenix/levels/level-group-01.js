@@ -1,7 +1,6 @@
 DefineModule('phoenix/levels/level-group-01', function (require) {
     var Banner = require('components/fadeout-banner');
     var EnemyShip = require('phoenix/enemy-ship');
-    var FlyPlayerInFromBottom = require('phoenix/scripts/fly-player-in-from-bottom');
     var GameObject = require('models/game-object');
     var MoveObjectToPoint = require('phoenix/scripts/move-object-to-point');
     var ScriptChain = require('models/script-chain');
@@ -31,7 +30,6 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
                 }
             }
 
-            this.addChild(new FlyPlayerInFromBottom(this, game));
             this.addChild(new Banner(this, this.levelName, 2000));
 
             this.ships.forEach(function (ship) {

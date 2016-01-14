@@ -1,4 +1,5 @@
 DefineModule('phoenix/level-manager', function (require) {
+    var FlyPlayerInFromBottom = require('phoenix/scripts/fly-player-in-from-bottom');
     var GameObject = require('models/game-object');
     var Level_group_01 = require('phoenix/levels/level-group-01');
 
@@ -20,6 +21,7 @@ DefineModule('phoenix/level-manager', function (require) {
 
         start: function () {
             this.loadNextLevel();
+            this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
         },
 
         loadNextLevel: function () {

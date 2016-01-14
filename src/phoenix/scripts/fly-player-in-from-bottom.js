@@ -18,6 +18,8 @@ DefineModule('phoenix/scripts/fly-player-in-from-bottom', function (require) {
             position.y = this.game.height + 30;
             velocity.x = 0;
             velocity.y = -this.player.SPEED / 5;
+
+            return this;
         },
         update: function (dtime) {
             this.super('update', arguments);
