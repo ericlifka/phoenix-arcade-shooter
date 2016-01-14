@@ -9,32 +9,37 @@ DefineModule('phoenix/level-manager', function (require) {
             this.super('constructor', arguments);
 
             this.game = game;
-            this.levelIndex = 1;
+            this.levelIndex = -1;
 
             this.levels = [
-                null,
                 new Level_group_01(this, this.game, "LEVEL 01", 1),
                 new Level_group_01(this, this.game, "LEVEL 02", 2),
                 new Level_group_01(this, this.game, "LEVEL 03", 3)
             ];
         },
 
-        startLevel: function () {
+        start: function () {
+            this.loadNextLevel();
+        },
+
+        loadNextLevel: function () {
+            this.levelIndex++;
             this.currentLevel = this.levels[ this.levelIndex ];
-            this.addChild(this.currentLevel);
-            this.currentLevel.start();
+
+            if (this.currentLevel) {
+                this.addChild(this.currentLevel);
+                this.currentLevel.start();
+            } else {
+                console.log('all levels complete');
+            }
         },
         update: function () {
             this.super('update', arguments);
 
             if (this.currentLevel && this.currentLevel.checkIfLevelComplete()) {
-                /* clear level and stuff */
                 this.currentLevel.cleanup();
                 this.removeChild(this.currentLevel);
-
-                this.levelIndex++;
-                this.startLevel();
-
+                this.loadNextLevel();
             }
         }
     });

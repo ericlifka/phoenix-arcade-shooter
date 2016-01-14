@@ -21,7 +21,7 @@ DefineModule('phoenix/game', function (require) {
             this.addChild(this.levelManager);
             this.addChild(this.player);
 
-            this.levelManager.startLevel();
+            this.levelManager.start();
         },
         spawnBullet: function (position, velocity, acceleration) {
             this.addChild(new Bullet(this, position, velocity, acceleration));
