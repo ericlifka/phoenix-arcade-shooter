@@ -20,10 +20,6 @@ DefineModule('phoenix/level-manager', function (require) {
         },
 
         startLevel: function () {
-            //var LevelClass = this.levels[ this.levelIndex ];
-            //
-            //this.currentLevel = new LevelClass(this, this.game);
-
             this.currentLevel = this.levels[ this.levelIndex ];
             this.addChild(this.currentLevel);
             this.currentLevel.start();
