@@ -7,23 +7,32 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
     var ScriptChain = require('models/script-chain');
 
     return DefineClass(GameObject, {
-        constructor: function (parent, game) {
+        constructor: function (parent, game, levelName, rowCount) {
             this.super('constructor', arguments);
 
             this.game = game;
+            this.levelName = levelName;
+            this.rowCount = rowCount;
+
             this.ships = [ ];
         },
         start: function () {
             var game = this.game;
 
             for (var i = 1; i <= 10; i++) {
-                this.newShip(10 * i + 39, -20, 60, 3);
-                this.newShip(10 * i + 39, -30, 50, 3);
                 this.newShip(10 * i + 39, -40, 40, 3);
+
+                if (this.rowCount >= 2) {
+                    this.newShip(10 * i + 39, -30, 50, 3);
+                }
+
+                if (this.rowCount >= 3) {
+                    this.newShip(10 * i + 39, -20, 60, 3);
+                }
             }
 
             this.addChild(new FlyPlayerInFromBottom(this, game));
-            this.addChild(new Banner(this, "LEVEL 1", 2000));
+            this.addChild(new Banner(this, this.levelName, 2000));
 
             this.ships.forEach(function (ship) {
                 game.addChild(ship);

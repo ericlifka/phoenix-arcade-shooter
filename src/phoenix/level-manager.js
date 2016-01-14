@@ -13,7 +13,7 @@ DefineModule('phoenix/level-manager', function (require) {
 
             this.levels = [
                 null,
-                new Level_group_01(this, this.game)
+                new Level_group_01(this, this.game, "LEVEL 01", 3)
             ];
         },
 
