@@ -4,6 +4,7 @@ DefineModule('phoenix/enemy-ship', function (require) {
     var shipExplosion = require('phoenix/animations/ship-explosion');
 
     return DefineClass(GameObject, {
+        BULLET_SPEED: 100,
         constructor: function () {
             this.super('constructor', arguments);
 
@@ -26,7 +27,14 @@ DefineModule('phoenix/enemy-ship', function (require) {
             this.velocity.y = 0;
         },
         fire: function () {
-            console.log('FIRE');
+            var position = {
+                x: this.position.x + Math.floor(this.sprite.width / 2),
+                y: this.position.y + this.sprite.height
+            };
+            var velocity = { x: 0, y: this.BULLET_SPEED };
+            var acceleration = { x: 0, y: 0 };
+
+            this.parent.spawnBullet(position, velocity, acceleration);
         }
     });
 });
