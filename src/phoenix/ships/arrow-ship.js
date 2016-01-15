@@ -5,6 +5,7 @@ DefineModule('phoenix/ships/arrow-ship', function (require) {
 
     return DefineClass(GameObject, {
         BULLET_SPEED: 100,
+        team: 1,
         constructor: function () {
             this.super('constructor', arguments);
 
@@ -34,7 +35,7 @@ DefineModule('phoenix/ships/arrow-ship', function (require) {
             var velocity = { x: 0, y: this.BULLET_SPEED };
             var acceleration = { x: 0, y: 0 };
 
-            this.parent.spawnBullet(position, velocity, acceleration);
+            this.parent.spawnBullet(this.team, position, velocity, acceleration);
         }
     });
 });

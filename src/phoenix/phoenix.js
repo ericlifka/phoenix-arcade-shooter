@@ -23,8 +23,8 @@ DefineModule('phoenix/game', function (require) {
 
             this.levelManager.start();
         },
-        spawnBullet: function (position, velocity, acceleration) {
-            this.addChild(new Bullet(this, position, velocity, acceleration));
+        spawnBullet: function (team, position, velocity, acceleration) {
+            this.addChild(new Bullet(this, team,  position, velocity, acceleration));
         },
         processInput: function (rawInput) {
             var input = this.inputInterpreter.interpret(rawInput);

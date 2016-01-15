@@ -7,6 +7,7 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
         BULLET_SPEED: 100,
         FIRE_RATE: 500,
         preventInputControl: false,
+        team: 0,
         constructor: function (parent) {
             this.super('constructor', arguments);
 
@@ -64,7 +65,7 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
             var velocity = { x: 0, y: -this.BULLET_SPEED };
             var acceleration = { x: 0, y: 0 };
 
-            this.parent.spawnBullet(position, velocity, acceleration);
+            this.parent.spawnBullet(this.team, position, velocity, acceleration);
         }
     });
 });

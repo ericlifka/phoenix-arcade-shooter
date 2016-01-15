@@ -5,9 +5,10 @@ DefineModule('phoenix/bullet', function (require) {
 
     return DefineClass(GameObject, {
         damage: 1,
-        constructor: function (parent, position, velocity, acceleration) {
+        constructor: function (parent, team, position, velocity, acceleration) {
             this.super('constructor', arguments);
 
+            this.team = team;
             this.position = position;
             this.velocity = velocity;
             this.acceleration = acceleration;
