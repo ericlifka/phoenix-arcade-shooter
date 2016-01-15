@@ -48,7 +48,7 @@ DefineModule('phoenix/game', function (require) {
                 for (var j = i + 1; j < physicalEntities.length; j++) {
                     var inner = physicalEntities[ j ];
 
-                    if (Collisions.boxCollision(outer, inner)) {
+                    if (outer.team !== inner.team && Collisions.boxCollision(outer, inner)) {
                         collisionPairs.push([outer, inner]);
                     }
                 }
