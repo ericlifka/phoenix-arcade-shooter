@@ -11,6 +11,7 @@ DefineModule('phoenix/scripts/fire-single-gun-random-rate', function (require) {
 
         start: function () {
             this.resetTimer();
+            this.threshold += 3000;
         },
 
         update: function (dtime) {
