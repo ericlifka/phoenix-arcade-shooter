@@ -1,6 +1,7 @@
 DefineModule('phoenix/levels/level-group-01', function (require) {
     var Banner = require('components/fadeout-banner');
     var EnemyShip = require('phoenix/enemy-ship');
+    var FireSingleGunRandomRate = require('phoenix/scripts/fire-single-gun-random-rate');
     var GameObject = require('models/game-object');
     var MoveObjectToPoint = require('phoenix/scripts/move-object-to-point');
     var ScriptChain = require('models/script-chain');
@@ -55,6 +56,7 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
             ship.position.x = startX;
             ship.position.y = startY;
 
+            this.addChild(new FireSingleGunRandomRate(this, ship));
             this.addChild(new ScriptChain(this, false, [
                 new MoveObjectToPoint(null, ship, { x: startX, y: endY }, time * 2),
                 new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time),
