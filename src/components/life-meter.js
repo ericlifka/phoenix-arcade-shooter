@@ -12,15 +12,6 @@ DefineModule('components/life-meter', function (require) {
 
             this.entity = boundEntity;
             this.position = position;
-
-
-            //this.currentLife = this.entity.life;
-            //this.maxLife = this.entity.maxLife;
-            //
-            //this.sprite = new Sprite([
-            //    [ g, g, g, g, g, g, g, g, g, g, g, g, g, g, g, g, g, g, g, g ],
-            //    [ g, g, g, g, g, g, g, g, g, g, g, g, g, g, g, g, g, g, g, g ]
-            //]);
         },
 
         update: function () {
