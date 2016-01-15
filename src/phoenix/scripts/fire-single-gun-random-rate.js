@@ -14,6 +14,10 @@ DefineModule('phoenix/scripts/fire-single-gun-random-rate', function (require) {
         },
 
         update: function (dtime) {
+            if (this.ship.destroyed) {
+                this.destroy();
+            }
+
             this.elapsed += dtime;
 
             if (this.elapsed > this.threshold) {
