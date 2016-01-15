@@ -11,6 +11,7 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
         preventInputControl: false,
         team: 0,
         life: 10,
+        maxLife: 10,
         damage: 5,
         constructor: function (parent) {
             this.super('constructor', arguments);
