@@ -1,6 +1,7 @@
 DefineModule('phoenix/ships/player-controlled-ship', function (require) {
     var GameObject = require('models/game-object');
     var playerShipSprite = require('phoenix/sprites/player-ship');
+    var shipExplosion = require('phoenix/animations/ship-explosion');
 
     return DefineClass(GameObject, {
         SPEED: 50,
@@ -33,6 +34,10 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
         },
         update: function (dtime) {
             this.super('update', arguments);
+
+            if (this.exploding && this.sprite.finished) {
+                this.destroy();
+            }
 
             this.timeSinceFired += dtime;
             if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
@@ -69,6 +74,18 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
             var acceleration = { x: 0, y: 0 };
 
             this.parent.spawnBullet(this.team, position, velocity, acceleration);
+        },
+        applyDamage: function (damage) {
+            this.life -= damage;
+
+            if (this.life <= 0) {
+                this.exploding = true;
+                this.sprite = shipExplosion();
+
+                this.velocity.x = 0;
+                this.velocity.y = 0;
+                this.preventInputControl = true;
+            }
         }
     });
 });
