@@ -30,7 +30,9 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
                 }
             }
 
-            this.addChild(new Banner(this, this.levelName, 2000));
+            if (this.levelName) {
+                this.addChild(new Banner(this, this.levelName, 2000));
+            }
 
             this.ships.forEach(function (ship) {
                 game.addChild(ship);
