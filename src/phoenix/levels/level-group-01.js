@@ -6,7 +6,7 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
     var ScriptChain = require('models/script-chain');
 
     return DefineClass(GameObject, {
-        constructor: function (parent, game, levelName, rowCount) {
+        constructor: function (parent, game, rowCount, levelName) {
             this.super('constructor', arguments);
 
             this.game = game;
