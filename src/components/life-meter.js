@@ -1,4 +1,4 @@
-DefineModule('components/life-display', function (require) {
+DefineModule('components/life-meter', function (require) {
     var GameObject = require('models/game-object');
 
     return DefineClass(GameObject, {
