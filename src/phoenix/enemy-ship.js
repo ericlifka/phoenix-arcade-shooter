@@ -24,6 +24,9 @@ DefineModule('phoenix/enemy-ship', function (require) {
 
             this.velocity.x = 0;
             this.velocity.y = 0;
+        },
+        fire: function () {
+            console.log('FIRE');
         }
     });
 });
