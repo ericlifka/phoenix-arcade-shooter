@@ -1,5 +1,5 @@
 DefineModule('components/life-display', function (require) {
-    var GameObject = require('model/game-object');
+    var GameObject = require('models/game-object');
 
     return DefineClass(GameObject, {
         constructor: function (parent, boundEntity, position) {

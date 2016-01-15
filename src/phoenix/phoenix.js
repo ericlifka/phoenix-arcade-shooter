@@ -4,6 +4,7 @@ DefineModule('phoenix/game', function (require) {
     var GameObject = require('models/game-object');
     var InputInterpreter = require('phoenix/input-interpreter');
     var LevelManager = require('phoenix/level-manager');
+    var LifeDisplay = require('components/life-display');
     var PlayerShip = require('phoenix/ships/player-controlled-ship');
 
     return DefineClass(GameObject, {
@@ -20,6 +21,7 @@ DefineModule('phoenix/game', function (require) {
 
             this.addChild(this.levelManager);
             this.addChild(this.player);
+            this.addChild(new LifeDisplay(this, this.player, {x: this.width-5, y: 2}));
 
             this.levelManager.start();
         },
