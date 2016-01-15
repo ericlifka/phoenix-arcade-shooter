@@ -1,4 +1,4 @@
-DefineModule('phoenix/enemy-ship', function (require) {
+DefineModule('phoenix/ships/arrow-ship', function (require) {
     var GameObject = require('models/game-object');
     var shipSprite = require('phoenix/sprites/arrow-ship');
     var shipExplosion = require('phoenix/animations/ship-explosion');

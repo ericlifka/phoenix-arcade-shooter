@@ -1,6 +1,6 @@
 DefineModule('phoenix/levels/level-group-01', function (require) {
     var Banner = require('components/fadeout-banner');
-    var EnemyShip = require('phoenix/enemy-ship');
+    var EnemyShip = require('phoenix/ships/arrow-ship');
     var FireSingleGunRandomRate = require('phoenix/scripts/fire-single-gun-random-rate');
     var GameObject = require('models/game-object');
     var MoveObjectToPoint = require('phoenix/scripts/move-object-to-point');
