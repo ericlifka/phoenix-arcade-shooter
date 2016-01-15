@@ -6,8 +6,11 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
         SPEED: 50,
         BULLET_SPEED: 100,
         FIRE_RATE: 500,
+
         preventInputControl: false,
         team: 0,
+        life: 10,
+        damage: 5,
         constructor: function (parent) {
             this.super('constructor', arguments);
 

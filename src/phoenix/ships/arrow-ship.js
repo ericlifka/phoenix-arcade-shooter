@@ -6,6 +6,7 @@ DefineModule('phoenix/ships/arrow-ship', function (require) {
     return DefineClass(GameObject, {
         BULLET_SPEED: 100,
         team: 1,
+        damage: 5,
         constructor: function () {
             this.super('constructor', arguments);
 
