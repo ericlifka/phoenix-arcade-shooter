@@ -7,12 +7,9 @@ DefineModule('phoenix/title-screen', function (require) {
             this.super('constructor', arguments);
 
             this.addChild(new TextDisplay(this, {
+                font: "phoenix",
                 message: "PHOENIX",
-                position: { x: 55, y: 50 },
-                border: true,
-                padding: 15,
-                // color: colorGradient[ this.colorIndex ],
-                font: "phoenix"
+                position: { x: 50, y: 30 }
             }));
         }
     });
