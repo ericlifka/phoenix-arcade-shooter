@@ -6,6 +6,7 @@ DefineModule('phoenix/game', function (require) {
     var LevelManager = require('phoenix/level-manager');
     var LifeMeter = require('components/life-meter');
     var PlayerShip = require('phoenix/ships/player-controlled-ship');
+    var TitleScreen = require('phoenix/title-screen');
 
     return DefineClass(GameObject, {
         FILL_COLOR: "#000031",
@@ -14,16 +15,19 @@ DefineModule('phoenix/game', function (require) {
 
             this.width = gameDimensions.width;
             this.height = gameDimensions.height;
-
             this.inputInterpreter = new InputInterpreter();
-            this.levelManager = new LevelManager(this);
-            this.player = new PlayerShip(this);
 
-            this.addChild(this.levelManager);
-            this.addChild(this.player);
-            this.addChild(new LifeMeter(this, this.player, {x: this.width-5, y: 2}));
+            this.addChild(new TitleScreen());
 
-            this.levelManager.start();
+
+            // this.levelManager = new LevelManager(this);
+            // this.player = new PlayerShip(this);
+            //
+            // this.addChild(this.levelManager);
+            // this.addChild(this.player);
+            // this.addChild(new LifeMeter(this, this.player, {x: this.width-5, y: 2}));
+            //
+            // this.levelManager.start();
         },
         spawnBullet: function (team, position, velocity, acceleration) {
             this.addChild(new Bullet(this, team,  position, velocity, acceleration));

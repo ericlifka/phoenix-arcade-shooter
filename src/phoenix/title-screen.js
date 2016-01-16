@@ -11,7 +11,7 @@ DefineModule('phoenix/title-screen', function (require) {
                 position: { x: 55, y: 50 },
                 border: true,
                 padding: 15,
-                color: colorGradient[ this.colorIndex ],
+                // color: colorGradient[ this.colorIndex ],
                 font: "arcade"
             }));
         }
