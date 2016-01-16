@@ -32,8 +32,8 @@ DefineModule('phoenix/scripts/move-object-to-point', function (require) {
             if (xPositive && position.x > target.x ||
                 !xPositive && position.x < target.x ||
                 yPositive && position.y > target.y ||
-                !yPositive && position.y < target.y)
-            {
+                !yPositive && position.y < target.y) {
+
                 this.object.velocity.x = 0;
                 this.object.velocity.y = 0;
 

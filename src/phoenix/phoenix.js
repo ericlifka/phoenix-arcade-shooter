@@ -30,7 +30,7 @@ DefineModule('phoenix/game', function (require) {
             // this.levelManager.start();
         },
         spawnBullet: function (team, position, velocity, acceleration) {
-            this.addChild(new Bullet(this, team,  position, velocity, acceleration));
+            this.addChild(new Bullet(this, team, position, velocity, acceleration));
         },
         processInput: function (rawInput) {
             var input = this.inputInterpreter.interpret(rawInput);
@@ -46,7 +46,7 @@ DefineModule('phoenix/game', function (require) {
                 return child.position && child.sprite && !child.exploding;
             });
 
-            var collisionPairs = [ ];
+            var collisionPairs = [];
 
             for (var i = 0; i < physicalEntities.length - 1; i++) {
                 var outer = physicalEntities[ i ];
@@ -55,7 +55,7 @@ DefineModule('phoenix/game', function (require) {
                     var inner = physicalEntities[ j ];
 
                     if (outer.team !== inner.team && Collisions.boxCollision(outer, inner)) {
-                        collisionPairs.push([outer, inner]);
+                        collisionPairs.push([ outer, inner ]);
                     }
                 }
             }

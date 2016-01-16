@@ -7,9 +7,9 @@ DefineModule('models/sprite', function (require) {
             this.width = pixels.length;
             this.height = pixels[ 0 ].length;
 
-            this.cells = [ ];
+            this.cells = [];
             for (var x = 0; x < this.width; x++) {
-                this.cells[ x ] = [ ];
+                this.cells[ x ] = [];
                 for (var y = 0; y < this.height; y++) {
                     this.cells[ x ][ y ] = {
                         x: x,
@@ -28,8 +28,8 @@ DefineModule('models/sprite', function (require) {
         },
         update: function (dtime) {
             /*
-            sprites ignore updates by default, but accept the event
-            so that the api signature of sprites and animations matches
+             sprites ignore updates by default, but accept the event
+             so that the api signature of sprites and animations matches
              */
         },
         renderToFrame: function (frame, x, y, index) {
@@ -46,9 +46,9 @@ DefineModule('models/sprite', function (require) {
             });
         },
         clone: function () {
-            var colorGrid = [ ];
+            var colorGrid = [];
             for (var x = 0; x < this.width; x++) {
-                colorGrid[ x ] = [ ];
+                colorGrid[ x ] = [];
                 for (var y = 0; y < this.height; y++) {
                     colorGrid[ x ][ y ] = this.cells[ x ][ y ].color;
                 }
@@ -99,7 +99,7 @@ DefineModule('models/sprite', function (require) {
         },
         invertY: function () {
             for (var x = 0; x < this.width; x++) {
-                this.cells[x].reverse();
+                this.cells[ x ].reverse();
             }
             return this;
         }

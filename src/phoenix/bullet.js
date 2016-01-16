@@ -26,8 +26,8 @@ DefineModule('phoenix/bullet', function (require) {
             if (this.position.x < 0
                 || this.position.y < 0
                 || this.position.x + this.sprite.width > this.parent.width
-                || this.position.y + this.sprite.height > this.parent.height)
-            {
+                || this.position.y + this.sprite.height > this.parent.height) {
+
                 this.destroy();
             }
         },

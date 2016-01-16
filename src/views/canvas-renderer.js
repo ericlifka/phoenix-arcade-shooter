@@ -1,5 +1,5 @@
- DefineModule('views/canvas-renderer', function (require) {
-     var Frame = require('models/frame');
+DefineModule('views/canvas-renderer', function (require) {
+    var Frame = require('models/frame');
 
     function maximumPixelSize(width, height) {
         var maxWidth = window.innerWidth;

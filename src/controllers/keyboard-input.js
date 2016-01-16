@@ -1,5 +1,4 @@
 DefineModule('controllers/keyboard-input', function (require) {
-
     function cloneObj(obj) {
         var nObj = {};
         Object.keys(obj).forEach(function (key) {

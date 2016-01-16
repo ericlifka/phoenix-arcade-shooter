@@ -3,7 +3,7 @@ DefineModule('phoenix/sprites/bullet', function (require) {
 
     return function () {
         return new Sprite([
-            ["white", "white"]
+            [ "white", "white" ]
         ]);
     }
 });

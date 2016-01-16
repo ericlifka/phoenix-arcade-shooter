@@ -1,5 +1,4 @@
 DefineModule('helpers/run-loop', function (require) {
-
     var fpsCounterDOM = null;
 
     function updateFPScounter(dtime) {
@@ -24,7 +23,7 @@ DefineModule('helpers/run-loop', function (require) {
     }
 
     function fpsTracker() {
-        var frameTimes = [ ];
+        var frameTimes = [];
 
         for (var i = 0; i < 100; i++) {
             frameTimes.push(20);
@@ -45,7 +44,8 @@ DefineModule('helpers/run-loop', function (require) {
 
     return DefineClass({
         constructor: function (callback) {
-            this.callback = callback || function () {};
+            this.callback = callback || function () {
+                };
 
             this.fpsTracker = fpsTracker();
             this.active = false;

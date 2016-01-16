@@ -11,39 +11,39 @@ DefineModule('phoenix/animations/small-explosion', function (require) {
     function newFrameSet() {
         var frames = [
             new Sprite([
-                [n, n, n, n, n],
-                [n, n, n, n, n],
-                [n, n, r, n, n],
-                [n, n, n, n, n],
-                [n, n, n, n, n]
+                [ n, n, n, n, n ],
+                [ n, n, n, n, n ],
+                [ n, n, r, n, n ],
+                [ n, n, n, n, n ],
+                [ n, n, n, n, n ]
             ]),
             new Sprite([
-                [n, n, n, n, n],
-                [n, n, r, n, n],
-                [n, y, y, o, n],
-                [n, n, o, n, n],
-                [n, n, n, n, n]
+                [ n, n, n, n, n ],
+                [ n, n, r, n, n ],
+                [ n, y, y, o, n ],
+                [ n, n, o, n, n ],
+                [ n, n, n, n, n ]
             ]),
             new Sprite([
-                [y, n, r, n, n],
-                [n, y, y, y, n],
-                [o, y, n, y, o],
-                [n, o, r, n, n],
-                [n, n, y, y, n]
+                [ y, n, r, n, n ],
+                [ n, y, y, y, n ],
+                [ o, y, n, y, o ],
+                [ n, o, r, n, n ],
+                [ n, n, y, y, n ]
             ]),
             new Sprite([
-                [y, n, y, n, n],
-                [n, n, n, n, y],
-                [n, n, n, n, y],
-                [n, y, n, n, n],
-                [n, n, y, y, n]
+                [ y, n, y, n, n ],
+                [ n, n, n, n, y ],
+                [ n, n, n, n, y ],
+                [ n, y, n, n, n ],
+                [ n, n, y, y, n ]
             ]),
             new Sprite([
-                [n, n, n, y, n],
-                [n, y, n, n, n],
-                [n, n, n, n, n],
-                [n, n, n, n, n],
-                [y, n, n, n, y]
+                [ n, n, n, y, n ],
+                [ n, y, n, n, n ],
+                [ n, n, n, n, n ],
+                [ n, n, n, n, n ],
+                [ y, n, n, n, y ]
             ])
         ];
 
@@ -55,7 +55,6 @@ DefineModule('phoenix/animations/small-explosion', function (require) {
 
         return frames;
     }
-
 
 
     return function () {

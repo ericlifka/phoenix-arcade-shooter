@@ -14,7 +14,7 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
             this.levelName = levelName;
             this.rowCount = rowCount;
 
-            this.ships = [ ];
+            this.ships = [];
         },
         start: function () {
             var game = this.game;

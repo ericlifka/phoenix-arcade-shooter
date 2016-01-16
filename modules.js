@@ -1,13 +1,12 @@
 (function () {
-
-    var moduleDefinitions = { };
-    var evaluatedModules = { };
-    var evaluationStack = [ ];
+    var moduleDefinitions = {};
+    var evaluatedModules = {};
+    var evaluationStack = [];
 
     function require(moduleName) {
         if (evaluationStack.indexOf(moduleName) > -1) {
             throw "Circular dependencies not supported: " + moduleName
-                + " required while still being evaluated";
+            + " required while still being evaluated";
         }
 
         var module = evaluatedModules[ moduleName ];
@@ -37,7 +36,8 @@
     window.DefineClass = function (Base, definition) {
         if (typeof Base === "object" && !definition) {
             definition = Base;
-            Base = function () { };
+            Base = function () {
+            };
         }
 
         function Constructor() {

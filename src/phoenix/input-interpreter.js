@@ -1,5 +1,4 @@
 DefineModule('phoenix/input-interpreter', function (require) {
-
     function newInputDescriptor() {
         return {
             GAME: 'phoenix',
@@ -25,8 +24,10 @@ DefineModule('phoenix/input-interpreter', function (require) {
 
             inputSources.forEach(function (inputSource) {
                 switch (inputSource.INPUT_TYPE) {
-                    case 'gamepad': return this.addGamepadInput(inputSource, gameInput);
-                    case 'keyboard': return this.addKeyboardInput(inputSource, gameInput);
+                    case 'gamepad':
+                        return this.addGamepadInput(inputSource, gameInput);
+                    case 'keyboard':
+                        return this.addKeyboardInput(inputSource, gameInput);
                     default:
                         console.error("Unsupported input type: ", inputSource.INPUT_TYPE);
                 }

@@ -4,8 +4,6 @@ DefineModule('phoenix/level-manager', function (require) {
     var Level_group_01 = require('phoenix/levels/level-group-01');
 
     return DefineClass(GameObject, {
-        //levels: [null, Level_01],
-
         constructor: function (game) {
             this.super('constructor', arguments);
 

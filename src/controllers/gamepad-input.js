@@ -1,5 +1,4 @@
 DefineModule('controllers/gamepad-input', function (require) {
-
     var BUTTON_MAP = {
         0: 'A',
         1: 'B',
@@ -58,7 +57,7 @@ DefineModule('controllers/gamepad-input', function (require) {
                 gamepad.buttons.forEach(function (button, index) {
                     gamepadState[ BUTTON_MAP[ index ] ] = button.pressed;
                 });
-                
+
                 gamepadState[ 'left-stick-x' ] = normalize(gamepad.axes[ 0 ]);
                 gamepadState[ 'left-stick-y' ] = normalize(gamepad.axes[ 1 ]);
                 gamepadState[ 'right-stick-x' ] = normalize(gamepad.axes[ 2 ]);

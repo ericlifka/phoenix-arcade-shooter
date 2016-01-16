@@ -10,7 +10,9 @@ DefineModule('components/text-display', function (require) {
             if (typeof message === "string") {
                 message = [ message ];
             }
-            message = message.map(function (str) { return str.split(''); });
+            message = message.map(function (str) {
+                return str.split('');
+            });
 
             this.font = require("fonts/" + (options.font || "arcade-small"));
             this.message = message;
@@ -30,7 +32,7 @@ DefineModule('components/text-display', function (require) {
             var height = 0;
             var xOffset = this.position.x;
             var yOffset = this.position.y;
-            var lineWidths = [ ];
+            var lineWidths = [];
 
             if (this.padding) {
                 xOffset += this.padding;
@@ -84,9 +86,9 @@ DefineModule('components/text-display', function (require) {
         },
 
         createBackgroundSprite: function (width, height) {
-            var spriteRows = [ ];
+            var spriteRows = [];
             for (var x = 0; x < width; x++) {
-                var row = [ ];
+                var row = [];
                 for (var y = 0; y < height; y++) {
                     row.push(this.background);
                 }
@@ -106,7 +108,7 @@ DefineModule('components/text-display', function (require) {
 
             if (this.border) {
                 this.sprite.iterateCells(function (cell, x, y) {
-                    if (x === 0 || y === 0 || x === width-1 || y === height-1) {
+                    if (x === 0 || y === 0 || x === width - 1 || y === height - 1) {
                         cell.color = color;
                     }
                 });
