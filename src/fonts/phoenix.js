@@ -12,14 +12,22 @@ DefineModule('fonts/phoenix', function (require) {
             letterSpacing: 1
         },
         P: new Sprite([
-            [w,w,w,w,w,w,w],
-            [w,w,w,w,w,w,w],
-            [w,n,n,w,n,n,n],
-            [w,n,n,w,n,n,n],
-            [w,n,n,w,n,n,n],
-            [w,w,w,w,n,n,n],
-            [n,w,w,n,n,n,n]
-        ]),
+            [n,n,n,w,w,w,w,w,w,w,w,w,n,n],
+            [n,n,n,n,n,w,w,w,n,n,w,w,w,n],
+            [n,n,n,n,n,w,w,n,n,n,n,w,w,w],
+            [n,n,n,n,w,w,n,n,n,n,n,n,w,w],
+            [n,n,n,n,w,w,n,n,n,n,n,n,w,w],
+            [n,n,n,n,w,w,n,n,n,n,n,n,w,w],
+            [n,n,n,n,w,w,w,n,n,n,n,w,w,w],
+            [n,n,n,w,w,w,w,w,n,n,w,w,w,n],
+            [n,n,n,w,w,n,w,w,w,w,w,w,n,n],
+            [n,n,n,w,w,n,n,n,n,n,n,n,n,n],
+            [n,n,n,w,w,n,n,n,n,n,n,n,n,n],
+            [n,n,w,w,n,n,n,n,n,n,n,n,n,n],
+            [n,n,w,w,n,n,n,n,n,n,n,n,n,n],
+            [n,n,w,w,n,n,n,n,n,n,n,n,n,n],
+            [w,w,w,w,w,w,n,n,n,n,n,n,n,n]
+        ]).invertY().rotateRight(),
         H: new Sprite([
             [w,w,w,w,w,w,w],
             [w,w,w,w,w,w,w],
