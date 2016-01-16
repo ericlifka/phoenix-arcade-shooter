@@ -12,7 +12,7 @@ DefineModule('phoenix/title-screen', function (require) {
                 border: true,
                 padding: 15,
                 // color: colorGradient[ this.colorIndex ],
-                font: "arcade"
+                font: "phoenix"
             }));
         }
     });
