@@ -6,10 +6,10 @@ DefineModule('fonts/phoenix', function (require) {
 
     return {
         meta: {
-            width: 7,
-            height: 7,
-            lineHeight: 11,
-            letterSpacing: 1
+            width: 15,
+            height: 15,
+            lineHeight: 16,
+            letterSpacing: -1
         },
         P: new Sprite([
             [n,n,n,w,w,w,w,w,w,w,w,w,n,n],
