@@ -11,6 +11,18 @@ DefineModule('phoenix/title-screen', function (require) {
                 message: "PHOENIX",
                 position: { x: 50, y: 30 }
             }));
+
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "New",
+                position: { x: 95, y: 80 }
+            }));
+
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "Load",
+                position: { x: 95, y: 95 }
+            }));
         }
     });
 });
