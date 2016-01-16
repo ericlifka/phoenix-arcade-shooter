@@ -80,7 +80,7 @@ DefineModule('fonts/phoenix', function (require) {
             [ w, w, w, w, w, w, w, w, w, w, w, w, n, n ]
         ]).invertY().rotateRight(),
         N: new Sprite([
-            [ n, n, n, n, n, w, w, n, n, n, n, w, w, w, w, w, w ],
+            [ n, n, n, w, w, w, w, n, n, n, n, w, w, w, w, w, w ],
             [ n, n, n, n, n, w, w, n, n, n, n, n, n, w, w, n, n ],
             [ n, n, n, n, n, w, w, w, n, n, n, n, n, w, w, n, n ],
             [ n, n, n, n, w, w, w, w, n, n, n, n, w, w, n, n, n ],
@@ -94,7 +94,7 @@ DefineModule('fonts/phoenix', function (require) {
             [ n, n, w, w, n, n, n, n, n, w, w, w, n, n, n, n, n ],
             [ n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n, n ],
             [ n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n, n ],
-            [ w, w, w, w, w, w, n, n, n, n, w, w, n, n, n, n, n ]
+            [ w, w, w, w, w, w, n, n, n, n, w, w, w, w, n, n, n ]
         ]).invertY().rotateRight(),
         I: new Sprite([
             [ n, n, n, w, w, w, w, w, w ],
