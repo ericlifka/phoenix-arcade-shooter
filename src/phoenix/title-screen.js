@@ -50,7 +50,7 @@ DefineModule('phoenix/title-screen', function (require) {
 
         processInput: function (input) {
             if (this.timeSinceChanged > this.CHANGE_DELAY) {
-                if (input.menuSelect) {
+                if (input.menuSelect || input.fire) {
                     this.timeSinceChanged = 0;
                     this.chooseSelected();
                 }
