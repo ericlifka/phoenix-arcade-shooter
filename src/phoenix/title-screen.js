@@ -5,6 +5,8 @@ DefineModule('phoenix/title-screen', function (require) {
 
     return DefineClass(GameObject, {
         selectedMenuItem: 0,
+        timeSinceChanged: 0,
+        CHANGE_DELAY: 200,
 
         constructor: function (parent) {
             this.super('constructor', arguments);
@@ -41,8 +43,11 @@ DefineModule('phoenix/title-screen', function (require) {
         },
 
         processInput: function (input) {
-            if (Math.abs(input.movementVector.y) > 0.6) {
+            if (Math.abs(input.movementVector.y) > 0.6
+                && this.timeSinceChanged > this.CHANGE_DELAY) {
+
                 this.selectedMenuItem++;
+                this.timeSinceChanged = 0;
 
                 if (this.selectedMenuItem > 1) {
                     this.selectedMenuItem = 0;
@@ -50,6 +55,12 @@ DefineModule('phoenix/title-screen', function (require) {
             }
 
             this.updateSelectorPosition();
+        },
+
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            this.timeSinceChanged += dtime;
         },
 
         updateSelectorPosition: function () {
