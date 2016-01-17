@@ -18,14 +18,12 @@ DefineModule('phoenix/game', function (require) {
             this.inputInterpreter = new InputInterpreter();
 
             this.addChild(new TitleScreen(this));
-
-
+        },
+        startNewGame: function () {
             this.levelManager = new LevelManager(this);
             this.player = new PlayerShip(this);
 
             this.addChild(this.levelManager);
-        },
-        startNewGame: function () {
             this.addChild(this.player);
             this.addChild(new LifeMeter(this, this.player, {x: this.width-5, y: 2}));
 
