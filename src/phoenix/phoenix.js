@@ -60,8 +60,10 @@ DefineModule('phoenix/game', function (require) {
             this.super('processInput', [ input ]);
         },
         update: function (dtime) {
-            this.super('update', arguments);
-            this.checkCollisions();
+            if (!this.paused) {
+                this.super('update', arguments);
+                this.checkCollisions();
+            }
         },
         checkCollisions: function () {
             var physicalEntities = this.children.filter(function (child) {
