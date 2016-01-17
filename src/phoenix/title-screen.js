@@ -43,14 +43,19 @@ DefineModule('phoenix/title-screen', function (require) {
         },
 
         processInput: function (input) {
-            if (Math.abs(input.movementVector.y) > 0.6
-                && this.timeSinceChanged > this.CHANGE_DELAY) {
+            if (this.timeSinceChanged > this.CHANGE_DELAY) {
+                if (input.menuSelect) {
+                    this.timeSinceChanged = 0;
+                    this.chooseSelected();
+                }
 
-                this.selectedMenuItem++;
-                this.timeSinceChanged = 0;
+                if (Math.abs(input.movementVector.y) > 0.6) {
+                    this.selectedMenuItem++;
+                    this.timeSinceChanged = 0;
 
-                if (this.selectedMenuItem > 1) {
-                    this.selectedMenuItem = 0;
+                    if (this.selectedMenuItem > 1) {
+                        this.selectedMenuItem = 0;
+                    }
                 }
             }
 
@@ -72,6 +77,10 @@ DefineModule('phoenix/title-screen', function (require) {
                 this.selectorLeft.position.y = 105;
                 this.selectorRight.position.y = 105;
             }
+        },
+
+        chooseSelected: function () {
+            console.log('selected item: ', this.selectedMenuItem);
         }
     });
 });
