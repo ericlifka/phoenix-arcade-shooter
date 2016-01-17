@@ -82,16 +82,26 @@ DefineModule('phoenix/title-screen', function (require) {
         chooseSelected: function () {
             console.log('selected item: ', this.selectedMenuItem);
 
+            var y = this.selectorLeft.position.y + Math.floor(this.selectorLeft.sprite.height / 2);
             var position1 = {
                 x: this.selectorLeft.position.x + this.selectorLeft.sprite.width,
-                y: this.selectorLeft.position.y + Math.floor(this.selectorLeft.sprite.height / 2)
+                y: y
+            };
+            var position2 = {
+                x: this.selectorRight.position.x,
+                y: y
             };
             var velocity1 = {
                 x: 50,
                 y: 0
             };
+            var velocity2 = {
+                x: -50,
+                y: 0
+            };
             var acceleration = { x: 0, y: 0 };
             this.parent.spawnBullet(2, position1, velocity1, acceleration);
+            this.parent.spawnBullet(3, position2, velocity2, acceleration);
         }
     });
 });
