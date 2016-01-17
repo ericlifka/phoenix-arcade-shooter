@@ -18,13 +18,13 @@ DefineModule('phoenix/title-screen', function (require) {
             this.addChild(new TextDisplay(this, {
                 font: "arcade-small",
                 message: "New",
-                position: { x: 95, y: 80 }
+                position: { x: 90, y: 90 }
             }));
 
             this.addChild(new TextDisplay(this, {
                 font: "arcade-small",
                 message: "Load",
-                position: { x: 95, y: 95 }
+                position: { x: 90, y: 105 }
             }));
 
             this.selectorLeft = new GameObject();
@@ -33,8 +33,8 @@ DefineModule('phoenix/title-screen', function (require) {
             this.selectorLeft.sprite = new ArrowShip();
             this.selectorRight.sprite = new ArrowShip().invertX();
 
-            this.selectorLeft.position = { x: 75, y: 80 };
-            this.selectorRight.position = { x: 120, y: 80 };
+            this.selectorLeft.position = { x: 70, y: 90 };
+            this.selectorRight.position = { x: 115, y: 90 };
 
             this.addChild(this.selectorLeft);
             this.addChild(this.selectorRight);
