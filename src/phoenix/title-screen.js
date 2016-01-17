@@ -71,38 +71,42 @@ DefineModule('phoenix/title-screen', function (require) {
         },
 
         updateSelectorPosition: function () {
-            if (this.selectedMenuItem === 0) {
-                this.selectorLeft.position.y = 90;
-                this.selectorRight.position.y = 90;
-            }
-            else {
-                this.selectorLeft.position.y = 105;
-                this.selectorRight.position.y = 105;
+            if (!this.selecting) {
+                if (this.selectedMenuItem === 0) {
+                    this.selectorLeft.position.y = 90;
+                    this.selectorRight.position.y = 90;
+                }
+                else {
+                    this.selectorLeft.position.y = 105;
+                    this.selectorRight.position.y = 105;
+                }
             }
         },
 
         chooseSelected: function () {
-            console.log('selected item: ', this.selectedMenuItem);
+            if (!this.selecting) {
+                this.selecting = true;
 
-            var y = this.selectorLeft.position.y + Math.floor(this.selectorLeft.sprite.height / 2);
-            var position1 = {
-                x: this.selectorLeft.position.x + this.selectorLeft.sprite.width,
-                y: y
-            };
-            var position2 = {
-                x: this.selectorRight.position.x,
-                y: y
-            };
-            var velocity1 = {
-                x: 50,
-                y: 0
-            };
-            var velocity2 = {
-                x: -50,
-                y: 0
-            };
-            this.parent.spawnBullet(2, position1, velocity1);
-            this.parent.spawnBullet(3, position2, velocity2);
+                var y = this.selectorLeft.position.y + Math.floor(this.selectorLeft.sprite.height / 2);
+                var position1 = {
+                    x: this.selectorLeft.position.x + this.selectorLeft.sprite.width,
+                    y: y
+                };
+                var position2 = {
+                    x: this.selectorRight.position.x,
+                    y: y
+                };
+                var velocity1 = {
+                    x: 50,
+                    y: 0
+                };
+                var velocity2 = {
+                    x: -50,
+                    y: 0
+                };
+                this.parent.spawnBullet(2, position1, velocity1);
+                this.parent.spawnBullet(3, position2, velocity2);
+            }
         }
     });
 });
