@@ -87,25 +87,12 @@ DefineModule('phoenix/title-screen', function (require) {
             if (!this.selecting) {
                 this.selecting = true;
 
+                var x1 = this.selectorLeft.position.x + this.selectorLeft.sprite.width;
+                var x2 = this.selectorRight.position.x;
                 var y = this.selectorLeft.position.y + Math.floor(this.selectorLeft.sprite.height / 2);
-                var position1 = {
-                    x: this.selectorLeft.position.x + this.selectorLeft.sprite.width,
-                    y: y
-                };
-                var position2 = {
-                    x: this.selectorRight.position.x,
-                    y: y
-                };
-                var velocity1 = {
-                    x: 50,
-                    y: 0
-                };
-                var velocity2 = {
-                    x: -50,
-                    y: 0
-                };
-                this.parent.spawnBullet(2, position1, velocity1);
-                this.parent.spawnBullet(3, position2, velocity2);
+
+                this.parent.spawnBullet(2, { x: x1, y: y }, { x: 50, y: 0 });
+                this.parent.spawnBullet(3, { x: x2, y: y }, { x: -50, y: 0 });
             }
         }
     });
