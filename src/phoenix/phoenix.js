@@ -6,6 +6,7 @@ DefineModule('phoenix/game', function (require) {
     var LevelManager = require('phoenix/level-manager');
     var LifeMeter = require('components/life-meter');
     var PlayerShip = require('phoenix/ships/player-controlled-ship');
+    var TextDisplay = require('components/text-display');
     var TitleScreen = require('phoenix/title-screen');
 
     return DefineClass(GameObject, {
@@ -16,6 +17,11 @@ DefineModule('phoenix/game', function (require) {
             this.width = gameDimensions.width;
             this.height = gameDimensions.height;
             this.inputInterpreter = new InputInterpreter();
+            this.pausedText = new TextDisplay(this, {
+                font: "arcade",
+                message: "PAUSE",
+                position: { x: 90, y: 105 }
+            })
 
             this.addChild(new TitleScreen(this));
         },
@@ -34,6 +40,22 @@ DefineModule('phoenix/game', function (require) {
         },
         processInput: function (rawInput) {
             var input = this.inputInterpreter.interpret(rawInput);
+
+            if (input.menuSelect && !this.paused && this.unpressedMenuSelect) {
+                this.paused = true;
+                this.unpressedMenuSelect = false;
+                this.addChild(this.pausedText);
+            }
+
+            if (input.menuSelect && this.paused && this.unpressedMenuSelect) {
+                this.paused = false;
+                this.unpressedMenuSelect = false;
+                this.removeChild(this.pausedText);
+            }
+
+            if (!input.menuSelect) {
+                this.unpressedMenuSelect = true;
+            }
 
             this.super('processInput', [ input ]);
         },
