@@ -17,13 +17,13 @@ DefineModule('phoenix/title-screen', function (require) {
                 position: { x: 50, y: 30 }
             }));
 
-            this.addChild(new TextDisplay(this, {
+            this.parent.addChild(new TextDisplay(this, {
                 font: "arcade-small",
                 message: "New",
                 position: { x: 90, y: 90 }
             }));
 
-            this.addChild(new TextDisplay(this, {
+            this.parent.addChild(new TextDisplay(this, {
                 font: "arcade-small",
                 message: "Load",
                 position: { x: 90, y: 105 }
