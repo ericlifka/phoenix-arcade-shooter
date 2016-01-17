@@ -1,5 +1,6 @@
 DefineModule('components/text-display', function (require) {
     var GameObject = require('models/game-object');
+    var shipExplosion = require('phoenix/animations/ship-explosion');
     var Sprite = require('models/sprite');
 
     return DefineClass(GameObject, {
@@ -113,6 +114,12 @@ DefineModule('components/text-display', function (require) {
                     }
                 });
             }
+        },
+
+        applyDamage: function () {
+            this.children.forEach(function (entity) {
+                entity.sprite = shipExplosion();
+            });
         }
     });
 });
