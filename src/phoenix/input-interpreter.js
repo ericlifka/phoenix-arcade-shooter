@@ -39,6 +39,10 @@ DefineModule('phoenix/input-interpreter', function (require) {
         },
 
         addKeyboardInput: function (keyboard, gameInput) {
+            if (keyboard[ 'ENTER' ]) {
+                gameInput.menuSelect = true;
+            }
+
             if (keyboard[ 'SPACE' ]) {
                 gameInput.fire = true;
             }
@@ -61,6 +65,10 @@ DefineModule('phoenix/input-interpreter', function (require) {
         },
 
         addGamepadInput: function (gamepad, gameInput) {
+            if (gamepad[ 'start' ]) {
+                gameInput.menuSelect = true;
+            }
+
             if (gamepad[ 'A' ]) {
                 gameInput.fire = true;
             }
