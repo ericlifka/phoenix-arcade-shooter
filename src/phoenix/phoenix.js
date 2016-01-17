@@ -20,14 +20,16 @@ DefineModule('phoenix/game', function (require) {
             this.addChild(new TitleScreen(this));
 
 
-            // this.levelManager = new LevelManager(this);
-            // this.player = new PlayerShip(this);
-            //
-            // this.addChild(this.levelManager);
-            // this.addChild(this.player);
-            // this.addChild(new LifeMeter(this, this.player, {x: this.width-5, y: 2}));
-            //
-            // this.levelManager.start();
+            this.levelManager = new LevelManager(this);
+            this.player = new PlayerShip(this);
+
+            this.addChild(this.levelManager);
+        },
+        startNewGame: function () {
+            this.addChild(this.player);
+            this.addChild(new LifeMeter(this, this.player, {x: this.width-5, y: 2}));
+
+            this.levelManager.start();
         },
         spawnBullet: function (team, position, velocity, acceleration) {
             this.addChild(new Bullet(this, team, position, velocity, acceleration));
