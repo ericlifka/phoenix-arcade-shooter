@@ -10,13 +10,13 @@ DefineModule('controllers/keyboard-input', function (require) {
     function newInputDescriptor() {
         return {
             W: false, A: false, S: false, D: false,
-            SPACE: false
+            SPACE: false, ENTER: false
         };
     }
 
     var KEYS = {
         87: 'W', 65: 'A', 83: 'S', 68: 'D',
-        32: 'SPACE'
+        32: 'SPACE', 13: 'ENTER'
     };
 
     return DefineClass({
