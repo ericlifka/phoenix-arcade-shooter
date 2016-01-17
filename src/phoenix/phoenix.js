@@ -21,7 +21,7 @@ DefineModule('phoenix/game', function (require) {
                 font: "arcade",
                 message: "PAUSE",
                 position: { x: 90, y: 105 }
-            })
+            });
 
             this.addChild(new TitleScreen(this));
         },
@@ -31,7 +31,7 @@ DefineModule('phoenix/game', function (require) {
 
             this.addChild(this.levelManager);
             this.addChild(this.player);
-            this.addChild(new LifeMeter(this, this.player, {x: this.width-5, y: 2}));
+            this.addChild(new LifeMeter(this, this.player, { x: this.width - 5, y: 2 }));
 
             this.levelManager.start();
         },
@@ -41,6 +41,17 @@ DefineModule('phoenix/game', function (require) {
         processInput: function (rawInput) {
             var input = this.inputInterpreter.interpret(rawInput);
 
+            this.checkPauseState(input);
+
+            this.super('processInput', [ input ]);
+        },
+        update: function (dtime) {
+            if (!this.paused) {
+                this.super('update', arguments);
+                this.checkCollisions();
+            }
+        },
+        checkPauseState: function (input) {
             if (input.menuSelect && !this.paused && this.unpressedMenuSelect) {
                 this.paused = true;
                 this.unpressedMenuSelect = false;
@@ -55,14 +66,6 @@ DefineModule('phoenix/game', function (require) {
 
             if (!input.menuSelect) {
                 this.unpressedMenuSelect = true;
-            }
-
-            this.super('processInput', [ input ]);
-        },
-        update: function (dtime) {
-            if (!this.paused) {
-                this.super('update', arguments);
-                this.checkCollisions();
             }
         },
         checkCollisions: function () {
