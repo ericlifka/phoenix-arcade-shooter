@@ -118,7 +118,7 @@ DefineModule('components/text-display', function (require) {
 
         applyDamage: function () {
             this.children.forEach(function (entity) {
-                entity.sprite = shipExplosion();
+                entity.sprite = shipExplosion({ x: -2, y: -1 });
             });
         }
     });

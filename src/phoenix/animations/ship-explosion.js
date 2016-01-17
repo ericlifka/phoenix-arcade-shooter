@@ -3,21 +3,23 @@ DefineModule('phoenix/animations/ship-explosion', function (require) {
     var smallExplosion = require('phoenix/animations/small-explosion');
     var SpriteGroup = require('models/sprite-group');
 
-    return function () {
+    return function (offset) {
+        offset = offset || { x: 0, y: 0 };
+
         return new SpriteGroup([
             {
-                x: 0,
-                y: Random.integer(0, 3),
+                x: 0 + offset.x,
+                y: Random.integer(0, 3) + offset.y,
                 sprite: smallExplosion()
             },
             {
-                x: Random.integer(3, 6),
-                y: 0,
+                x: Random.integer(3, 6) + offset.x,
+                y: 0 + offset.y,
                 sprite: smallExplosion()
             },
             {
-                x: Random.integer(2, 4),
-                y: Random.integer(4, 6),
+                x: Random.integer(2, 4) + offset.x,
+                y: Random.integer(4, 6) + offset.y,
                 sprite: smallExplosion()
             }
         ]);
