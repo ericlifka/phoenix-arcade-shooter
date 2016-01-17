@@ -17,7 +17,7 @@ DefineModule('phoenix/game', function (require) {
             this.height = gameDimensions.height;
             this.inputInterpreter = new InputInterpreter();
 
-            this.addChild(new TitleScreen());
+            this.addChild(new TitleScreen(this));
 
 
             // this.levelManager = new LevelManager(this);
