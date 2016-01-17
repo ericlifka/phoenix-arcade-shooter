@@ -38,6 +38,29 @@ DefineModule('phoenix/title-screen', function (require) {
 
             this.addChild(this.selectorLeft);
             this.addChild(this.selectorRight);
+        },
+
+        processInput: function (input) {
+            if (Math.abs(input.movementVector.y) > 0.6) {
+                this.selectedMenuItem++;
+
+                if (this.selectedMenuItem > 1) {
+                    this.selectedMenuItem = 0;
+                }
+            }
+
+            this.updateSelectorPosition();
+        },
+
+        updateSelectorPosition: function () {
+            if (this.selectedMenuItem === 0) {
+                this.selectorLeft.position.y = 90;
+                this.selectorRight.position.y = 90;
+            }
+            else {
+                this.selectorLeft.position.y = 105;
+                this.selectorRight.position.y = 105;
+            }
         }
     });
 });
