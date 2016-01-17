@@ -99,9 +99,8 @@ DefineModule('phoenix/title-screen', function (require) {
                 x: -50,
                 y: 0
             };
-            var acceleration = { x: 0, y: 0 };
-            this.parent.spawnBullet(2, position1, velocity1, acceleration);
-            this.parent.spawnBullet(3, position2, velocity2, acceleration);
+            this.parent.spawnBullet(2, position1, velocity1);
+            this.parent.spawnBullet(3, position2, velocity2);
         }
     });
 });
