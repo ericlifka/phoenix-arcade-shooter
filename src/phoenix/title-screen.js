@@ -17,19 +17,23 @@ DefineModule('phoenix/title-screen', function (require) {
                 position: { x: 50, y: 30 }
             }));
 
-            this.parent.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                message: "New",
-                position: { x: 90, y: 90 },
-                explodable: true
-            }));
-
-            this.parent.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                message: "Load",
-                position: { x: 90, y: 105 },
-                explodable: true
-            }));
+            this.menuItems = [
+                new TextDisplay(this, {
+                    font: "arcade-small",
+                    message: "New",
+                    position: { x: 90, y: 90 },
+                    explodable: true
+                }),
+                new TextDisplay(this, {
+                    font: "arcade-small",
+                    message: "Load",
+                    position: { x: 90, y: 105 },
+                    explodable: true
+                })
+            ];
+            this.menuItems.forEach(function (item) {
+                this.parent.addChild(item);
+            }.bind(this));
 
             this.selectorLeft = new GameObject();
             this.selectorRight = new GameObject();
@@ -72,6 +76,9 @@ DefineModule('phoenix/title-screen', function (require) {
 
             if (this.selecting && this.timeSinceSelected > 595) {
                 this.parent.removeChild(this);
+                this.menuItems.forEach(function (item) {
+                    this.parent.removeChild(item);
+                }.bind(this));
             }
         },
 
