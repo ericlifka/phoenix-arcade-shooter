@@ -68,6 +68,11 @@ DefineModule('phoenix/title-screen', function (require) {
             this.super('update', arguments);
 
             this.timeSinceChanged += dtime;
+            this.timeSinceSelected += dtime;
+
+            if (this.selecting && this.timeSinceSelected > 595) {
+                this.parent.removeChild(this);
+            }
         },
 
         updateSelectorPosition: function () {
@@ -86,6 +91,7 @@ DefineModule('phoenix/title-screen', function (require) {
         chooseSelected: function () {
             if (!this.selecting) {
                 this.selecting = true;
+                this.timeSinceSelected = 0;
 
                 var x1 = this.selectorLeft.position.x + this.selectorLeft.sprite.width;
                 var x2 = this.selectorRight.position.x;
