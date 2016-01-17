@@ -20,13 +20,15 @@ DefineModule('phoenix/title-screen', function (require) {
             this.parent.addChild(new TextDisplay(this, {
                 font: "arcade-small",
                 message: "New",
-                position: { x: 90, y: 90 }
+                position: { x: 90, y: 90 },
+                explodable: true
             }));
 
             this.parent.addChild(new TextDisplay(this, {
                 font: "arcade-small",
                 message: "Load",
-                position: { x: 90, y: 105 }
+                position: { x: 90, y: 105 },
+                explodable: true
             }));
 
             this.selectorLeft = new GameObject();
