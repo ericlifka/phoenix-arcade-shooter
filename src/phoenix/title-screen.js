@@ -75,10 +75,9 @@ DefineModule('phoenix/title-screen', function (require) {
             this.timeSinceSelected += dtime;
 
             if (this.selecting && this.timeSinceSelected > 595) {
-                this.parent.removeChild(this);
-                this.menuItems.forEach(function (item) {
-                    this.parent.removeChild(item);
-                }.bind(this));
+                this.cleanup();
+
+                this.parent.startNewGame();
             }
         },
 
@@ -107,6 +106,13 @@ DefineModule('phoenix/title-screen', function (require) {
                 this.parent.spawnBullet(2, { x: x1, y: y }, { x: 50, y: 0 });
                 this.parent.spawnBullet(3, { x: x2, y: y }, { x: -50, y: 0 });
             }
+        },
+
+        cleanup: function () {
+            this.parent.removeChild(this);
+            this.menuItems.forEach(function (item) {
+                this.parent.removeChild(item);
+            }.bind(this));
         }
     });
 });
