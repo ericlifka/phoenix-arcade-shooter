@@ -55,22 +55,24 @@ DefineModule('phoenix/game', function (require) {
             }
         },
         checkPauseState: function (input) {
-            if (this.levelManager.running) {
-                if (input.menuSelect && !this.paused && this.unpressedMenuSelect) {
-                    this.paused = true;
-                    this.unpressedMenuSelect = false;
-                    this.addChild(this.pausedText);
-                }
+            if (!this.levelManager.running) {
+                return;
+            }
 
-                if (input.menuSelect && this.paused && this.unpressedMenuSelect) {
+            if (input.menuSelect && this.unpressedMenuSelect) {
+                this.unpressedMenuSelect = false;
+
+                if (this.paused) {
                     this.paused = false;
-                    this.unpressedMenuSelect = false;
                     this.removeChild(this.pausedText);
                 }
-
-                if (!input.menuSelect) {
-                    this.unpressedMenuSelect = true;
+                else {
+                    this.paused = true;
+                    this.addChild(this.pausedText);
                 }
+            }
+            else if (!input.menuSelect) {
+                this.unpressedMenuSelect = true;
             }
         },
         checkCollisions: function () {
