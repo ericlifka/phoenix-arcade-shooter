@@ -22,19 +22,19 @@ DefineModule('controllers/keyboard-input', function (require) {
     return DefineClass({
         constructor: function () {
             this.clearState();
-            
-            document.body.addEventListener('keydown', function (event) {
-                this.inputState[ KEYS[ event.keyCode ] ] = true;
-                this.clearAfterNext[ KEYS[ event.keyCode ] ] = false;
-            }.bind(this));
-            document.body.addEventListener('keyup', function (event) {
-                this.clearAfterNext[ KEYS[ event.keyCode ] ] = true;
-            }.bind(this));
+
+            document.body.addEventListener('keydown', this.keydown.bind(this));
+            document.body.addEventListener('keyup', this.keyup.bind(this));
         },
         getInputState: function () {
             var state = cloneObj(this.inputState);
             this.propagateInputClears();
             return state;
+        },
+        clearState: function () {
+            this.clearAfterNext = newInputDescriptor();
+            this.inputState = newInputDescriptor();
+            this.inputState.INPUT_TYPE = "keyboard";
         },
         propagateInputClears: function () {
             Object.keys(this.clearAfterNext).forEach(function (key) {
@@ -44,10 +44,12 @@ DefineModule('controllers/keyboard-input', function (require) {
                 }
             }.bind(this));
         },
-        clearState: function () {
-            this.clearAfterNext = newInputDescriptor();
-            this.inputState = newInputDescriptor();
-            this.inputState.INPUT_TYPE = "keyboard";
+        keydown: function (event) {
+            this.inputState[ KEYS[ event.keyCode ] ] = true;
+            this.clearAfterNext[ KEYS[ event.keyCode ] ] = false;
+        },
+        keyup: function (event) {
+            this.clearAfterNext[ KEYS[ event.keyCode ] ] = true;
         }
     });
 });
