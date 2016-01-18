@@ -26,6 +26,7 @@ DefineModule('phoenix/game', function (require) {
             this.pausedText = new TextDisplay(this, {
                 font: "arcade",
                 message: "PAUSE",
+                color: "yellow",
                 position: { x: 82, y: 70 }
             });
 
