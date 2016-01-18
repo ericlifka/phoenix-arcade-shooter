@@ -52,7 +52,7 @@ DefineModule('phoenix/game', function (require) {
             }
         },
         checkPauseState: function (input) {
-            if (input.menuSelect && !this.paused && this.unpressedMenuSelect) {
+            if (input.menuSelect && !this.paused && this.lllllk) {
                 this.paused = true;
                 this.unpressedMenuSelect = false;
                 this.addChild(this.pausedText);
