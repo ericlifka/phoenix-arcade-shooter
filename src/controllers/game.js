@@ -1,6 +1,9 @@
 DefineModule('controllers/game', function (require) {
     return DefineClass({
         constructor: function GameController(injections) {
+            document.addEventListener("visibilitychange", this.handleVisibilityChange.bind(this));
+            window.addEventListener("blur", this.handleBlur.bind(this));
+
             this.renderer = injections.renderer;
             this.runLoop = injections.runLoop;
             this.inputSources = injections.inputSources;
@@ -24,6 +27,14 @@ DefineModule('controllers/game', function (require) {
             return this.inputSources.map(function (inputSource) {
                 return inputSource.getInputState();
             });
+        },
+        handleVisibilityChange: function () {
+            if (document.hidden) {
+                this.model.pause();
+            }
+        },
+        handleBlur: function () {
+            this.model.pause();
         }
     });
 });

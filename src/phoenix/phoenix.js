@@ -73,9 +73,11 @@ DefineModule('phoenix/game', function (require) {
             }
         },
         pause: function () {
-            this.paused = true;
-            this.unpressedMenuSelect = false;
-            this.addChild(this.pausedText);
+            if (this.levelManager.running) {
+                this.paused = true;
+                this.unpressedMenuSelect = false;
+                this.addChild(this.pausedText);
+            }
         },
         unpause: function () {
             this.paused = false;
