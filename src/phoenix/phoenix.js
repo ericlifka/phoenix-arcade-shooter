@@ -11,12 +11,18 @@ DefineModule('phoenix/game', function (require) {
 
     return DefineClass(GameObject, {
         FILL_COLOR: "#000031",
+        unpressedMenuSelect: false,
+
         constructor: function (gameDimensions) {
             this.super('constructor');
 
             this.width = gameDimensions.width;
             this.height = gameDimensions.height;
+
             this.inputInterpreter = new InputInterpreter();
+            this.levelManager = new LevelManager(this);
+            this.player = new PlayerShip(this);
+
             this.pausedText = new TextDisplay(this, {
                 font: "arcade",
                 message: "PAUSE",
@@ -26,9 +32,6 @@ DefineModule('phoenix/game', function (require) {
             this.addChild(new TitleScreen(this));
         },
         startNewGame: function () {
-            this.levelManager = new LevelManager(this);
-            this.player = new PlayerShip(this);
-
             this.addChild(this.levelManager);
             this.addChild(this.player);
             this.addChild(new LifeMeter(this, this.player, { x: this.width - 5, y: 2 }));
@@ -52,20 +55,22 @@ DefineModule('phoenix/game', function (require) {
             }
         },
         checkPauseState: function (input) {
-            if (input.menuSelect && !this.paused && this.unpressedMenuSelect) {
-                this.paused = true;
-                this.unpressedMenuSelect = false;
-                this.addChild(this.pausedText);
-            }
+            if (this.levelManager.running) {
+                if (input.menuSelect && !this.paused && this.unpressedMenuSelect) {
+                    this.paused = true;
+                    this.unpressedMenuSelect = false;
+                    this.addChild(this.pausedText);
+                }
 
-            if (input.menuSelect && this.paused && this.unpressedMenuSelect) {
-                this.paused = false;
-                this.unpressedMenuSelect = false;
-                this.removeChild(this.pausedText);
-            }
+                if (input.menuSelect && this.paused && this.unpressedMenuSelect) {
+                    this.paused = false;
+                    this.unpressedMenuSelect = false;
+                    this.removeChild(this.pausedText);
+                }
 
-            if (!input.menuSelect) {
-                this.unpressedMenuSelect = true;
+                if (!input.menuSelect) {
+                    this.unpressedMenuSelect = true;
+                }
             }
         },
         checkCollisions: function () {

@@ -18,6 +18,7 @@ DefineModule('phoenix/level-manager', function (require) {
         },
 
         start: function () {
+            this.running = true;
             this.loadNextLevel();
             this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
         },
@@ -31,6 +32,7 @@ DefineModule('phoenix/level-manager', function (require) {
                 this.currentLevel.start();
             } else {
                 console.log('all levels complete');
+                this.running = false;
             }
         },
         update: function () {
