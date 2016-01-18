@@ -61,20 +61,26 @@ DefineModule('phoenix/game', function (require) {
             }
 
             if (input.menuSelect && this.unpressedMenuSelect) {
-                this.unpressedMenuSelect = false;
-
                 if (this.paused) {
-                    this.paused = false;
-                    this.removeChild(this.pausedText);
+                    this.unpause();
                 }
                 else {
-                    this.paused = true;
-                    this.addChild(this.pausedText);
+                    this.pause();
                 }
             }
             else if (!input.menuSelect) {
                 this.unpressedMenuSelect = true;
             }
+        },
+        pause: function () {
+            this.paused = true;
+            this.unpressedMenuSelect = false;
+            this.addChild(this.pausedText);
+        },
+        unpause: function () {
+            this.paused = false;
+            this.unpressedMenuSelect = false;
+            this.removeChild(this.pausedText);
         },
         checkCollisions: function () {
             var physicalEntities = this.children.filter(function (child) {
