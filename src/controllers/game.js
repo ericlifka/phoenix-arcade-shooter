@@ -3,6 +3,7 @@ DefineModule('controllers/game', function (require) {
         constructor: function GameController(injections) {
             document.addEventListener("visibilitychange", this.handleVisibilityChange.bind(this));
             window.addEventListener("blur", this.handleBlur.bind(this));
+            window.addEventListener("focus", this.handleFocus.bind(this));
 
             this.renderer = injections.renderer;
             this.runLoop = injections.runLoop;
@@ -35,6 +36,11 @@ DefineModule('controllers/game', function (require) {
         },
         handleBlur: function () {
             this.model.pause();
+        },
+        handleFocus: function () {
+            this.inputSources.forEach(function (input) {
+                input.clearState();
+            });
         }
     });
 });

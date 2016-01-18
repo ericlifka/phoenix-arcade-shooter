@@ -65,6 +65,9 @@ DefineModule('controllers/gamepad-input', function (require) {
             }
 
             return gamepadState;
+        },
+        clearState: function () {
+            /* no op for gamepads */
         }
     });
 });

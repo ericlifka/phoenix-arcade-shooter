@@ -21,11 +21,8 @@ DefineModule('controllers/keyboard-input', function (require) {
 
     return DefineClass({
         constructor: function () {
-            this.inputState = newInputDescriptor();
-            this.inputState.INPUT_TYPE = "keyboard";
-
-            this.clearAfterNext = newInputDescriptor();
-
+            this.clearState();
+            
             document.body.addEventListener('keydown', function (event) {
                 this.inputState[ KEYS[ event.keyCode ] ] = true;
                 this.clearAfterNext[ KEYS[ event.keyCode ] ] = false;
@@ -46,6 +43,11 @@ DefineModule('controllers/keyboard-input', function (require) {
                     this.clearAfterNext[ key ] = false;
                 }
             }.bind(this));
+        },
+        clearState: function () {
+            this.clearAfterNext = newInputDescriptor();
+            this.inputState = newInputDescriptor();
+            this.inputState.INPUT_TYPE = "keyboard";
         }
     });
 });
