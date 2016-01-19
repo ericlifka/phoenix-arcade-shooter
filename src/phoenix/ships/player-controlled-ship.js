@@ -9,7 +9,7 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
 
             this.sprite = playerShipSprite().rotateRight();
 
-            this.position = { x: 0, y: 0 };
+            this.position = { x: -100, y: -100 };
             this.velocity = { x: 0, y: 0 };
 
             this.life = 10;
@@ -19,7 +19,7 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
             this.BULLET_SPEED = 100;
             this.FIRE_RATE = 500;
 
-            this.preventInputControl = false;
+            this.preventInputControl = true;
             this.exploding = false;
             this.team = 0;
             this.damage = 5;
