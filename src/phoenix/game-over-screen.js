@@ -10,7 +10,16 @@ DefineModule('phoenix/game-over-screen', function (require) {
                 font: "arcade",
                 message: "GAME OVER",
                 color: "red",
-                position: { x: 75, y: 70 }
+                border: 1,
+                // background: this.parent.FILL_COLOR,
+                padding: 20,
+                position: { x: 45, y: 45 }
+            }));
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "hit start",
+                color: "red",
+                position: { x: 85, y: 80 }
             }));
         }
     })
