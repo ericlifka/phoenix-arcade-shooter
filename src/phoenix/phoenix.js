@@ -34,7 +34,7 @@ DefineModule('phoenix/game', function (require) {
         },
         reset: function () {
             this.super('reset');
-            
+
             this.gameOver = false;
             this.paused = false;
             this.unpressedMenuSelect = false;
@@ -131,7 +131,7 @@ DefineModule('phoenix/game', function (require) {
         checkGameOver: function () {
             if (this.player.destroyed && !this.gameOver) {
                 this.gameOver = true;
-
+                console.log('adding gameover screen');
                 this.addChild(this.gameOverScreen);
             }
         }

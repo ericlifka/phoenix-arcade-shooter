@@ -3,8 +3,10 @@ DefineModule('phoenix/game-over-screen', function (require) {
     var TextDisplay = require('components/text-display');
 
     return DefineClass(GameObject, {
-        constructor: function () {
-            this.super('constructor', arguments);
+        reset: function () {
+            this.super('reset');
+
+            this.resetPressed = false;
 
             this.addChild(new TextDisplay(this, {
                 font: "arcade",
@@ -21,6 +23,13 @@ DefineModule('phoenix/game-over-screen', function (require) {
                 color: "red",
                 position: { x: 75, y: 81 }
             }));
+        },
+
+        processInput: function (input) {
+            if (!this.resetPressed && (input.menuSelect || input.fire)) {
+                this.resetPressed = true;
+                this.parent.reset();
+            }
         }
     })
 });
