@@ -12,7 +12,7 @@ DefineModule('phoenix/level-manager', function (require) {
 
         reset: function () {
             this.super('reset');
-            
+
             this.running = false;
             this.levelIndex = -1;
             this.currentLevel = null;

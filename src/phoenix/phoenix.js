@@ -43,13 +43,12 @@ DefineModule('phoenix/game', function (require) {
             this.levelManager.reset();
             this.player.reset();
 
+            this.addChild(this.player);
+            this.addChild(this.levelManager);
             this.addChild(this.titleScreen);
         },
         startNewGame: function () {
-            this.addChild(this.levelManager);
-            this.addChild(this.player);
             this.addChild(new LifeMeter(this, this.player, { x: this.width - 5, y: 2 }));
-
             this.levelManager.start();
         },
         spawnBullet: function (team, position, velocity, acceleration) {

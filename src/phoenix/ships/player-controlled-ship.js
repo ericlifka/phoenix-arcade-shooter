@@ -4,12 +4,10 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
     var shipExplosion = require('phoenix/animations/ship-explosion');
 
     return DefineClass(GameObject, {
-        constructor: function (parent) {
-            this.sprite = playerShipSprite().rotateRight();
-            this.super('constructor', arguments);
-        },
         reset: function () {
             this.super('reset');
+
+            this.sprite = playerShipSprite().rotateRight();
 
             this.position = { x: 0, y: 0 };
             this.velocity = { x: 0, y: 0 };
