@@ -3,6 +3,7 @@ DefineModule('phoenix/game', function (require) {
     var Collisions = require('helpers/collisions');
     var GameObject = require('models/game-object');
     var GameOverScreen = require('phoenix/game-over-screen');
+    var GameWonScreen = require('phoenix/game-won-screen');
     var InputInterpreter = require('phoenix/input-interpreter');
     var LevelManager = require('phoenix/level-manager');
     var LifeMeter = require('components/life-meter');
