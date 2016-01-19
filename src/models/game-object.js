@@ -3,6 +3,10 @@ DefineModule('models/game-object', function (require) {
         damage: 0,
         constructor: function (parentObj) {
             this.parent = parentObj;
+
+            this.reset();
+        },
+        reset: function () {
             this.children = [];
         },
         processInput: function (input) {
