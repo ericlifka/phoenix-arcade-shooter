@@ -29,6 +29,12 @@ DefineModule('phoenix/game', function (require) {
                 color: "yellow",
                 position: { x: 82, y: 70 }
             });
+            this.gameOverText = new TextDisplay(this, {
+                font: "arcade",
+                message: "GAME OVER",
+                color: "red",
+                position: { x: 75, y: 70 }
+            });
 
             this.addChild(new TitleScreen(this));
         },
@@ -118,7 +124,8 @@ DefineModule('phoenix/game', function (require) {
         checkGameOver: function () {
             if (this.player.destroyed) {
                 this.levelManager.stop();
-                this.children = []
+                this.children = [];
+                this.addChild(this.gameOverText);
             }
         }
     });
