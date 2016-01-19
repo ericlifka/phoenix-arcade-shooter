@@ -8,8 +8,10 @@ DefineModule('phoenix/level-manager', function (require) {
             this.super('constructor', arguments);
 
             this.game = game;
-            this.levelIndex = -1;
+        },
 
+        reset: function () {
+            this.levelIndex = -1;
             this.levels = [
                 new Level_group_01(this, this.game, 1, "LEVEL 01"),
                 new Level_group_01(this, this.game, 2),

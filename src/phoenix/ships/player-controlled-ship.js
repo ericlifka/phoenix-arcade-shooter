@@ -4,21 +4,24 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
     var shipExplosion = require('phoenix/animations/ship-explosion');
 
     return DefineClass(GameObject, {
-        SPEED: 50,
-        BULLET_SPEED: 100,
-        FIRE_RATE: 500,
-
-        preventInputControl: false,
-        team: 0,
-        life: 10,
-        maxLife: 10,
-        damage: 5,
         constructor: function (parent) {
-            this.super('constructor', arguments);
-
             this.sprite = playerShipSprite().rotateRight();
+            this.super('constructor', arguments);
+        },
+        reset: function () {
             this.position = { x: 0, y: 0 };
             this.velocity = { x: 0, y: 0 };
+
+            this.life = 10;
+            this.maxLife = 10;
+
+            this.SPEED = 50;
+            this.BULLET_SPEED = 100;
+            this.FIRE_RATE = 500;
+
+            this.preventInputControl = false;
+            this.team = 0;
+            this.damage = 5;
             this.timeSinceFired = 0;
         },
         processInput: function (input) {
