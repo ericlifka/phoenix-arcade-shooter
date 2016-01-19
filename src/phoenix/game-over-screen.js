@@ -17,9 +17,9 @@ DefineModule('phoenix/game-over-screen', function (require) {
             }));
             this.addChild(new TextDisplay(this, {
                 font: "arcade-small",
-                message: "hit start",
+                message: "< hit start >",
                 color: "red",
-                position: { x: 85, y: 80 }
+                position: { x: 75, y: 81 }
             }));
         }
     })

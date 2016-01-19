@@ -336,6 +336,19 @@ DefineModule('fonts/arcade-small', function (require) {
             [ w, n, w, w, n, w ],
             [ n, w, n, n, n, n ]
         ]),
+        '<': new Sprite([
+            [ n, n, w, n, n],
+            [ n, w, w, w, n],
+            [ w, w, n, w, w],
+            [ w, n, n, n, w]
+
+        ]),
+        '>': new Sprite([
+            [ w, n, n, n, w],
+            [ w, w, n, w, w],
+            [ n, w, w, w, n],
+            [ n, n, w, n, n]
+        ]),
 
 
         ' ': new Sprite([
