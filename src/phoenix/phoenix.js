@@ -134,13 +134,12 @@ DefineModule('phoenix/game', function (require) {
         checkGameOver: function () {
             if (this.player.destroyed && !this.gameOver) {
                 this.gameOver = true;
-                console.log('adding gameover screen');
                 this.addChild(this.gameOverScreen);
             }
             if (this.levelManager.complete && !this.gameOver) {
                 this.gameOver = true;
-                console.log('adding win screen');
-                this.addChild(this.gameWonScreen)
+                this.removeChild(this.player);
+                this.addChild(this.gameWonScreen);
             }
         }
     });

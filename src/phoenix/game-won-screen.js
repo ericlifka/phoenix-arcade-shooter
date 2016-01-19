@@ -11,7 +11,7 @@ DefineModule('phoenix/game-won-screen', function (require) {
 
             this.addChild(new TextDisplay(this, {
                 font: "arcade",
-                message: "YOU WIN!",
+                message: "YOU WIN!!",
                 color: "green",
                 border: 1,
                 background: this.parent.FILL_COLOR,
@@ -21,7 +21,7 @@ DefineModule('phoenix/game-won-screen', function (require) {
             this.addChild(new TextDisplay(this, {
                 font: "arcade-small",
                 message: "< hit start >",
-                color: "red",
+                color: "green",
                 position: { x: 75, y: 81 }
             }));
         },
