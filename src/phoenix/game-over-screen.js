@@ -6,6 +6,7 @@ DefineModule('phoenix/game-over-screen', function (require) {
         reset: function () {
             this.super('reset');
 
+            this.inputReleased = false;
             this.resetPressed = false;
 
             this.addChild(new TextDisplay(this, {
@@ -26,7 +27,10 @@ DefineModule('phoenix/game-over-screen', function (require) {
         },
 
         processInput: function (input) {
-            if (!this.resetPressed && (input.menuSelect || input.fire)) {
+            if (!input.menuSelect && !input.fire) {
+                this.inputReleased = true;
+            }
+            if (!this.resetPressed && this.inputReleased && (input.menuSelect || input.fire)) {
                 this.resetPressed = true;
                 this.parent.reset();
             }
