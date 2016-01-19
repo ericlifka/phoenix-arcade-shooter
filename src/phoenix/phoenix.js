@@ -40,6 +40,7 @@ DefineModule('phoenix/game', function (require) {
             this.unpressedMenuSelect = false;
 
             this.titleScreen.reset();
+            this.gameOverScreen.reset();
             this.levelManager.reset();
             this.player.reset();
 
