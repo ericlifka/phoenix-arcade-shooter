@@ -11,7 +11,7 @@ DefineModule('phoenix/game-over-screen', function (require) {
                 message: "GAME OVER",
                 color: "red",
                 border: 1,
-                // background: this.parent.FILL_COLOR,
+                background: this.parent.FILL_COLOR,
                 padding: 20,
                 position: { x: 45, y: 45 }
             }));
