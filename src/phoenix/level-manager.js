@@ -11,7 +11,11 @@ DefineModule('phoenix/level-manager', function (require) {
         },
 
         reset: function () {
+            this.super('reset');
+            
+            this.running = false;
             this.levelIndex = -1;
+            this.currentLevel = null;
             this.levels = [
                 new Level_group_01(this, this.game, 1, "LEVEL 01"),
                 new Level_group_01(this, this.game, 2),

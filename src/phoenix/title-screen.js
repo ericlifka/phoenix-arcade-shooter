@@ -4,12 +4,16 @@ DefineModule('phoenix/title-screen', function (require) {
     var ArrowShip = require('phoenix/sprites/arrow-ship');
 
     return DefineClass(GameObject, {
-        selectedMenuItem: 0,
-        timeSinceChanged: 0,
-        CHANGE_DELAY: 200,
-
         reset: function () {
             this.super('reset');
+
+            this.selectedMenuItem = 0;
+            this.timeSinceChanged = 0;
+            this.timeSinceSelected = 0;
+            this.CHANGE_DELAY = 200;
+
+            this.inputReleased = false;
+            this.selecting = false;
 
             this.addChild(new TextDisplay(this, {
                 font: "phoenix",
@@ -49,8 +53,12 @@ DefineModule('phoenix/title-screen', function (require) {
         },
 
         processInput: function (input) {
+            if (!input.menuSelect && !input.fire) {
+                this.inputReleased = true;
+            }
+
             if (this.timeSinceChanged > this.CHANGE_DELAY) {
-                if (input.menuSelect || input.fire) {
+                if (this.inputReleased && (input.menuSelect || input.fire)) {
                     this.timeSinceChanged = 0;
                     this.chooseSelected();
                 }
