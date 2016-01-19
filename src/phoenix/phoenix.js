@@ -117,7 +117,8 @@ DefineModule('phoenix/game', function (require) {
         },
         checkGameOver: function () {
             if (this.player.destroyed) {
-                this.children = [];
+                this.levelManager.stop();
+                this.children = []
             }
         }
     });
