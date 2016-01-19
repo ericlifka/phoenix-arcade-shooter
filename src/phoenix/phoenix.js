@@ -2,6 +2,7 @@ DefineModule('phoenix/game', function (require) {
     var Bullet = require('phoenix/bullet');
     var Collisions = require('helpers/collisions');
     var GameObject = require('models/game-object');
+    var GameOverScreen = require('phoenix/game-over-screen');
     var InputInterpreter = require('phoenix/input-interpreter');
     var LevelManager = require('phoenix/level-manager');
     var LifeMeter = require('components/life-meter');
@@ -18,6 +19,7 @@ DefineModule('phoenix/game', function (require) {
             this.height = gameDimensions.height;
 
             this.titleScreen = new TitleScreen(this);
+            this.gameOverScreen = new GameOverScreen(this);
             this.inputInterpreter = new InputInterpreter();
             this.levelManager = new LevelManager(this);
             this.player = new PlayerShip(this);
@@ -27,12 +29,6 @@ DefineModule('phoenix/game', function (require) {
                 message: "PAUSE",
                 color: "yellow",
                 position: { x: 82, y: 70 }
-            });
-            this.gameOverText = new TextDisplay(this, {
-                font: "arcade",
-                message: "GAME OVER",
-                color: "red",
-                position: { x: 75, y: 70 }
             });
 
             this.super('constructor');
@@ -131,9 +127,7 @@ DefineModule('phoenix/game', function (require) {
         },
         checkGameOver: function () {
             if (this.player.destroyed) {
-                this.levelManager.stop();
-                this.children = [];
-                this.addChild(this.gameOverText);
+                this.addChild(this.gameOverScreen);
             }
         }
     });
