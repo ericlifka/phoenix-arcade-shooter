@@ -14,6 +14,7 @@ DefineModule('phoenix/level-manager', function (require) {
             this.super('reset');
 
             this.running = false;
+            this.complete = false;
             this.levelIndex = -1;
             this.currentLevel = null;
             this.levels = [
@@ -44,6 +45,7 @@ DefineModule('phoenix/level-manager', function (require) {
                 this.currentLevel.start();
             } else {
                 console.log('all levels complete');
+                this.complete = true;
                 this.running = false;
             }
         },

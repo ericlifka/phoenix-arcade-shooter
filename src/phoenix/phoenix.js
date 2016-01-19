@@ -19,6 +19,7 @@ DefineModule('phoenix/game', function (require) {
 
             this.titleScreen = new TitleScreen(this);
             this.gameOverScreen = new GameOverScreen(this);
+            this.gameWonScreen = new GameWonScreen(this);
             this.inputInterpreter = new InputInterpreter();
             this.levelManager = new LevelManager(this);
             this.player = new PlayerShip(this);
@@ -41,6 +42,7 @@ DefineModule('phoenix/game', function (require) {
 
             this.titleScreen.reset();
             this.gameOverScreen.reset();
+            this.gameWonScreen.reset();
             this.levelManager.reset();
             this.player.reset();
 
@@ -133,6 +135,11 @@ DefineModule('phoenix/game', function (require) {
                 this.gameOver = true;
                 console.log('adding gameover screen');
                 this.addChild(this.gameOverScreen);
+            }
+            if (this.levelManager.complete && !this.gameOver) {
+                this.gameOver = true;
+                console.log('adding win screen');
+                this.addChild(this.gameWonScreen)
             }
         }
     });
