@@ -12,7 +12,6 @@ DefineModule('phoenix/game', function (require) {
 
     return DefineClass(GameObject, {
         FILL_COLOR: "#000031",
-        unpressedMenuSelect: false,
 
         constructor: function (gameDimensions) {
             this.width = gameDimensions.width;
@@ -35,6 +34,10 @@ DefineModule('phoenix/game', function (require) {
         },
         reset: function () {
             this.super('reset');
+            
+            this.gameOver = false;
+            this.paused = false;
+            this.unpressedMenuSelect = false;
 
             this.titleScreen.reset();
             this.levelManager.reset();
@@ -126,7 +129,9 @@ DefineModule('phoenix/game', function (require) {
             });
         },
         checkGameOver: function () {
-            if (this.player.destroyed) {
+            if (this.player.destroyed && !this.gameOver) {
+                this.gameOver = true;
+
                 this.addChild(this.gameOverScreen);
             }
         }
