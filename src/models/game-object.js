@@ -8,6 +8,7 @@ DefineModule('models/game-object', function (require) {
         },
         reset: function () {
             this.children = [];
+            this.destroyed = false;
         },
         processInput: function (input) {
             this.children.forEach(function (child) {

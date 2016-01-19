@@ -9,6 +9,8 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
             this.super('constructor', arguments);
         },
         reset: function () {
+            this.super('reset');
+
             this.position = { x: 0, y: 0 };
             this.velocity = { x: 0, y: 0 };
 
@@ -20,6 +22,7 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
             this.FIRE_RATE = 500;
 
             this.preventInputControl = false;
+            this.exploding = false;
             this.team = 0;
             this.damage = 5;
             this.timeSinceFired = 0;
