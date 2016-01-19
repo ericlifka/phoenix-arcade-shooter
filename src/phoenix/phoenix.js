@@ -14,11 +14,10 @@ DefineModule('phoenix/game', function (require) {
         unpressedMenuSelect: false,
 
         constructor: function (gameDimensions) {
-            this.super('constructor');
-
             this.width = gameDimensions.width;
             this.height = gameDimensions.height;
 
+            this.titleScreen = new TitleScreen(this);
             this.inputInterpreter = new InputInterpreter();
             this.levelManager = new LevelManager(this);
             this.player = new PlayerShip(this);
@@ -36,7 +35,16 @@ DefineModule('phoenix/game', function (require) {
                 position: { x: 75, y: 70 }
             });
 
-            this.addChild(new TitleScreen(this));
+            this.super('constructor');
+        },
+        reset: function () {
+            this.super('reset');
+
+            this.titleScreen.reset();
+            this.levelManager.reset();
+            this.player.reset();
+
+            this.addChild(this.titleScreen);
         },
         startNewGame: function () {
             this.addChild(this.levelManager);

@@ -8,8 +8,8 @@ DefineModule('phoenix/title-screen', function (require) {
         timeSinceChanged: 0,
         CHANGE_DELAY: 200,
 
-        constructor: function (parent) {
-            this.super('constructor', arguments);
+        reset: function () {
+            this.super('reset');
 
             this.addChild(new TextDisplay(this, {
                 font: "phoenix",
