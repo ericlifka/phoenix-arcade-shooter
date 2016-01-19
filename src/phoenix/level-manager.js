@@ -23,6 +23,12 @@ DefineModule('phoenix/level-manager', function (require) {
             this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
         },
 
+        stop: function () {
+            this.running = false;
+            this.removeChild(this.currentLevel);
+            this.currentLevel = null;
+        },
+
         loadNextLevel: function () {
             this.levelIndex++;
             this.currentLevel = this.levels[ this.levelIndex ];

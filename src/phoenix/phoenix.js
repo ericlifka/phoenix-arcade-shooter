@@ -52,7 +52,9 @@ DefineModule('phoenix/game', function (require) {
         update: function (dtime) {
             if (!this.paused) {
                 this.super('update', arguments);
+
                 this.checkCollisions();
+                this.checkGameOver();
             }
         },
         checkPauseState: function (input) {
@@ -112,6 +114,11 @@ DefineModule('phoenix/game', function (require) {
                     b.applyDamage(a.damage);
                 }
             });
+        },
+        checkGameOver: function () {
+            if (this.player.destroyed) {
+                this.levelManager.stop();
+            }
         }
     });
 });
