@@ -10,6 +10,11 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
         constructor: function (parent, game, rowCount, levelName) {
             this.super('constructor', arguments);
 
+            if (rowCount === "boss") {
+                rowCount = 1;
+                this.boss = true;
+            }
+
             this.game = game;
             this.levelName = levelName;
             this.rowCount = rowCount;
@@ -29,6 +34,10 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
                 if (this.rowCount >= 3) {
                     this.newShip(10 * i + 39, -20, 60, 3);
                 }
+            }
+
+            if (this.boss) {
+                this.newBossShip();
             }
 
             if (this.levelName) {
@@ -68,6 +77,9 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
                 ])
             ]));
             this.ships.push(ship);
+        },
+        newBossShip: function () {
+
         }
     });
 });
