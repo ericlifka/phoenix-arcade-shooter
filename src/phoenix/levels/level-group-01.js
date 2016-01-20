@@ -26,14 +26,14 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
             var game = this.game;
 
             for (var i = 1; i <= 10; i++) {
-                this.newShip(10 * i + 39, -40, 40, 3);
+                this.newShip(10 * i + 39, -40, 45, 3);
 
                 if (this.rowCount >= 2) {
-                    this.newShip(10 * i + 39, -30, 50, 3);
+                    this.newShip(10 * i + 39, -30, 55, 3);
                 }
 
                 if (this.rowCount >= 3) {
-                    this.newShip(10 * i + 39, -20, 60, 3);
+                    this.newShip(10 * i + 39, -20, 65, 3);
                 }
             }
 
@@ -87,8 +87,8 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
             boss.position.y = 1;
 
             this.addChild(new ScriptChain(this, true, [
-                new MoveObjectToPoint(null, boss, { x: this.game.width - boss.sprite.width, y: 1 }, 2),
-                new MoveObjectToPoint(null, boss, { x: 0, y: 1 }, 2)
+                new MoveObjectToPoint(null, boss, { x: this.game.width - boss.sprite.width - 5, y: 1 }, 8),
+                new MoveObjectToPoint(null, boss, { x: 0, y: 1 }, 8)
             ]));
 
             this.ships.push(boss);
