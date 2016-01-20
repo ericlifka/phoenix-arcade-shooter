@@ -88,7 +88,7 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
 
             this.addChild(new ScriptChain(this, true, [
                 new MoveObjectToPoint(null, boss, { x: this.game.width - boss.sprite.width, y: 1 }, 2),
-                new MoveObjectToPoint(null, boss, { x: 0, y: 1 })
+                new MoveObjectToPoint(null, boss, { x: 0, y: 1 }, 2)
             ]));
 
             this.ships.push(boss);
