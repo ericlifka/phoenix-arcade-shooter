@@ -23,11 +23,11 @@ DefineModule('phoenix/ships/arrow-boss', function (require) {
             }
         },
         applyDamage: function (damage) {
-            this.exploding = true;
-            this.sprite = shipExplosion();
-
-            this.velocity.x = 0;
-            this.velocity.y = 0;
+            //this.exploding = true;
+            //this.sprite = shipExplosion();
+            //
+            //this.velocity.x = 0;
+            //this.velocity.y = 0;
         },
         fire: function () {
             var position = {
