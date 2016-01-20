@@ -82,13 +82,15 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
         newBossShip: function () {
             console.log('adding boss ship');
             var boss = window.boss = new BossShip(this.game);
+            var gameWidth = this.game.width;
+            var bossWidth = boss.sprite.width;
 
-            boss.position.x = -20;
+            boss.position.x = -this.game.width / 2;
             boss.position.y = 1;
 
             this.addChild(new ScriptChain(this, true, [
-                new MoveObjectToPoint(null, boss, { x: this.game.width - boss.sprite.width - 5, y: 1 }, 8),
-                new MoveObjectToPoint(null, boss, { x: 0, y: 1 }, 8)
+                new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
+                new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
             ]));
 
             this.ships.push(boss);
