@@ -19,9 +19,9 @@ DefineModule('phoenix/sprites/player-ship', function (require) {
 
     newPlayerShip.meta = {
         guns: [
-            { x: 3, y: 0 },
-            { x: 0, y: 4 },
-            { x: 6, y: 4 }
+            { x: 3, y: 1 },
+            { x: 0, y: 5 },
+            { x: 6, y: 5 }
         ]
     };
 
