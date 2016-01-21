@@ -81,6 +81,7 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
             var velocity = { x: 0, y: -this.BULLET_SPEED };
 
             this.parent.spawnBullet(this.team, position, velocity);
+            this.addChild(new MuzzleFlash(this, gun));
         },
         applyDamage: function (damage) {
             this.life -= damage;
