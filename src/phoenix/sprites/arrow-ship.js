@@ -18,7 +18,7 @@ DefineModule('phoenix/sprites/arrow-ship', function (require) {
 
     arrowShipSprite.meta = {
         guns: [
-            { x: 3, y: 6 }
+            { x: 3, y: 7 }
         ]
     };
 
