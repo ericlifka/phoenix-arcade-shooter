@@ -90,7 +90,7 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
 
             this.addChild(new FireSingleGunRandomRate(this, boss, 0));
             this.addChild(new FireSingleGunRandomRate(this, boss, 2));
-            this.addChild(new ChainGunFire(this, boss, 1));
+            this.addChild(new ChainGunFire(this, boss, { gunIndex: 1 }));
 
             this.addChild(new ScriptChain(this, true, [
                 new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),

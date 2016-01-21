@@ -3,13 +3,13 @@ DefineModule('phoenix/scripts/chain-gun-fire', function (require) {
     var Random = require('helpers/random');
 
     return DefineClass(GameObject, {
-        constructor: function (parent, ship, gunIndex) {
+        constructor: function (parent, ship, options) {
             this.super('constructor', arguments);
 
             this.ship = ship;
-            this.gunIndex = gunIndex || 0;
-            this.fireRate = 100;
-            this.burstSize = 10;
+            this.gunIndex = options.gunIndex || 0;
+            this.fireRate = options.fireRate || 150;
+            this.burstSize = options.burstSize || 5;
         },
 
         start: function () {
