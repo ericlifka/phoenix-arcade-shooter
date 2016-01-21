@@ -3,7 +3,6 @@ DefineModule('phoenix/animations/muzzle-flash', function (require) {
     var GameObject = require('models/game-object');
     var Sprite = require('models/sprite');
 
-    var n = null;
     var shades = [
         "#ff0000",
         "#ff3300",
@@ -33,7 +32,7 @@ DefineModule('phoenix/animations/muzzle-flash', function (require) {
             });
         },
 
-        update: function (dtime) {
+        update: function () {
             this.super('update', arguments);
 
             if (this.sprite.finished) {
