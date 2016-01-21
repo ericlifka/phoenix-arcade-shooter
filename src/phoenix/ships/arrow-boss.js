@@ -29,7 +29,7 @@ DefineModule('phoenix/ships/arrow-boss', function (require) {
             //this.velocity.x = 0;
             //this.velocity.y = 0;
         },
-        fire: function () {
+        fire: function (gunIndex) {
             var position = {
                 x: this.position.x + Math.floor(this.sprite.width / 2),
                 y: this.position.y + this.sprite.height
