@@ -10,11 +10,13 @@ DefineModule('phoenix/scripts/chain-gun-fire', function (require) {
             this.gunIndex = options.gunIndex || 0;
             this.fireRate = options.fireRate || 150;
             this.burstSize = options.burstSize || 5;
+            this.thresholdMin = options.thresholdMin || 2000;
+            this.thresholdMax = options.thresholdMax || 6000;
         },
 
         start: function () {
             this.resetTimer();
-            this.threshold += 3000;
+            this.threshold += this.thresholdMax;
         },
 
         update: function (dtime) {
@@ -51,7 +53,7 @@ DefineModule('phoenix/scripts/chain-gun-fire', function (require) {
 
         resetTimer: function () {
             this.elapsed = 0;
-            this.threshold = Random.integer(1000, 3000);
+            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
         }
     });
 });
