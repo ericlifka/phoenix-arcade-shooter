@@ -2,6 +2,7 @@ DefineModule('phoenix/ships/arrow-boss', function (require) {
     var GameObject = require('models/game-object');
     var shipSprite = require('phoenix/sprites/arrow-boss');
     var shipExplosion = require('phoenix/animations/ship-explosion');
+    var MuzzleFlash = require('phoenix/animations/muzzle-flash');
 
     return DefineClass(GameObject, {
         BULLET_SPEED: 100,
@@ -43,6 +44,7 @@ DefineModule('phoenix/ships/arrow-boss', function (require) {
             var velocity = { x: 0, y: this.BULLET_SPEED };
 
             this.parent.spawnBullet(this.team, position, velocity);
+            this.addChild(new MuzzleFlash(this, gun));
         }
     });
 });
