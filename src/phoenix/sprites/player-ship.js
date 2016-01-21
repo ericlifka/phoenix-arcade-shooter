@@ -1,7 +1,7 @@
 DefineModule('phoenix/sprites/player-ship', function (require) {
     var Sprite = require('models/sprite');
 
-    return function () {
+    function newPlayerShip() {
         var w = "white";
         var n = null;
         return new Sprite([
@@ -16,4 +16,14 @@ DefineModule('phoenix/sprites/player-ship', function (require) {
             [ n, n, n, w, n, n, n ]
         ]);
     }
+
+    newPlayerShip.meta = {
+        guns: [
+            { x: 3, y: 0 },
+            { x: 0, y: 4 },
+            { x: 6, y: 4 }
+        ]
+    };
+
+    return newPlayerShip;
 });
