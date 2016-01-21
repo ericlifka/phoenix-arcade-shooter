@@ -1,5 +1,6 @@
 DefineModule('phoenix/ships/player-controlled-ship', function (require) {
     var GameObject = require('models/game-object');
+    var MuzzleFlash = require('phoenix/animations/muzzle-flash');
     var playerShipSprite = require('phoenix/sprites/player-ship');
     var shipExplosion = require('phoenix/animations/ship-explosion');
 
@@ -71,14 +72,15 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
             }
         },
         fire: function () {
+            var gun = playerShipSprite.meta.guns[0];
+
             var position = {
-                x: this.position.x + Math.floor(this.sprite.width / 2),
-                y: this.position.y - 2
+                x: this.position.x + gun.x,
+                y: this.position.y + gun.y
             };
             var velocity = { x: 0, y: -this.BULLET_SPEED };
-            var acceleration = { x: 0, y: 0 };
 
-            this.parent.spawnBullet(this.team, position, velocity, acceleration);
+            this.parent.spawnBullet(this.team, position, velocity);
         },
         applyDamage: function (damage) {
             this.life -= damage;
