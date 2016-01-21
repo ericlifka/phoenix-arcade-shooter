@@ -1,7 +1,7 @@
 DefineModule('phoenix/sprites/arrow-boss', function (require) {
     var Sprite = require('models/sprite');
 
-    return function () {
+    function arrowBossSprite() {
         var w = "white";
         var n = null;
         return new Sprite([
@@ -18,4 +18,14 @@ DefineModule('phoenix/sprites/arrow-boss', function (require) {
             [ n, n, n, n, n, n, n, n, w, n, n, n, n, n, n, n, n ]
         ]);
     }
+
+    arrowBossSprite.meta = {
+        guns: [
+            { x: 3, y: 8 },
+            { x: 8, y: 10 },
+            { x: 13, y: 8 }
+        ]
+    };
+
+    return arrowBossSprite;
 });
