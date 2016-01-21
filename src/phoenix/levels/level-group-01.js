@@ -88,8 +88,8 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
             boss.position.x = -this.game.width / 2;
             boss.position.y = 1;
 
-            this.addChild(new FireSingleGunRandomRate(this, boss, 0));
-            this.addChild(new FireSingleGunRandomRate(this, boss, 2));
+            this.addChild(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));
+            this.addChild(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
             this.addChild(new ChainGunFire(this, boss, { gunIndex: 1 }));
 
             this.addChild(new ScriptChain(this, true, [

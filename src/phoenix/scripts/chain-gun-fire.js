@@ -5,6 +5,7 @@ DefineModule('phoenix/scripts/chain-gun-fire', function (require) {
     return DefineClass(GameObject, {
         constructor: function (parent, ship, options) {
             this.super('constructor', arguments);
+            options = options || {};
 
             this.ship = ship;
             this.gunIndex = options.gunIndex || 0;

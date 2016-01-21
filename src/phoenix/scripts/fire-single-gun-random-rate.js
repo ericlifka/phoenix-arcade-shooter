@@ -3,16 +3,19 @@ DefineModule('phoenix/scripts/fire-single-gun-random-rate', function (require) {
     var Random = require('helpers/random');
 
     return DefineClass(GameObject, {
-        constructor: function (parent, ship, gunIndex) {
+        constructor: function (parent, ship, options) {
             this.super('constructor', arguments);
+            options = options || {};
 
             this.ship = ship;
-            this.gunIndex = gunIndex || 0;
+            this.gunIndex = options.gunIndex || 0;
+            this.thresholdMin = options.thresholdMin || 1000;
+            this.thresholdMax = options.thresholdMax || 3000;
         },
 
         start: function () {
             this.resetTimer();
-            this.threshold += 3000;
+            this.threshold += this.thresholdMax;
         },
 
         update: function (dtime) {
@@ -30,7 +33,7 @@ DefineModule('phoenix/scripts/fire-single-gun-random-rate', function (require) {
 
         resetTimer: function () {
             this.elapsed = 0;
-            this.threshold = Random.integer(1000, 3000);
+            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
         }
     });
 });
