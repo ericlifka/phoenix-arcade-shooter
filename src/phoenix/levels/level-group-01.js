@@ -1,6 +1,7 @@
 DefineModule('phoenix/levels/level-group-01', function (require) {
     var Banner = require('components/fadeout-banner');
     var BossShip = require('phoenix/ships/arrow-boss');
+    var ChainGunFire = require('phoenix/scripts/chain-gun-fire');
     var EnemyShip = require('phoenix/ships/arrow-ship');
     var FireSingleGunRandomRate = require('phoenix/scripts/fire-single-gun-random-rate');
     var GameObject = require('models/game-object');
@@ -80,7 +81,6 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
             this.ships.push(ship);
         },
         newBossShip: function () {
-            console.log('adding boss ship');
             var boss = window.boss = new BossShip(this.game);
             var gameWidth = this.game.width;
             var bossWidth = boss.sprite.width;
@@ -90,6 +90,8 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
 
             this.addChild(new FireSingleGunRandomRate(this, boss, 0));
             this.addChild(new FireSingleGunRandomRate(this, boss, 2));
+            this.addChild(new ChainGunFire(this, boss, 1));
+
             this.addChild(new ScriptChain(this, true, [
                 new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
                 new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
