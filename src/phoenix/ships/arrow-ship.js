@@ -1,5 +1,6 @@
 DefineModule('phoenix/ships/arrow-ship', function (require) {
     var GameObject = require('models/game-object');
+    var MuzzleFlash = require('phoenix/animations/muzzle-flash');
     var shipSprite = require('phoenix/sprites/arrow-ship');
     var shipExplosion = require('phoenix/animations/ship-explosion');
 
@@ -38,6 +39,7 @@ DefineModule('phoenix/ships/arrow-ship', function (require) {
             var velocity = { x: 0, y: this.BULLET_SPEED };
 
             this.parent.spawnBullet(this.team, position, velocity);
+            this.addChild(new MuzzleFlash(this, gun));
         }
     });
 });
