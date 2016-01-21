@@ -8,6 +8,8 @@ DefineModule('phoenix/scripts/chain-gun-fire', function (require) {
 
             this.ship = ship;
             this.gunIndex = gunIndex || 0;
+            this.fireRate = 100;
+            this.burstSize = 10;
         },
 
         start: function () {
@@ -22,9 +24,28 @@ DefineModule('phoenix/scripts/chain-gun-fire', function (require) {
 
             this.elapsed += dtime;
 
-            if (this.elapsed > this.threshold) {
-                this.resetTimer();
-                this.ship.fire(this.gunIndex);
+            if (this.firing) {
+
+                if (this.elapsed > this.fireRate) {
+                    this.elapsed -= this.fireRate;
+                    this.burstCount++;
+                    this.ship.fire(this.gunIndex);
+
+                    if (this.burstCount > this.burstSize) {
+                        this.firing = false;
+                        this.resetTimer();
+                    }
+                }
+
+            }
+            else {
+
+                if (this.elapsed > this.threshold) {
+                    this.firing = true;
+                    this.elapsed = 0;
+                    this.burstCount = 0;
+                }
+
             }
         },
 
