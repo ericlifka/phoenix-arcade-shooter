@@ -29,14 +29,15 @@ DefineModule('phoenix/ships/arrow-ship', function (require) {
             this.velocity.y = 0;
         },
         fire: function () {
+            var gun = shipSprite.meta.guns[0];
+
             var position = {
-                x: this.position.x + Math.floor(this.sprite.width / 2),
-                y: this.position.y + this.sprite.height
+                x: this.position.x + gun.x,
+                y: this.position.y + gun.y
             };
             var velocity = { x: 0, y: this.BULLET_SPEED };
-            var acceleration = { x: 0, y: 0 };
 
-            this.parent.spawnBullet(this.team, position, velocity, acceleration);
+            this.parent.spawnBullet(this.team, position, velocity);
         }
     });
 });

@@ -1,7 +1,7 @@
 DefineModule('phoenix/sprites/arrow-ship', function (require) {
     var Sprite = require('models/sprite');
 
-    return function () {
+    function arrowShipSprite() {
         var w = "white";
         var n = null;
         return new Sprite([
@@ -15,4 +15,12 @@ DefineModule('phoenix/sprites/arrow-ship', function (require) {
             [ n, n, n, w, n, n, n ]
         ]);
     }
+
+    arrowShipSprite.meta = {
+        guns: [
+            { x: 3, y: 6 }
+        ]
+    };
+
+    return arrowShipSprite;
 });
