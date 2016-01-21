@@ -6,8 +6,8 @@ DefineModule('phoenix/ships/arrow-boss', function (require) {
 
     return DefineClass(GameObject, {
         BULLET_SPEED: 100,
+        damage: 50,
         team: 1,
-        damage: 5,
 
         constructor: function () {
             this.super('constructor', arguments);
@@ -15,6 +15,8 @@ DefineModule('phoenix/ships/arrow-boss', function (require) {
             this.sprite = shipSprite().rotateRight();
             this.position = { x: 0, y: 0 };
             this.velocity = { x: 0, y: 0 };
+
+            this.life = 10;
         },
         update: function () {
             this.super('update', arguments);
@@ -24,11 +26,15 @@ DefineModule('phoenix/ships/arrow-boss', function (require) {
             }
         },
         applyDamage: function (damage) {
-            //this.exploding = true;
-            //this.sprite = shipExplosion();
-            //
-            //this.velocity.x = 0;
-            //this.velocity.y = 0;
+            this.life -= damage;
+
+            if (this.life <= 0) {
+                this.exploding = true;
+                this.sprite = shipExplosion();
+
+                this.velocity.x = 0;
+                this.velocity.y = 0;
+            }
         },
         fire: function (gunIndex) {
             if (gunIndex === undefined || gunIndex > shipSprite.meta.guns.length) {
