@@ -88,6 +88,8 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
             boss.position.x = -this.game.width / 2;
             boss.position.y = 1;
 
+            this.addChild(new FireSingleGunRandomRate(this, boss, 0));
+            this.addChild(new FireSingleGunRandomRate(this, boss, 1));
             this.addChild(new ScriptChain(this, true, [
                 new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
                 new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
