@@ -3,21 +3,24 @@ DefineModule('phoenix/animations/muzzle-flash', function (require) {
     var GameObject = require('models/game-object');
     var Sprite = require('models/sprite');
 
-    var y = "yellow";
-    var o = "orange";
-    var r = "red";
-
-    var frames = [
-        new Sprite([
-            [ r, r ]
-        ]),
-        new Sprite([
-            [ o, o ]
-        ]),
-        new Sprite([
-            [ y, y ]
-        ])
+    var n = null;
+    var shades = [
+        "#ff0000",
+        "#ff3300",
+        "#ff6600",
+        "#ff9933",
+        "#ffcc00",
+        "#ff9900",
+        "#ffcc00",
+        "#ffcc66",
+        "#ffcc99"
     ];
+
+    var frames = shades.map(function (shade) {
+        return new Sprite([
+            [ shade, shade ]
+        ]);
+    });
 
     return DefineClass(GameObject, {
         constructor: function (parent, gunPosition) {
@@ -26,7 +29,7 @@ DefineModule('phoenix/animations/muzzle-flash', function (require) {
             this.gunPosition = gunPosition;
             this.sprite = new Animation({
                 frames: frames,
-                millisPerFrame: 50
+                millisPerFrame: 25
             });
         },
 
@@ -41,7 +44,7 @@ DefineModule('phoenix/animations/muzzle-flash', function (require) {
         renderToFrame: function (frame) {
             this.sprite.renderToFrame(frame,
                 Math.floor(this.parent.position.x + this.gunPosition.x),
-                Math.floor(this.parent.position.y + this.gunPosition.y),
+                Math.floor(this.parent.position.y + this.gunPosition.y-1),
                 (this.parent.index || 0) + 1);
         }
     })
