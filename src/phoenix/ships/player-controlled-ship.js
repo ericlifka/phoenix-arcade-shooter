@@ -29,8 +29,8 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
         },
         processInput: function (input) {
             this.super('processInput', arguments);
-            if (this.preventInputControl) {
-                // a script is in control of this object
+            if (this.preventInputControl || this.exploding || this.destroyed) {
+                // ship in a state where input isn't appropriate
                 return;
             }
 
