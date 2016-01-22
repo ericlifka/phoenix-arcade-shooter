@@ -7,30 +7,22 @@ DefineModule('phoenix/ships/arrow-ship', function (require) {
     return DefineClass(GameObject, {
         BULLET_SPEED: 100,
         team: 1,
-        damage: 5,
-        constructor: function () {
-            this.super('constructor', arguments);
+
+        reset: function () {
+            this.super('reset');
 
             this.sprite = shipSprite().rotateRight();
+            this.explosion = shipExplosion;
+
             this.position = { x: 0, y: 0 };
             this.velocity = { x: 0, y: 0 };
-        },
-        update: function () {
-            this.super('update', arguments);
 
-            if (this.exploding && this.sprite.finished) {
-                this.destroy();
-            }
-        },
-        applyDamage: function (damage) {
-            this.exploding = true;
-            this.sprite = shipExplosion();
-
-            this.velocity.x = 0;
-            this.velocity.y = 0;
+            this.damage = 5;
+            this.maxLife = 1;
+            this.life = 1;
         },
         fire: function () {
-            var gun = shipSprite.meta.guns[0];
+            var gun = this.sprite.meta.guns[0];
 
             var position = {
                 x: this.position.x + gun.x,

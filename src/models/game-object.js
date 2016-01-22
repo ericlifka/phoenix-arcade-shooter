@@ -34,6 +34,10 @@ DefineModule('models/game-object', function (require) {
             }
 
             this.checkBoundaries();
+
+            if (this.exploding && this.sprite.finished) {
+                this.destroy();
+            }
         },
         checkBoundaries: function () {
             /* a place to verify that objects are within the screen constraints */
@@ -74,7 +78,23 @@ DefineModule('models/game-object', function (require) {
             this.destroyed = true;
         },
         applyDamage: function (damage) {
-            /* no good base implementation, needs to be overridden */
+            if (this.maxLife) {
+                this.life -= damage;
+
+                if (this.life <= 0) {
+                    this.exploding = true;
+                    this.sprite = this.explosion();
+
+                    if (this.velocity) {
+                        this.velocity.x = 0;
+                        this.velocity.y = 0;
+                    }
+                    if (this.acceleration) {
+                        this.acceleration.x = 0;
+                        this.acceleration.y = 0;
+                    }
+                }
+            }
         }
     });
 });
