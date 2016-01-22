@@ -14,21 +14,25 @@ DefineModule('phoenix/ships/arrow-ship', function (require) {
             this.sprite = shipSprite().rotateRight();
             this.position = { x: 0, y: 0 };
             this.velocity = { x: 0, y: 0 };
-        },
-        update: function () {
-            this.super('update', arguments);
 
-            if (this.exploding && this.sprite.finished) {
-                this.destroy();
-            }
+            this.maxLife = 1;
+            this.life = 1;
+            this.explosion = shipExplosion;
         },
-        applyDamage: function (damage) {
-            this.exploding = true;
-            this.sprite = shipExplosion();
-
-            this.velocity.x = 0;
-            this.velocity.y = 0;
-        },
+        // update: function () {
+        //     this.super('update', arguments);
+        //
+        //     if (this.exploding && this.sprite.finished) {
+        //         this.destroy();
+        //     }
+        // },
+        // applyDamage: function (damage) {
+        //     this.exploding = true;
+        //     this.sprite = shipExplosion();
+        //
+        //     this.velocity.x = 0;
+        //     this.velocity.y = 0;
+        // },
         fire: function () {
             var gun = shipSprite.meta.guns[0];
 
