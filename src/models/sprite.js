@@ -3,7 +3,8 @@ DefineModule('models/sprite', function (require) {
 
     var Sprite = DefineClass(CellGrid, {
         finished: true,
-        constructor: function Sprite(pixels) {
+        constructor: function Sprite(pixels, meta) {
+            this.meta = meta || {};
             this.width = pixels.length;
             this.height = pixels[ 0 ].length;
 

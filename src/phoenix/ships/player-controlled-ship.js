@@ -69,7 +69,7 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
             }
         },
         fire: function () {
-            var gun = playerShipSprite.meta.guns[0];
+            var gun = this.sprite.meta.guns[0];
 
             var position = {
                 x: this.position.x + gun.x,

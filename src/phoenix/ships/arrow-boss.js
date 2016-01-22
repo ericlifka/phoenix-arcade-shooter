@@ -26,7 +26,7 @@ DefineModule('phoenix/ships/arrow-boss', function (require) {
                 gunIndex = 1;
             }
 
-            var gun = shipSprite.meta.guns[ gunIndex ];
+            var gun = this.sprite.meta.guns[ gunIndex ];
 
             var position = {
                 x: this.position.x + gun.x,

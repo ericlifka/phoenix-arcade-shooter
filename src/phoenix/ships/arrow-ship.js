@@ -10,7 +10,7 @@ DefineModule('phoenix/ships/arrow-ship', function (require) {
 
         reset: function () {
             this.super('reset');
-            
+
             this.sprite = shipSprite().rotateRight();
             this.explosion = shipExplosion;
 
@@ -22,7 +22,7 @@ DefineModule('phoenix/ships/arrow-ship', function (require) {
             this.life = 1;
         },
         fire: function () {
-            var gun = shipSprite.meta.guns[0];
+            var gun = this.sprite.meta.guns[0];
 
             var position = {
                 x: this.position.x + gun.x,
