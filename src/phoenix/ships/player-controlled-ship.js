@@ -9,6 +9,7 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
             this.super('reset');
 
             this.sprite = playerShipSprite().rotateRight();
+            this.explosion = shipExplosion;
 
             this.position = { x: -100, y: -100 };
             this.velocity = { x: 0, y: 0 };
@@ -40,10 +41,6 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
         },
         update: function (dtime) {
             this.super('update', arguments);
-
-            if (this.exploding && this.sprite.finished) {
-                this.destroy();
-            }
 
             this.timeSinceFired += dtime;
             if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
@@ -82,18 +79,6 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
 
             this.parent.spawnBullet(this.team, position, velocity);
             this.addChild(new MuzzleFlash(this, gun));
-        },
-        applyDamage: function (damage) {
-            this.life -= damage;
-
-            if (this.life <= 0) {
-                this.exploding = true;
-                this.sprite = shipExplosion();
-
-                this.velocity.x = 0;
-                this.velocity.y = 0;
-                this.preventInputControl = true;
-            }
         }
     });
 });
