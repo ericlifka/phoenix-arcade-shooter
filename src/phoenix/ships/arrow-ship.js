@@ -9,8 +9,11 @@ DefineModule('phoenix/ships/arrow-ship', function (require) {
         team: 1,
 
         reset: function () {
+            this.super('reset');
+            
             this.sprite = shipSprite().rotateRight();
             this.explosion = shipExplosion;
+
             this.position = { x: 0, y: 0 };
             this.velocity = { x: 0, y: 0 };
 
