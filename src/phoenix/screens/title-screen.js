@@ -70,10 +70,17 @@ DefineModule('phoenix/title-screen', function (require) {
                 }
 
                 if (Math.abs(input.movementVector.y) > 0.6) {
-                    this.selectedMenuItem++;
                     this.timeSinceChanged = 0;
+                    if (input.movementVector.y > 0) {
+                        this.selectedMenuItem++;
+                    } else {
+                        this.selectedMenuItem--;
+                    }
 
                     if (this.selectedMenuItem >= this.menuItems.length) {
+                        this.selectedMenuItem = this.menuItems.length - 1;
+                    }
+                    if (this.selectedMenuItem < 0) {
                         this.selectedMenuItem = 0;
                     }
                 }
