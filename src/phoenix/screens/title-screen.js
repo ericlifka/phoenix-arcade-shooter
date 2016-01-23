@@ -96,8 +96,7 @@ DefineModule('phoenix/title-screen', function (require) {
             this.timeSinceSelected += dtime;
 
             if (this.selecting && this.timeSinceSelected > 595) {
-                this.cleanup();
-
+                this.destroy();
                 this.parent.startNewGame();
             }
         },

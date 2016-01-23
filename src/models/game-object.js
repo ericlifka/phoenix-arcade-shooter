@@ -75,6 +75,7 @@ DefineModule('models/game-object', function (require) {
                 this.parent.removeChild(this);
             }
 
+            this.cleanup();
             this.destroyed = true;
         },
         applyDamage: function (damage) {
