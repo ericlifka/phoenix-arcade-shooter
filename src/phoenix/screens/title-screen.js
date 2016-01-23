@@ -33,6 +33,12 @@ DefineModule('phoenix/title-screen', function (require) {
                     message: "Load",
                     position: { x: 90, y: 105 },
                     explodable: true
+                }),
+                new TextDisplay(this, {
+                    font: "arcade-small",
+                    message: "controls",
+                    position: { x: 85, y: 120 },
+                    explodable: true
                 })
             ];
             this.menuItems.forEach(function (item) {
