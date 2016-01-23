@@ -23,23 +23,9 @@ DefineModule('phoenix/title-screen', function (require) {
             this.createShipSelectors();
 
             this.addChild(new EventedInput({
-                onUp: function () {
-                    if (this.selectedMenuItem < this.menuItems.length - 1 && !this.selecting) {
-                        this.selectedMenuItem++;
-                        this.updateSelectorPosition();
-                    }
-                }.bind(this),
-                onDown: function () {
-                    if (this.selectedMenuItem > 0 && !this.selecting) {
-                        this.selectedMenuItem--;
-                        this.updateSelectorPosition();
-                    }
-                }.bind(this),
-                onSelect: function () {
-                    if (!this.selecting) {
-                        this.chooseSelected();
-                    }
-                }.bind(this)
+                onUp: this.onUp.bind(this),
+                onDown: this.onDown.bind(this),
+                onSelect: this.onSelect.bind(this)
             }));
         },
 
@@ -83,6 +69,26 @@ DefineModule('phoenix/title-screen', function (require) {
             if (this.selecting && this.timeSinceSelected > 595) {
                 this.destroy();
                 this.parent.startNewGame();
+            }
+        },
+
+        onUp: function () {
+            if (this.selectedMenuItem < this.menuItems.length - 1 && !this.selecting) {
+                this.selectedMenuItem++;
+                this.updateSelectorPosition();
+            }
+        },
+
+        onDown: function () {
+            if (this.selectedMenuItem > 0 && !this.selecting) {
+                this.selectedMenuItem--;
+                this.updateSelectorPosition();
+            }
+        },
+
+        onSelect: function () {
+            if (!this.selecting) {
+                this.chooseSelected();
             }
         },
 
