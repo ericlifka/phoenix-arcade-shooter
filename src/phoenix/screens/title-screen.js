@@ -134,10 +134,13 @@ DefineModule('phoenix/title-screen', function (require) {
         },
 
         cleanup: function () {
-            this.parent.removeChild(this);
+            var parent = this.parent;
+
             this.menuItems.forEach(function (item) {
-                this.parent.removeChild(item);
-            }.bind(this));
+                parent.removeChild(item);
+            });
+
+            parent.removeChild(this);
         }
     });
 });
