@@ -22,7 +22,7 @@ DefineModule('phoenix/ships/arrow-boss', function (require) {
             this.maxLife = 10;
         },
         fire: function (gunIndex) {
-            if (gunIndex === undefined || gunIndex > shipSprite.meta.guns.length) {
+            if (gunIndex === undefined || gunIndex > this.sprite.meta.guns.length) {
                 gunIndex = 1;
             }
 
