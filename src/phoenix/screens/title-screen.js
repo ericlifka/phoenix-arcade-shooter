@@ -94,18 +94,10 @@ DefineModule('phoenix/title-screen', function (require) {
         },
 
         updateSelectorPosition: function () {
-            if (this.selectedMenuItem === 0) {
-                this.selectorLeft.position.y = 90;
-                this.selectorRight.position.y = 90;
-            }
-            else if (this.selectedMenuItem === 1) {
-                this.selectorLeft.position.y = 105;
-                this.selectorRight.position.y = 105;
-            }
-            else {
-                this.selectorLeft.position.y = 120;
-                this.selectorRight.position.y = 120;
-            }
+            var selectedY = this.menuItems[ this.selectedMenuItem ].position.y;
+
+            this.selectorLeft.position.y = selectedY;
+            this.selectorRight.position.y = selectedY;
         },
 
         chooseSelected: function () {
