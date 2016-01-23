@@ -31,13 +31,13 @@ DefineModule('phoenix/title-screen', function (require) {
                 new TextDisplay(this, {
                     font: "arcade-small",
                     message: "Load",
-                    position: { x: 90, y: 105 },
+                    position: { x: 89, y: 105 },
                     explodable: true
                 }),
                 new TextDisplay(this, {
                     font: "arcade-small",
                     message: "controls",
-                    position: { x: 85, y: 120 },
+                    position: { x: 84, y: 120 },
                     explodable: true
                 })
             ];
