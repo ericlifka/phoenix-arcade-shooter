@@ -53,9 +53,9 @@ DefineModule('phoenix/game', function (require) {
         },
         startNewGame: function () {
             this.addChild(new LifeMeter(this.player, {
-                position: { x: this.width - 5, y: 2 },
-                length: 30,
-                width: 1,
+                position: { x: this.width - 2, y: this.height - 21 },
+                length: 20,
+                width: 1
             }));
 
             this.levelManager.start();
