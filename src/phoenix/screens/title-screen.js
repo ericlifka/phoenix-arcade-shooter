@@ -59,7 +59,16 @@ DefineModule('phoenix/title-screen', function (require) {
             this.addChild(this.selectorRight);
 
             this.addChild(new EventedInput({
-
+                onUp: function () {
+                    if (this.selectedMenuItem < this.menuItems.length - 1) {
+                        this.selectedMenuItem++;
+                    }
+                }.bind(this),
+                onDown: function () {
+                    if (this.selectedMenuItem > 0) {
+                        this.selectedMenuItem--;
+                    }
+                }.bind(this)
             }));
         },
 
