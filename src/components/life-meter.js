@@ -26,8 +26,8 @@ DefineModule('components/life-meter', function (require) {
 
         redrawMeter: function () {
             var percentage = this.currentLife / this.maxLife * 100;
-            var colors = [];
 
+            var colors = [];
             for (var i = this.length - 1; i >= 0; i--) {
                 if (i / this.length * 100 >= percentage) {
                     colors.push(r);
@@ -37,7 +37,12 @@ DefineModule('components/life-meter', function (require) {
                 }
             }
 
-            this.sprite = new Sprite([ colors, colors ]);
+            var rows = [];
+            for (var j = 0; j < this.width; j++) {
+                rows.push(colors);
+            }
+
+            this.sprite = new Sprite(rows);
         }
     });
 });
