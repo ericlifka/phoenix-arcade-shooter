@@ -20,18 +20,7 @@ DefineModule('phoenix/title-screen', function (require) {
             this.selecting = false;
 
             this.createTextMenu();
-
-            this.selectorLeft = new GameObject();
-            this.selectorRight = new GameObject();
-
-            this.selectorLeft.sprite = new ArrowShip();
-            this.selectorRight.sprite = new ArrowShip().invertX();
-
-            this.selectorLeft.position = { x: 70, y: 90 };
-            this.selectorRight.position = { x: 115, y: 90 };
-
-            this.addChild(this.selectorLeft);
-            this.addChild(this.selectorRight);
+            this.createShipSelectors();
 
             this.addChild(new EventedInput({
                 onUp: function () {
@@ -69,6 +58,22 @@ DefineModule('phoenix/title-screen', function (require) {
                     explodable: true
                 }));
             }.bind(this));
+        },
+
+        createShipSelectors: function () {
+            this.selectorLeft = new GameObject();
+            this.selectorRight = new GameObject();
+
+            this.selectorLeft.sprite = new ArrowShip();
+            this.selectorRight.sprite = new ArrowShip().invertX();
+
+            this.selectorLeft.position = { x: 70, y: 0 };
+            this.selectorRight.position = { x: 115, y: 0 };
+
+            this.addChild(this.selectorLeft);
+            this.addChild(this.selectorRight);
+
+            this.updateSelectorPosition();
         },
 
         update: function (dtime) {
