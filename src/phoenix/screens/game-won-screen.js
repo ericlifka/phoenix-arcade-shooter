@@ -3,37 +3,35 @@ DefineModule('phoenix/game-won-screen', function (require) {
     var TextDisplay = require('components/text-display');
 
     return DefineClass(GameObject, {
+        headerDef: {
+            font: "arcade",
+            message: "YOU WIN!!",
+            color: "green",
+            border: 1,
+            background: this.parent.FILL_COLOR,
+            padding: 20,
+            position: { x: 45, y: 45 }
+        },
+        subHeaderDef: {
+            font: "arcade-small",
+            message: "< hit start >",
+            color: "green",
+            position: { x: 75, y: 81 }
+        },
+
         reset: function () {
             this.super('reset');
 
-            this.inputReleased = false;
-            this.resetPressed = false;
+            this.addChild(new TextDisplay(this, this.headerDef));
+            this.addChild(new TextDisplay(this, this.subHeaderDef));
 
-            this.addChild(new TextDisplay(this, {
-                font: "arcade",
-                message: "YOU WIN!!",
-                color: "green",
-                border: 1,
-                background: this.parent.FILL_COLOR,
-                padding: 20,
-                position: { x: 45, y: 45 }
-            }));
-            this.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                message: "< hit start >",
-                color: "green",
-                position: { x: 75, y: 81 }
+            this.addChild(new EventedInput({
+                onSelect: this.onSelect.bind(this)
             }));
         },
 
-        processInput: function (input) {
-            if (!input.menuSelect && !input.fire) {
-                this.inputReleased = true;
-            }
-            if (!this.resetPressed && this.inputReleased && (input.menuSelect || input.fire)) {
-                this.resetPressed = true;
-                this.parent.reset();
-            }
+        onSelect: function () {
+            this.parent.reset();
         }
     })
 });
