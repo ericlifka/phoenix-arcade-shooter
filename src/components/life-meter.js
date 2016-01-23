@@ -43,6 +43,10 @@ DefineModule('components/life-meter', function (require) {
             }
 
             this.sprite = new Sprite(rows);
+
+            if (this.horizontal) {
+                this.sprite.rotateRight();
+            }
         }
     });
 });
