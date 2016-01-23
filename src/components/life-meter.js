@@ -11,7 +11,8 @@ DefineModule('components/life-meter', function (require) {
             this.entity = boundEntity;
             this.position = options.position || { x: 0, y: 0 };
             this.horizontal = !!options.horizontal;
-            this.size = options.size || 20;
+            this.length = options.length || 10;
+            this.width = options.width || 1;
         },
 
         update: function () {
@@ -27,8 +28,8 @@ DefineModule('components/life-meter', function (require) {
             var percentage = this.currentLife / this.maxLife * 100;
             var colors = [];
 
-            for (var i = this.size - 1; i >= 0; i--) {
-                if (i / this.size * 100 >= percentage) {
+            for (var i = this.length - 1; i >= 0; i--) {
+                if (i / this.length * 100 >= percentage) {
                     colors.push(r);
                 }
                 else {
