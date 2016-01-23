@@ -9,11 +9,7 @@ DefineModule('phoenix/title-screen', function (require) {
             this.super('reset');
 
             this.selectedMenuItem = 0;
-            this.timeSinceChanged = 0;
             this.timeSinceSelected = 0;
-            this.CHANGE_DELAY = 200;
-
-            this.inputReleased = false;
             this.selecting = false;
 
             this.addChild(new TextDisplay(this, {
@@ -60,60 +56,29 @@ DefineModule('phoenix/title-screen', function (require) {
 
             this.addChild(new EventedInput({
                 onUp: function () {
-                    if (this.selectedMenuItem < this.menuItems.length - 1) {
+                    if (this.selectedMenuItem < this.menuItems.length - 1 && !this.selecting) {
                         this.selectedMenuItem++;
+                        this.updateSelectorPosition();
                     }
-                    this.updateSelectorPosition();
                 }.bind(this),
                 onDown: function () {
-                    if (this.selectedMenuItem > 0) {
+                    if (this.selectedMenuItem > 0 && !this.selecting) {
                         this.selectedMenuItem--;
+                        this.updateSelectorPosition();
                     }
-                    this.updateSelectorPosition();
                 }.bind(this),
                 onSelect: function () {
-                    this.chooseSelected();
+                    if (!this.selecting) {
+                        this.chooseSelected();
+                    }
                 }.bind(this)
             }));
         },
 
-        //processInput: function (input) {
-        //    if (!input.menuSelect && !input.fire) {
-        //        this.inputReleased = true;
-        //    }
-        //
-        //    if (this.timeSinceChanged > this.CHANGE_DELAY) {
-        //        if (this.inputReleased && (input.menuSelect || input.fire)) {
-        //            this.timeSinceChanged = 0;
-        //            this.chooseSelected();
-        //        }
-        //
-        //        if (Math.abs(input.movementVector.y) > 0.6) {
-        //            this.timeSinceChanged = 0;
-        //            if (input.movementVector.y > 0) {
-        //                this.selectedMenuItem++;
-        //            } else {
-        //                this.selectedMenuItem--;
-        //            }
-        //
-        //            if (this.selectedMenuItem >= this.menuItems.length) {
-        //                this.selectedMenuItem = this.menuItems.length - 1;
-        //            }
-        //            if (this.selectedMenuItem < 0) {
-        //                this.selectedMenuItem = 0;
-        //            }
-        //        }
-        //    }
-        //
-        //    this.updateSelectorPosition();
-        //},
-
         update: function (dtime) {
             this.super('update', arguments);
 
-            this.timeSinceChanged += dtime;
             this.timeSinceSelected += dtime;
-
             if (this.selecting && this.timeSinceSelected > 595) {
                 this.destroy();
                 this.parent.startNewGame();
@@ -121,34 +86,30 @@ DefineModule('phoenix/title-screen', function (require) {
         },
 
         updateSelectorPosition: function () {
-            if (!this.selecting) {
-                if (this.selectedMenuItem === 0) {
-                    this.selectorLeft.position.y = 90;
-                    this.selectorRight.position.y = 90;
-                }
-                else if (this.selectedMenuItem === 1) {
-                    this.selectorLeft.position.y = 105;
-                    this.selectorRight.position.y = 105;
-                }
-                else {
-                    this.selectorLeft.position.y = 120;
-                    this.selectorRight.position.y = 120;
-                }
+            if (this.selectedMenuItem === 0) {
+                this.selectorLeft.position.y = 90;
+                this.selectorRight.position.y = 90;
+            }
+            else if (this.selectedMenuItem === 1) {
+                this.selectorLeft.position.y = 105;
+                this.selectorRight.position.y = 105;
+            }
+            else {
+                this.selectorLeft.position.y = 120;
+                this.selectorRight.position.y = 120;
             }
         },
 
         chooseSelected: function () {
-            if (!this.selecting) {
-                this.selecting = true;
-                this.timeSinceSelected = 0;
+            this.selecting = true;
+            this.timeSinceSelected = 0;
 
-                var x1 = this.selectorLeft.position.x + this.selectorLeft.sprite.width;
-                var x2 = this.selectorRight.position.x;
-                var y = this.selectorLeft.position.y + Math.floor(this.selectorLeft.sprite.height / 2);
+            var x1 = this.selectorLeft.position.x + this.selectorLeft.sprite.width;
+            var x2 = this.selectorRight.position.x;
+            var y = this.selectorLeft.position.y + Math.floor(this.selectorLeft.sprite.height / 2);
 
-                this.parent.spawnBullet(2, { x: x1, y: y }, { x: 50, y: 0 });
-                this.parent.spawnBullet(3, { x: x2, y: y }, { x: -50, y: 0 });
-            }
+            this.parent.spawnBullet(2, { x: x1, y: y }, { x: 50, y: 0 });
+            this.parent.spawnBullet(3, { x: x2, y: y }, { x: -50, y: 0 });
         },
 
         destroy: function () {
