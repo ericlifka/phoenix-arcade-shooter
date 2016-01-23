@@ -18,6 +18,8 @@ DefineModule('phoenix/bullet', function (require) {
             this.life = 0;
             this.maxLife = 1;
             this.damage = 1;
+
+            this.updateBulletDirection();
         },
         checkBoundaries: function () {
             if (this.position.x < 0
@@ -26,6 +28,11 @@ DefineModule('phoenix/bullet', function (require) {
                 || this.position.y + this.sprite.height > this.parent.height) {
 
                 this.destroy();
+            }
+        },
+        updateBulletDirection: function () {
+            if (Math.abs(this.velocity.x) > Math.abs(this.velocity.y)) {
+                this.sprite.rotateRight();
             }
         }
     });
