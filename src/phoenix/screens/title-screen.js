@@ -70,6 +70,9 @@ DefineModule('phoenix/title-screen', function (require) {
                         this.selectedMenuItem--;
                     }
                     this.updateSelectorPosition();
+                }.bind(this),
+                onSelect: function () {
+                    this.chooseSelected();
                 }.bind(this)
             }));
         },
@@ -105,17 +108,17 @@ DefineModule('phoenix/title-screen', function (require) {
         //    this.updateSelectorPosition();
         //},
 
-        //update: function (dtime) {
-        //    this.super('update', arguments);
-        //
-        //    this.timeSinceChanged += dtime;
-        //    this.timeSinceSelected += dtime;
-        //
-        //    if (this.selecting && this.timeSinceSelected > 595) {
-        //        this.destroy();
-        //        this.parent.startNewGame();
-        //    }
-        //},
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            this.timeSinceChanged += dtime;
+            this.timeSinceSelected += dtime;
+
+            if (this.selecting && this.timeSinceSelected > 595) {
+                this.destroy();
+                this.parent.startNewGame();
+            }
+        },
 
         updateSelectorPosition: function () {
             if (!this.selecting) {
