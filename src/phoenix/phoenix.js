@@ -52,7 +52,10 @@ DefineModule('phoenix/game', function (require) {
             this.addChild(this.titleScreen);
         },
         startNewGame: function () {
-            this.addChild(new LifeMeter(this, this.player, { x: this.width - 5, y: 2 }));
+            this.addChild(new LifeMeter(this.player, {
+                position: { x: this.width - 5, y: 2 }
+            }));
+
             this.levelManager.start();
         },
         spawnBullet: function (team, position, velocity, acceleration) {

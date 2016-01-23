@@ -7,11 +7,11 @@ DefineModule('components/life-meter', function (require) {
     return DefineClass(GameObject, {
         meterSize: 20,
 
-        constructor: function (parent, boundEntity, position) {
-            this.super('constructor', arguments);
+        constructor: function (boundEntity, options) {
+            options = options || {};
 
             this.entity = boundEntity;
-            this.position = position;
+            this.position = options.position || { x: 0, y: 0 };
         },
 
         update: function () {
