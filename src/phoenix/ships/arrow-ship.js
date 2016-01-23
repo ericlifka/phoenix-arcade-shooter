@@ -13,6 +13,7 @@ DefineModule('phoenix/ships/arrow-ship', function (require) {
 
             this.sprite = shipSprite().rotateRight();
             this.explosion = shipExplosion;
+            this.gun = this.sprite.meta.guns[ 0 ];
 
             this.position = { x: 0, y: 0 };
             this.velocity = { x: 0, y: 0 };
@@ -22,16 +23,15 @@ DefineModule('phoenix/ships/arrow-ship', function (require) {
             this.life = 1;
         },
         fire: function () {
-            var gun = this.sprite.meta.guns[0];
 
             var position = {
-                x: this.position.x + gun.x,
-                y: this.position.y + gun.y
+                x: this.position.x + this.gun.x,
+                y: this.position.y + this.gun.y
             };
             var velocity = { x: 0, y: this.BULLET_SPEED };
 
             this.parent.spawnBullet(this.team, position, velocity);
-            this.addChild(new MuzzleFlash(this, gun));
+            this.addChild(new MuzzleFlash(this, this.gun));
         }
     });
 });

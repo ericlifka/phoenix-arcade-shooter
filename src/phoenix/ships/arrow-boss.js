@@ -14,6 +14,7 @@ DefineModule('phoenix/ships/arrow-boss', function (require) {
 
             this.sprite = shipSprite().rotateRight();
             this.explosion = shipExplosion;
+            this.guns = this.sprite.meta.guns;
 
             this.position = { x: 0, y: 0 };
             this.velocity = { x: 0, y: 0 };
@@ -22,7 +23,7 @@ DefineModule('phoenix/ships/arrow-boss', function (require) {
             this.maxLife = 10;
         },
         fire: function (gunIndex) {
-            var gun = this.sprite.meta.guns[ gunIndex ];
+            var gun = this.guns[ gunIndex ];
 
             var position = {
                 x: this.position.x + gun.x,
