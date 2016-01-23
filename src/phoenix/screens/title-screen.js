@@ -37,12 +37,13 @@ DefineModule('phoenix/title-screen', function (require) {
             }));
 
             this.menuItems.forEach(function (item) {
-                this.parent.addChild(new TextDisplay(this, {
+                item.component = new TextDisplay(this, {
                     font: "arcade-small",
                     message: item.message,
                     position: item.position,
                     explodable: true
-                }));
+                });
+                this.parent.addChild(item.component);
             }.bind(this));
         },
 
@@ -122,7 +123,7 @@ DefineModule('phoenix/title-screen', function (require) {
         destroy: function () {
             var parent = this.parent;
             this.menuItems.forEach(function (item) {
-                parent.removeChild(item);
+                parent.removeChild(item.component);
             });
 
             this.super('destroy');
