@@ -5,7 +5,7 @@ DefineModule('phoenix/ships/arrow-boss', function (require) {
     var MuzzleFlash = require('phoenix/animations/muzzle-flash');
 
     return DefineClass(GameObject, {
-        BULLET_SPEED: 100,
+        BULLET_SPEED: 120,
         damage: 50,
         team: 1,
 
@@ -19,8 +19,8 @@ DefineModule('phoenix/ships/arrow-boss', function (require) {
             this.position = { x: 0, y: 0 };
             this.velocity = { x: 0, y: 0 };
 
-            this.life = 10;
-            this.maxLife = 10;
+            this.life = 25;
+            this.maxLife = 25;
         },
         fire: function (gunIndex) {
             var gun = this.guns[ gunIndex ];
