@@ -5,6 +5,7 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
     var EnemyShip = require('phoenix/ships/arrow-ship');
     var FireSingleGunRandomRate = require('phoenix/scripts/fire-single-gun-random-rate');
     var GameObject = require('models/game-object');
+    var LifeMeter = require('components/life-meter');
     var MoveObjectToPoint = require('phoenix/scripts/move-object-to-point');
     var ScriptChain = require('models/script-chain');
 
@@ -87,6 +88,13 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
 
             boss.position.x = -this.game.width / 2;
             boss.position.y = 1;
+
+            boss.addChild(new LifeMeter(boss, {
+                position: { x: 0, y: 0 },
+                length: this.game.width,
+                width: 1,
+                horizontal: true
+            }));
 
             this.addChild(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));
             this.addChild(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
