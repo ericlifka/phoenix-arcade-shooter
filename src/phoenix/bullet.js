@@ -4,7 +4,6 @@ DefineModule('phoenix/bullet', function (require) {
     var smallExplosion = require('phoenix/animations/small-explosion');
 
     return DefineClass(GameObject, {
-        damage: 1,
         constructor: function (parent, team, position, velocity, acceleration) {
             this.super('constructor', arguments);
 
@@ -14,6 +13,11 @@ DefineModule('phoenix/bullet', function (require) {
             this.acceleration = acceleration;
 
             this.sprite = bulletSprite();
+            this.explosion = smallExplosion;
+
+            this.life = 0;
+            this.maxLife = 1;
+            this.damage = 1;
         },
         checkBoundaries: function () {
             if (this.position.x < 0
@@ -23,15 +27,6 @@ DefineModule('phoenix/bullet', function (require) {
 
                 this.destroy();
             }
-        },
-        applyDamage: function (damage) {
-            this.exploding = true;
-            this.sprite = smallExplosion();
-
-            this.velocity.x = 0;
-            this.velocity.y = 0;
-            this.position.x -= Math.floor(this.sprite.width / 2);
-            this.position.y -= Math.floor(this.sprite.height / 2);
         }
     });
 });
