@@ -20,6 +20,7 @@ DefineModule('phoenix/bullet', function (require) {
             this.damage = 1;
 
             this.updateBulletDirection();
+            this.updateColor();
         },
         checkBoundaries: function () {
             if (this.position.x < 0
@@ -33,6 +34,13 @@ DefineModule('phoenix/bullet', function (require) {
         updateBulletDirection: function () {
             if (Math.abs(this.velocity.x) > Math.abs(this.velocity.y)) {
                 this.sprite.rotateRight();
+            }
+        },
+        updateColor: function () {
+            switch (this.team) {
+                case 0: this.sprite.applyColor("#B1D8AD"); break;
+                case 1: this.sprite.applyColor("#F7BEBE"); break;
+                default: break;
             }
         }
     });
