@@ -66,16 +66,12 @@ DefineModule('models/game-object', function (require) {
                 }
             }
         },
-        cleanup: function () {
-            /* a place to unload any children that need to be dealt with */
-            this.children = null;
-        },
         destroy: function () {
             if (this.parent && this.parent.removeChild) {
                 this.parent.removeChild(this);
             }
 
-            this.cleanup();
+            this.children = null; // may need to iterate through children and destroy them too
             this.destroyed = true;
         },
         applyDamage: function (damage) {

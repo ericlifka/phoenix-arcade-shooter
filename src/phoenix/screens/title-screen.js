@@ -132,14 +132,13 @@ DefineModule('phoenix/title-screen', function (require) {
             }
         },
 
-        cleanup: function () {
+        destroy: function () {
             var parent = this.parent;
-
             this.menuItems.forEach(function (item) {
                 parent.removeChild(item);
             });
 
-            parent.removeChild(this);
+            this.super('destroy');
         }
     });
 });

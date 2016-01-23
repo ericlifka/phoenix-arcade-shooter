@@ -54,8 +54,7 @@ DefineModule('phoenix/level-manager', function (require) {
             this.super('update', arguments);
 
             if (this.currentLevel && this.currentLevel.checkIfLevelComplete()) {
-                this.currentLevel.cleanup();
-                this.removeChild(this.currentLevel);
+                this.currentLevel.destroy();
                 this.loadNextLevel();
             }
         }
