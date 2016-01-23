@@ -73,7 +73,7 @@ DefineModule('phoenix/title-screen', function (require) {
                     this.selectedMenuItem++;
                     this.timeSinceChanged = 0;
 
-                    if (this.selectedMenuItem > 1) {
+                    if (this.selectedMenuItem >= this.menuItems.length) {
                         this.selectedMenuItem = 0;
                     }
                 }
@@ -101,9 +101,13 @@ DefineModule('phoenix/title-screen', function (require) {
                     this.selectorLeft.position.y = 90;
                     this.selectorRight.position.y = 90;
                 }
-                else {
+                else if (this.selectedMenuItem === 1) {
                     this.selectorLeft.position.y = 105;
                     this.selectorRight.position.y = 105;
+                }
+                else {
+                    this.selectorLeft.position.y = 120;
+                    this.selectorRight.position.y = 120;
                 }
             }
         },
