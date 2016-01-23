@@ -63,11 +63,13 @@ DefineModule('phoenix/title-screen', function (require) {
                     if (this.selectedMenuItem < this.menuItems.length - 1) {
                         this.selectedMenuItem++;
                     }
+                    this.updateSelectorPosition();
                 }.bind(this),
                 onDown: function () {
                     if (this.selectedMenuItem > 0) {
                         this.selectedMenuItem--;
                     }
+                    this.updateSelectorPosition();
                 }.bind(this)
             }));
         },
