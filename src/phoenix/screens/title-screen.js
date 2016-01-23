@@ -1,4 +1,5 @@
 DefineModule('phoenix/title-screen', function (require) {
+    var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
     var TextDisplay = require('components/text-display');
     var ArrowShip = require('phoenix/sprites/arrow-ship');
@@ -56,50 +57,54 @@ DefineModule('phoenix/title-screen', function (require) {
 
             this.addChild(this.selectorLeft);
             this.addChild(this.selectorRight);
+
+            this.addChild(new EventedInput({
+
+            }));
         },
 
-        processInput: function (input) {
-            if (!input.menuSelect && !input.fire) {
-                this.inputReleased = true;
-            }
+        //processInput: function (input) {
+        //    if (!input.menuSelect && !input.fire) {
+        //        this.inputReleased = true;
+        //    }
+        //
+        //    if (this.timeSinceChanged > this.CHANGE_DELAY) {
+        //        if (this.inputReleased && (input.menuSelect || input.fire)) {
+        //            this.timeSinceChanged = 0;
+        //            this.chooseSelected();
+        //        }
+        //
+        //        if (Math.abs(input.movementVector.y) > 0.6) {
+        //            this.timeSinceChanged = 0;
+        //            if (input.movementVector.y > 0) {
+        //                this.selectedMenuItem++;
+        //            } else {
+        //                this.selectedMenuItem--;
+        //            }
+        //
+        //            if (this.selectedMenuItem >= this.menuItems.length) {
+        //                this.selectedMenuItem = this.menuItems.length - 1;
+        //            }
+        //            if (this.selectedMenuItem < 0) {
+        //                this.selectedMenuItem = 0;
+        //            }
+        //        }
+        //    }
+        //
+        //    this.updateSelectorPosition();
+        //},
 
-            if (this.timeSinceChanged > this.CHANGE_DELAY) {
-                if (this.inputReleased && (input.menuSelect || input.fire)) {
-                    this.timeSinceChanged = 0;
-                    this.chooseSelected();
-                }
-
-                if (Math.abs(input.movementVector.y) > 0.6) {
-                    this.timeSinceChanged = 0;
-                    if (input.movementVector.y > 0) {
-                        this.selectedMenuItem++;
-                    } else {
-                        this.selectedMenuItem--;
-                    }
-
-                    if (this.selectedMenuItem >= this.menuItems.length) {
-                        this.selectedMenuItem = this.menuItems.length - 1;
-                    }
-                    if (this.selectedMenuItem < 0) {
-                        this.selectedMenuItem = 0;
-                    }
-                }
-            }
-
-            this.updateSelectorPosition();
-        },
-
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            this.timeSinceChanged += dtime;
-            this.timeSinceSelected += dtime;
-
-            if (this.selecting && this.timeSinceSelected > 595) {
-                this.destroy();
-                this.parent.startNewGame();
-            }
-        },
+        //update: function (dtime) {
+        //    this.super('update', arguments);
+        //
+        //    this.timeSinceChanged += dtime;
+        //    this.timeSinceSelected += dtime;
+        //
+        //    if (this.selecting && this.timeSinceSelected > 595) {
+        //        this.destroy();
+        //        this.parent.startNewGame();
+        //    }
+        //},
 
         updateSelectorPosition: function () {
             if (!this.selecting) {
