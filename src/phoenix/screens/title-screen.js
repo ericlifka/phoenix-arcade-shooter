@@ -5,6 +5,13 @@ DefineModule('phoenix/title-screen', function (require) {
     var ArrowShip = require('phoenix/sprites/arrow-ship');
 
     return DefineClass(GameObject, {
+        headerDef: { message: "PHOENIX", position: { x: 50, y: 30 } },
+        menuItems: [
+            { message: "New", position: { x: 90, y: 90 } },
+            { message: "Load", position: { x: 89, y: 105 } },
+            { message: "controls", position: { x: 84, y: 120 } }
+        ],
+
         reset: function () {
             this.super('reset');
 
@@ -12,35 +19,7 @@ DefineModule('phoenix/title-screen', function (require) {
             this.timeSinceSelected = 0;
             this.selecting = false;
 
-            this.addChild(new TextDisplay(this, {
-                font: "phoenix",
-                message: "PHOENIX",
-                position: { x: 50, y: 30 }
-            }));
-
-            this.menuItems = [
-                new TextDisplay(this, {
-                    font: "arcade-small",
-                    message: "New",
-                    position: { x: 90, y: 90 },
-                    explodable: true
-                }),
-                new TextDisplay(this, {
-                    font: "arcade-small",
-                    message: "Load",
-                    position: { x: 89, y: 105 },
-                    explodable: true
-                }),
-                new TextDisplay(this, {
-                    font: "arcade-small",
-                    message: "controls",
-                    position: { x: 84, y: 120 },
-                    explodable: true
-                })
-            ];
-            this.menuItems.forEach(function (item) {
-                this.parent.addChild(item);
-            }.bind(this));
+            this.createTextMenu();
 
             this.selectorLeft = new GameObject();
             this.selectorRight = new GameObject();
@@ -73,6 +52,23 @@ DefineModule('phoenix/title-screen', function (require) {
                     }
                 }.bind(this)
             }));
+        },
+
+        createTextMenu: function () {
+            this.addChild(new TextDisplay(this, {
+                font: 'phoenix',
+                message: this.headerDef.message,
+                position: this.headerDef.position
+            }));
+
+            this.menuItems.forEach(function (item) {
+                this.parent.addChild(new TextDisplay(this, {
+                    font: "arcade-small",
+                    message: item.message,
+                    position: item.position,
+                    explodable: true
+                }));
+            }.bind(this));
         },
 
         update: function (dtime) {
