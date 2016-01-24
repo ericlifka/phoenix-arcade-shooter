@@ -5,6 +5,7 @@ DefineModule('phoenix/ships/arrow-ship', function (require) {
     var shipExplosion = require('phoenix/animations/ship-explosion');
 
     return DefineClass(GameObject, {
+        isPhysicalEntity: true,
         BULLET_SPEED: 100,
         team: 1,
 

@@ -4,6 +4,8 @@ DefineModule('phoenix/bullet', function (require) {
     var smallExplosion = require('phoenix/animations/small-explosion');
 
     return DefineClass(GameObject, {
+        isPhysicalEntity: true,
+
         constructor: function (parent, team, position, velocity, acceleration) {
             this.super('constructor', arguments);
 

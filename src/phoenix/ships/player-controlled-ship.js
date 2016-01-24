@@ -5,6 +5,8 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
     var shipExplosion = require('phoenix/animations/ship-explosion');
 
     return DefineClass(GameObject, {
+        isPhysicalEntity: true,
+
         reset: function () {
             this.super('reset');
 

@@ -5,6 +5,7 @@ DefineModule('phoenix/ships/arrow-boss', function (require) {
     var MuzzleFlash = require('phoenix/animations/muzzle-flash');
 
     return DefineClass(GameObject, {
+        isPhysicalEntity: true,
         BULLET_SPEED: 120,
         damage: 50,
         team: 1,
