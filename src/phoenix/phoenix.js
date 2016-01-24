@@ -1,6 +1,7 @@
 DefineModule('phoenix/game', function (require) {
     var Bullet = require('phoenix/bullet');
     var Collisions = require('helpers/collisions');
+    var ControlsScreen = require('phoenix/screens/controls-description');
     var GameObject = require('models/game-object');
     var GameOverScreen = require('phoenix/game-over-screen');
     var GameWonScreen = require('phoenix/game-won-screen');
@@ -18,6 +19,7 @@ DefineModule('phoenix/game', function (require) {
             this.width = gameDimensions.width;
             this.height = gameDimensions.height;
 
+            this.controlsScreen = new ControlsScreen(this);
             this.titleScreen = new TitleScreen(this);
             this.gameOverScreen = new GameOverScreen(this);
             this.gameWonScreen = new GameWonScreen(this);
@@ -60,8 +62,8 @@ DefineModule('phoenix/game', function (require) {
 
             this.levelManager.start();
         },
-        showControlPage: function () {
-
+        showControlsScreen: function () {
+            this.addChild(this.controlsScreen);
         },
         spawnBullet: function (team, position, velocity, acceleration) {
             this.addChild(new Bullet(this, team, position, velocity, acceleration));

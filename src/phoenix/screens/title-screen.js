@@ -75,7 +75,7 @@ DefineModule('phoenix/title-screen', function (require) {
                         this.parent.startNewGame();
                         break;
                     case 2:
-                        this.parent.showControlPage();
+                        this.parent.showControlsScreen();
                         break;
                     default:
                         console.error('Unsupported menu option');
