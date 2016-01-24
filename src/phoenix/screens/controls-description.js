@@ -1,4 +1,5 @@
 DefineModule('phoenix/screens/controls-description', function (require) {
+    var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
     var TextDisplay = require('components/text-display');
 
@@ -43,7 +44,15 @@ DefineModule('phoenix/screens/controls-description', function (require) {
                 color: "#F6EC9A",
                 position: { x: 85, y: 20 }
             }));
+
+            this.addChild(new EventedInput({
+                onSelect: this.onSelect.bind(this)
+            }));
         },
+
+        onSelect: function () {
+            this.parent.reset();
+        }
         //
         //processInput: function (input) {
         //    if (!input.menuSelect && !input.fire) {

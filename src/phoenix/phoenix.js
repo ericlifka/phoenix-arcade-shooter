@@ -43,7 +43,7 @@ DefineModule('phoenix/game', function (require) {
             this.paused = false;
             this.unpressedMenuSelect = false;
 
-            //this.titleScreen.reset();
+            this.titleScreen.reset();
             this.gameOverScreen.reset();
             this.gameWonScreen.reset();
             this.levelManager.reset();
@@ -51,8 +51,7 @@ DefineModule('phoenix/game', function (require) {
 
             this.addChild(this.player);
             this.addChild(this.levelManager);
-            //this.addChild(this.titleScreen);
-            this.addChild(this.controlsScreen);
+            this.addChild(this.titleScreen);
         },
         startNewGame: function () {
             this.addChild(new LifeMeter(this.player, {
