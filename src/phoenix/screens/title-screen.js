@@ -43,7 +43,7 @@ DefineModule('phoenix/title-screen', function (require) {
                     position: item.position,
                     isPhysicalEntity: true
                 });
-                this.parent.addChild(item.component);
+                this.addChild(item.component);
             }.bind(this));
         },
 
