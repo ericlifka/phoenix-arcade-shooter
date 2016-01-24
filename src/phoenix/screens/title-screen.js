@@ -37,13 +37,12 @@ DefineModule('phoenix/title-screen', function (require) {
             }));
 
             this.menuItems.forEach(function (item) {
-                item.component = new TextDisplay(this, {
+                this.addChild(new TextDisplay(this, {
                     font: "arcade-small",
                     message: item.message,
                     position: item.position,
                     isPhysicalEntity: true
-                });
-                this.addChild(item.component);
+                }));
             }.bind(this));
         },
 
