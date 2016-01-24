@@ -16,12 +16,32 @@ DefineModule('phoenix/screens/controls-description', function (require) {
             this.addChild(new TextDisplay(this, {
                 font: "arcade-small",
                 message: [
-                    "          - Keyboard - Controller",
-                    "Move      - WASD     - Left Stick",
-                    "Fire      - Space    - A"
+                    "",
+                    "Move",
+                    "Fire"
                 ],
                 color: "#F6EC9A",
                 position: { x: 5, y: 20 }
+            }));
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: [
+                    "- Keyboard",
+                    "- WASD",
+                    "- Space"
+                ],
+                color: "#F6EC9A",
+                position: { x: 35, y: 20 }
+            }));
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: [
+                    "- Controller",
+                    "- Left Stick",
+                    "- A"
+                ],
+                color: "#F6EC9A",
+                position: { x: 85, y: 20 }
             }));
         },
         //
