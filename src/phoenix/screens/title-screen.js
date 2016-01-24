@@ -84,15 +84,15 @@ DefineModule('phoenix/title-screen', function (require) {
         },
 
         onUp: function () {
-            if (this.selectedMenuItem < this.menuItems.length - 1 && !this.selecting) {
-                this.selectedMenuItem++;
+            if (this.selectedMenuItem > 0 && !this.selecting) {
+                this.selectedMenuItem--;
                 this.updateSelectorPosition();
             }
         },
 
         onDown: function () {
-            if (this.selectedMenuItem > 0 && !this.selecting) {
-                this.selectedMenuItem--;
+            if (this.selectedMenuItem < this.menuItems.length - 1 && !this.selecting) {
+                this.selectedMenuItem++;
                 this.updateSelectorPosition();
             }
         },
