@@ -1,5 +1,6 @@
 DefineModule('phoenix/game', function (require) {
     var Bullet = require('phoenix/bullet');
+    var collectEntities = require('helpers/collect-entities');
     var Collisions = require('helpers/collisions');
     var ControlsScreen = require('phoenix/screens/controls-description');
     var GameObject = require('models/game-object');
@@ -113,9 +114,7 @@ DefineModule('phoenix/game', function (require) {
             this.removeChild(this.pausedText);
         },
         checkCollisions: function () {
-            var physicalEntities = this.children.filter(function (child) {
-                return child.position && child.sprite && !child.exploding;
-            });
+            var physicalEntities = collectEntities(this);
 
             var collisionPairs = [];
 
