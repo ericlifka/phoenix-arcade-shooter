@@ -69,7 +69,18 @@ DefineModule('phoenix/title-screen', function (require) {
             this.timeSinceSelected += dtime;
             if (this.selecting && this.timeSinceSelected > 595) {
                 this.destroy();
-                this.parent.startNewGame();
+                switch (this.selectedMenuItem) {
+                    case 0:
+                    case 1:
+                        this.parent.startNewGame();
+                        break;
+                    case 2:
+                        this.parent.showControlPage();
+                        break;
+                    default:
+                        console.error('Unsupported menu option');
+                }
+
             }
         },
 

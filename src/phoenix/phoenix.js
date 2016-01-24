@@ -60,6 +60,9 @@ DefineModule('phoenix/game', function (require) {
 
             this.levelManager.start();
         },
+        showControlPage: function () {
+
+        },
         spawnBullet: function (team, position, velocity, acceleration) {
             this.addChild(new Bullet(this, team, position, velocity, acceleration));
         },
