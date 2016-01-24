@@ -4,46 +4,40 @@ DefineModule('phoenix/screens/controls-description', function (require) {
     var TextDisplay = require('components/text-display');
 
     return DefineClass(GameObject, {
+        headerDef: {
+            font: "arcade",
+            message: "Controls",
+            color: "white",
+            position: { x: 5, y: 5 }
+        },
+        inputDescriptions: [
+            {
+                message: [ "", "Move", "Fire" ],
+                position: { x: 5, y: 20 }
+            },
+            {
+                message: [ "- Keyboard", "- WASD", "- Space" ],
+                position: { x: 35, y: 20 }
+            },
+            {
+                message: [ "- Controller", "- Left Stick", "- A" ],
+                position: { x: 85, y: 20 }
+            }
+        ],
+
         reset: function () {
             this.super('reset');
 
-            this.addChild(new TextDisplay(this, {
-                font: "arcade",
-                message: "Controls",
-                color: "white",
-                position: { x: 5, y: 5 }
-            }));
+            this.addChild(new TextDisplay(this, this.headerDef));
 
-            this.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                message: [
-                    "",
-                    "Move",
-                    "Fire"
-                ],
-                color: "#F6EC9A",
-                position: { x: 5, y: 20 }
-            }));
-            this.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                message: [
-                    "- Keyboard",
-                    "- WASD",
-                    "- Space"
-                ],
-                color: "#F6EC9A",
-                position: { x: 35, y: 20 }
-            }));
-            this.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                message: [
-                    "- Controller",
-                    "- Left Stick",
-                    "- A"
-                ],
-                color: "#F6EC9A",
-                position: { x: 85, y: 20 }
-            }));
+            this.inputDescriptions.forEach(function (item) {
+                this.addChild(new TextDisplay(this, {
+                    font: "arcade-small",
+                    color: "#F6EC9A",
+                    message: item.message,
+                    position: item.position
+                }))
+            }.bind(this));
 
             this.addChild(new EventedInput({
                 onSelect: this.onSelect.bind(this)
@@ -53,15 +47,5 @@ DefineModule('phoenix/screens/controls-description', function (require) {
         onSelect: function () {
             this.parent.reset();
         }
-        //
-        //processInput: function (input) {
-        //    if (!input.menuSelect && !input.fire) {
-        //        this.inputReleased = true;
-        //    }
-        //    if (!this.resetPressed && this.inputReleased && (input.menuSelect || input.fire)) {
-        //        this.resetPressed = true;
-        //        this.parent.reset();
-        //    }
-        //}
     })
 });
