@@ -22,7 +22,7 @@ DefineModule('components/text-display', function (require) {
             this.padding = options.padding || 0;
             this.background = options.background || null;
             this.index = options.index || 10;
-            this.explodable = options.explodable;
+            this.isPhysicalEntity = options.isPhysicalEntity;
 
             this.populateSprites();
             this.updateColor(options.color || "white");
@@ -118,11 +118,9 @@ DefineModule('components/text-display', function (require) {
         },
 
         applyDamage: function () {
-            if (this.explodable) {
-                this.children.forEach(function (entity) {
-                    entity.sprite = shipExplosion({ x: -2, y: -1 });
-                });    
-            }
+            this.children.forEach(function (entity) {
+                entity.sprite = shipExplosion({ x: -2, y: -1 });
+            });
         }
     });
 });

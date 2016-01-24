@@ -41,7 +41,7 @@ DefineModule('phoenix/title-screen', function (require) {
                     font: "arcade-small",
                     message: item.message,
                     position: item.position,
-                    explodable: true
+                    isPhysicalEntity: true
                 });
                 this.parent.addChild(item.component);
             }.bind(this));
