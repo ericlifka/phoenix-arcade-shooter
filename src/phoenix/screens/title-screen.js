@@ -67,19 +67,7 @@ DefineModule('phoenix/title-screen', function (require) {
 
             this.timeSinceSelected += dtime;
             if (this.selecting && this.timeSinceSelected > 595) {
-                this.destroy();
-                switch (this.selectedMenuItem) {
-                    case 0:
-                    case 1:
-                        this.parent.startNewGame();
-                        break;
-                    case 2:
-                        this.parent.showControlsScreen();
-                        break;
-                    default:
-                        console.error('Unsupported menu option');
-                }
-
+                this.propagateSelection();
             }
         },
 
@@ -122,13 +110,20 @@ DefineModule('phoenix/title-screen', function (require) {
             this.parent.spawnBullet(3, { x: x2, y: y }, { x: -50, y: 0 });
         },
 
-        destroy: function () {
-            var parent = this.parent;
-            this.menuItems.forEach(function (item) {
-                parent.removeChild(item.component);
-            });
+        propagateSelection: function () {
+            this.destroy();
+            switch (this.selectedMenuItem) {
+                case 0:
+                case 1:
+                    this.parent.startNewGame();
+                    break;
+                case 2:
+                    this.parent.showControlsScreen();
+                    break;
+                default:
+                    console.error('Unsupported menu option');
+            }
 
-            this.super('destroy');
         }
     });
 });
