@@ -1,15 +1,15 @@
 DefineModule('helpers/collect-entities', function () {
-    return function visitNode(node, collection) {
+    return function visitNode(node, matcherFn, collection) {
         collection = collection || [];
 
         if (node) {
-            if (node.isPhysicalEntity) {
+            if (matcherFn(node)) {
                 collection.push(node);
             }
 
             if (node.children && node.children.length) {
                 for (var i = 0; i < node.children.length; i++) {
-                    visitNode(node.children[i], collection);
+                    visitNode(node.children[i], matcherFn, collection);
                 }
             }
         }

@@ -114,7 +114,9 @@ DefineModule('phoenix/game', function (require) {
             this.removeChild(this.pausedText);
         },
         checkCollisions: function () {
-            var physicalEntities = collectEntities(this);
+            var physicalEntities = collectEntities(this, function (entity) {
+                return entity.isPhysicalEntity && !entity.exploding;
+            });
 
             var collisionPairs = [];
 
