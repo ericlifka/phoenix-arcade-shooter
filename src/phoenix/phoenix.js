@@ -114,17 +114,21 @@ DefineModule('phoenix/game', function (require) {
             this.removeChild(this.pausedText);
         },
         checkCollisions: function () {
-            var physicalEntities = collectEntities(this, function (entity) {
-                return entity.isPhysicalEntity && !entity.exploding;
-            });
-
+            var physicalEntities = collectEntities(this, this.physicalEntityMatcher);
+            var collisionPairs = this.findBoxCollisions(physicalEntities);
+            this.checkPairsForCollision(collisionPairs);
+        },
+        physicalEntityMatcher: function (entity) {
+            return entity.isPhysicalEntity && !entity.exploding;
+        },
+        findBoxCollisions: function (entities) {
             var collisionPairs = [];
 
-            for (var i = 0; i < physicalEntities.length - 1; i++) {
-                var outer = physicalEntities[ i ];
+            for (var i = 0; i < entities.length - 1; i++) {
+                var outer = entities[ i ];
 
-                for (var j = i + 1; j < physicalEntities.length; j++) {
-                    var inner = physicalEntities[ j ];
+                for (var j = i + 1; j < entities.length; j++) {
+                    var inner = entities[ j ];
 
                     if (outer.team !== inner.team && Collisions.boxCollision(outer, inner)) {
                         collisionPairs.push([ outer, inner ]);
@@ -132,9 +136,12 @@ DefineModule('phoenix/game', function (require) {
                 }
             }
 
-            collisionPairs.forEach(function (entityPair) {
-                var a = entityPair[ 0 ];
-                var b = entityPair[ 1 ];
+            return collisionPairs;
+        },
+        checkPairsForCollision: function (pairs) {
+            pairs.forEach(function (pair) {
+                var a = pair[ 0 ];
+                var b = pair[ 1 ];
 
                 if (Collisions.spriteCollision(a, b)) {
                     a.applyDamage(b.damage);
