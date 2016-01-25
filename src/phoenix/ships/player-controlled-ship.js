@@ -80,7 +80,7 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
             };
             var velocity = { x: 0, y: -this.BULLET_SPEED };
 
-            this.addChild(new Bullet(this, this.team, position, velocity));
+            this.parent.addChild(new Bullet(this.parent, this.team, position, velocity));
             this.addChild(new MuzzleFlash(this, gun));
         }
     });
