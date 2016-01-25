@@ -44,6 +44,12 @@ DefineModule('phoenix/bullet', function (require) {
                 case 1: this.sprite.applyColor("#F7BEBE"); break;
                 default: break;
             }
+        },
+        applyDamage: function (damage) {
+            this.super('applyDamage', arguments);
+
+            this.position.x -= Math.floor(this.sprite.width / 2);
+            this.position.y -= Math.floor(this.sprite.height / 2);
         }
     });
 });
