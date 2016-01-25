@@ -6,6 +6,8 @@ DefineModule('components/life-meter', function (require) {
 
     return DefineClass(GameObject, {
         constructor: function (boundEntity, options) {
+            this.super('constructor', arguments);
+
             options = options || {};
 
             this.entity = boundEntity;
