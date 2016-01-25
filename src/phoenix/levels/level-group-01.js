@@ -21,11 +21,11 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
             this.game = game;
             this.levelName = levelName;
             this.rowCount = rowCount;
-
-            this.ships = [];
-            this.scripts = [];
         },
         start: function () {
+            this.ships = [];
+            this.scripts = [];
+
             for (var i = 1; i <= 10; i++) {
                 this.newShip(10 * i + 39, -40, 45, 3);
 
@@ -43,7 +43,7 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
             }
 
             if (this.levelName) {
-                this.addChild(new Banner(this, this.levelName, 2000));
+                this.scripts.push(new Banner(this, this.levelName, 2000));
             }
 
             this.ships.forEach(function (ship) {
