@@ -23,10 +23,9 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
             this.rowCount = rowCount;
 
             this.ships = [];
+            this.scripts = [];
         },
         start: function () {
-            var game = this.game;
-
             for (var i = 1; i <= 10; i++) {
                 this.newShip(10 * i + 39, -40, 45, 3);
 
@@ -48,12 +47,13 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
             }
 
             this.ships.forEach(function (ship) {
-                game.addChild(ship);
-            });
+                this.addChild(ship);
+            }.bind(this));
 
-            this.children.forEach(function (script) {
+            this.scripts.forEach(function (script) {
                 script.start();
-            });
+                this.addChild(script);
+            }.bind(this));
         },
         checkIfLevelComplete: function () {
             var remainingShips = this.ships.filter(function (ship) {
@@ -63,13 +63,13 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
             return remainingShips.length === 0;
         },
         newShip: function (startX, startY, endY, time) {
-            var ship = new EnemyShip(this.game);
+            var ship = new EnemyShip(this);
 
             ship.position.x = startX;
             ship.position.y = startY;
 
-            this.addChild(new FireSingleGunRandomRate(this, ship));
-            this.addChild(new ScriptChain(this, false, [
+            this.scripts.push(new FireSingleGunRandomRate(this, ship));
+            this.scripts.push(new ScriptChain(this, false, [
                 new MoveObjectToPoint(null, ship, { x: startX, y: endY }, time * 2),
                 new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time),
                 new ScriptChain(this, true, [
@@ -82,7 +82,7 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
             this.ships.push(ship);
         },
         newBossShip: function () {
-            var boss = window.boss = new BossShip(this.game);
+            var boss = window.boss = new BossShip(this);
             var gameWidth = this.game.width;
             var bossWidth = boss.sprite.width;
 
@@ -96,11 +96,11 @@ DefineModule('phoenix/levels/level-group-01', function (require) {
                 horizontal: true
             }));
 
-            this.addChild(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));
-            this.addChild(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
-            this.addChild(new ChainGunFire(this, boss, { gunIndex: 1 }));
+            this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));
+            this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
+            this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
 
-            this.addChild(new ScriptChain(this, true, [
+            this.scripts.push(new ScriptChain(this, true, [
                 new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
                 new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
             ]));
