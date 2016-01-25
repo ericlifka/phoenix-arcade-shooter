@@ -1,4 +1,5 @@
 DefineModule('phoenix/title-screen', function (require) {
+    var Bullet = require('phoenix/bullet');
     var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
     var TextDisplay = require('components/text-display');
@@ -106,8 +107,8 @@ DefineModule('phoenix/title-screen', function (require) {
             var x2 = this.selectorRight.position.x;
             var y = this.selectorLeft.position.y + Math.floor(this.selectorLeft.sprite.height / 2);
 
-            this.parent.spawnBullet(2, { x: x1, y: y }, { x: 50, y: 0 });
-            this.parent.spawnBullet(3, { x: x2, y: y }, { x: -50, y: 0 });
+            this.addChild(new Bullet(this, 2, { x: x1, y: y }, { x: 50, y: 0 }));
+            this.addChild(new Bullet(this, 3, { x: x2, y: y }, { x: -50, y: 0 }));
         },
 
         propagateSelection: function () {
