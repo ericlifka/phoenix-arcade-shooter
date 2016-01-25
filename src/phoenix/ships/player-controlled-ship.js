@@ -1,4 +1,5 @@
 DefineModule('phoenix/ships/player-controlled-ship', function (require) {
+    var Bullet = require('phoenix/bullet');
     var GameObject = require('models/game-object');
     var MuzzleFlash = require('phoenix/animations/muzzle-flash');
     var playerShipSprite = require('phoenix/sprites/player-ship');
@@ -79,7 +80,7 @@ DefineModule('phoenix/ships/player-controlled-ship', function (require) {
             };
             var velocity = { x: 0, y: -this.BULLET_SPEED };
 
-            this.parent.spawnBullet(this.team, position, velocity);
+            this.addChild(new Bullet(this, this.team, position, velocity));
             this.addChild(new MuzzleFlash(this, gun));
         }
     });

@@ -66,9 +66,6 @@ DefineModule('phoenix/game', function (require) {
         showControlsScreen: function () {
             this.addChild(this.controlsScreen);
         },
-        spawnBullet: function (team, position, velocity, acceleration) {
-            this.addChild(new Bullet(this, team, position, velocity, acceleration));
-        },
         processInput: function (rawInput) {
             var input = this.inputInterpreter.interpret(rawInput);
 
