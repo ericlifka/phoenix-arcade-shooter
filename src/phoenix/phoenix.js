@@ -99,7 +99,7 @@ DefineModule('phoenix/game', function (require) {
             }
         },
         pause: function () {
-            if (this.levelManager.running) {
+            if (this.levelManager.running && !this.paused) {
                 this.paused = true;
                 this.unpressedMenuSelect = false;
                 this.addChild(this.pausedText);
