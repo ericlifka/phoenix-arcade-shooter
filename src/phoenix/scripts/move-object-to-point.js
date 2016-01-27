@@ -24,24 +24,29 @@ DefineModule('phoenix/scripts/move-object-to-point', function (require) {
         update: function (dtime) {
             this.super('update', arguments);
 
-            var xPositive = this.xPositive;
-            var yPositive = this.yPositive;
-            var position = this.object.position;
-            var target = this.target;
-
-            if (xPositive && position.x > target.x ||
-                !xPositive && position.x < target.x ||
-                yPositive && position.y > target.y ||
-                !yPositive && position.y < target.y) {
-
+            if (this.metXThreshold() && this.metYThreshold()) {
                 this.object.velocity.x = 0;
                 this.object.velocity.y = 0;
 
-                this.object.position.x = target.x;
-                this.object.position.y = target.y;
+                this.object.position.x = this.target.x;
+                this.object.position.y = this.target.y;
 
                 this.parent.removeChild(this);
             }
+        },
+
+        metXThreshold: function () {
+            return (
+                this.xPositive && this.object.position.x >= this.target.x ||
+                !this.xPositive && this.object.position.x <= this.target.x
+            );
+        },
+
+        metYThreshold: function () {
+            return (
+                this.yPositive && this.object.position.y >= this.target.y ||
+                !this.yPositive && this.object.position.y <= this.target.y
+            );
         }
     });
 });
