@@ -37,6 +37,9 @@ DefineModule('phoenix/scripts/move-object-to-point', function (require) {
                 this.object.velocity.x = 0;
                 this.object.velocity.y = 0;
 
+                this.object.position.x = target.x;
+                this.object.position.y = target.y;
+
                 this.parent.removeChild(this);
             }
         }
