@@ -14,7 +14,7 @@ DefineModule('components/combo-gauge', function (require) {
                 font: "arcade-small",
                 color: "#ffffff",
                 message: "1x",
-                position: { x: 1, y: this.position.y - 6 }
+                position: { x: 1 + 7, y: this.position.y + this.sprite.height - 5 }
             }));
 
             this.addChild(new TextDisplay(this, {
