@@ -1,5 +1,4 @@
 DefineModule('phoenix/game', function (require) {
-    var Bullet = require('phoenix/bullet');
     var collectEntities = require('helpers/collect-entities');
     var Collisions = require('helpers/collisions');
     var ControlsScreen = require('phoenix/screens/controls-description');
