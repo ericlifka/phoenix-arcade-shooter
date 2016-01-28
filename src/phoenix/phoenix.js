@@ -1,6 +1,7 @@
 DefineModule('phoenix/game', function (require) {
     var collectEntities = require('helpers/collect-entities');
     var Collisions = require('helpers/collisions');
+    var ComboGauge = require('components/combo-gauge');
     var ControlsScreen = require('phoenix/screens/controls-description');
     var GameObject = require('models/game-object');
     var GameOverScreen = require('phoenix/game-over-screen');
@@ -54,6 +55,7 @@ DefineModule('phoenix/game', function (require) {
             this.addChild(this.titleScreen);
         },
         startNewGame: function () {
+            this.addChild(new ComboGauge(this));
             this.addChild(new LifeMeter(this.player, {
                 position: { x: this.width - 2, y: this.height - 21 },
                 length: 20,
