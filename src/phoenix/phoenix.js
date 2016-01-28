@@ -56,7 +56,7 @@ DefineModule('phoenix/game', function (require) {
         },
         startNewGame: function () {
             this.addChild(new ComboGauge(this, {
-                position: { x: 0, y: this.height - 50 }
+                position: { x: 1, y: this.height - 75 }
             }));
             this.addChild(new LifeMeter(this.player, {
                 position: { x: this.width - 2, y: this.height - 21 },
