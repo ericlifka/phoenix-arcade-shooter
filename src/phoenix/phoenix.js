@@ -9,7 +9,7 @@ DefineModule('phoenix/game', function (require) {
     var InputInterpreter = require('phoenix/input-interpreter');
     var LevelManager = require('phoenix/level-manager');
     var LifeMeter = require('components/life-meter');
-    var PlayerShip = require('phoenix/ships/player-controlled-ship');
+    var PlayerShip = require('ships/player-controlled-ship');
     var TextDisplay = require('components/text-display');
     var TitleScreen = require('screens/title-screen');
 

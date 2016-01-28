@@ -1,4 +1,4 @@
-DefineModule('phoenix/ships/player-controlled-ship', function (require) {
+DefineModule('ships/player-controlled-ship', function (require) {
     var Bullet = require('phoenix/bullet');
     var GameObject = require('models/game-object');
     var MuzzleFlash = require('animations/muzzle-flash');

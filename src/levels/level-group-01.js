@@ -1,8 +1,8 @@
 DefineModule('levels/level-group-01', function (require) {
     var Banner = require('components/fadeout-banner');
-    var BossShip = require('phoenix/ships/arrow-boss');
+    var BossShip = require('ships/arrow-boss');
     var ChainGunFire = require('phoenix/scripts/chain-gun-fire');
-    var EnemyShip = require('phoenix/ships/arrow-ship');
+    var EnemyShip = require('ships/arrow-ship');
     var FireSingleGunRandomRate = require('phoenix/scripts/fire-single-gun-random-rate');
     var GameObject = require('models/game-object');
     var LifeMeter = require('components/life-meter');
