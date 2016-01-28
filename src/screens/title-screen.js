@@ -1,4 +1,4 @@
-DefineModule('phoenix/title-screen', function (require) {
+DefineModule('screens/title-screen', function (require) {
     var Bullet = require('phoenix/bullet');
     var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');

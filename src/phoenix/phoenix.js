@@ -2,16 +2,16 @@ DefineModule('phoenix/game', function (require) {
     var collectEntities = require('helpers/collect-entities');
     var Collisions = require('helpers/collisions');
     var ComboGauge = require('components/combo-gauge');
-    var ControlsScreen = require('phoenix/screens/controls-description');
+    var ControlsScreen = require('screens/controls-description');
     var GameObject = require('models/game-object');
-    var GameOverScreen = require('phoenix/game-over-screen');
-    var GameWonScreen = require('phoenix/game-won-screen');
+    var GameOverScreen = require('screens/game-over-screen');
+    var GameWonScreen = require('screens/game-won-screen');
     var InputInterpreter = require('phoenix/input-interpreter');
     var LevelManager = require('phoenix/level-manager');
     var LifeMeter = require('components/life-meter');
     var PlayerShip = require('phoenix/ships/player-controlled-ship');
     var TextDisplay = require('components/text-display');
-    var TitleScreen = require('phoenix/title-screen');
+    var TitleScreen = require('screens/title-screen');
 
     return DefineClass(GameObject, {
         FILL_COLOR: "#000031",

@@ -1,4 +1,4 @@
-DefineModule('phoenix/game-won-screen', function (require) {
+DefineModule('screens/game-won-screen', function (require) {
     var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
     var TextDisplay = require('components/text-display');
