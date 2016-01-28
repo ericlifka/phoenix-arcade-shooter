@@ -1,4 +1,4 @@
-DefineModule('phoenix/scripts/chain-gun-fire', function (require) {
+DefineModule('scripts/chain-gun-fire', function (require) {
     var GameObject = require('models/game-object');
     var Random = require('helpers/random');
 

@@ -1,5 +1,5 @@
 DefineModule('phoenix/level-manager', function (require) {
-    var FlyPlayerInFromBottom = require('phoenix/scripts/fly-player-in-from-bottom');
+    var FlyPlayerInFromBottom = require('scripts/fly-player-in-from-bottom');
     var GameObject = require('models/game-object');
     var Level_group_01 = require('levels/level-group-01');
 
