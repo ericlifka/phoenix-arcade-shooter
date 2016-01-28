@@ -1,4 +1,4 @@
-DefineModule('models/level-manager', function (require) {
+DefineModule('levels/level-manager', function (require) {
     var FlyPlayerInFromBottom = require('scripts/fly-player-in-from-bottom');
     var GameObject = require('models/game-object');
     var Level_group_01 = require('levels/level-group-01');

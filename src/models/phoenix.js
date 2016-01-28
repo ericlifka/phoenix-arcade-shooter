@@ -7,7 +7,7 @@ DefineModule('models/phoenix', function (require) {
     var GameOverScreen = require('screens/game-over-screen');
     var GameWonScreen = require('screens/game-won-screen');
     var InputInterpreter = require('helpers/input-interpreter');
-    var LevelManager = require('models/level-manager');
+    var LevelManager = require('levels/level-manager');
     var LifeMeter = require('components/life-meter');
     var PlayerShip = require('ships/player-controlled-ship');
     var TextDisplay = require('components/text-display');
