@@ -1,4 +1,4 @@
-DefineModule('phoenix/animations/muzzle-flash', function (require) {
+DefineModule('animations/muzzle-flash', function (require) {
     var Animation = require('models/animation');
     var GameObject = require('models/game-object');
     var Sprite = require('models/sprite');
