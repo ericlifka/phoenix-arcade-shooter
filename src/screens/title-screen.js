@@ -3,7 +3,7 @@ DefineModule('screens/title-screen', function (require) {
     var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
     var TextDisplay = require('components/text-display');
-    var ArrowShip = require('phoenix/sprites/arrow-ship');
+    var ArrowShip = require('sprites/arrow-ship');
 
     return DefineClass(GameObject, {
         headerDef: { message: "PHOENIX", position: { x: 50, y: 30 } },

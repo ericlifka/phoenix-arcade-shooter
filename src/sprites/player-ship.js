@@ -1,4 +1,4 @@
-DefineModule('phoenix/sprites/player-ship', function (require) {
+DefineModule('sprites/player-ship', function (require) {
     var Sprite = require('models/sprite');
 
     return function () {

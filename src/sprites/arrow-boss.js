@@ -1,4 +1,4 @@
-DefineModule('phoenix/sprites/arrow-boss', function (require) {
+DefineModule('sprites/arrow-boss', function (require) {
     var Sprite = require('models/sprite');
 
     return function () {

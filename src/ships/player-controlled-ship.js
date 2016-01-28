@@ -2,7 +2,7 @@ DefineModule('ships/player-controlled-ship', function (require) {
     var Bullet = require('phoenix/bullet');
     var GameObject = require('models/game-object');
     var MuzzleFlash = require('animations/muzzle-flash');
-    var playerShipSprite = require('phoenix/sprites/player-ship');
+    var playerShipSprite = require('sprites/player-ship');
     var shipExplosion = require('animations/ship-explosion');
 
     return DefineClass(GameObject, {

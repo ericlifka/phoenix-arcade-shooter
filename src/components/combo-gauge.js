@@ -1,6 +1,6 @@
 DefineModule('components/combo-gauge', function (require) {
     var GameObject = require('models/game-object');
-    var frameSprite = require('phoenix/sprites/combo-gauge');
+    var frameSprite = require('sprites/combo-gauge');
 
     return DefineClass(GameObject, {
         constructor: function (parent, options) {
