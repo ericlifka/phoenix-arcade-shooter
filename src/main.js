@@ -3,7 +3,7 @@ DefineModule('main', function (require) {
     var GameController = require('controllers/game');
     var GamepadController = require('controllers/gamepad-input');
     var KeyboardController = require('controllers/keyboard-input');
-    var Phoenix = require('phoenix/game');
+    var Phoenix = require('models/phoenix');
     var RunLoop = require('helpers/run-loop');
 
     var gameDimensions = { width: 200, height: 150 };

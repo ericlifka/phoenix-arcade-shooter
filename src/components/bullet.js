@@ -1,7 +1,7 @@
-DefineModule('phoenix/bullet', function (require) {
+DefineModule('components/bullet', function (require) {
     var GameObject = require('models/game-object');
-    var bulletSprite = require('phoenix/sprites/bullet');
-    var smallExplosion = require('phoenix/animations/small-explosion');
+    var bulletSprite = require('sprites/bullet');
+    var smallExplosion = require('sprites/animations/small-explosion');
 
     return DefineClass(GameObject, {
         isPhysicalEntity: true,

@@ -1,4 +1,4 @@
-DefineModule('phoenix/sprites/bullet', function (require) {
+DefineModule('sprites/bullet', function (require) {
     var Sprite = require('models/sprite');
 
     return function () {

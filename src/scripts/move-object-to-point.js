@@ -1,4 +1,4 @@
-DefineModule('phoenix/scripts/move-object-to-point', function (require) {
+DefineModule('scripts/move-object-to-point', function (require) {
     var GameObject = require('models/game-object');
 
     return DefineClass(GameObject, {

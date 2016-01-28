@@ -1,6 +1,6 @@
-DefineModule('phoenix/animations/ship-explosion', function (require) {
+DefineModule('sprites/animations/ship-explosion', function (require) {
     var Random = require('helpers/random');
-    var smallExplosion = require('phoenix/animations/small-explosion');
+    var smallExplosion = require('sprites/animations/small-explosion');
     var SpriteGroup = require('models/sprite-group');
 
     return function (offset) {

@@ -1,17 +1,17 @@
-DefineModule('phoenix/game', function (require) {
-    var Bullet = require('phoenix/bullet');
+DefineModule('models/phoenix', function (require) {
     var collectEntities = require('helpers/collect-entities');
     var Collisions = require('helpers/collisions');
-    var ControlsScreen = require('phoenix/screens/controls-description');
+    var ComboGauge = require('components/combo-gauge');
+    var ControlsScreen = require('screens/controls-description');
     var GameObject = require('models/game-object');
-    var GameOverScreen = require('phoenix/game-over-screen');
-    var GameWonScreen = require('phoenix/game-won-screen');
-    var InputInterpreter = require('phoenix/input-interpreter');
-    var LevelManager = require('phoenix/level-manager');
+    var GameOverScreen = require('screens/game-over-screen');
+    var GameWonScreen = require('screens/game-won-screen');
+    var InputInterpreter = require('helpers/input-interpreter');
+    var LevelManager = require('levels/level-manager');
     var LifeMeter = require('components/life-meter');
-    var PlayerShip = require('phoenix/ships/player-controlled-ship');
+    var PlayerShip = require('ships/player-controlled-ship');
     var TextDisplay = require('components/text-display');
-    var TitleScreen = require('phoenix/title-screen');
+    var TitleScreen = require('screens/title-screen');
 
     return DefineClass(GameObject, {
         FILL_COLOR: "#000031",
@@ -55,6 +55,9 @@ DefineModule('phoenix/game', function (require) {
             this.addChild(this.titleScreen);
         },
         startNewGame: function () {
+            this.addChild(new ComboGauge(this, {
+                position: { x: 1, y: this.height - 75 }
+            }));
             this.addChild(new LifeMeter(this.player, {
                 position: { x: this.width - 2, y: this.height - 21 },
                 length: 20,

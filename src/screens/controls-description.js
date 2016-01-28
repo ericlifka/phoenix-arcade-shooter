@@ -1,4 +1,4 @@
-DefineModule('phoenix/screens/controls-description', function (require) {
+DefineModule('screens/controls-description', function (require) {
     var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
     var TextDisplay = require('components/text-display');

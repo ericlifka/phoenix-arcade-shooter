@@ -1,4 +1,4 @@
-DefineModule('phoenix/animations/small-explosion', function (require) {
+DefineModule('sprites/animations/small-explosion', function (require) {
     var Animation = require('models/animation');
     var Random = require('helpers/random');
     var Sprite = require('models/sprite');

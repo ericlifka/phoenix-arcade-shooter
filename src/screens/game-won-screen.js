@@ -1,4 +1,4 @@
-DefineModule('phoenix/game-over-screen', function (require) {
+DefineModule('screens/game-won-screen', function (require) {
     var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
     var TextDisplay = require('components/text-display');
@@ -6,16 +6,17 @@ DefineModule('phoenix/game-over-screen', function (require) {
     return DefineClass(GameObject, {
         headerDef: {
             font: "arcade",
-            message: "GAME OVER",
-            color: "red",
+            message: "YOU WIN!!",
+            color: "green",
             border: 1,
+            background: this.parent.FILL_COLOR,
             padding: 20,
             position: { x: 45, y: 45 }
         },
         subHeaderDef: {
             font: "arcade-small",
             message: "< hit start >",
-            color: "red",
+            color: "green",
             position: { x: 75, y: 81 }
         },
 

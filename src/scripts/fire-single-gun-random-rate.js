@@ -1,4 +1,4 @@
-DefineModule('phoenix/scripts/fire-single-gun-random-rate', function (require) {
+DefineModule('scripts/fire-single-gun-random-rate', function (require) {
     var GameObject = require('models/game-object');
     var Random = require('helpers/random');
 

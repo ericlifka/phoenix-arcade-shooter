@@ -1,4 +1,4 @@
-DefineModule('phoenix/input-interpreter', function (require) {
+DefineModule('helpers/input-interpreter', function (require) {
     function newInputDescriptor() {
         return {
             GAME: 'phoenix',

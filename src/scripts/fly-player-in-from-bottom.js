@@ -1,4 +1,4 @@
-DefineModule('phoenix/scripts/fly-player-in-from-bottom', function (require) {
+DefineModule('scripts/fly-player-in-from-bottom', function (require) {
     var GameObject = require('models/game-object');
 
     return DefineClass(GameObject, {

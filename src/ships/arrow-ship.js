@@ -1,9 +1,9 @@
-DefineModule('phoenix/ships/arrow-ship', function (require) {
-    var Bullet = require('phoenix/bullet');
+DefineModule('ships/arrow-ship', function (require) {
+    var Bullet = require('components/bullet');
     var GameObject = require('models/game-object');
-    var MuzzleFlash = require('phoenix/animations/muzzle-flash');
-    var shipSprite = require('phoenix/sprites/arrow-ship');
-    var shipExplosion = require('phoenix/animations/ship-explosion');
+    var MuzzleFlash = require('components/muzzle-flash');
+    var shipSprite = require('sprites/arrow-ship');
+    var shipExplosion = require('sprites/animations/ship-explosion');
 
     return DefineClass(GameObject, {
         isPhysicalEntity: true,

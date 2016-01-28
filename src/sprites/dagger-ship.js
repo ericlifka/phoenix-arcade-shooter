@@ -1,4 +1,4 @@
-DefineModule('phoenix/sprites/dagger-ship', function (require) {
+DefineModule('sprites/dagger-ship', function (require) {
     var Sprite = require('models/sprite');
 
     return function () {
