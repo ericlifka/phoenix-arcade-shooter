@@ -1,5 +1,5 @@
 DefineModule('ships/arrow-ship', function (require) {
-    var Bullet = require('phoenix/bullet');
+    var Bullet = require('components/bullet');
     var GameObject = require('models/game-object');
     var MuzzleFlash = require('animations/muzzle-flash');
     var shipSprite = require('sprites/arrow-ship');
