@@ -1,6 +1,6 @@
 DefineModule('components/text-display', function (require) {
     var GameObject = require('models/game-object');
-    var shipExplosion = require('animations/ship-explosion');
+    var shipExplosion = require('sprites/animations/ship-explosion');
     var Sprite = require('models/sprite');
 
     return DefineClass(GameObject, {

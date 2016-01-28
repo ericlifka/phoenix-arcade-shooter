@@ -1,7 +1,7 @@
 DefineModule('components/bullet', function (require) {
     var GameObject = require('models/game-object');
     var bulletSprite = require('sprites/bullet');
-    var smallExplosion = require('animations/small-explosion');
+    var smallExplosion = require('sprites/animations/small-explosion');
 
     return DefineClass(GameObject, {
         isPhysicalEntity: true,
