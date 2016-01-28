@@ -1,4 +1,4 @@
-DefineModule('phoenix/levels/level-group-01', function (require) {
+DefineModule('levels/level-group-01', function (require) {
     var Banner = require('components/fadeout-banner');
     var BossShip = require('phoenix/ships/arrow-boss');
     var ChainGunFire = require('phoenix/scripts/chain-gun-fire');
