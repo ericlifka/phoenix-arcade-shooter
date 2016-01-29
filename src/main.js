@@ -1,20 +1,50 @@
 DefineModule('main', function (require) {
     var CanvasRenderer = require('views/canvas-renderer');
-    var GameController = require('controllers/game');
     var GamepadController = require('controllers/gamepad-input');
     var KeyboardController = require('controllers/keyboard-input');
     var Phoenix = require('models/phoenix');
     var RunLoop = require('helpers/run-loop');
 
     var gameDimensions = { width: 200, height: 150 };
+    var gamepadInput = new GamepadController();
+    var keyboardInput = new KeyboardController();
 
-    window.activeGame = new GameController({
-        inputSources: [
-            new KeyboardController(),
-            new GamepadController()
-        ],
-        model: new Phoenix(gameDimensions),
-        renderer: new CanvasRenderer(gameDimensions),
-        runLoop: new RunLoop()
+    var phoenix = new Phoenix(gameDimensions);
+    var renderer = new CanvasRenderer(gameDimensions);
+    var runLoop = new RunLoop();
+
+    renderer.setFillColor(phoenix.FILL_COLOR);
+
+    runLoop.addCallback(function (dtime) {
+        phoenix.processInput([
+            keyboardInput.getInputState(),
+            gamepadInput.getInputState()
+        ]);
+
+        phoenix.update(dtime);
+
+        var frame = renderer.newRenderFrame();
+        frame.clear();
+        phoenix.renderToFrame(frame);
+
+        renderer.renderFrame(frame);
     });
+
+    document.addEventListener("visibilitychange", function () {
+        if (document.hidden) {
+            phoenix.pause();
+        }
+    });
+
+    window.addEventListener("blur", function () {
+        phoenix.pause();
+    });
+
+    window.addEventListener("focus", function () {
+        keyboardInput.clearState();
+        gamepadInput.clearState();
+    });
+
+    runLoop.start();
+    window.activeGame = phoenix;
 });
