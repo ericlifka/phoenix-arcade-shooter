@@ -53,6 +53,8 @@ DefineModule('models/phoenix', function (require) {
             this.paused = false;
             this.unpressedMenuSelect = false;
 
+            this.comboGauge.reset();
+            this.lifeMeter.reset();
             this.titleScreen.reset();
             this.gameOverScreen.reset();
             this.gameWonScreen.reset();

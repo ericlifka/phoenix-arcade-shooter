@@ -5,10 +5,13 @@ DefineModule('components/combo-gauge', function (require) {
 
     return DefineClass(GameObject, {
         constructor: function (parent, options) {
-            this.super('constructor', arguments);
-
             this.position = options.position;
             this.sprite = frameSprite();
+
+            this.super('constructor', arguments);
+        },
+        reset: function () {
+            this.super('reset');
 
             this.addChild(new TextDisplay(this, {
                 font: "arcade-small",
