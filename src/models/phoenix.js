@@ -162,6 +162,9 @@ DefineModule('models/phoenix', function (require) {
         },
         enemyDestroyed: function () {
             console.log('phoenix - enemyDestroyed', arguments);
+        },
+        enemyHit: function () {
+            console.log('phoenix - enemyHit', arguments);
         }
     });
 });
