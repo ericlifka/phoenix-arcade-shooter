@@ -10,6 +10,20 @@ DefineModule('models/game-object', function (require) {
             this.children = [];
             this.destroyed = false;
         },
+        triggerEvent: function (event, data) {
+            var entityRef = this.parent;
+
+            while (entityRef) {
+                if (typeof entityRef[ event ] === 'function') {
+                    entityRef[ event ](data);
+                    return;
+                }
+
+                entityRef = entityRef.parent;
+            }
+
+            console.error("Couldn't find event '" + event + "' in parent chain of ", this);
+        },
         processInput: function (input) {
             this.children.forEach(function (child) {
                 if (typeof child.processInput === "function") {
