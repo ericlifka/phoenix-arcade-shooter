@@ -34,6 +34,13 @@ DefineModule('ships/arrow-ship', function (require) {
 
             this.parent.addChild(new Bullet(this.parent, this.team, position, velocity));
             this.addChild(new MuzzleFlash(this, this.gun));
+        },
+        destroy: function () {
+            this.triggerEvent('enemyDestroyed', {
+                shipValue: this.maxLife
+            });
+
+            this.super('destroy');
         }
     });
 });

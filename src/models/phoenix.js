@@ -159,6 +159,9 @@ DefineModule('models/phoenix', function (require) {
                 this.removeChild(this.player);
                 this.addChild(this.gameWonScreen);
             }
+        },
+        enemyDestroyed: function () {
+            console.log('phoenix - enemyDestroyed', arguments);
         }
     });
 });
