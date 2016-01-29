@@ -46,4 +46,5 @@ DefineModule('main', function (require) {
     });
 
     runLoop.start();
+    window.activeGame = phoenix;
 });
