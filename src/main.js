@@ -43,7 +43,20 @@ DefineModule('main', function (require) {
         renderer.renderFrame(frame);
     });
 
+    document.addEventListener("visibilitychange", function () {
+        if (document.hidden) {
+            phoenix.pause();
+        }
+    });
 
+    window.addEventListener("blur", function () {
+        phoenix.pause();
+    });
+
+    window.addEventListener("focus", function () {
+        keyboardInput.clearState();
+        gamepadInput.clearState();
+    });
 
     runLoop.start();
 });
