@@ -35,6 +35,15 @@ DefineModule('models/phoenix', function (require) {
                 position: { x: 82, y: 70 }
             });
 
+            this.comboGauge = new ComboGauge(this, {
+                position: { x: 1, y: this.height - 68 }
+            });
+            this.lifeMeter = new LifeMeter(this.player, {
+                position: { x: this.width - 2, y: this.height - 21 },
+                length: 20,
+                width: 1
+            });
+
             this.super('constructor');
         },
         reset: function () {
@@ -55,14 +64,9 @@ DefineModule('models/phoenix', function (require) {
             this.addChild(this.titleScreen);
         },
         startNewGame: function () {
-            this.addChild(new ComboGauge(this, {
-                position: { x: 1, y: this.height - 68 }
-            }));
-            this.addChild(new LifeMeter(this.player, {
-                position: { x: this.width - 2, y: this.height - 21 },
-                length: 20,
-                width: 1
-            }));
+
+            this.addChild(this.comboGauge);
+            this.addChild(this.lifeMeter);
 
             this.levelManager.start();
         },
