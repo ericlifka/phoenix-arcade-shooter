@@ -5,18 +5,9 @@ DefineModule('components/text-display', function (require) {
 
     return DefineClass(GameObject, {
         constructor: function (parent, options) {
-            this.super('constructor', arguments);
-
-            var message = options.message || "";
-            if (typeof message === "string") {
-                message = [ message ];
-            }
-            message = message.map(function (str) {
-                return str.split('');
-            });
-
+            this.rawMessage = options.message;
             this.font = require("fonts/" + (options.font || "arcade-small"));
-            this.message = message;
+            this.color = options.color || "white";
             this.position = options.position;
             this.border = !!options.border;
             this.padding = options.padding || 0;
@@ -24,8 +15,28 @@ DefineModule('components/text-display', function (require) {
             this.index = options.index || 10;
             this.isPhysicalEntity = options.isPhysicalEntity;
 
+            this.super('constructor', arguments);
+        },
+        reset: function () {
+            this.super('reset');
+
+            this.changeMessage(this.rawMessage);
+            this.updateColor(this.color);
+        },
+
+        changeMessage: function (text) {
+            this.rawMessage = text;
+
+            text = text || "";
+            if (typeof text === "string") {
+                text = [ text ];
+            }
+            text = text.map(function (str) {
+                return str.split('');
+            });
+            this.message = text;
+
             this.populateSprites();
-            this.updateColor(options.color || "white");
         },
 
         populateSprites: function () {
