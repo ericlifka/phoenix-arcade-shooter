@@ -8,6 +8,8 @@ DefineModule('components/combo-gauge', function (require) {
             this.position = options.position;
             this.sprite = frameSprite();
 
+            this.pointTotal = 0;
+
             this.super('constructor', arguments);
         },
         reset: function () {
@@ -23,13 +25,14 @@ DefineModule('components/combo-gauge', function (require) {
             this.addChild(new TextDisplay(this, {
                 font: "arcade-small",
                 color: "#ffffff",
-                message: "0000",
+                message: this.pointTotal + "",
                 position: { x: 1, y: this.position.y + this.sprite.height + 1}
             }));
         },
 
         addPoints: function (points) {
-
+            this.pointTotal++;
+            this.children[ 1 ].changeMessage(this.pointTotal + "");
         },
 
         bumpCombo: function () {
