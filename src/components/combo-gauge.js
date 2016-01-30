@@ -26,7 +26,7 @@ DefineModule('components/combo-gauge', function (require) {
 
             this.pointTotal = 0;
             this.multiplierDisplay.changeMessage("1x");
-            this.scoreDisplay.changeMessage(this.pointTotal + "");
+            this.scoreDisplay.changeMessage(padScoreText(this.pointTotal));
 
             this.addChild(this.multiplierDisplay);
             this.addChild(this.scoreDisplay);
@@ -34,11 +34,23 @@ DefineModule('components/combo-gauge', function (require) {
 
         addPoints: function (points) {
             this.pointTotal += points;
-            this.scoreDisplay.changeMessage(this.pointTotal + "");
+            this.scoreDisplay.changeMessage(padScoreText(this.pointTotal));
         },
 
         bumpCombo: function () {
 
         }
     });
+
+    function padScoreText(score) {
+        score = score + "";
+        switch (score.length) {
+            case 0: score = "0" + score;
+            case 1: score = "0" + score;
+            case 2: score = "0" + score;
+            case 3: score = "0" + score;
+        }
+
+        return score;
+    }
 });
