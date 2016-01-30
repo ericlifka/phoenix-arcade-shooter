@@ -166,11 +166,11 @@ DefineModule('models/phoenix', function (require) {
                 this.addChild(this.gameWonScreen);
             }
         },
-        enemyDestroyed: function () {
-            console.log('phoenix - enemyDestroyed', arguments);
+        enemyDestroyed: function (data) {
+            this.comboGauge.addPoints(data.shipValue);
         },
         enemyHit: function () {
-            console.log('phoenix - enemyHit', arguments);
+            this.comboGauge.bumpCombo();
         }
     });
 });

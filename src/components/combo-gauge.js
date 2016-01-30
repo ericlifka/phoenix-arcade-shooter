@@ -26,6 +26,14 @@ DefineModule('components/combo-gauge', function (require) {
                 message: "0000",
                 position: { x: 1, y: this.position.y + this.sprite.height + 1}
             }));
+        },
+
+        addPoints: function (points) {
+
+        },
+
+        bumpCombo: function () {
+
         }
     });
 });
