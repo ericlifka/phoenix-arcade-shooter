@@ -5,7 +5,7 @@ DefineModule('components/text-display', function (require) {
 
     return DefineClass(GameObject, {
         constructor: function (parent, options) {
-            this.rawMessage = options.message;
+            this.rawMessage = options.message || " ";
             this.font = require("fonts/" + (options.font || "arcade-small"));
             this.color = options.color || "white";
             this.position = options.position;
@@ -25,9 +25,9 @@ DefineModule('components/text-display', function (require) {
         },
 
         changeMessage: function (text) {
+            text = text || " ";
             this.rawMessage = text;
 
-            text = text || "";
             if (typeof text === "string") {
                 text = [ text ];
             }

@@ -8,31 +8,33 @@ DefineModule('components/combo-gauge', function (require) {
             this.position = options.position;
             this.sprite = frameSprite();
 
-            this.pointTotal = 0;
+            this.multiplierDisplay = new TextDisplay(this, {
+                font: "arcade-small",
+                color: "#ffffff",
+                position: { x: 1 + 7, y: this.position.y + this.sprite.height - 5 }
+            });
+            this.scoreDisplay = new TextDisplay(this, {
+                font: "arcade-small",
+                color: "#ffffff",
+                position: { x: 1, y: this.position.y + this.sprite.height + 1 }
+            });
 
             this.super('constructor', arguments);
         },
         reset: function () {
             this.super('reset');
 
-            this.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                color: "#ffffff",
-                message: "1x",
-                position: { x: 1 + 7, y: this.position.y + this.sprite.height - 5 }
-            }));
+            this.pointTotal = 0;
+            this.multiplierDisplay.changeMessage("1x");
+            this.scoreDisplay.changeMessage(this.pointTotal + "");
 
-            this.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                color: "#ffffff",
-                message: this.pointTotal + "",
-                position: { x: 1, y: this.position.y + this.sprite.height + 1}
-            }));
+            this.addChild(this.multiplierDisplay);
+            this.addChild(this.scoreDisplay);
         },
 
         addPoints: function (points) {
-            this.pointTotal++;
-            this.children[ 1 ].changeMessage(this.pointTotal + "");
+            this.pointTotal += points;
+            this.scoreDisplay.changeMessage(this.pointTotal + "");
         },
 
         bumpCombo: function () {
