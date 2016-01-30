@@ -40,7 +40,9 @@ DefineModule('components/text-display', function (require) {
         },
 
         populateSprites: function () {
+            this.children = []; // intentionally clear all previous sprites before adding new ones
             var self = this;
+
             var width = 0;
             var height = 0;
             var xOffset = this.position.x;
