@@ -72,12 +72,12 @@ DefineModule('components/combo-gauge', function (require) {
         updateGaugeHeight: function () {
             var pixels = [];
             for (var i = 0; i < 59; i++) {
-                //if (i < this.comboPoints) {
-                pixels.unshift(getGradientPixel(i));
-                //}
-                //else {
-                //    pixels.unshift(null);
-                //}
+                if (i < this.comboPoints) {
+                    pixels.unshift(getGradientPixel(i));
+                }
+                else {
+                    pixels.unshift(null);
+                }
             }
 
             this.fillGaugeSprite = new Sprite([
