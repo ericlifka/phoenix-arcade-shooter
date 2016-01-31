@@ -21,7 +21,6 @@ DefineModule('components/text-display', function (require) {
             this.super('reset');
 
             this.changeMessage(this.rawMessage);
-            this.updateColor(this.color);
         },
 
         changeMessage: function (text) {
@@ -37,6 +36,7 @@ DefineModule('components/text-display', function (require) {
             this.message = text;
 
             this.populateSprites();
+            this.updateColor(this.color);
         },
 
         populateSprites: function () {
