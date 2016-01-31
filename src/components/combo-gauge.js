@@ -1,6 +1,7 @@
 DefineModule('components/combo-gauge', function (require) {
     var GameObject = require('models/game-object');
     var frameSprite = require('sprites/combo-gauge');
+    var Sprite = require('models/sprite');
     var TextDisplay = require('components/text-display');
 
     return DefineClass(GameObject, {
@@ -36,11 +37,22 @@ DefineModule('components/combo-gauge', function (require) {
         addPoints: function (points) {
             this.pointTotal += points;
             this.scoreDisplay.changeMessage(padScoreText(this.pointTotal));
+            this.updateGaugeHeight();
         },
 
         bumpCombo: function () {
             this.comboPoints++;
             this.multiplierDisplay.changeMessage(pointsToMultiplierDisplay(this.comboPoints));
+        },
+
+        updateGaugeHeight: function () {
+            var pixels = [];
+            for (var i = 0; i < 60; i++) {
+                pixels.push('green');
+            }
+            var sprite = new Sprite([
+                pixels
+            ]);
         }
     });
 
