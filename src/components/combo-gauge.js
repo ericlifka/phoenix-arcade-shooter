@@ -5,6 +5,8 @@ DefineModule('components/combo-gauge', function (require) {
     var TextDisplay = require('components/text-display');
 
     return DefineClass(GameObject, {
+        index: 1,
+
         constructor: function (parent, options) {
             this.position = options.position;
             this.sprite = frameSprite();
@@ -12,11 +14,13 @@ DefineModule('components/combo-gauge', function (require) {
             this.multiplierDisplay = new TextDisplay(this, {
                 font: "arcade-small",
                 color: "#ffffff",
+                index: 1,
                 position: { x: 1 + 7, y: this.position.y + this.sprite.height - 5 }
             });
             this.scoreDisplay = new TextDisplay(this, {
                 font: "arcade-small",
                 color: "#ffffff",
+                index: 1,
                 position: { x: 1, y: this.position.y + this.sprite.height + 1 }
             });
 
@@ -36,7 +40,7 @@ DefineModule('components/combo-gauge', function (require) {
         },
 
         renderToFrame: function (frame) {
-            this.fillGaugeSprite.renderToFrame(frame, this.position.x + 1, this.position.y + 1);
+            this.fillGaugeSprite.renderToFrame(frame, this.position.x + 1, this.position.y + 1, this.index - 1);
 
             this.super('renderToFrame', arguments);
         },
