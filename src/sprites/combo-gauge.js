@@ -8,8 +8,8 @@ DefineModule('sprites/combo-gauge', function (require) {
         return new Sprite([
             [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n],
             [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
-            [w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w],
-            [w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w],
+            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
+            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
             [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
             [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n]
         ]);

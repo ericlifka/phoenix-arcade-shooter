@@ -88,7 +88,7 @@ DefineModule('components/combo-gauge', function (require) {
         },
 
         updateMultiplier: function () {
-            if (this.comboPoints >= 60) {
+            if (this.comboPoints >= 59) {
                 this.pointMultiplier = 6;
             }
             else if (this.comboPoints >= 48) {
