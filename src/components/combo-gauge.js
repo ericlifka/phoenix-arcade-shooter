@@ -24,8 +24,9 @@ DefineModule('components/combo-gauge', function (require) {
         reset: function () {
             this.super('reset');
 
+            this.comboPoints = 0;
             this.pointTotal = 0;
-            this.multiplierDisplay.changeMessage("1x");
+            this.multiplierDisplay.changeMessage(pointsToMultiplierDisplay(this.comboPoints));
             this.scoreDisplay.changeMessage(padScoreText(this.pointTotal));
 
             this.addChild(this.multiplierDisplay);
@@ -52,5 +53,9 @@ DefineModule('components/combo-gauge', function (require) {
         }
 
         return score;
+    }
+
+    function pointsToMultiplierDisplay(points) {
+        return "1x";
     }
 });
