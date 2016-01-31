@@ -61,12 +61,12 @@ DefineModule('components/combo-gauge', function (require) {
         addPoints: function (points) {
             this.pointTotal += points;
             this.scoreDisplay.changeMessage(padScoreText(this.pointTotal));
-            this.updateGaugeHeight();
         },
 
         bumpCombo: function () {
             this.comboPoints++;
             this.multiplierDisplay.changeMessage(pointsToMultiplierDisplay(this.comboPoints));
+            this.updateGaugeHeight();
         },
 
         updateGaugeHeight: function () {
