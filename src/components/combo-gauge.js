@@ -4,20 +4,42 @@ DefineModule('components/combo-gauge', function (require) {
     var Sprite = require('models/sprite');
     var TextDisplay = require('components/text-display');
 
+    //var gradient = [
+    //    "#0AF448",
+    //    "#0DF415",
+    //    "#3BF40F",
+    //    "#71F412",
+    //    "#A6F414",
+    //    "#DAF417",
+    //    "#F4DC19",
+    //    "#F4AB1C",
+    //    "#F47A1E",
+    //    "#F44B21",
+    //    "#F52429"
+    //];
     var gradient = [
-        "#0AF448",
-        "#0DF415",
-        "#3BF40F",
-        "#71F412",
-        "#A6F414",
+        "#40f410",
+        "#57f411",
+        "#6df412",
+        "#83F413",
+        "#99F414",
+        "#AFF415",
+        "#C4F416",
         "#DAF417",
-        "#F4DC19",
-        "#F4AB1C",
-        "#F47A1E",
-        "#F44B21",
+        "#EFF418",
+        "#F4E419",
+        "#F4CF1A",
+        "#F4BB1B",
+        "#F4A71C",
+        "#F4921D",
+        "#F47E1E",
+        "#F46B1F",
+        "#F45720",
+        "#F44421",
+        "#F43122",
         "#F52429"
     ];
-    var gradientStep = 59 / gradient.length;
+    var gradientStep = 60 / gradient.length;
 
     return DefineClass(GameObject, {
         index: 1,
@@ -82,6 +104,7 @@ DefineModule('components/combo-gauge', function (require) {
                 //}
             }
             debugger;
+            console.log(pixels);
             this.fillGaugeSprite = new Sprite([
                 pixels, pixels, pixels, pixels
             ]);
