@@ -19,8 +19,7 @@ DefineModule('components/combo-gauge', function (require) {
 
     return DefineClass(GameObject, {
         index: 1,
-        //color: "#ffe",
-        color: "yellow",
+        color: "#ffd",
 
         constructor: function (parent, options) {
             this.position = options.position;
