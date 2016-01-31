@@ -26,6 +26,8 @@ DefineModule('models/sprite', function (require) {
                     cell.color = color;
                 }
             });
+
+            return this;
         },
         update: function (dtime) {
             /*

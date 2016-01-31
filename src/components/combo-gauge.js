@@ -19,20 +19,22 @@ DefineModule('components/combo-gauge', function (require) {
 
     return DefineClass(GameObject, {
         index: 1,
+        //color: "#ffe",
+        color: "yellow",
 
         constructor: function (parent, options) {
             this.position = options.position;
-            this.sprite = frameSprite();
+            this.sprite = frameSprite().applyColor(this.color);
 
             this.multiplierDisplay = new TextDisplay(this, {
                 font: "arcade-small",
-                color: "#ffffff",
+                color: this.color,
                 index: 1,
                 position: { x: 1 + 7, y: this.position.y + this.sprite.height - 5 }
             });
             this.scoreDisplay = new TextDisplay(this, {
                 font: "arcade-small",
-                color: "#ffffff",
+                color: this.color,
                 index: 1,
                 position: { x: 1, y: this.position.y + this.sprite.height + 1 }
             });
