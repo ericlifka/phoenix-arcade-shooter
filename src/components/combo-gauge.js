@@ -75,12 +75,13 @@ DefineModule('components/combo-gauge', function (require) {
             var pixels = [];
             for (var i = 0; i < 59; i++) {
                 //if (i < this.comboPoints) {
-                    pixels.unshift(getGradientPixel(i));
+                pixels.unshift(getGradientPixel(i));
                 //}
                 //else {
                 //    pixels.unshift(null);
                 //}
             }
+            debugger;
             this.fillGaugeSprite = new Sprite([
                 pixels, pixels, pixels, pixels
             ]);
@@ -105,10 +106,13 @@ DefineModule('components/combo-gauge', function (require) {
 
     function getGradientPixel(pixelIndex) {
         if (pixelIndex < 0) pixelIndex = 0;
-        if (pixelIndex > gradient.length - 1) pixelIndex = gradient.length - 1;
+        if (pixelIndex > 58) pixelIndex = 58;
 
         var index = Math.floor(pixelIndex / gradientStep);
+        var color = gradient[ index ];
 
-        return gradient[ index ];
+        console.log(pixelIndex, index, color);
+
+        return color;
     }
 });
