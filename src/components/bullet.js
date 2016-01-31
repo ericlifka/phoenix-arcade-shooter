@@ -5,6 +5,7 @@ DefineModule('components/bullet', function (require) {
 
     return DefineClass(GameObject, {
         isPhysicalEntity: true,
+        index: 5,
 
         constructor: function (parent, team, position, velocity, acceleration) {
             this.super('constructor', arguments);

@@ -10,6 +10,7 @@ DefineModule('ships/arrow-boss', function (require) {
         BULLET_SPEED: 120,
         damage: 50,
         team: 1,
+        index: 5,
 
         reset: function () {
             this.super('reset');

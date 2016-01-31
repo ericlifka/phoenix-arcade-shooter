@@ -7,6 +7,7 @@ DefineModule('ships/player-controlled-ship', function (require) {
 
     return DefineClass(GameObject, {
         isPhysicalEntity: true,
+        index: 5,
 
         reset: function () {
             this.super('reset');

@@ -5,6 +5,8 @@ DefineModule('components/life-meter', function (require) {
     var r = "#AA3939";
 
     return DefineClass(GameObject, {
+        index: 1,
+        
         constructor: function (boundEntity, options) {
             this.super('constructor', arguments);
 

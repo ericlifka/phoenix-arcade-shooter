@@ -9,6 +9,7 @@ DefineModule('ships/arrow-ship', function (require) {
         isPhysicalEntity: true,
         BULLET_SPEED: 100,
         team: 1,
+        index: 5,
 
         reset: function () {
             this.super('reset');
