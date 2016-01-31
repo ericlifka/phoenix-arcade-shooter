@@ -36,7 +36,7 @@ DefineModule('components/combo-gauge', function (require) {
         },
 
         renderToFrame: function (frame) {
-            this.fillGaugeSprite.renderToFrame(frame, 0, 0);
+            this.fillGaugeSprite.renderToFrame(frame, this.position.x + 1, this.position.y + 1);
 
             this.super('renderToFrame', arguments);
         },
@@ -54,11 +54,11 @@ DefineModule('components/combo-gauge', function (require) {
 
         updateGaugeHeight: function () {
             var pixels = [];
-            for (var i = 0; i < 60; i++) {
+            for (var i = 0; i < 59; i++) {
                 pixels.push('green');
             }
             this.fillGaugeSprite = new Sprite([
-                pixels
+                pixels, pixels, pixels, pixels
             ]);
         }
     });
