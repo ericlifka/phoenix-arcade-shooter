@@ -44,7 +44,8 @@ DefineModule('components/combo-gauge', function (require) {
 
             this.comboPoints = 0;
             this.pointTotal = 0;
-            this.multiplierDisplay.changeMessage(pointsToMultiplierDisplay(this.comboPoints));
+            this.updateMultiplier();
+            this.multiplierDisplay.changeMessage(this.pointMultiplier + "x");
             this.scoreDisplay.changeMessage(padScoreText(this.pointTotal));
 
             this.updateGaugeHeight();
@@ -65,8 +66,9 @@ DefineModule('components/combo-gauge', function (require) {
 
         bumpCombo: function () {
             this.comboPoints++;
-            this.multiplierDisplay.changeMessage(pointsToMultiplierDisplay(this.comboPoints));
+            this.updateMultiplier();
             this.updateGaugeHeight();
+            this.multiplierDisplay.changeMessage(this.pointMultiplier + "x");
         },
 
         updateGaugeHeight: function () {
@@ -83,6 +85,27 @@ DefineModule('components/combo-gauge', function (require) {
             this.fillGaugeSprite = new Sprite([
                 pixels, pixels, pixels, pixels
             ]);
+        },
+
+        updateMultiplier: function () {
+            if (this.comboPoints >= 60) {
+                this.pointMultiplier = 6;
+            }
+            else if (this.comboPoints >= 48) {
+                this.pointMultiplier = 5;
+            }
+            else if (this.comboPoints >= 36) {
+                this.pointMultiplier = 4;
+            }
+            else if (this.comboPoints >= 24 ) {
+                this.pointMultiplier = 3;
+            }
+            else if (this.comboPoints >= 12) {
+                this.pointMultiplier = 2;
+            }
+            else {
+                this.pointMultiplier = 1;
+            }
         }
     });
 
@@ -96,10 +119,6 @@ DefineModule('components/combo-gauge', function (require) {
         }
 
         return score;
-    }
-
-    function pointsToMultiplierDisplay(points) {
-        return "1x";
     }
 
     function getGradientPixel(pixelIndex) {
