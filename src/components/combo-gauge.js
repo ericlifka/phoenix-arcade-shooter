@@ -39,7 +39,8 @@ DefineModule('components/combo-gauge', function (require) {
         },
 
         bumpCombo: function () {
-
+            this.comboPoints++;
+            this.multiplierDisplay.changeMessage(pointsToMultiplierDisplay(this.comboPoints));
         }
     });
 
