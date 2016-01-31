@@ -4,6 +4,20 @@ DefineModule('components/combo-gauge', function (require) {
     var Sprite = require('models/sprite');
     var TextDisplay = require('components/text-display');
 
+    var gradient = [
+        "#0AF448",
+        "#0DF415",
+        "#3BF40F",
+        "#71F412",
+        "#A6F414",
+        "#DAF417",
+        "#F4DC19",
+        "#F4AB1C",
+        "#F47A1E",
+        "#F44B21",
+        "#F52429"
+    ];
+
     return DefineClass(GameObject, {
         index: 1,
 
