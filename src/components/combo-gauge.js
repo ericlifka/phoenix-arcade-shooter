@@ -30,8 +30,15 @@ DefineModule('components/combo-gauge', function (require) {
             this.multiplierDisplay.changeMessage(pointsToMultiplierDisplay(this.comboPoints));
             this.scoreDisplay.changeMessage(padScoreText(this.pointTotal));
 
+            this.updateGaugeHeight();
             this.addChild(this.multiplierDisplay);
             this.addChild(this.scoreDisplay);
+        },
+
+        renderToFrame: function (frame) {
+            this.fillGaugeSprite.renderToFrame(frame, 0, 0);
+
+            this.super('renderToFrame', arguments);
         },
 
         addPoints: function (points) {
@@ -50,7 +57,7 @@ DefineModule('components/combo-gauge', function (require) {
             for (var i = 0; i < 60; i++) {
                 pixels.push('green');
             }
-            var sprite = new Sprite([
+            this.fillGaugeSprite = new Sprite([
                 pixels
             ]);
         }
