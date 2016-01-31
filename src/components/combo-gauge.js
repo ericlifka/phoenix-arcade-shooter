@@ -17,6 +17,7 @@ DefineModule('components/combo-gauge', function (require) {
         "#F44B21",
         "#F52429"
     ];
+    var gradientStep = 59 / gradient.length;
 
     return DefineClass(GameObject, {
         index: 1,
@@ -73,12 +74,12 @@ DefineModule('components/combo-gauge', function (require) {
         updateGaugeHeight: function () {
             var pixels = [];
             for (var i = 0; i < 59; i++) {
-                if (i < this.comboPoints) {
-                    pixels.unshift('green');
-                }
-                else {
-                    pixels.unshift(null);
-                }
+                //if (i < this.comboPoints) {
+                    pixels.unshift(getGradientPixel(i));
+                //}
+                //else {
+                //    pixels.unshift(null);
+                //}
             }
             this.fillGaugeSprite = new Sprite([
                 pixels, pixels, pixels, pixels
@@ -100,5 +101,14 @@ DefineModule('components/combo-gauge', function (require) {
 
     function pointsToMultiplierDisplay(points) {
         return "1x";
+    }
+
+    function getGradientPixel(pixelIndex) {
+        if (pixelIndex < 0) pixelIndex = 0;
+        if (pixelIndex > gradient.length - 1) pixelIndex = gradient.length - 1;
+
+        var index = Math.floor(pixelIndex / gradientStep);
+
+        return gradient[ index ];
     }
 });
