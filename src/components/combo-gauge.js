@@ -61,7 +61,7 @@ DefineModule('components/combo-gauge', function (require) {
         },
 
         addPoints: function (points) {
-            this.pointTotal += points;
+            this.pointTotal += this.pointMultiplier * points;
             this.scoreDisplay.changeMessage(padScoreText(this.pointTotal));
         },
 
