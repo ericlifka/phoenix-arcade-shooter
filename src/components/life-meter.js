@@ -1,8 +1,11 @@
 DefineModule('components/life-meter', function (require) {
     var GameObject = require('models/game-object');
+    var Gradients = require('helpers/gradients');
     var Sprite = require('models/sprite');
+
     var g = "#2D882D";
     var r = "#AA3939";
+    var gradient = Gradients.GreenToRed;
 
     return DefineClass(GameObject, {
         index: 1,
