@@ -7,6 +7,10 @@ DefineModule('components/life-meter', function (require) {
     var r = "#AA3939";
     var gradient = Gradients.GreenToRed;
 
+    function getGradientIndex(percentage) {
+        return Math.floor(((1 - percentage) * gradient.length));
+    }
+
     return DefineClass(GameObject, {
         index: 1,
 
@@ -35,6 +39,7 @@ DefineModule('components/life-meter', function (require) {
 
         redrawMeter: function () {
             var percentage = this.currentLife / this.maxLife * 100;
+            var meterColor = gradient[ getGradientIndex(this.currentLife / this.maxLife) ];
 
             var colors = [];
             var border = [];
@@ -43,7 +48,7 @@ DefineModule('components/life-meter', function (require) {
                     colors.push(null);
                 }
                 else {
-                    colors.push(g);
+                    colors.push(meterColor);
                 }
 
                 border.push(this.borderColor);
