@@ -6,7 +6,7 @@ DefineModule('components/life-meter', function (require) {
 
     return DefineClass(GameObject, {
         index: 1,
-        
+
         constructor: function (boundEntity, options) {
             this.super('constructor', arguments);
 
@@ -17,6 +17,7 @@ DefineModule('components/life-meter', function (require) {
             this.horizontal = !!options.horizontal;
             this.length = options.length || 10;
             this.width = options.width || 1;
+            this.showBorder = !!options.showBorder;
         },
 
         update: function () {
@@ -32,6 +33,7 @@ DefineModule('components/life-meter', function (require) {
             var percentage = this.currentLife / this.maxLife * 100;
 
             var colors = [];
+            var border = [];
             for (var i = this.length - 1; i >= 0; i--) {
                 if (i / this.length * 100 >= percentage) {
                     colors.push(r);
@@ -39,11 +41,23 @@ DefineModule('components/life-meter', function (require) {
                 else {
                     colors.push(g);
                 }
+
+                border.push('#fff');
             }
 
             var rows = [];
             for (var j = 0; j < this.width; j++) {
                 rows.push(colors);
+            }
+
+            if (this.showBorder) {
+                colors.push('#fff');
+                colors.unshift('#fff');
+                border.push(null);
+                border.unshift(null);
+
+                rows.unshift(border);
+                rows.push(border);
             }
 
             this.sprite = new Sprite(rows);

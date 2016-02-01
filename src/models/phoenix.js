@@ -39,9 +39,10 @@ DefineModule('models/phoenix', function (require) {
                 position: { x: 1, y: this.height - 68 }
             });
             this.lifeMeter = new LifeMeter(this.player, {
-                position: { x: this.width - 2, y: this.height - 21 },
-                length: 20,
-                width: 1
+                position: { x: this.width - 7, y: this.height - 63 },
+                length: 60,
+                width: 4,
+                showBorder: true
             });
 
             this.super('constructor');
