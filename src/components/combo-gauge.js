@@ -45,11 +45,11 @@ DefineModule('components/combo-gauge', function (require) {
 
             this.comboPoints = 0;
             this.pointTotal = 0;
-            this.updateMultiplier();
-            this.multiplierDisplay.changeMessage(this.pointMultiplier + "x");
-            this.scoreDisplay.changeMessage(padScoreText(this.pointTotal));
 
+            this.updateMultiplier();
             this.updateGaugeHeight();
+            this.updateScore();
+
             this.addChild(this.multiplierDisplay);
             this.addChild(this.scoreDisplay);
         },
@@ -62,14 +62,19 @@ DefineModule('components/combo-gauge', function (require) {
 
         addPoints: function (points) {
             this.pointTotal += this.pointMultiplier * points;
-            this.scoreDisplay.changeMessage(padScoreText(this.pointTotal));
+            this.updateScore();
         },
 
         bumpCombo: function () {
             this.comboPoints++;
             this.updateMultiplier();
             this.updateGaugeHeight();
-            this.multiplierDisplay.changeMessage(this.pointMultiplier + "x");
+        },
+
+        clearCombo: function () {
+            this.comboPoints = 0;
+            this.updateMultiplier();
+            this.updateGaugeHeight();
         },
 
         updateGaugeHeight: function () {
@@ -107,6 +112,12 @@ DefineModule('components/combo-gauge', function (require) {
             else {
                 this.pointMultiplier = 1;
             }
+
+            this.multiplierDisplay.changeMessage(this.pointMultiplier + "x");
+        },
+
+        updateScore: function () {
+            this.scoreDisplay.changeMessage(padScoreText(this.pointTotal));
         }
     });
 

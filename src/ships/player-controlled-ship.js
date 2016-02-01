@@ -83,6 +83,11 @@ DefineModule('ships/player-controlled-ship', function (require) {
 
             this.parent.addChild(new Bullet(this.parent, this.team, position, velocity));
             this.addChild(new MuzzleFlash(this, gun));
+        },
+
+        applyDamage: function () {
+            this.triggerEvent('playerHit');
+            this.super('applyDamage', arguments);
         }
     });
 });
