@@ -170,6 +170,7 @@ DefineModule('models/phoenix', function (require) {
             this.comboGauge.addPoints(data.shipValue);
         },
         enemyHit: function () {
+
             this.comboGauge.bumpCombo();
         }
     });
