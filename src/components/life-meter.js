@@ -42,38 +42,50 @@ DefineModule('components/life-meter', function (require) {
         },
 
         redrawMeter: function () {
+            var i, j;
             var percentage = this.currentLife / this.maxLife * 100;
             var meterColor = getGradientColor(this.currentLife / this.maxLife);
 
-            var colors = [];
             var border = [];
-            for (var i = this.length - 1; i >= 0; i--) {
-                if (i / this.length * 100 >= percentage) {
-                    colors.push(null);
+            var colors = [];
+            for (j = 0; j < this.width; j++) {
+                colors.push([]);
+            }
+
+            for (i = this.length - 1; i >= 0; i--) {
+                var color = null;
+                if (i / this.length * 100 < percentage) {
+                    color = meterColor;
                 }
-                else {
-                    colors.push(meterColor);
+
+                for (j = 0; j < this.width; j++) {
+                    colors[ j ].push(color);
                 }
 
                 border.push(this.borderColor);
             }
 
-            var rows = [];
-            for (var j = 0; j < this.width; j++) {
-                rows.push(colors);
-            }
-
             if (this.showBorder) {
-                colors.push('#fff');
-                colors.unshift('#fff');
+                if (this.width > 2) {
+                    colors[ 0 ][ 0 ] = this.borderColor;
+                    colors[ this.width - 1 ][ 0 ] = this.borderColor;
+                    colors[ 0 ][ this.length - 1 ] = this.borderColor;
+                    colors[ this.width - 1 ][ this.length - 1 ] = this.borderColor;
+                }
+
+                for (j = 0; j < this.width; j++) {
+                    colors[ j ].push(this.borderColor);
+                    colors[ j ].unshift(this.borderColor);
+                }
+
                 border.push(null);
                 border.unshift(null);
 
-                rows.unshift(border);
-                rows.push(border);
+                colors.unshift(border);
+                colors.push(border);
             }
 
-            this.sprite = new Sprite(rows);
+            this.sprite = new Sprite(colors);
 
             if (this.horizontal) {
                 this.sprite.rotateRight();
