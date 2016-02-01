@@ -40,7 +40,7 @@ DefineModule('components/life-meter', function (require) {
             var border = [];
             for (var i = this.length - 1; i >= 0; i--) {
                 if (i / this.length * 100 >= percentage) {
-                    colors.push(r);
+                    colors.push(null);
                 }
                 else {
                     colors.push(g);
