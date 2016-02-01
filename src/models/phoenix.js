@@ -15,6 +15,7 @@ DefineModule('models/phoenix', function (require) {
 
     return DefineClass(GameObject, {
         FILL_COLOR: "#000031",
+        interfaceColor: "#ffd",
 
         constructor: function (gameDimensions) {
             this.width = gameDimensions.width;
@@ -36,13 +37,15 @@ DefineModule('models/phoenix', function (require) {
             });
 
             this.comboGauge = new ComboGauge(this, {
-                position: { x: 1, y: this.height - 68 }
+                position: { x: 1, y: this.height - 68 },
+                color: this.interfaceColor
             });
             this.lifeMeter = new LifeMeter(this.player, {
                 position: { x: this.width - 7, y: this.height - 63 },
                 length: 60,
                 width: 4,
-                showBorder: true
+                showBorder: true,
+                borderColor: this.interfaceColor
             });
 
             this.super('constructor');

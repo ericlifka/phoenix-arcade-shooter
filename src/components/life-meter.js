@@ -18,6 +18,7 @@ DefineModule('components/life-meter', function (require) {
             this.length = options.length || 10;
             this.width = options.width || 1;
             this.showBorder = !!options.showBorder;
+            this.borderColor = options.borderColor || "#ffffff";
         },
 
         update: function () {
@@ -42,7 +43,7 @@ DefineModule('components/life-meter', function (require) {
                     colors.push(g);
                 }
 
-                border.push('#fff');
+                border.push(this.borderColor);
             }
 
             var rows = [];

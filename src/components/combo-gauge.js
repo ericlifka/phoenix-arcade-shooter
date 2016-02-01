@@ -19,10 +19,10 @@ DefineModule('components/combo-gauge', function (require) {
 
     return DefineClass(GameObject, {
         index: 1,
-        color: "#ffd",
 
         constructor: function (parent, options) {
             this.position = options.position;
+            this.color = options.color || "#ffffff";
             this.sprite = frameSprite().applyColor(this.color);
 
             this.multiplierDisplay = new TextDisplay(this, {
