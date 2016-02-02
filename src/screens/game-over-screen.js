@@ -14,9 +14,27 @@ DefineModule('screens/game-over-screen', function (require) {
         },
         subHeaderDef: {
             font: "arcade-small",
-            message: "< hit start >",
+            message: "Final Score:",
             color: "red",
-            position: { x: 75, y: 81 }
+            position: { x: 66, y: 81 }
+        },
+        scoreDisplayDef: {
+            font: "arcade-small",
+            message: "0",
+            color: "yellow",
+            position: { x: 110, y: 81 }
+        },
+        //subHeaderDef: {
+        //    font: "arcade-small",
+        //    message: "< hit start >",
+        //    color: "red",
+        //    position: { x: 75, y: 81 }
+        //},
+
+        constructor: function () {
+            this.scoreDisplay = new TextDisplay(this, this.scoreDisplayDef);
+
+            this.super('constructor', arguments);
         },
 
         reset: function () {
@@ -24,6 +42,7 @@ DefineModule('screens/game-over-screen', function (require) {
 
             this.addChild(new TextDisplay(this, this.headerDef));
             this.addChild(new TextDisplay(this, this.subHeaderDef));
+            this.addChild(this.scoreDisplay);
 
             this.addChild(new EventedInput({
                 onSelect: this.onSelect.bind(this)
@@ -32,6 +51,10 @@ DefineModule('screens/game-over-screen', function (require) {
 
         onSelect: function () {
             this.parent.reset();
+        },
+
+        setFinalScore: function (score) {
+            this.scoreDisplay.changeMessage(score + "");
         }
     })
 });

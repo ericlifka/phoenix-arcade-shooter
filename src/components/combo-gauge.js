@@ -56,6 +56,10 @@ DefineModule('components/combo-gauge', function (require) {
             this.updateScore();
         },
 
+        getScore: function () {
+            return this.pointTotal;
+        },
+
         bumpCombo: function () {
             this.comboPoints++;
             this.updateMultiplier();
