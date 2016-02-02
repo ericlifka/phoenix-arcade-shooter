@@ -3,6 +3,7 @@ DefineModule('models/phoenix', function (require) {
     var Collisions = require('helpers/collisions');
     var ComboGauge = require('components/combo-gauge');
     var ControlsScreen = require('screens/controls-description');
+    var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
     var GameOverScreen = require('screens/game-over-screen');
     var GameWonScreen = require('screens/game-won-screen');
@@ -28,6 +29,10 @@ DefineModule('models/phoenix', function (require) {
             this.inputInterpreter = new InputInterpreter();
             this.levelManager = new LevelManager(this);
             this.player = new PlayerShip(this);
+
+            this.pauseInputTracker = new EventedInput({
+                onSelect: this.togglePause.bind(this)
+            });
 
             this.pausedText = new TextDisplay(this, {
                 font: "arcade",
@@ -68,6 +73,7 @@ DefineModule('models/phoenix', function (require) {
             this.addChild(this.player);
             this.addChild(this.levelManager);
             this.addChild(this.titleScreen);
+            this.addChild(this.pauseInputTracker);
         },
         startNewGame: function () {
 
@@ -82,7 +88,7 @@ DefineModule('models/phoenix', function (require) {
         processInput: function (rawInput) {
             var input = this.inputInterpreter.interpret(rawInput);
 
-            this.checkPauseState(input);
+            //this.checkPauseState(input);
 
             this.super('processInput', [ input ]);
         },
@@ -109,6 +115,14 @@ DefineModule('models/phoenix', function (require) {
             }
             else if (!input.menuSelect) {
                 this.unpressedMenuSelect = true;
+            }
+        },
+        togglePause: function () {
+            if (this.paused) {
+                this.unpause();
+            }
+            else {
+                this.pause();
             }
         },
         pause: function () {
