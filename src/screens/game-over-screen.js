@@ -1,6 +1,7 @@
 DefineModule('screens/game-over-screen', function (require) {
     var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
+    var padScoreDisplay = require('helpers/pad-score-display');
     var TextDisplay = require('components/text-display');
 
     return DefineClass(GameObject, {
@@ -48,7 +49,7 @@ DefineModule('screens/game-over-screen', function (require) {
         },
 
         setFinalScore: function (score) {
-            this.scoreDisplay.changeMessage(score + "");
+            this.scoreDisplay.changeMessage(padScoreDisplay(score));
         }
     })
 });

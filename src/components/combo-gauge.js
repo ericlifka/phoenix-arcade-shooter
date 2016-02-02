@@ -2,6 +2,7 @@ DefineModule('components/combo-gauge', function (require) {
     var GameObject = require('models/game-object');
     var Gradients = require('helpers/gradients');
     var frameSprite = require('sprites/combo-gauge');
+    var padScoreDisplay = require('helpers/pad-score-display');
     var Sprite = require('models/sprite');
     var TextDisplay = require('components/text-display');
 
@@ -112,21 +113,9 @@ DefineModule('components/combo-gauge', function (require) {
         },
 
         updateScore: function () {
-            this.scoreDisplay.changeMessage(padScoreText(this.pointTotal));
+            this.scoreDisplay.changeMessage(padScoreDisplay(this.pointTotal));
         }
     });
-
-    function padScoreText(score) {
-        score = score + "";
-        switch (score.length) {
-            case 0: score = "0" + score;
-            case 1: score = "0" + score;
-            case 2: score = "0" + score;
-            case 3: score = "0" + score;
-        }
-
-        return score;
-    }
 
     function getGradientPixel(pixelIndex) {
         var index = Math.floor(pixelIndex / gradientStep);
