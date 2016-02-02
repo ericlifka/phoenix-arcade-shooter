@@ -29,7 +29,7 @@ DefineModule('screens/game-over-screen', function (require) {
             this.scoreDisplay = new TextDisplay(this, this.scoreDisplayDef);
 
             this.inputEvents = new EventedInput({
-                onSelect: this.onSelect.bind(this)
+                onStart: this.onStart.bind(this)
             });
 
             this.super('constructor', arguments);
@@ -45,7 +45,7 @@ DefineModule('screens/game-over-screen', function (require) {
             this.addChild(this.inputEvents);
         },
 
-        onSelect: function () {
+        onStart: function () {
             this.parent.reset();
         },
 
