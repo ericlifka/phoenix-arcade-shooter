@@ -154,12 +154,15 @@ DefineModule('models/phoenix', function (require) {
                 this.gameOver = true;
                 this.gameOverScreen.setResult("loss");
                 this.gameOverScreen.setFinalScore(this.comboGauge.getScore());
+                this.removeChild(this.player);
                 this.addChild(this.gameOverScreen);
             }
             if (this.levelManager.complete && !this.gameOver) {
                 this.gameOver = true;
+                this.gameOverScreen.setResult("win");
+                this.gameOverScreen.setFinalScore(this.comboGauge.getScore());
                 this.removeChild(this.player);
-                this.addChild(this.gameWonScreen);
+                this.addChild(this.gameOverScreen);
             }
         },
         enemyDestroyed: function (data) {
