@@ -152,6 +152,7 @@ DefineModule('models/phoenix', function (require) {
         checkGameOver: function () {
             if (this.player.destroyed && !this.gameOver) {
                 this.gameOver = true;
+                this.gameOverScreen.setResult("loss");
                 this.gameOverScreen.setFinalScore(this.comboGauge.getScore());
                 this.addChild(this.gameOverScreen);
             }

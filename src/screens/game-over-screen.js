@@ -48,6 +48,14 @@ DefineModule('screens/game-over-screen', function (require) {
             this.parent.reset();
         },
 
+        setResult: function (result) {
+            if (result === "win") {
+
+            } else if (result === "loss") {
+
+            }
+        },
+
         setFinalScore: function (score) {
             this.scoreDisplay.changeMessage(padScoreDisplay(score));
         }
