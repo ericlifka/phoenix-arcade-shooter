@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-tar cvzf build.tar.gz index.html modules.js styles/ src/
+tar cvzf favicon.ico build.tar.gz index.html modules.js styles/ src/
 
 git co gh-pages
 
