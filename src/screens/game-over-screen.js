@@ -7,7 +7,6 @@ DefineModule('screens/game-over-screen', function (require) {
     return DefineClass(GameObject, {
         headerDef: {
             font: "arcade",
-            message: "GAME OVER",
             border: 1,
             padding: 20,
             position: { x: 45, y: 45 }
@@ -29,6 +28,10 @@ DefineModule('screens/game-over-screen', function (require) {
             this.subHeader = new TextDisplay(this, this.subHeaderDef);
             this.scoreDisplay = new TextDisplay(this, this.scoreDisplayDef);
 
+            this.inputEvents = new EventedInput({
+                onSelect: this.onSelect.bind(this)
+            });
+
             this.super('constructor', arguments);
         },
 
@@ -39,9 +42,7 @@ DefineModule('screens/game-over-screen', function (require) {
             this.addChild(this.subHeader);
             this.addChild(this.scoreDisplay);
 
-            this.addChild(new EventedInput({
-                onSelect: this.onSelect.bind(this)
-            }));
+            this.addChild(this.inputEvents);
         },
 
         onSelect: function () {
