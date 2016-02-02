@@ -147,16 +147,17 @@ DefineModule('models/phoenix', function (require) {
             });
         },
         checkGameOver: function () {
-            if (this.player.destroyed && !this.gameOver) {
-                this.gameOver = true;
-                this.gameOverScreen.setResult("loss");
-                this.gameOverScreen.setFinalScore(this.comboGauge.getScore());
-                this.removeChild(this.player);
-                this.addChild(this.gameOverScreen);
+            var gameResult = null;
+            if (this.player.destroyed) {
+                gameResult = "loss";
             }
-            if (this.levelManager.complete && !this.gameOver) {
+            else if (this.levelManager.complete) {
+                gameResult = "win";
+            }
+
+            if (gameResult && !this.gameOver) {
                 this.gameOver = true;
-                this.gameOverScreen.setResult("win");
+                this.gameOverScreen.setResult(gameResult);
                 this.gameOverScreen.setFinalScore(this.comboGauge.getScore());
                 this.removeChild(this.player);
                 this.addChild(this.gameOverScreen);
