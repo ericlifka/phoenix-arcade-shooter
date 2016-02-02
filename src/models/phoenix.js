@@ -147,13 +147,9 @@ DefineModule('models/phoenix', function (require) {
             });
         },
         checkGameOver: function () {
-            var gameResult = null;
-            if (this.player.destroyed) {
-                gameResult = "loss";
-            }
-            else if (this.levelManager.complete) {
-                gameResult = "win";
-            }
+            var gameResult = this.player.destroyed ? "loss" :
+                this.levelManager.complete ? "win" :
+                    null;
 
             if (gameResult && !this.gameOver) {
                 this.gameOver = true;
