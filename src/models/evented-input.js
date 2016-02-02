@@ -3,10 +3,13 @@ DefineModule('models/evented-input', function (require) {
         constructor: function (options) {
             this.upReleased = false;
             this.downReleased = false;
-            this.selectReleased = false;
+            this.fireReleased = false;
+            this.startReleased = false;
 
             this.onUp = options.onUp || function () {};
             this.onDown = options.onDown || function () {};
+            this.onFire = options.onFire || function () {};
+            this.onStart = options.onStart || function () {};
             this.onSelect = options.onSelect || function () {};
         },
 
@@ -17,8 +20,11 @@ DefineModule('models/evented-input', function (require) {
             if (input.movementVector.y > -.6) {
                 this.upReleased = true;
             }
-            if (!input.menuSelect && !input.fire) {
-                this.selectReleased = true;
+            if (!input.start) {
+                this.startReleased = true;
+            }
+            if (!input.fire) {
+                this.fireReleased = true;
             }
 
             if (input.movementVector.y >= .6 && this.downReleased) {
@@ -29,8 +35,14 @@ DefineModule('models/evented-input', function (require) {
                 this.upReleased = false;
                 this.onUp();
             }
-            if ((input.menuSelect || input.fire) && this.selectReleased) {
-                this.selectReleased = false;
+            if (input.start && this.startReleased) {
+                this.startReleased = false;
+                this.onStart();
+                this.onSelect();
+            }
+            if (input.fire && this.fireReleased) {
+                this.fireReleased = false;
+                this.onFire();
                 this.onSelect();
             }
         }

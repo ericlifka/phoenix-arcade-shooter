@@ -40,7 +40,7 @@ DefineModule('helpers/input-interpreter', function (require) {
 
         addKeyboardInput: function (keyboard, gameInput) {
             if (keyboard[ 'ENTER' ]) {
-                gameInput.menuSelect = true;
+                gameInput.start = true;
             }
 
             if (keyboard[ 'SPACE' ]) {
@@ -66,7 +66,7 @@ DefineModule('helpers/input-interpreter', function (require) {
 
         addGamepadInput: function (gamepad, gameInput) {
             if (gamepad[ 'start' ]) {
-                gameInput.menuSelect = true;
+                gameInput.start = true;
             }
 
             if (gamepad[ 'A' ]) {

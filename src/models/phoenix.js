@@ -31,7 +31,7 @@ DefineModule('models/phoenix', function (require) {
             this.player = new PlayerShip(this);
 
             this.pauseInputTracker = new EventedInput({
-                onSelect: this.togglePause.bind(this)
+                onStart: this.togglePause.bind(this)
             });
 
             this.pausedText = new TextDisplay(this, {
@@ -60,7 +60,6 @@ DefineModule('models/phoenix', function (require) {
 
             this.gameOver = false;
             this.paused = false;
-            this.unpressedMenuSelect = false;
 
             this.comboGauge.reset();
             this.lifeMeter.reset();
@@ -86,11 +85,7 @@ DefineModule('models/phoenix', function (require) {
             this.addChild(this.controlsScreen);
         },
         processInput: function (rawInput) {
-            var input = this.inputInterpreter.interpret(rawInput);
-
-            //this.checkPauseState(input);
-
-            this.super('processInput', [ input ]);
+            this.super('processInput', [ this.inputInterpreter.interpret(rawInput) ]);
         },
         update: function (dtime) {
             if (!this.paused) {
@@ -98,23 +93,6 @@ DefineModule('models/phoenix', function (require) {
 
                 this.checkCollisions();
                 this.checkGameOver();
-            }
-        },
-        checkPauseState: function (input) {
-            if (!this.levelManager.running) {
-                return;
-            }
-
-            if (input.menuSelect && this.unpressedMenuSelect) {
-                if (this.paused) {
-                    this.unpause();
-                }
-                else {
-                    this.pause();
-                }
-            }
-            else if (!input.menuSelect) {
-                this.unpressedMenuSelect = true;
             }
         },
         togglePause: function () {
@@ -128,13 +106,11 @@ DefineModule('models/phoenix', function (require) {
         pause: function () {
             if (this.levelManager.running && !this.paused) {
                 this.paused = true;
-                this.unpressedMenuSelect = false;
                 this.addChild(this.pausedText);
             }
         },
         unpause: function () {
             this.paused = false;
-            this.unpressedMenuSelect = false;
             this.removeChild(this.pausedText);
         },
         checkCollisions: function () {
