@@ -1,4 +1,5 @@
 DefineModule('models/phoenix', function (require) {
+    var Bullet = require('components/bullet');
     var collectEntities = require('helpers/collect-entities');
     var Collisions = require('helpers/collisions');
     var ComboGauge = require('components/combo-gauge');
@@ -158,6 +159,13 @@ DefineModule('models/phoenix', function (require) {
                 this.removeChild(this.player);
                 this.addChild(this.gameOverScreen);
             }
+        },
+        spawnBullet: function (data) {
+            var team = data.team;
+            var position = data.position;
+            var velocity = data.velocity;
+
+            this.addChild(new Bullet(this, team, position, velocity));
         },
         enemyDestroyed: function (data) {
             this.comboGauge.addPoints(data.shipValue);
