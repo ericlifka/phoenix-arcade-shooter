@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phoenix Arcade Shooter</title>
+    <link rel="stylesheet" type="text/css" href="styles/game.css"/>
+</head>
+<body>
+
+<script src="modules.js"></script>
+
+<script src="src/components/bullet.js"></script>
+<script src="src/components/combo-gauge.js"></script>
+<script src="src/components/fadeout-banner.js"></script>
+<script src="src/components/life-meter.js"></script>
+<script src="src/components/muzzle-flash.js"></script>
+<script src="src/components/text-display.js"></script>
+
+<script src="src/controllers/gamepad-input.js"></script>
+<script src="src/controllers/keyboard-input.js"></script>
+
+<script src="src/fonts/arcade.js"></script>
+<script src="src/fonts/arcade-small.js"></script>
+<script src="src/fonts/phoenix.js"></script>
+
+<script src="src/helpers/collect-entities.js"></script>
+<script src="src/helpers/collisions.js"></script>
+<script src="src/helpers/gradients.js"></script>
+<script src="src/helpers/input-interpreter.js"></script>
+<script src="src/helpers/pad-score-display.js"></script>
+<script src="src/helpers/random.js"></script>
+<script src="src/helpers/run-loop.js"></script>
+
+<script src="src/levels/level-group-01.js"></script>
+<script src="src/levels/level-manager.js"></script>
+
+<script src="src/models/animation.js"></script>
+<script src="src/models/cell-grid.js"></script>
+<script src="src/models/evented-input.js"></script>
+<script src="src/models/frame.js"></script>
+<script src="src/models/game-object.js"></script>
+<script src="src/models/phoenix.js"></script>
+<script src="src/models/script-chain.js"></script>
+<script src="src/models/sprite.js"></script>
+<script src="src/models/sprite-group.js"></script>
+
+<script src="src/screens/controls-description.js"></script>
+<script src="src/screens/game-over-screen.js"></script>
+<script src="src/screens/title-screen.js"></script>
+
+<script src="src/scripts/chain-gun-fire.js"></script>
+<script src="src/scripts/fire-single-gun-random-rate.js"></script>
+<script src="src/scripts/fly-player-in-from-bottom.js"></script>
+<script src="src/scripts/move-object-to-point.js"></script>
+
+<script src="src/ships/arrow-boss.js"></script>
+<script src="src/ships/arrow-ship.js"></script>
+<script src="src/ships/player-controlled-ship.js"></script>
+
+<script src="src/sprites/animations/ship-explosion.js"></script>
+<script src="src/sprites/animations/small-explosion.js"></script>
+
+<script src="src/sprites/arrow-boss.js"></script>
+<script src="src/sprites/arrow-ship.js"></script>
+<script src="src/sprites/bullet.js"></script>
+<script src="src/sprites/combo-gauge.js"></script>
+<script src="src/sprites/dagger-ship.js"></script>
+<script src="src/sprites/player-ship.js"></script>
+
+<script src="src/views/canvas-renderer.js"></script>
+
+<script src="src/main.js"></script>
+</body>
+</html>
