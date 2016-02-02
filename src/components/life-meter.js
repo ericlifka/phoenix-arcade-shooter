@@ -42,47 +42,10 @@ DefineModule('components/life-meter', function (require) {
         },
 
         redrawMeter: function () {
-            var i, j;
-            var percentage = this.currentLife / this.maxLife * 100;
-            var meterColor = getGradientColor(this.currentLife / this.maxLife);
-
-            var border = [];
-            var colors = [];
-            for (j = 0; j < this.width; j++) {
-                colors.push([]);
-            }
-
-            for (i = this.length - 1; i >= 0; i--) {
-                var color = null;
-                if (i / this.length * 100 < percentage) {
-                    color = meterColor;
-                }
-
-                for (j = 0; j < this.width; j++) {
-                    colors[ j ].push(color);
-                }
-
-                border.push(this.borderColor);
-            }
+            var colors = this.buildSpriteColorArray();
 
             if (this.showBorder) {
-                if (this.width > 2) {
-                    colors[ 0 ][ 0 ] = this.borderColor;
-                    colors[ this.width - 1 ][ 0 ] = this.borderColor;
-                    colors[ 0 ][ this.length - 1 ] = this.borderColor;
-                    colors[ this.width - 1 ][ this.length - 1 ] = this.borderColor;
-                }
-
-                for (j = 0; j < this.width; j++) {
-                    colors[ j ].push(this.borderColor);
-                    colors[ j ].unshift(this.borderColor);
-                }
-
-                border.push(null);
-                border.unshift(null);
-
-                colors.unshift(border);
-                colors.push(border);
+                this.addBorderToColorArray(colors);
             }
 
             this.sprite = new Sprite(colors);
@@ -90,6 +53,66 @@ DefineModule('components/life-meter', function (require) {
             if (this.horizontal) {
                 this.sprite.rotateRight();
             }
+        },
+
+        buildSpriteColorArray: function () {
+            var percentage = this.currentLife / this.maxLife * 100;
+            var meterColor = getGradientColor(this.currentLife / this.maxLife);
+            var colors = this.buildEmptySpriteColorArray();
+
+            for (var i = this.length - 1; i >= 0; i--) {
+                var color = null;
+                if (i / this.length * 100 <= percentage) {
+                    color = meterColor;
+                }
+
+                colors.forEach(function (colorArray) {
+                    colorArray.push(color);
+                });
+            }
+
+            return colors;
+        },
+
+        buildEmptySpriteColorArray: function() {
+            var colors = [];
+            for (var j = 0; j < this.width; j++) {
+                colors.push([]);
+            }
+            return colors;
+        },
+
+        addBorderToColorArray: function (colors) {
+            this.addBezelPixelsToBorder(colors);
+            this.addBorderEnds(colors);
+            this.addBorderEdges(colors);
+        },
+
+        addBezelPixelsToBorder: function (colors) {
+            if (this.width > 2) {
+                colors[ 0 ][ 0 ] = this.borderColor;
+                colors[ this.width - 1 ][ 0 ] = this.borderColor;
+                colors[ 0 ][ this.length - 1 ] = this.borderColor;
+                colors[ this.width - 1 ][ this.length - 1 ] = this.borderColor;
+            }
+        },
+
+        addBorderEnds: function (colors) {
+            for (var j = 0; j < this.width; j++) {
+                colors[ j ].push(this.borderColor);
+                colors[ j ].unshift(this.borderColor);
+            }
+        },
+
+        addBorderEdges: function (colors) {
+            var border = [ null ];
+            for (var i = 0; i < this.length; i++) {
+                border.push(this.borderColor);
+            }
+            border.push(null);
+
+            colors.push(border);
+            colors.unshift(border);
         }
     });
 });
