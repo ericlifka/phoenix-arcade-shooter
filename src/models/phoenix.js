@@ -6,7 +6,6 @@ DefineModule('models/phoenix', function (require) {
     var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
     var GameOverScreen = require('screens/game-over-screen');
-    var GameWonScreen = require('screens/game-won-screen');
     var InputInterpreter = require('helpers/input-interpreter');
     var LevelManager = require('levels/level-manager');
     var LifeMeter = require('components/life-meter');
@@ -25,7 +24,6 @@ DefineModule('models/phoenix', function (require) {
             this.controlsScreen = new ControlsScreen(this);
             this.titleScreen = new TitleScreen(this);
             this.gameOverScreen = new GameOverScreen(this);
-            this.gameWonScreen = new GameWonScreen(this);
             this.inputInterpreter = new InputInterpreter();
             this.levelManager = new LevelManager(this);
             this.player = new PlayerShip(this);
@@ -65,7 +63,6 @@ DefineModule('models/phoenix', function (require) {
             this.lifeMeter.reset();
             this.titleScreen.reset();
             this.gameOverScreen.reset();
-            this.gameWonScreen.reset();
             this.levelManager.reset();
             this.player.reset();
 
