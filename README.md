@@ -8,7 +8,7 @@ While silly it is fun to explore manual rendering over modern techniques such as
 
 ## Play
 
-The current release version of the game is hosted here: (ericlifka.com/phoenix-arcade-shooter)[http://www.ericlifka.com/phoenix-arcade-shooter/]
+The current release version of the game is hosted here: [ericlifka.com/phoenix-arcade-shooter](http://www.ericlifka.com/phoenix-arcade-shooter/)
 
 ## setup
 
