@@ -24,12 +24,6 @@ DefineModule('screens/game-over-screen', function (require) {
             color: "yellow",
             position: { x: 110, y: 81 }
         },
-        //subHeaderDef: {
-        //    font: "arcade-small",
-        //    message: "< hit start >",
-        //    color: "red",
-        //    position: { x: 75, y: 81 }
-        //},
 
         constructor: function () {
             this.scoreDisplay = new TextDisplay(this, this.scoreDisplayDef);
