@@ -8,7 +8,6 @@ DefineModule('screens/game-over-screen', function (require) {
         headerDef: {
             font: "arcade",
             message: "GAME OVER",
-            color: "red",
             border: 1,
             padding: 20,
             position: { x: 45, y: 45 }
@@ -16,7 +15,6 @@ DefineModule('screens/game-over-screen', function (require) {
         subHeaderDef: {
             font: "arcade-small",
             message: "Final Score:",
-            color: "red",
             position: { x: 66, y: 81 }
         },
         scoreDisplayDef: {
@@ -27,6 +25,8 @@ DefineModule('screens/game-over-screen', function (require) {
         },
 
         constructor: function () {
+            this.header = new TextDisplay(this, this.headerDef);
+            this.subHeader = new TextDisplay(this, this.subHeaderDef);
             this.scoreDisplay = new TextDisplay(this, this.scoreDisplayDef);
 
             this.super('constructor', arguments);
@@ -35,8 +35,8 @@ DefineModule('screens/game-over-screen', function (require) {
         reset: function () {
             this.super('reset');
 
-            this.addChild(new TextDisplay(this, this.headerDef));
-            this.addChild(new TextDisplay(this, this.subHeaderDef));
+            this.addChild(this.header);
+            this.addChild(this.subHeader);
             this.addChild(this.scoreDisplay);
 
             this.addChild(new EventedInput({
@@ -50,9 +50,13 @@ DefineModule('screens/game-over-screen', function (require) {
 
         setResult: function (result) {
             if (result === "win") {
-
+                this.header.updateColor("green");
+                this.subHeader.updateColor("green");
+                this.header.changeMessage("YOU WIN!");
             } else if (result === "loss") {
-
+                this.header.updateColor("red");
+                this.subHeader.updateColor("red");
+                this.header.changeMessage("GAME OVER");
             }
         },
 
