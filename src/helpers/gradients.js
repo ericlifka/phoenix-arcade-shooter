@@ -1,4 +1,14 @@
 DefineModule('helpers/gradients', function (require) {
+
+    function calcChroma(color) {
+        var M = Math.max(color.R, color.G, color.B);
+        var m = Math.min(color.R, color.G, color.B);
+
+        return M - m;
+    }
+
+
+
     return {
         GreenToRed: [ "#0AF448", "#0BF440", "#0BF437", "#0CF42E", "#0CF426",
             "#0DF41D", "#0DF415", "#0FF40D", "#18F40E", "#22F40E", "#2BF40F",
