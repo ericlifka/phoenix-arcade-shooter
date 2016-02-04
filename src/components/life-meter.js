@@ -3,15 +3,6 @@ DefineModule('components/life-meter', function (require) {
     var Gradients = require('helpers/gradients');
     var Sprite = require('models/sprite');
 
-    var gradient = Gradients.GreenToRed;
-    function getGradientColor(percentage) {
-        var inverse = 1 - percentage;
-        var ratio = inverse * gradient.length;
-        var index = Math.floor(ratio);
-
-        return gradient[ index ];
-    }
-
     return DefineClass(GameObject, {
         index: 1,
 
