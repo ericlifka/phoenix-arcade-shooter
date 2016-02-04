@@ -44,12 +44,16 @@ DefineModule('helpers/gradients', function (require) {
         GreenToRed: {
             start: 120,
             end: 0,
-            direction: -1,
+            inverted: true,
             S: 1,
             L: .5
         },
 
         colorAtPercent: function (gradient, percent) {
+            if (gradient.inverted) {
+                percent = 1 - percent;
+            }
+
             var H = (gradient.end - gradient.start) * percent + gradient.start;
             var S = gradient.S * 100;
             var L = gradient.L * 100;
