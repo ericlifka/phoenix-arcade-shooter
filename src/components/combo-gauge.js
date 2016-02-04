@@ -77,7 +77,7 @@ DefineModule('components/combo-gauge', function (require) {
             var pixels = [];
             for (var i = 0; i < 59; i++) {
                 if (i < this.comboPoints) {
-                    pixels.unshift(Gradients.colorAtPercent(Gradients.GreenToRed, i / 59));
+                    pixels.unshift(Gradients.colorAtPercent(Gradients.GreenToRed, 1 - i / 59));
                 }
                 else {
                     pixels.unshift(null);
