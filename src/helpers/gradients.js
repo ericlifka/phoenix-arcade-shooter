@@ -50,8 +50,7 @@ DefineModule('helpers/gradients', function (require) {
         },
 
         colorAtPercent: function (gradient, percent) {
-            var decimalPercent = percent / 100;
-            var H = (gradient.end - gradient.start) * decimalPercent + gradient.start;
+            var H = (gradient.end - gradient.start) * percent + gradient.start;
             var S = gradient.S * 100;
             var L = gradient.L * 100;
 

@@ -54,7 +54,7 @@ DefineModule('components/life-meter', function (require) {
 
         buildSpriteColorArray: function () {
             var percentage = this.currentLife / this.maxLife * 100;
-            var meterColor = Gradients.colorAtPercent(Gradients.GreenToRed, this.currentLife / this.maxLife * 100);
+            var meterColor = Gradients.colorAtPercent(Gradients.GreenToRed, this.currentLife / this.maxLife);
             var colors = this.buildEmptySpriteColorArray();
 
             for (var i = this.length - 1; i >= 0; i--) {
