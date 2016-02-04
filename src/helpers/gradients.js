@@ -44,7 +44,22 @@ DefineModule('helpers/gradients', function (require) {
         GreenToRed: {
             start: 120,
             end: 0,
-            direction: -1
+            direction: -1,
+            S: 1,
+            L: .5
+        },
+
+        colorAtPercent: function (gradient, percent) {
+            var decimalPercent = percent / 100;
+            var H = (gradient.end - gradient.start) * decimalPercent + gradient.start;
+            var S = gradient.S * 100;
+            var L = gradient.L * 100;
+
+            H = Math.floor(H);
+            S = Math.floor(S) + "%";
+            L = Math.floor(L) + "%";
+
+            return "hsl(" + H + ", " + S + ", " + L + ")";
         }
     };
 });
