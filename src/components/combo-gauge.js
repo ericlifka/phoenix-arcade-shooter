@@ -6,9 +6,6 @@ DefineModule('components/combo-gauge', function (require) {
     var Sprite = require('models/sprite');
     var TextDisplay = require('components/text-display');
 
-    var gradient = Gradients.GreenToRed;
-    var gradientStep = 60 / gradient.length;
-
     return DefineClass(GameObject, {
         index: 1,
 
@@ -77,7 +74,7 @@ DefineModule('components/combo-gauge', function (require) {
             var pixels = [];
             for (var i = 0; i < 59; i++) {
                 if (i < this.comboPoints) {
-                    pixels.unshift(getGradientPixel(i));
+                    pixels.unshift(Gradients.colorAtPercent(Gradients.GreenToRed, 1 - i / 59));
                 }
                 else {
                     pixels.unshift(null);
@@ -116,12 +113,4 @@ DefineModule('components/combo-gauge', function (require) {
             this.scoreDisplay.changeMessage(padScoreDisplay(this.pointTotal));
         }
     });
-
-    function getGradientPixel(pixelIndex) {
-        var index = Math.floor(pixelIndex / gradientStep);
-        if (index < 0) index = 0;
-        if (index > gradient.length - 1) index = gradient.length - 1;
-
-        return gradient[ index ];
-    }
 });
