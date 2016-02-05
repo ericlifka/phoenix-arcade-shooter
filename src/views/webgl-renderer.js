@@ -53,6 +53,11 @@ DefineModule('views/webgl-renderer', function (require) {
             this.container.appendChild(this.canvas);
 
             this.canvasDrawContext = this.canvas.getContext("webgl");
+            this.canvasDrawContext.clearColor(0.0, 0.0, 0.0, 1.0);
+            this.canvasDrawContext.enable(this.canvasDrawContext.DEPTH_TEST);
+            this.canvasDrawContext.depthFunc(this.canvasDrawContext.LEQUAL);
+            this.canvasDrawContext.clear(this.canvasDrawContext.COLOR_BUFFER_BIT | this.canvasDrawContext.DEPTH_BUFFER_BIT);
+
             this.frames = [
                 new Frame(this),
                 new Frame(this)
