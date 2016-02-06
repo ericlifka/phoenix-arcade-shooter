@@ -35,6 +35,22 @@ DefineModule('views/webgl-renderer', function (require) {
         return el;
     }
 
+    var horizAspect = 480.0/640.0;
+
+    function initBuffers(gl) {
+        squareVerticesBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
+
+        var vertices = [
+            1.0,  1.0,  0.0,
+            -1.0, 1.0,  0.0,
+            1.0,  -1.0, 0.0,
+            -1.0, -1.0, 0.0
+        ];
+
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    }
+
     function getShader(gl, id) {
         var shaderScript, theSource, currentChild, shader;
 
