@@ -18,6 +18,8 @@
     var shaderProgram;
     var vertexPositionAttribute;
     var perspectiveMatrix;
+    var squareVerticesColorBuffer;
+    var vertexColorAttribute;
 
     var horizAspect = 480.0/640.0;
 
@@ -91,6 +93,9 @@
 
         vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
         gl.enableVertexAttribArray(vertexPositionAttribute);
+
+        vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+        gl.enableVertexAttribArray(vertexColorAttribute);
     }
 
     function getShader(gl, id) {
@@ -147,6 +152,17 @@
         ];
 
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+        var colors = [
+            1.0,  1.0,  1.0,  1.0,    // white
+            1.0,  0.0,  0.0,  1.0,    // red
+            0.0,  1.0,  0.0,  1.0,    // green
+            0.0,  0.0,  1.0,  1.0     // blue
+        ];
+
+        squareVerticesColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesColorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
     }
 
     function drawScene() {
@@ -161,6 +177,9 @@
         gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
         setMatrixUniforms();
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesColorBuffer);
+        gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
     }
 
     function loadIdentity() {
@@ -186,20 +205,26 @@
 </script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
-  void main(void) {
-    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-  }
+varying lowp vec4 vColor;
+
+void main(void) {
+    gl_FragColor = vColor;
+}
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
-  attribute vec3 aVertexPosition;
+attribute vec3 aVertexPosition;
+attribute vec4 aVertexColor;
 
-  uniform mat4 uMVMatrix;
-  uniform mat4 uPMatrix;
+uniform mat4 uMVMatrix;
+uniform mat4 uPMatrix;
 
-  void main(void) {
+varying lowp vec4 vColor;
+
+void main(void) {
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-  }
+    vColor = aVertexColor;
+}
 </script>
 
 <script>
