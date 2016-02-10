@@ -97,35 +97,35 @@ function initBuffers() {
         1.0,  1.0,  1.0,
         -1.0,  1.0,  1.0,
 
-        // Back face
-        -1.0, -1.0, -1.0,
-        -1.0,  1.0, -1.0,
-        1.0,  1.0, -1.0,
-        1.0, -1.0, -1.0,
-
-        // Top face
-        -1.0,  1.0, -1.0,
-        -1.0,  1.0,  1.0,
-        1.0,  1.0,  1.0,
-        1.0,  1.0, -1.0,
-
-        // Bottom face
-        -1.0, -1.0, -1.0,
-        1.0, -1.0, -1.0,
-        1.0, -1.0,  1.0,
-        -1.0, -1.0,  1.0,
-
-        // Right face
-        1.0, -1.0, -1.0,
-        1.0,  1.0, -1.0,
-        1.0,  1.0,  1.0,
-        1.0, -1.0,  1.0,
-
-        // Left face
-        -1.0, -1.0, -1.0,
-        -1.0, -1.0,  1.0,
-        -1.0,  1.0,  1.0,
-        -1.0,  1.0, -1.0
+//        // Back face
+//        -1.0, -1.0, -1.0,
+//        -1.0,  1.0, -1.0,
+//        1.0,  1.0, -1.0,
+//        1.0, -1.0, -1.0,
+//
+//        // Top face
+//        -1.0,  1.0, -1.0,
+//        -1.0,  1.0,  1.0,
+//        1.0,  1.0,  1.0,
+//        1.0,  1.0, -1.0,
+//
+//        // Bottom face
+//        -1.0, -1.0, -1.0,
+//        1.0, -1.0, -1.0,
+//        1.0, -1.0,  1.0,
+//        -1.0, -1.0,  1.0,
+//
+//        // Right face
+//        1.0, -1.0, -1.0,
+//        1.0,  1.0, -1.0,
+//        1.0,  1.0,  1.0,
+//        1.0, -1.0,  1.0,
+//
+//        // Left face
+//        -1.0, -1.0, -1.0,
+//        -1.0, -1.0,  1.0,
+//        -1.0,  1.0,  1.0,
+//        -1.0,  1.0, -1.0
     ];
 
     // Now pass the list of vertices into WebGL to build the shape. We
@@ -176,11 +176,11 @@ function initBuffers() {
 
     var cubeVertexIndices = [
         0,  1,  2,      0,  2,  3,    // front
-        4,  5,  6,      4,  6,  7,    // back
-        8,  9,  10,     8,  10, 11,   // top
-        12, 13, 14,     12, 14, 15,   // bottom
-        16, 17, 18,     16, 18, 19,   // right
-        20, 21, 22,     20, 22, 23    // left
+//        4,  5,  6,      4,  6,  7,    // back
+//        8,  9,  10,     8,  10, 11,   // top
+//        12, 13, 14,     12, 14, 15,   // bottom
+//        16, 17, 18,     16, 18, 19,   // right
+//        20, 21, 22,     20, 22, 23    // left
     ];
 
     // Now send the element array to GL
@@ -232,7 +232,7 @@ function drawScene() {
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVerticesIndexBuffer);
     setMatrixUniforms();
-    gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
 
     // Restore the original matrix
 
