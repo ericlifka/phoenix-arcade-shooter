@@ -213,9 +213,9 @@ function drawScene() {
 
     // Save the current matrix, then rotate before we draw.
 
-    mvPushMatrix();
-    mvRotate(cubeRotation, [1, 0, 1]);
-    mvTranslate([cubeXOffset, cubeYOffset, cubeZOffset]);
+//    mvPushMatrix();
+//    mvRotate(cubeRotation, [1, 0, 1]);
+//    mvTranslate([cubeXOffset, cubeYOffset, cubeZOffset]);
 
     // Draw the cube by binding the array buffer to the cube's vertices
     // array, setting attributes, and pushing it to GL.
@@ -236,7 +236,7 @@ function drawScene() {
 
     // Restore the original matrix
 
-    mvPopMatrix();
+//    mvPopMatrix();
 
     // Update the rotation for the next draw, if it's time to do so.
 
