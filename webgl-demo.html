@@ -90,7 +90,7 @@ function initBuffers() {
 
     // Now create an array of vertices for the cube.
 
-    var vertices = [
+    var vertices_orig = [
             0.0, 0.0, 0.0,
             1.0, 0.0, 0.0,
             1.0, 1.0, 0.0,
@@ -137,6 +137,16 @@ function initBuffers() {
 //        -1.0,  1.0,  1.0,
 //        -1.0,  1.0, -1.0
     ];
+
+    var squareCount = 3;
+    var vertices = [];
+
+    for (var s = 0; s < squareCount; s++) {
+        vertices = vertices.concat([s, 0.0, 0.0]);
+        vertices = vertices.concat([s + 1, 0.0, 0.0]);
+        vertices = vertices.concat([s + 1, 1.0, 0.0]);
+        vertices = vertices.concat([s, 1.0, 0.0]);
+    }
 
     // Now pass the list of vertices into WebGL to build the shape. We
     // do this by creating a Float32Array from the JavaScript array,
@@ -187,7 +197,7 @@ function initBuffers() {
     var cubeVertexIndices = [
         0,  1,  2,      0,  2,  3,    // front
         4,  5,  6,      4,  6,  7,    // back
-//        8,  9,  10,     8,  10, 11,   // top
+        8,  9,  10,     8,  10, 11,   // top
 //        12, 13, 14,     12, 14, 15,   // bottom
 //        16, 17, 18,     16, 18, 19,   // right
 //        20, 21, 22,     20, 22, 23    // left
@@ -242,7 +252,7 @@ function drawScene() {
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVerticesIndexBuffer);
     setMatrixUniforms();
-    gl.drawElements(gl.TRIANGLES, 12, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, 18, gl.UNSIGNED_SHORT, 0);
 
     // Restore the original matrix
 
