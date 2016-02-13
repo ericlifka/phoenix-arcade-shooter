@@ -281,7 +281,7 @@ function drawScene() {
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVerticesIndexBuffer);
     setMatrixUniforms();
-    gl.drawElements(gl.TRIANGLES, width * height * 3, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, width * height * 6, gl.UNSIGNED_SHORT, 0);
 
     // Restore the original matrix
 
