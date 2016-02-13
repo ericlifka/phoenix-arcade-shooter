@@ -174,15 +174,32 @@ function initBuffers() {
 
     var generatedColors = [];
 
-    for (j=0; j<6; j++) {
-        var c = colors[j];
+    var widthStep = 1.0 / width;
+    var heightStep = 1.0 / height;
 
-        // Repeat each color four times for the four vertices of the face
-
-        for (var i=0; i<4; i++) {
-            generatedColors = generatedColors.concat(c);
+    for (var h = 0; h < height; h++) {
+        for (var w = 0; w < width; w++) {
+            var color = [
+                widthStep * w,
+                0.0,
+                heightStep * h,
+                1.0
+            ];
+            for (var i = 0; i < 4; i++) {
+                generatedColors = generatedColors.concat(color);
+            }
         }
     }
+
+    // for (j=0; j<6; j++) {
+    //     var c = colors[j];
+    //
+    //     // Repeat each color four times for the four vertices of the face
+    //
+    //     for (var i=0; i<4; i++) {
+    //         generatedColors = generatedColors.concat(c);
+    //     }
+    // }
 
     cubeVerticesColorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesColorBuffer);
