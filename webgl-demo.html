@@ -215,14 +215,22 @@ function initBuffers() {
     // indices into the vertex array to specify each triangle's
     // position.
 
-    var cubeVertexIndices = [
-        0,  1,  2,      0,  2,  3,    // front
-        4,  5,  6,      4,  6,  7,    // back
-        8,  9,  10,     8,  10, 11,   // top
-       12, 13, 14,     12, 14, 15,   // bottom
-       16, 17, 18,     16, 18, 19,   // right
-       20, 21, 22,     20, 22, 23    // left
-    ];
+    // var cubeVertexIndices = [
+    //     0,  1,  2,      0,  2,  3,    // front
+    //     4,  5,  6,      4,  6,  7,    // back
+    //     8,  9,  10,     8,  10, 11,   // top
+    //    12, 13, 14,     12, 14, 15,   // bottom
+    //    16, 17, 18,     16, 18, 19,   // right
+    //    20, 21, 22,     20, 22, 23    // left
+    // ];
+    var cubeVertexIndices = [ ];
+    for (var i = 0; i < width * height; i++) {
+        var squareIndex = i * 4;
+        cubeVertexIndices = cubeVertexIndices.concat([
+            squareIndex, squareIndex + 1, squareIndex + 2, // first triangle in square
+            squareIndex, squareIndex + 2, squareIndex + 3  // second
+        ]);
+    }
 
     // Now send the element array to GL
 
