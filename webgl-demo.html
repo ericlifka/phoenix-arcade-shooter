@@ -102,12 +102,13 @@ function initBuffers() {
             vertices = vertices.concat([w, h + 1, 0]);
         }
     }
+    logTime('cubeVerticesBuffer - create js data');
 
     cubeVerticesBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
-    logTime('cubeVerticesBuffer');
+    logTime('cubeVerticesBuffer - create gl data');
 
     var generatedColors = [];
 
@@ -128,13 +129,13 @@ function initBuffers() {
         }
     }
 
+    logTime('cubeVerticesColorBuffer - create js data');
+
     cubeVerticesColorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesColorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(generatedColors), gl.STATIC_DRAW);
 
-    logTime('cubeVerticesColorBuffer');
-
-
+    logTime('cubeVerticesColorBuffer - create gl data');
 
     var cubeVertexIndices = [ ];
     for (var i = 0; i < width * height; i++) {
@@ -145,11 +146,13 @@ function initBuffers() {
         ]);
     }
 
+    logTime('cubeVerticesIndexBuffer - create js data');
+
     cubeVerticesIndexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVerticesIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeVertexIndices), gl.STATIC_DRAW);
 
-    logTime('cubeVerticesIndexBuffer');
+    logTime('cubeVerticesIndexBuffer - create gl data');
 
     logTime('end - buffers');
 }
