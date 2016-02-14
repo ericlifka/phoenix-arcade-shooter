@@ -101,14 +101,12 @@ function initBuffers() {
 
     for (var h = 0; h < height; h++) {
         for (var w = 0; w < width; w++) {
-            var trianglePoints = [
+            pushOntoEnd(vertices, [
                 w, h, 0,
                 w + 1, h, 0,
                 w + 1, h + 1, 0,
                 w, h + 1, 0
-            ];
-
-            pushOntoEnd(vertices, trianglePoints);
+            ]);
         }
     }
     logTime('cubeVerticesBuffer - create js data');
@@ -132,8 +130,9 @@ function initBuffers() {
                 0.0,
                 1.0
             ];
+
             for (var i = 0; i < 4; i++) {
-                generatedColors = generatedColors.concat(color);
+                pushOntoEnd(generatedColors, color);
             }
         }
     }
@@ -149,7 +148,8 @@ function initBuffers() {
     var cubeVertexIndices = [ ];
     for (var i = 0; i < width * height; i++) {
         var squareIndex = i * 4;
-        cubeVertexIndices = cubeVertexIndices.concat([
+        
+        pushOntoEnd(cubeVertexIndices, [
             squareIndex, squareIndex + 1, squareIndex + 2, // first triangle in square
             squareIndex, squareIndex + 2, squareIndex + 3  // second
         ]);
