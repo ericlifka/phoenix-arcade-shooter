@@ -36,7 +36,21 @@ var vertexPositionAttribute;
 var vertexColorAttribute;
 var perspectiveMatrix;
 
+var lastTime;
+function logTime(tag) {
+    var now = new Date().valueOf();
+    
+    if (!lastTime) {
+        console.log('timing: ' + tag);
+    } else {
+        console.log('timing: ' + tag, now - lastTime);
+    }
+
+    lastTime = now;
+}
+
 function start() {
+    logTime('start');
     canvas = document.getElementById("glcanvas");
 
     initWebGL(canvas);      // Initialize the GL context
@@ -62,6 +76,7 @@ function start() {
         // Set up to draw the scene periodically.
 
         setInterval(drawScene, 15);
+        logTime('end');
     }
 }
 
