@@ -39,7 +39,7 @@ var perspectiveMatrix;
 var lastTime;
 function logTime(tag) {
     var now = new Date().valueOf();
-    
+
     if (!lastTime) {
         console.log('timing: ' + tag);
     } else {
@@ -52,9 +52,9 @@ function logTime(tag) {
 function start() {
     logTime('start');
     canvas = document.getElementById("glcanvas");
-
+    logTime('init canvas');
     initWebGL(canvas);      // Initialize the GL context
-
+    logTime('create gl');
     // Only continue if WebGL is available and working
 
     if (gl) {
@@ -65,14 +65,14 @@ function start() {
 
         // Initialize the shaders; this is where all the lighting for the
         // vertices and so forth is established.
-
+        logTime('init gl');
         initShaders();
-
+        logTime('init shaders');
         // Here's where we call the routine that builds all the objects
         // we'll be drawing.
 
         initBuffers();
-
+        logTime('init buffers');
         // Set up to draw the scene periodically.
 
         setInterval(drawScene, 15);
