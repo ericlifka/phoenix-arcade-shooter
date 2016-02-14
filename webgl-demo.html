@@ -50,13 +50,9 @@ function logTime(tag) {
 }
 
 function start() {
-    logTime('start');
     canvas = document.getElementById("glcanvas");
-    logTime('init canvas');
     initWebGL(canvas);      // Initialize the GL context
-    logTime('create gl');
     // Only continue if WebGL is available and working
-
     if (gl) {
         gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
         gl.clearDepth(1.0);                 // Clear everything
@@ -65,18 +61,15 @@ function start() {
 
         // Initialize the shaders; this is where all the lighting for the
         // vertices and so forth is established.
-        logTime('init gl');
         initShaders();
-        logTime('init shaders');
+
         // Here's where we call the routine that builds all the objects
         // we'll be drawing.
 
         initBuffers();
-        logTime('init buffers');
         // Set up to draw the scene periodically.
 
         setInterval(drawScene, 15);
-        logTime('end');
     }
 }
 
@@ -97,7 +90,7 @@ function initWebGL() {
 }
 
 function initBuffers() {
-
+    logTime('start - buffers');
     // Create a buffer for the cube's vertices.
 
     cubeVerticesBuffer = gl.createBuffer();
@@ -252,6 +245,8 @@ function initBuffers() {
 
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
             new Uint16Array(cubeVertexIndices), gl.STATIC_DRAW);
+
+    logTime('end - buffers');
 }
 
 function drawScene() {
