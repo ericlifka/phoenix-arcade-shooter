@@ -26,8 +26,8 @@ var xIncValue = 0.2;
 var yIncValue = -0.4;
 var zIncValue = 0.3;
 
-var width = 60;
-var height = 50;
+var width = 120;
+var height = 100;
 var cameraTranslateMatrix= [-38.0, -28.0, -70.0];
 
 var mvMatrix;
@@ -47,6 +47,11 @@ function logTime(tag) {
     }
 
     lastTime = now;
+}
+function pushOntoEnd(target, data) {
+    for (var i = 0; i < data.length; i++) {
+        target.push(data[ i ]);
+    }
 }
 
 function start() {
@@ -96,10 +101,14 @@ function initBuffers() {
 
     for (var h = 0; h < height; h++) {
         for (var w = 0; w < width; w++) {
-            vertices = vertices.concat([w, h, 0]);
-            vertices = vertices.concat([w + 1, h, 0]);
-            vertices = vertices.concat([w + 1, h + 1, 0]);
-            vertices = vertices.concat([w, h + 1, 0]);
+            var trianglePoints = [
+                w, h, 0,
+                w + 1, h, 0,
+                w + 1, h + 1, 0,
+                w, h + 1, 0
+            ];
+
+            pushOntoEnd(vertices, trianglePoints);
         }
     }
     logTime('cubeVerticesBuffer - create js data');
