@@ -5,7 +5,7 @@
 </head>
 <body onload="start()">
 
-<canvas id="glcanvas" width="640" height="480">
+<canvas id="glcanvas" width="800" height="600">
     Your browser doesn't appear to support the
     <code>&lt;canvas&gt;</code> element.
 </canvas>
@@ -26,9 +26,9 @@ var xIncValue = 0.2;
 var yIncValue = -0.4;
 var zIncValue = 0.3;
 
-var width = 120;
-var height = 100;
-var cameraTranslateMatrix= [-38.0, -28.0, -70.0];
+var width = 200;
+var height = 150;
+var cameraTranslateMatrix= [-68.0, -58.0, -160.0];
 
 var mvMatrix;
 var shaderProgram;
@@ -148,7 +148,7 @@ function initBuffers() {
     var cubeVertexIndices = [ ];
     for (var i = 0; i < width * height; i++) {
         var squareIndex = i * 4;
-        
+
         pushOntoEnd(cubeVertexIndices, [
             squareIndex, squareIndex + 1, squareIndex + 2, // first triangle in square
             squareIndex, squareIndex + 2, squareIndex + 3  // second
@@ -176,7 +176,7 @@ function drawScene() {
     // ratio of 640:480, and we only want to see objects between 0.1 units
     // and 100 units away from the camera.
 
-    perspectiveMatrix = makePerspective(45, 640.0/480.0, 0.1, 100.0);
+    perspectiveMatrix = makePerspective(45, 200.0/150.0, 0.1, 200.0);
 
     // Set the drawing position to the "identity" point, which is
     // the center of the scene.
