@@ -26,8 +26,8 @@ var xIncValue = 0.2;
 var yIncValue = -0.4;
 var zIncValue = 0.3;
 
-var width = 200;
-var height = 150;
+var width = 150;
+var height = 200;
 var cameraTranslateMatrix= [-90.0, -58.0, -200.0];
 
 var mvMatrix;
@@ -82,7 +82,7 @@ function initWebGL() {
     gl = null;
 
     try {
-        gl = canvas.getContext("experimental-webgl");
+        gl = canvas.getContext("webgl");
     }
     catch(e) {
     }
@@ -209,6 +209,8 @@ function drawScene() {
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVerticesIndexBuffer);
     setMatrixUniforms();
+//    gl.drawElements(gl.TRIANGLES, 98304, gl.UNSIGNED_SHORT, 0);
+//    gl.drawElements(gl.TRIANGLES, 90000, gl.UNSIGNED_SHORT, 0);
     gl.drawElements(gl.TRIANGLES, width * height * 6, gl.UNSIGNED_SHORT, 0);
 
     // Restore the original matrix
