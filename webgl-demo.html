@@ -129,7 +129,7 @@ function initBuffers() {
     for (var h = 0; h < height; h++) {
         for (var w = 0; w < width; w++) {
 
-            if (currentChunk.chunkSize >= 60000) {
+            if (currentChunk.chunkSize >= 10000) {
                 currentChunk = newChunk();
             }
 
@@ -151,14 +151,14 @@ function initBuffers() {
                 pushOntoEnd(currentChunk.colors.raw, color);
             }
 
-            var squareIndex = (h * height + w) * 4;
+            var squareIndex = currentChunk.chunkSize * 4;
 
             pushOntoEnd(currentChunk.indices.raw, [
                 squareIndex, squareIndex + 1, squareIndex + 2, // first triangle in square
                 squareIndex, squareIndex + 2, squareIndex + 3  // second
             ]);
 
-            currentChunk.chunkSize += 6;
+            currentChunk.chunkSize++;
 
         }
     }
@@ -307,7 +307,7 @@ function drawScene() {
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, chunk.indices.buffer);
 
-        gl.drawElements(gl.TRIANGLES, chunk.chunkSize, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
     });
 
     // Restore the original matrix
