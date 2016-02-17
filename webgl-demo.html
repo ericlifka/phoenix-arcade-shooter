@@ -281,22 +281,34 @@ function drawScene() {
 
     // Draw the cube by binding the array buffer to the cube's vertices
     // array, setting attributes, and pushing it to GL.
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesBuffer);
-    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-
-    // Set the colors attribute for the vertices.
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesColorBuffer);
-    gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
-
-    // Draw the cube.
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVerticesIndexBuffer);
+//
+//    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesBuffer);
+//    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+//
+//    // Set the colors attribute for the vertices.
+//
+//    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesColorBuffer);
+//    gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+//
+//    // Draw the cube.
+//
+//    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVerticesIndexBuffer);
     setMatrixUniforms();
 //    gl.drawElements(gl.TRIANGLES, 98304, gl.UNSIGNED_SHORT, 0);
 //    gl.drawElements(gl.TRIANGLES, 90000, gl.UNSIGNED_SHORT, 0);
-    gl.drawElements(gl.TRIANGLES, width * height * 6, gl.UNSIGNED_SHORT, 0);
+//    gl.drawElements(gl.TRIANGLES, width * height * 6, gl.UNSIGNED_SHORT, 0);
+
+    chunks.forEach(function (chunk) {
+        gl.bindBuffer(gl.ARRAY_BUFFER, chunk.vertices.buffer);
+        gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, chunk.colors.buffer);
+        gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, chunk.indices.buffer);
+
+        gl.drawElements(gl.TRIANGLES, chunk.chunkSize, gl.UNSIGNED_SHORT, 0);
+    });
 
     // Restore the original matrix
 
