@@ -18,7 +18,15 @@ var cubeVerticesBuffer;
 var cubeVerticesColorBuffer;
 var cubeVerticesIndexBuffer;
 
-var chunks = [];
+var chunks = [
+    {
+        vertices: [],
+        generatedColors: [],
+        cubeVertexIndices: [],
+        squareIndex: 0
+    }
+];
+var chunk = chunks[0];
 
 var cubeRotation = 0.0;
 var cubeXOffset = 0.0;
@@ -184,16 +192,6 @@ function initBuffers() {
 //
 //    logTime('create buffers');
 
-    var chunks = [
-        {
-            vertices: [],
-            generatedColors: [],
-            cubeVertexIndices: [],
-            squareIndex: 0
-        }
-    ];
-    var chunk = chunks[0];
-
     for (var h = 0; h < height; h++) {
         for (var w = 0; w < width; w++) {
             pushOntoEnd(chunk.vertices, [
@@ -225,16 +223,16 @@ function initBuffers() {
 
     logTime('create js data');
 
-    cubeVerticesBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesBuffer);
+    chunk.cubeVerticesBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, chunk.cubeVerticesBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(chunk.vertices), gl.STATIC_DRAW);
 
-    cubeVerticesColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesColorBuffer);
+    chunk.cubeVerticesColorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, chunk.cubeVerticesColorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(chunk.generatedColors), gl.STATIC_DRAW);
 
-    cubeVerticesIndexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVerticesIndexBuffer);
+    chunk.cubeVerticesIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, chunk.cubeVerticesIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(chunk.cubeVertexIndices), gl.STATIC_DRAW);
 
     logTime('create buffers');
@@ -273,17 +271,17 @@ function drawScene() {
     // Draw the cube by binding the array buffer to the cube's vertices
     // array, setting attributes, and pushing it to GL.
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, chunk.cubeVerticesBuffer);
     gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
     // Set the colors attribute for the vertices.
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesColorBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, chunk.cubeVerticesColorBuffer);
     gl.vertexAttribPointer(vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
 
     // Draw the cube.
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVerticesIndexBuffer);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, chunk.cubeVerticesIndexBuffer);
 
     setMatrixUniforms();
 //    gl.drawElements(gl.TRIANGLES, 98304, gl.UNSIGNED_SHORT, 0);
