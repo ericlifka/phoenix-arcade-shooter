@@ -187,6 +187,8 @@ function initBuffers() {
 
     var vertices = [];
     var generatedColors = [];
+    var cubeVertexIndices = [];
+    var squareIndex = 0;
 
     for (var h = 0; h < height; h++) {
         for (var w = 0; w < width; w++) {
@@ -207,10 +209,17 @@ function initBuffers() {
             for (var i = 0; i < 4; i++) {
                 pushOntoEnd(generatedColors, color);
             }
+
+            pushOntoEnd(cubeVertexIndices, [
+                squareIndex, squareIndex + 1, squareIndex + 2, // first triangle in square
+                squareIndex, squareIndex + 2, squareIndex + 3  // second
+            ]);
+
+            squareIndex += 4;
         }
     }
 
-    logTime('create vertices and color data');
+    logTime('create js data');
 
     cubeVerticesBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesBuffer);
@@ -220,25 +229,11 @@ function initBuffers() {
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesColorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(generatedColors), gl.STATIC_DRAW);
 
-    logTime('vertex and color buffers');
-
-    var cubeVertexIndices = [ ];
-    for (var i = 0; i < width * height; i++) {
-        var squareIndex = i * 4;
-
-        pushOntoEnd(cubeVertexIndices, [
-            squareIndex, squareIndex + 1, squareIndex + 2, // first triangle in square
-            squareIndex, squareIndex + 2, squareIndex + 3  // second
-        ]);
-    }
-
-    logTime('cubeVerticesIndexBuffer - create js data');
-
     cubeVerticesIndexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVerticesIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeVertexIndices), gl.STATIC_DRAW);
 
-    logTime('cubeVerticesIndexBuffer - create gl data');
+    logTime('create buffers');
 
     logTime('end - buffers');
 }
