@@ -235,17 +235,19 @@ function initBuffers() {
 
     logTime('create js data');
 
-    chunk.cubeVerticesBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, chunk.cubeVerticesBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(chunk.vertices), gl.STATIC_DRAW);
+    chunks.forEach(function (chunk) {
+        chunk.cubeVerticesBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, chunk.cubeVerticesBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(chunk.vertices), gl.STATIC_DRAW);
 
-    chunk.cubeVerticesColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, chunk.cubeVerticesColorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(chunk.generatedColors), gl.STATIC_DRAW);
+        chunk.cubeVerticesColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, chunk.cubeVerticesColorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(chunk.generatedColors), gl.STATIC_DRAW);
 
-    chunk.cubeVerticesIndexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, chunk.cubeVerticesIndexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(chunk.cubeVertexIndices), gl.STATIC_DRAW);
+        chunk.cubeVerticesIndexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, chunk.cubeVerticesIndexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(chunk.cubeVertexIndices), gl.STATIC_DRAW);
+    });
 
     logTime('create buffers');
 
