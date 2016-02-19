@@ -194,6 +194,18 @@ function initBuffers() {
 
     for (var h = 0; h < height; h++) {
         for (var w = 0; w < width; w++) {
+
+            if (chunk.squareIndex >= 5000) {
+                chunk = {
+                    vertices: [],
+                    generatedColors: [],
+                    cubeVertexIndices: [],
+                    squareIndex: 0
+                };
+
+                chunks.push(chunk);
+            }
+
             pushOntoEnd(chunk.vertices, [
                 w, h, 0,
                 w + 1, h, 0,
@@ -286,7 +298,7 @@ function drawScene() {
     setMatrixUniforms();
 //    gl.drawElements(gl.TRIANGLES, 98304, gl.UNSIGNED_SHORT, 0);
 //    gl.drawElements(gl.TRIANGLES, 90000, gl.UNSIGNED_SHORT, 0);
-    gl.drawElements(gl.TRIANGLES, width * height * 6, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, chunk.squareIndex / 4 * 6, gl.UNSIGNED_SHORT, 0);
 
 //    var chunk = chunks[0];
 //    chunks.forEach(function (chunk) {
