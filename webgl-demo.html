@@ -186,6 +186,7 @@ function initBuffers() {
 
 
     var vertices = [];
+    var generatedColors = [];
 
     for (var h = 0; h < height; h++) {
         for (var w = 0; w < width; w++) {
@@ -195,20 +196,7 @@ function initBuffers() {
                 w + 1, h + 1, 0,
                 w, h + 1, 0
             ]);
-        }
-    }
-    logTime('cubeVerticesBuffer - create js data');
 
-    cubeVerticesBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-
-    logTime('cubeVerticesBuffer - create gl data');
-
-    var generatedColors = [];
-
-    for (var h = 0; h < height; h++) {
-        for (var w = 0; w < width; w++) {
             var color = [
                 widthStep * w,
                 heightStep * h,
@@ -222,13 +210,17 @@ function initBuffers() {
         }
     }
 
-    logTime('cubeVerticesColorBuffer - create js data');
+    logTime('create vertices and color data');
+
+    cubeVerticesBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
     cubeVerticesColorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeVerticesColorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(generatedColors), gl.STATIC_DRAW);
 
-    logTime('cubeVerticesColorBuffer - create gl data');
+    logTime('vertex and color buffers');
 
     var cubeVertexIndices = [ ];
     for (var i = 0; i < width * height; i++) {
