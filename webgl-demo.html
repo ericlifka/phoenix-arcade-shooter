@@ -104,27 +104,27 @@ function initWebGL() {
         alert("Unable to initialize WebGL. Your browser may not support it.");
     }
 }
-
-function newSegment() {
-    return {
-        raw: [],
-        data: null,
-        buffer: null
-    };
-}
-
-function newChunk() {
-    var chunk = {
-        chunkSize: 0,
-        vertices: newSegment(),
-        colors: newSegment(),
-        indices: newSegment()
-    };
-
-    chunks.push(chunk);
-
-    return chunk;
-}
+//
+//function newSegment() {
+//    return {
+//        raw: [],
+//        data: null,
+//        buffer: null
+//    };
+//}
+//
+//function newChunk() {
+//    var chunk = {
+//        chunkSize: 0,
+//        vertices: newSegment(),
+//        colors: newSegment(),
+//        indices: newSegment()
+//    };
+//
+//    chunks.push(chunk);
+//
+//    return chunk;
+//}
 
 function initBuffers() {
     logTime('start - buffers');
