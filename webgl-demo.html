@@ -88,7 +88,13 @@ function start() {
         initBuffers();
         // Set up to draw the scene periodically.
 
-        setInterval(drawScene, 15);
+        function animFrame() {
+            drawScene();
+
+            requestAnimationFrame(animFrame);
+        }
+
+        requestAnimationFrame(animFrame);
     }
 }
 
