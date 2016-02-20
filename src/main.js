@@ -4,6 +4,7 @@ DefineModule('main', function (require) {
     var KeyboardController = require('controllers/keyboard-input');
     var Phoenix = require('models/phoenix');
     var RunLoop = require('helpers/run-loop');
+    //var WebGLRenderer = require('views/webgl-renderer');
 
     var gameDimensions = { width: 200, height: 150 };
     var gamepadInput = new GamepadController();
