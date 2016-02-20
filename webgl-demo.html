@@ -41,6 +41,9 @@ var width = 200;
 var height = 150;
 var cameraTranslateMatrix= [-100.0, -70.0, -200.0];
 
+var colorWidthStep = 1.0 / width;
+var colorHeightStep = 1.0 / height;
+
 var mvMatrix;
 var shaderProgram;
 var vertexPositionAttribute;
@@ -129,9 +132,6 @@ function initWebGL() {
 function initBuffers() {
     logTime('start - buffers');
 
-    var widthStep = 1.0 / width;
-    var heightStep = 1.0 / height;
-
 //    var currentChunk = newChunk();
 //
 //    for (var h = 0; h < height; h++) {
@@ -214,8 +214,8 @@ function initBuffers() {
             ]);
 
             var color = [
-                widthStep * w,
-                heightStep * h,
+                colorWidthStep * w,
+                colorHeightStep * h,
                 0.0,
                 1.0
             ];
@@ -254,7 +254,28 @@ function initBuffers() {
     logTime('end - buffers');
 }
 
+function updateColors() {
+    chunks.forEach(function (chunk) {
+        for (var i = 0; i < chunk.generatedColors.length; i += 4) {
+            chunk.generatedColors[i] += colorWidthStep;
+            chunk.generatedColors[i+1] += colorHeightStep;
+            if (chunk.generatedColors[i] > 1) {
+                chunk.generatedColors[i] -= 1;
+            }
+            if (chunk.generatedColors[i+1] > 1) {
+                chunk.generatedColors[i+1] -= 1;
+            }
+        }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, chunk.cubeVerticesColorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(chunk.generatedColors), gl.STATIC_DRAW);
+    });
+}
+
 function drawScene() {
+
+    updateColors();
+
     // Clear the canvas before we start drawing on it.
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
