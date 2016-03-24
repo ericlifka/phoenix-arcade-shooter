@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/ericlifka/phoenix-arcade-shooter/issues"
   },
-  "homepage": "https://github.com/ericlifka/phoenix-arcade-shooter#readme"
+  "homepage": "https://github.com/ericlifka/phoenix-arcade-shooter#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  }
 }
