@@ -25,6 +25,7 @@
   "homepage": "https://github.com/ericlifka/phoenix-arcade-shooter#readme",
   "devDependencies": {
     "gulp": "^3.9.1",
-    "gulp-concat": "^2.6.0"
+    "gulp-concat": "^2.6.0",
+    "gulp-htmlbuild": "^0.4.1"
   }
 }
