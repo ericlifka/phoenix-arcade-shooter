@@ -3,10 +3,14 @@ const concat = require('gulp-concat');
 const htmlbuild = require('gulp-htmlbuild');
 
 gulp.task('default', function () {
-    gulp.src([ './index.html' ])
+    gulp.src([ './index.html', './styles/game.css' ])
         .pipe(htmlbuild({
             js: htmlbuild.preprocess.js(function (block) {
                 block.write('phoenix-arcade-shooter.js');
+                block.end();
+            }),
+            css: htmlbuild.preprocess.css(function (block) {
+                block.write('game.css');
                 block.end();
             })
         }))
