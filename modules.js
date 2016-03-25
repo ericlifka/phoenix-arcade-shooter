@@ -1,3 +1,6 @@
+var DefineClass;
+var DefineModule;
+
 (function () {
     var moduleDefinitions = {};
     var evaluatedModules = {};
@@ -33,7 +36,7 @@
         });
     }
 
-    window.DefineClass = function (Base, definition) {
+    DefineClass = function (Base, definition) {
         if (typeof Base === "object" && !definition) {
             definition = Base;
             Base = function () {
@@ -61,7 +64,7 @@
         return Constructor;
     };
 
-    window.DefineModule = function (moduleName, moduleDefinition) {
+    DefineModule = function (moduleName, moduleDefinition) {
         if (moduleDefinitions[ moduleName ]) {
             throw "Duplicate module definition: " + moduleName;
         }
