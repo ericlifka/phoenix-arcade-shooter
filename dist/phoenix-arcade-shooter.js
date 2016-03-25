@@ -1,4 +1,8 @@
 (function () {
+var DefineClass;
+var DefineModule;
+
+(function () {
     var moduleDefinitions = {};
     var evaluatedModules = {};
     var evaluationStack = [];
@@ -33,7 +37,7 @@
         });
     }
 
-    window.DefineClass = function (Base, definition) {
+    DefineClass = function (Base, definition) {
         if (typeof Base === "object" && !definition) {
             definition = Base;
             Base = function () {
@@ -61,7 +65,7 @@
         return Constructor;
     };
 
-    window.DefineModule = function (moduleName, moduleDefinition) {
+    DefineModule = function (moduleName, moduleDefinition) {
         if (moduleDefinitions[ moduleName ]) {
             throw "Duplicate module definition: " + moduleName;
         }
@@ -2393,258 +2397,6 @@ DefineModule('levels/level-manager', function (require) {
     });
 });
 
-DefineModule('screens/controls-description', function (require) {
-    var EventedInput = require('models/evented-input');
-    var GameObject = require('models/game-object');
-    var TextDisplay = require('components/text-display');
-
-    return DefineClass(GameObject, {
-        headerDef: {
-            font: "arcade",
-            message: "Controls",
-            color: "white",
-            position: { x: 5, y: 5 }
-        },
-        inputDescriptions: [
-            {
-                message: [ "", "Move", "Fire" ],
-                position: { x: 5, y: 20 }
-            },
-            {
-                message: [ "- Keyboard", "- WASD", "- Space" ],
-                position: { x: 35, y: 20 }
-            },
-            {
-                message: [ "- Controller", "- Left Stick", "- A" ],
-                position: { x: 85, y: 20 }
-            }
-        ],
-
-        reset: function () {
-            this.super('reset');
-
-            this.addChild(new TextDisplay(this, this.headerDef));
-
-            this.inputDescriptions.forEach(function (item) {
-                this.addChild(new TextDisplay(this, {
-                    font: "arcade-small",
-                    color: "#F6EC9A",
-                    message: item.message,
-                    position: item.position
-                }))
-            }.bind(this));
-
-            this.addChild(new EventedInput({
-                onSelect: this.onSelect.bind(this)
-            }));
-        },
-
-        onSelect: function () {
-            this.parent.reset();
-        }
-    })
-});
-
-DefineModule('screens/game-over-screen', function (require) {
-    var EventedInput = require('models/evented-input');
-    var GameObject = require('models/game-object');
-    var padScoreDisplay = require('helpers/pad-score-display');
-    var TextDisplay = require('components/text-display');
-
-    return DefineClass(GameObject, {
-        headerDef: {
-            font: "arcade",
-            border: 1,
-            padding: 20,
-            position: { x: 45, y: 45 }
-        },
-        subHeaderDef: {
-            font: "arcade-small",
-            message: "Final Score:",
-            position: { x: 66, y: 81 }
-        },
-        scoreDisplayDef: {
-            font: "arcade-small",
-            message: "0",
-            color: "yellow",
-            position: { x: 110, y: 81 }
-        },
-
-        constructor: function () {
-            this.header = new TextDisplay(this, this.headerDef);
-            this.subHeader = new TextDisplay(this, this.subHeaderDef);
-            this.scoreDisplay = new TextDisplay(this, this.scoreDisplayDef);
-
-            this.inputEvents = new EventedInput({
-                onStart: this.onStart.bind(this)
-            });
-
-            this.super('constructor', arguments);
-        },
-
-        reset: function () {
-            this.super('reset');
-
-            this.addChild(this.header);
-            this.addChild(this.subHeader);
-            this.addChild(this.scoreDisplay);
-
-            this.addChild(this.inputEvents);
-        },
-
-        onStart: function () {
-            this.parent.reset();
-        },
-
-        setResult: function (result) {
-            if (result === "win") {
-                this.header.updateColor("green");
-                this.subHeader.updateColor("green");
-                this.header.changeMessage("YOU WIN!");
-            } else if (result === "loss") {
-                this.header.updateColor("red");
-                this.subHeader.updateColor("red");
-                this.header.changeMessage("GAME OVER");
-            }
-        },
-
-        setFinalScore: function (score) {
-            this.scoreDisplay.changeMessage(padScoreDisplay(score));
-        }
-    })
-});
-
-DefineModule('screens/title-screen', function (require) {
-    var Bullet = require('components/bullet');
-    var EventedInput = require('models/evented-input');
-    var GameObject = require('models/game-object');
-    var TextDisplay = require('components/text-display');
-    var ArrowShip = require('sprites/arrow-ship');
-
-    return DefineClass(GameObject, {
-        headerDef: { message: "PHOENIX", position: { x: 50, y: 30 } },
-        menuItems: [
-            { message: "New", position: { x: 90, y: 90 } },
-            { message: "Load", position: { x: 89, y: 105 } },
-            { message: "controls", position: { x: 84, y: 120 } }
-        ],
-
-        reset: function () {
-            this.super('reset');
-
-            this.selectedMenuItem = 0;
-            this.timeSinceSelected = 0;
-            this.selecting = false;
-
-            this.createTextMenu();
-            this.createShipSelectors();
-
-            this.addChild(new EventedInput({
-                onUp: this.onUp.bind(this),
-                onDown: this.onDown.bind(this),
-                onSelect: this.onSelect.bind(this)
-            }));
-        },
-
-        createTextMenu: function () {
-            this.addChild(new TextDisplay(this, {
-                font: 'phoenix',
-                message: this.headerDef.message,
-                position: this.headerDef.position
-            }));
-
-            this.menuItems.forEach(function (item) {
-                this.addChild(new TextDisplay(this, {
-                    font: "arcade-small",
-                    message: item.message,
-                    position: item.position,
-                    isPhysicalEntity: true
-                }));
-            }.bind(this));
-        },
-
-        createShipSelectors: function () {
-            this.selectorLeft = new GameObject();
-            this.selectorRight = new GameObject();
-
-            this.selectorLeft.sprite = new ArrowShip();
-            this.selectorRight.sprite = new ArrowShip().invertX();
-
-            this.selectorLeft.position = { x: 70, y: 0 };
-            this.selectorRight.position = { x: 115, y: 0 };
-
-            this.addChild(this.selectorLeft);
-            this.addChild(this.selectorRight);
-
-            this.updateSelectorPosition();
-        },
-
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            this.timeSinceSelected += dtime;
-            if (this.selecting && this.timeSinceSelected > 595) {
-                this.propagateSelection();
-            }
-        },
-
-        onUp: function () {
-            if (this.selectedMenuItem > 0 && !this.selecting) {
-                this.selectedMenuItem--;
-                this.updateSelectorPosition();
-            }
-        },
-
-        onDown: function () {
-            if (this.selectedMenuItem < this.menuItems.length - 1 && !this.selecting) {
-                this.selectedMenuItem++;
-                this.updateSelectorPosition();
-            }
-        },
-
-        onSelect: function () {
-            if (!this.selecting) {
-                this.chooseSelected();
-            }
-        },
-
-        updateSelectorPosition: function () {
-            var selectedY = this.menuItems[ this.selectedMenuItem ].position.y;
-
-            this.selectorLeft.position.y = selectedY;
-            this.selectorRight.position.y = selectedY;
-        },
-
-        chooseSelected: function () {
-            this.selecting = true;
-            this.timeSinceSelected = 0;
-
-            var x1 = this.selectorLeft.position.x + this.selectorLeft.sprite.width;
-            var x2 = this.selectorRight.position.x;
-            var y = this.selectorLeft.position.y + Math.floor(this.selectorLeft.sprite.height / 2);
-
-            this.addChild(new Bullet(this, 2, { x: x1, y: y }, { x: 50, y: 0 }));
-            this.addChild(new Bullet(this, 3, { x: x2, y: y }, { x: -50, y: 0 }));
-        },
-
-        propagateSelection: function () {
-            this.destroy();
-            switch (this.selectedMenuItem) {
-                case 0:
-                case 1:
-                    this.parent.startNewGame();
-                    break;
-                case 2:
-                    this.parent.showControlsScreen();
-                    break;
-                default:
-                    console.error('Unsupported menu option');
-            }
-
-        }
-    });
-});
-
 DefineModule('models/animation', function (require) {
     return DefineClass({
         finished: false,
@@ -3289,210 +3041,254 @@ DefineModule('models/sprite', function (require) {
     return Sprite;
 });
 
-DefineModule('ships/arrow-boss', function (require) {
+DefineModule('screens/controls-description', function (require) {
+    var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
-    var shipSprite = require('sprites/arrow-boss');
-    var shipExplosion = require('sprites/animations/ship-explosion');
-    var MuzzleFlash = require('components/muzzle-flash');
+    var TextDisplay = require('components/text-display');
 
     return DefineClass(GameObject, {
-        isPhysicalEntity: true,
-        BULLET_SPEED: 120,
-        damage: 50,
-        team: 1,
-        index: 5,
-
-        reset: function () {
-            this.super('reset');
-
-            this.sprite = shipSprite().rotateRight();
-            this.explosion = shipExplosion;
-            this.guns = this.sprite.meta.guns;
-
-            this.position = { x: 0, y: 0 };
-            this.velocity = { x: 0, y: 0 };
-
-            this.life = 25;
-            this.maxLife = 25;
+        headerDef: {
+            font: "arcade",
+            message: "Controls",
+            color: "white",
+            position: { x: 5, y: 5 }
         },
-        fire: function (gunIndex) {
-            var gun = this.guns[ gunIndex ];
-
-            var position = {
-                x: this.position.x + gun.x,
-                y: this.position.y + gun.y
-            };
-            var velocity = { x: 0, y: this.BULLET_SPEED };
-
-            this.triggerEvent('spawnBullet', {
-                team: this.team,
-                position: position,
-                velocity: velocity
-            });
-            this.addChild(new MuzzleFlash(this, gun));
-        },
-        applyDamage: function () {
-            this.triggerEvent('enemyHit');
-            this.super('applyDamage', arguments);
-        },
-        destroy: function () {
-            this.triggerEvent('enemyDestroyed', {
-                shipValue: this.maxLife
-            });
-
-            this.super('destroy', arguments);
-        }
-    });
-});
-
-DefineModule('ships/arrow-ship', function (require) {
-    var GameObject = require('models/game-object');
-    var MuzzleFlash = require('components/muzzle-flash');
-    var shipSprite = require('sprites/arrow-ship');
-    var shipExplosion = require('sprites/animations/ship-explosion');
-
-    return DefineClass(GameObject, {
-        isPhysicalEntity: true,
-        BULLET_SPEED: 100,
-        team: 1,
-        index: 5,
-
-        reset: function () {
-            this.super('reset');
-
-            this.sprite = shipSprite().rotateRight();
-            this.explosion = shipExplosion;
-            this.gun = this.sprite.meta.guns[ 0 ];
-
-            this.position = { x: 0, y: 0 };
-            this.velocity = { x: 0, y: 0 };
-
-            this.damage = 5;
-            this.maxLife = 1;
-            this.life = 1;
-        },
-        fire: function () {
-
-            var position = {
-                x: this.position.x + this.gun.x,
-                y: this.position.y + this.gun.y
-            };
-            var velocity = { x: 0, y: this.BULLET_SPEED };
-
-            this.triggerEvent('spawnBullet', {
-                team: this.team,
-                position: position,
-                velocity: velocity
-            });
-            this.addChild(new MuzzleFlash(this, this.gun));
-        },
-        applyDamage: function () {
-            this.triggerEvent('enemyHit');
-            this.super('applyDamage', arguments);
-        },
-        destroy: function () {
-            this.triggerEvent('enemyDestroyed', {
-                shipValue: this.maxLife
-            });
-
-            this.super('destroy', arguments);
-        }
-    });
-});
-
-DefineModule('ships/player-controlled-ship', function (require) {
-    var GameObject = require('models/game-object');
-    var MuzzleFlash = require('components/muzzle-flash');
-    var playerShipSprite = require('sprites/player-ship');
-    var shipExplosion = require('sprites/animations/ship-explosion');
-
-    return DefineClass(GameObject, {
-        isPhysicalEntity: true,
-        index: 5,
-
-        reset: function () {
-            this.super('reset');
-
-            this.sprite = playerShipSprite().rotateRight();
-            this.explosion = shipExplosion;
-
-            this.position = { x: -100, y: -100 };
-            this.velocity = { x: 0, y: 0 };
-
-            this.life = 10;
-            this.maxLife = 10;
-
-            this.SPEED = 50;
-            this.BULLET_SPEED = 100;
-            this.FIRE_RATE = 500;
-
-            this.preventInputControl = true;
-            this.exploding = false;
-            this.team = 0;
-            this.damage = 5;
-            this.timeSinceFired = 0;
-        },
-        processInput: function (input) {
-            this.super('processInput', arguments);
-            if (this.preventInputControl || this.exploding || this.destroyed) {
-                // ship in a state where input isn't appropriate
-                return;
+        inputDescriptions: [
+            {
+                message: [ "", "Move", "Fire" ],
+                position: { x: 5, y: 20 }
+            },
+            {
+                message: [ "- Keyboard", "- WASD", "- Space" ],
+                position: { x: 35, y: 20 }
+            },
+            {
+                message: [ "- Controller", "- Left Stick", "- A" ],
+                position: { x: 85, y: 20 }
             }
+        ],
 
-            this.velocity.x = input.movementVector.x * this.SPEED;
-            this.velocity.y = input.movementVector.y * this.SPEED;
+        reset: function () {
+            this.super('reset');
 
-            this.firing = input.fire;
+            this.addChild(new TextDisplay(this, this.headerDef));
+
+            this.inputDescriptions.forEach(function (item) {
+                this.addChild(new TextDisplay(this, {
+                    font: "arcade-small",
+                    color: "#F6EC9A",
+                    message: item.message,
+                    position: item.position
+                }))
+            }.bind(this));
+
+            this.addChild(new EventedInput({
+                onSelect: this.onSelect.bind(this)
+            }));
         },
+
+        onSelect: function () {
+            this.parent.reset();
+        }
+    })
+});
+
+DefineModule('screens/game-over-screen', function (require) {
+    var EventedInput = require('models/evented-input');
+    var GameObject = require('models/game-object');
+    var padScoreDisplay = require('helpers/pad-score-display');
+    var TextDisplay = require('components/text-display');
+
+    return DefineClass(GameObject, {
+        headerDef: {
+            font: "arcade",
+            border: 1,
+            padding: 20,
+            position: { x: 45, y: 45 }
+        },
+        subHeaderDef: {
+            font: "arcade-small",
+            message: "Final Score:",
+            position: { x: 66, y: 81 }
+        },
+        scoreDisplayDef: {
+            font: "arcade-small",
+            message: "0",
+            color: "yellow",
+            position: { x: 110, y: 81 }
+        },
+
+        constructor: function () {
+            this.header = new TextDisplay(this, this.headerDef);
+            this.subHeader = new TextDisplay(this, this.subHeaderDef);
+            this.scoreDisplay = new TextDisplay(this, this.scoreDisplayDef);
+
+            this.inputEvents = new EventedInput({
+                onStart: this.onStart.bind(this)
+            });
+
+            this.super('constructor', arguments);
+        },
+
+        reset: function () {
+            this.super('reset');
+
+            this.addChild(this.header);
+            this.addChild(this.subHeader);
+            this.addChild(this.scoreDisplay);
+
+            this.addChild(this.inputEvents);
+        },
+
+        onStart: function () {
+            this.parent.reset();
+        },
+
+        setResult: function (result) {
+            if (result === "win") {
+                this.header.updateColor("green");
+                this.subHeader.updateColor("green");
+                this.header.changeMessage("YOU WIN!");
+            } else if (result === "loss") {
+                this.header.updateColor("red");
+                this.subHeader.updateColor("red");
+                this.header.changeMessage("GAME OVER");
+            }
+        },
+
+        setFinalScore: function (score) {
+            this.scoreDisplay.changeMessage(padScoreDisplay(score));
+        }
+    })
+});
+
+DefineModule('screens/title-screen', function (require) {
+    var Bullet = require('components/bullet');
+    var EventedInput = require('models/evented-input');
+    var GameObject = require('models/game-object');
+    var TextDisplay = require('components/text-display');
+    var ArrowShip = require('sprites/arrow-ship');
+
+    return DefineClass(GameObject, {
+        headerDef: { message: "PHOENIX", position: { x: 50, y: 30 } },
+        menuItems: [
+            { message: "New", position: { x: 90, y: 90 } },
+            { message: "Load", position: { x: 89, y: 105 } },
+            { message: "controls", position: { x: 84, y: 120 } }
+        ],
+
+        reset: function () {
+            this.super('reset');
+
+            this.selectedMenuItem = 0;
+            this.timeSinceSelected = 0;
+            this.selecting = false;
+
+            this.createTextMenu();
+            this.createShipSelectors();
+
+            this.addChild(new EventedInput({
+                onUp: this.onUp.bind(this),
+                onDown: this.onDown.bind(this),
+                onSelect: this.onSelect.bind(this)
+            }));
+        },
+
+        createTextMenu: function () {
+            this.addChild(new TextDisplay(this, {
+                font: 'phoenix',
+                message: this.headerDef.message,
+                position: this.headerDef.position
+            }));
+
+            this.menuItems.forEach(function (item) {
+                this.addChild(new TextDisplay(this, {
+                    font: "arcade-small",
+                    message: item.message,
+                    position: item.position,
+                    isPhysicalEntity: true
+                }));
+            }.bind(this));
+        },
+
+        createShipSelectors: function () {
+            this.selectorLeft = new GameObject();
+            this.selectorRight = new GameObject();
+
+            this.selectorLeft.sprite = new ArrowShip();
+            this.selectorRight.sprite = new ArrowShip().invertX();
+
+            this.selectorLeft.position = { x: 70, y: 0 };
+            this.selectorRight.position = { x: 115, y: 0 };
+
+            this.addChild(this.selectorLeft);
+            this.addChild(this.selectorRight);
+
+            this.updateSelectorPosition();
+        },
+
         update: function (dtime) {
             this.super('update', arguments);
 
-            this.timeSinceFired += dtime;
-            if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
-                this.timeSinceFired = 0;
-
-                this.fire();
+            this.timeSinceSelected += dtime;
+            if (this.selecting && this.timeSinceSelected > 595) {
+                this.propagateSelection();
             }
         },
-        checkBoundaries: function () {
-            if (this.preventInputControl) {
-                // don't check screen boundaries when an external script is controlling the player
-                return;
-            }
 
-            if (this.position.x < 0) {
-                this.position.x = 0;
-            }
-            if (this.position.y < 0) {
-                this.position.y = 0;
-            }
-            if (this.position.x + this.sprite.width > this.parent.width) {
-                this.position.x = this.parent.width - this.sprite.width;
-            }
-            if (this.position.y + this.sprite.height > this.parent.height) {
-                this.position.y = this.parent.height - this.sprite.height;
+        onUp: function () {
+            if (this.selectedMenuItem > 0 && !this.selecting) {
+                this.selectedMenuItem--;
+                this.updateSelectorPosition();
             }
         },
-        fire: function () {
-            var gun = this.sprite.meta.guns[0];
 
-            var position = {
-                x: this.position.x + gun.x,
-                y: this.position.y + gun.y
-            };
-            var velocity = { x: 0, y: -this.BULLET_SPEED };
-
-            this.triggerEvent('spawnBullet', {
-                team: this.team,
-                position: position,
-                velocity: velocity
-            });
-            this.addChild(new MuzzleFlash(this, gun));
+        onDown: function () {
+            if (this.selectedMenuItem < this.menuItems.length - 1 && !this.selecting) {
+                this.selectedMenuItem++;
+                this.updateSelectorPosition();
+            }
         },
 
-        applyDamage: function () {
-            this.triggerEvent('playerHit');
-            this.super('applyDamage', arguments);
+        onSelect: function () {
+            if (!this.selecting) {
+                this.chooseSelected();
+            }
+        },
+
+        updateSelectorPosition: function () {
+            var selectedY = this.menuItems[ this.selectedMenuItem ].position.y;
+
+            this.selectorLeft.position.y = selectedY;
+            this.selectorRight.position.y = selectedY;
+        },
+
+        chooseSelected: function () {
+            this.selecting = true;
+            this.timeSinceSelected = 0;
+
+            var x1 = this.selectorLeft.position.x + this.selectorLeft.sprite.width;
+            var x2 = this.selectorRight.position.x;
+            var y = this.selectorLeft.position.y + Math.floor(this.selectorLeft.sprite.height / 2);
+
+            this.addChild(new Bullet(this, 2, { x: x1, y: y }, { x: 50, y: 0 }));
+            this.addChild(new Bullet(this, 3, { x: x2, y: y }, { x: -50, y: 0 }));
+        },
+
+        propagateSelection: function () {
+            this.destroy();
+            switch (this.selectedMenuItem) {
+                case 0:
+                case 1:
+                    this.parent.startNewGame();
+                    break;
+                case 2:
+                    this.parent.showControlsScreen();
+                    break;
+                default:
+                    console.error('Unsupported menu option');
+            }
+
         }
     });
 });
@@ -4130,6 +3926,214 @@ DefineModule('scripts/move-object-to-point', function (require) {
     });
 });
 
+DefineModule('ships/arrow-boss', function (require) {
+    var GameObject = require('models/game-object');
+    var shipSprite = require('sprites/arrow-boss');
+    var shipExplosion = require('sprites/animations/ship-explosion');
+    var MuzzleFlash = require('components/muzzle-flash');
+
+    return DefineClass(GameObject, {
+        isPhysicalEntity: true,
+        BULLET_SPEED: 120,
+        damage: 50,
+        team: 1,
+        index: 5,
+
+        reset: function () {
+            this.super('reset');
+
+            this.sprite = shipSprite().rotateRight();
+            this.explosion = shipExplosion;
+            this.guns = this.sprite.meta.guns;
+
+            this.position = { x: 0, y: 0 };
+            this.velocity = { x: 0, y: 0 };
+
+            this.life = 25;
+            this.maxLife = 25;
+        },
+        fire: function (gunIndex) {
+            var gun = this.guns[ gunIndex ];
+
+            var position = {
+                x: this.position.x + gun.x,
+                y: this.position.y + gun.y
+            };
+            var velocity = { x: 0, y: this.BULLET_SPEED };
+
+            this.triggerEvent('spawnBullet', {
+                team: this.team,
+                position: position,
+                velocity: velocity
+            });
+            this.addChild(new MuzzleFlash(this, gun));
+        },
+        applyDamage: function () {
+            this.triggerEvent('enemyHit');
+            this.super('applyDamage', arguments);
+        },
+        destroy: function () {
+            this.triggerEvent('enemyDestroyed', {
+                shipValue: this.maxLife
+            });
+
+            this.super('destroy', arguments);
+        }
+    });
+});
+
+DefineModule('ships/arrow-ship', function (require) {
+    var GameObject = require('models/game-object');
+    var MuzzleFlash = require('components/muzzle-flash');
+    var shipSprite = require('sprites/arrow-ship');
+    var shipExplosion = require('sprites/animations/ship-explosion');
+
+    return DefineClass(GameObject, {
+        isPhysicalEntity: true,
+        BULLET_SPEED: 100,
+        team: 1,
+        index: 5,
+
+        reset: function () {
+            this.super('reset');
+
+            this.sprite = shipSprite().rotateRight();
+            this.explosion = shipExplosion;
+            this.gun = this.sprite.meta.guns[ 0 ];
+
+            this.position = { x: 0, y: 0 };
+            this.velocity = { x: 0, y: 0 };
+
+            this.damage = 5;
+            this.maxLife = 1;
+            this.life = 1;
+        },
+        fire: function () {
+
+            var position = {
+                x: this.position.x + this.gun.x,
+                y: this.position.y + this.gun.y
+            };
+            var velocity = { x: 0, y: this.BULLET_SPEED };
+
+            this.triggerEvent('spawnBullet', {
+                team: this.team,
+                position: position,
+                velocity: velocity
+            });
+            this.addChild(new MuzzleFlash(this, this.gun));
+        },
+        applyDamage: function () {
+            this.triggerEvent('enemyHit');
+            this.super('applyDamage', arguments);
+        },
+        destroy: function () {
+            this.triggerEvent('enemyDestroyed', {
+                shipValue: this.maxLife
+            });
+
+            this.super('destroy', arguments);
+        }
+    });
+});
+
+DefineModule('ships/player-controlled-ship', function (require) {
+    var GameObject = require('models/game-object');
+    var MuzzleFlash = require('components/muzzle-flash');
+    var playerShipSprite = require('sprites/player-ship');
+    var shipExplosion = require('sprites/animations/ship-explosion');
+
+    return DefineClass(GameObject, {
+        isPhysicalEntity: true,
+        index: 5,
+
+        reset: function () {
+            this.super('reset');
+
+            this.sprite = playerShipSprite().rotateRight();
+            this.explosion = shipExplosion;
+
+            this.position = { x: -100, y: -100 };
+            this.velocity = { x: 0, y: 0 };
+
+            this.life = 10;
+            this.maxLife = 10;
+
+            this.SPEED = 50;
+            this.BULLET_SPEED = 100;
+            this.FIRE_RATE = 500;
+
+            this.preventInputControl = true;
+            this.exploding = false;
+            this.team = 0;
+            this.damage = 5;
+            this.timeSinceFired = 0;
+        },
+        processInput: function (input) {
+            this.super('processInput', arguments);
+            if (this.preventInputControl || this.exploding || this.destroyed) {
+                // ship in a state where input isn't appropriate
+                return;
+            }
+
+            this.velocity.x = input.movementVector.x * this.SPEED;
+            this.velocity.y = input.movementVector.y * this.SPEED;
+
+            this.firing = input.fire;
+        },
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            this.timeSinceFired += dtime;
+            if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
+                this.timeSinceFired = 0;
+
+                this.fire();
+            }
+        },
+        checkBoundaries: function () {
+            if (this.preventInputControl) {
+                // don't check screen boundaries when an external script is controlling the player
+                return;
+            }
+
+            if (this.position.x < 0) {
+                this.position.x = 0;
+            }
+            if (this.position.y < 0) {
+                this.position.y = 0;
+            }
+            if (this.position.x + this.sprite.width > this.parent.width) {
+                this.position.x = this.parent.width - this.sprite.width;
+            }
+            if (this.position.y + this.sprite.height > this.parent.height) {
+                this.position.y = this.parent.height - this.sprite.height;
+            }
+        },
+        fire: function () {
+            var gun = this.sprite.meta.guns[0];
+
+            var position = {
+                x: this.position.x + gun.x,
+                y: this.position.y + gun.y
+            };
+            var velocity = { x: 0, y: -this.BULLET_SPEED };
+
+            this.triggerEvent('spawnBullet', {
+                team: this.team,
+                position: position,
+                velocity: velocity
+            });
+            this.addChild(new MuzzleFlash(this, gun));
+        },
+
+        applyDamage: function () {
+            this.triggerEvent('playerHit');
+            this.super('applyDamage', arguments);
+        }
+    });
+});
+
 DefineModule('sprites/animations/ship-explosion', function (require) {
     var Random = require('helpers/random');
     var smallExplosion = require('sprites/animations/small-explosion');
@@ -4224,3 +4228,4 @@ DefineModule('sprites/animations/small-explosion', function (require) {
         });
     }
 });
+}());
