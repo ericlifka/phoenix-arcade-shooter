@@ -17,8 +17,13 @@ gulp.task('default', function () {
         }))
         .pipe(gulp.dest('./dist'));
 
-    return gulp.src([ './modules.js', './src/**/*.js' ])
-        .pipe(filter(function (file) { console.log(file.path); return !/embedded-main/.test(file.path) }))
+    gulp.src([ './modules.js', './src/**/*.js' ])
+        .pipe(filter(function (file) { return !/embedded-main/.test(file.path) }))
         .pipe(concat({ path: 'phoenix-arcade-shooter.js' }))
+        .pipe(gulp.dest('./dist'));
+
+    return gulp.src([ './modules.js', './src/**/*.js' ])
+        .pipe(filter(function (file) { return !/main\.js/.test(file.path) }))
+        .pipe(concat({ path: 'phoenix-arcade-shooter-embedded.js' }))
         .pipe(gulp.dest('./dist'));
 });
