@@ -156,6 +156,10 @@ DefineModule('models/phoenix', function (require) {
                 this.gameOver = true;
                 this.gameOverScreen.setResult(gameResult);
                 this.gameOverScreen.setFinalScore(this.comboGauge.getScore());
+                if (this.gameOverCallback) {
+                    this.gameOverCallback(this.comboGauge.getScore());
+                }
+
                 this.removeChild(this.player);
                 this.addChild(this.gameOverScreen);
             }

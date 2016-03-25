@@ -52,10 +52,10 @@ DefineModule('main', function (require) {
             });
 
             runLoop.start();
+            this.activeGame = phoenix;
         },
         setGameEndCallback: function (callback) {
-
-        },
-        activeGame: phoenix
+            this.activeGame.gameOverCallback = callback;
+        }
     };
 });
