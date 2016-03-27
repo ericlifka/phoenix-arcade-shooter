@@ -8,6 +8,7 @@ DefineModule('levels/level-group-01', function (require) {
     var LifeMeter = require('components/life-meter');
     var MoveObjectToPoint = require('scripts/move-object-to-point');
     var ScriptChain = require('models/script-chain');
+    var WatchForDeath = require('scripts/watch-for-death');
 
     return DefineClass(GameObject, {
         constructor: function (parent, game, rowCount, levelName) {
