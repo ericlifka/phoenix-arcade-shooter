@@ -79,6 +79,9 @@ DefineModule('levels/level-group-01', function (require) {
                     new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time * 2)
                 ])
             ]));
+            this.scripts.push(new WatchForDeath(this, ship, function () {
+                console.log('ship death');
+            }));
             this.ships.push(ship);
         },
         newBossShip: function () {
