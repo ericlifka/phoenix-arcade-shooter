@@ -13,8 +13,8 @@ DefineModule('components/money-drop', function (require) {
         checkBoundaries: function () {
             if (this.position.x < 0
                 || this.position.y < 0
-                || this.position.x + this.sprite.width > this.parent.width
-                || this.position.y + this.sprite.height > this.parent.height) {
+                || this.position.x > this.parent.width
+                || this.position.y > this.parent.height) {
 
                 this.destroy();
             }
