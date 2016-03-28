@@ -3,9 +3,22 @@ DefineModule('helpers/random', function (require) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    function sample(collection, requestedCount) {
-        requestedCount = requestedCount || 1;
+    function rangeCap(n, min, max) {
+        if (typeof n !== "number" || n < min) {
+            return min;
+        }
 
+        else if (n > max) {
+            return max;
+        }
+
+        else {
+            return n;
+        }
+    }
+
+    function sample(collection, requestedCount) {
+        requestedCount = rangeCap(requestedCount, 1, collection.length);
         var range = collection.length - 1;
         var selected = {};
         var count = 0;
@@ -26,6 +39,7 @@ DefineModule('helpers/random', function (require) {
 
     return {
         integer: integer,
+        rangeCap: rangeCap,
         sample: sample
     };
 });
