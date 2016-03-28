@@ -43,6 +43,8 @@ DefineModule('levels/level-group-01', function (require) {
                 }
             }
 
+            this.attachMoneyScripts();
+
             if (this.boss) {
                 this.newBossShip();
             }
@@ -87,9 +89,7 @@ DefineModule('levels/level-group-01', function (require) {
                     new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time * 2)
                 ])
             ]));
-            this.scripts.push(new WatchForDeath(this, ship, function () {
-                this.spawnMoneyDrop(ship.position);
-            }.bind(this)));
+
             this.ships.push(ship);
         },
         newBossShip: function () {
@@ -118,8 +118,15 @@ DefineModule('levels/level-group-01', function (require) {
 
             this.ships.push(boss);
         },
-        spawnMoneyDrop: function (position) {
-            this.addChild(new MoneyDrop(this, position));
+        attachMoneyScripts: function () {
+            var count = this.ships.length / 10;
+            var selectedShips = chooseRandom(this.ships, count);
+
+            selectedShips.forEach(function (ship) {
+                this.scripts.push(new WatchForDeath(this, ship, function () {
+                    this.addChild(new MoneyDrop(this, ship.position));
+                }.bind(this)));
+            }.bind(this));
         }
     });
 });
