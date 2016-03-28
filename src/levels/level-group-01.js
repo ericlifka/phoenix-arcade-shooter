@@ -9,6 +9,7 @@ DefineModule('levels/level-group-01', function (require) {
     var MoneyDrop = require('components/money-drop');
     var MoveObjectToPoint = require('scripts/move-object-to-point');
     var ScriptChain = require('models/script-chain');
+    var Random = require('helpers/random');
     var WatchForDeath = require('scripts/watch-for-death');
 
     return DefineClass(GameObject, {
@@ -120,7 +121,7 @@ DefineModule('levels/level-group-01', function (require) {
         },
         attachMoneyScripts: function () {
             var count = this.ships.length / 10;
-            var selectedShips = chooseRandom(this.ships, count);
+            var selectedShips = Random.sample(this.ships, count);
 
             selectedShips.forEach(function (ship) {
                 this.scripts.push(new WatchForDeath(this, ship, function () {
