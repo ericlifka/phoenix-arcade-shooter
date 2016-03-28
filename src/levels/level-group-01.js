@@ -120,7 +120,7 @@ DefineModule('levels/level-group-01', function (require) {
             this.ships.push(boss);
         },
         attachMoneyScripts: function () {
-            var count = this.ships.length / 10;
+            var count = this.ships.length / 5;
             var selectedShips = Random.sample(this.ships, count);
 
             selectedShips.forEach(function (ship) {
