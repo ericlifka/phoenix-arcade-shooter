@@ -116,6 +116,21 @@ DefineModule('levels/level-group-01', function (require) {
                 new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
                 new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
             ]));
+            this.scripts.push(new WatchForDeath(this, boss, function () {
+                var p = boss.position;
+                this.addChild(new MoneyDrop(this, {
+                    x: p.x,
+                    y: p.y
+                }));
+                this.addChild(new MoneyDrop(this, {
+                    x: p.x + 7,
+                    y: p.y
+                }));
+                this.addChild(new MoneyDrop(this, {
+                    x: p.x + 4,
+                    y: p.y + 8
+                }));
+            }.bind(this)));
 
             this.ships.push(boss);
         },
