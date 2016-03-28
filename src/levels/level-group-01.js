@@ -6,6 +6,7 @@ DefineModule('levels/level-group-01', function (require) {
     var FireSingleGunRandomRate = require('scripts/fire-single-gun-random-rate');
     var GameObject = require('models/game-object');
     var LifeMeter = require('components/life-meter');
+    var MoneyDrop = require('components/money-drop');
     var MoveObjectToPoint = require('scripts/move-object-to-point');
     var ScriptChain = require('models/script-chain');
     var WatchForDeath = require('scripts/watch-for-death');
@@ -81,8 +82,8 @@ DefineModule('levels/level-group-01', function (require) {
                 ])
             ]));
             this.scripts.push(new WatchForDeath(this, ship, function () {
-                console.log('ship death');
-            }));
+                this.spawnMoneyDrop(ship.position);
+            }.bind(this)));
             this.ships.push(ship);
         },
         newBossShip: function () {
@@ -110,6 +111,9 @@ DefineModule('levels/level-group-01', function (require) {
             ]));
 
             this.ships.push(boss);
+        },
+        spawnMoneyDrop: function (position) {
+            this.addChild(new MoneyDrop(this, position));
         }
     });
 });

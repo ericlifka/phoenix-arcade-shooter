@@ -7,7 +7,7 @@ DefineModule('components/money-drop', function (require) {
             this.super('constructor', arguments);
 
             this.position = position;
-            this.velocity = velocity;
+            this.velocity = { x: 0, y: 50 };
             this.sprite = dollarSprite;
         }
     });
