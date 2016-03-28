@@ -4,6 +4,7 @@ DefineModule('components/money-drop', function (require) {
 
     return DefineClass(GameObject, {
         isPhysicalEntity: true,
+        type: "pickup",
         team: 1,
         index: 4,
 

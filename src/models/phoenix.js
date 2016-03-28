@@ -128,6 +128,13 @@ DefineModule('models/phoenix', function (require) {
                 for (var j = i + 1; j < entities.length; j++) {
                     var inner = entities[ j ];
 
+                    if ((outer.type === "pickup" || inner.type === "pickup") &&
+                        !(outer.type === "player" || inner.type === "player")) {
+                        // When one of the entities is a pickup item such as money then the only collide-able targets
+                        // are player entities, so all other collisions get eliminated.
+                        continue;
+                    }
+
                     if (outer.team !== inner.team && Collisions.boxCollision(outer, inner)) {
                         collisionPairs.push([ outer, inner ]);
                     }
