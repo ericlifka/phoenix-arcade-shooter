@@ -7,6 +7,8 @@ DefineModule('levels/level-manager', function (require) {
         constructor: function (game) {
             this.super('constructor', arguments);
 
+            this.width = this.parent.width;
+            this.height = this.parent.height;
             this.game = game;
         },
 

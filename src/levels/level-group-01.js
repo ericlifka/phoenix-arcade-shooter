@@ -15,6 +15,9 @@ DefineModule('levels/level-group-01', function (require) {
         constructor: function (parent, game, rowCount, levelName) {
             this.super('constructor', arguments);
 
+            this.width = this.parent.width;
+            this.height = this.parent.height;
+
             if (rowCount === "boss") {
                 rowCount = 1;
                 this.boss = true;
@@ -58,11 +61,14 @@ DefineModule('levels/level-group-01', function (require) {
             }.bind(this));
         },
         checkIfLevelComplete: function () {
-            var remainingShips = this.ships.filter(function (ship) {
-                return !ship.destroyed;
-            });
+            for (var i = 0; i < this.children.length; i++) {
+                var child = this.children[ i ];
+                if (child && child.position && !child.destroyed) {
+                    return false;
+                }
+            }
 
-            return remainingShips.length === 0;
+            return true;
         },
         newShip: function (startX, startY, endY, time) {
             var ship = new EnemyShip(this);
