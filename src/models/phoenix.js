@@ -142,8 +142,8 @@ DefineModule('models/phoenix', function (require) {
                 var b = pair[ 1 ];
 
                 if (Collisions.spriteCollision(a, b)) {
-                    a.applyDamage(b.damage);
-                    b.applyDamage(a.damage);
+                    a.applyDamage(b.damage, b);
+                    b.applyDamage(a.damage, a);
                 }
             });
         },

@@ -25,14 +25,14 @@ DefineModule('models/game-object', function (require) {
             console.error("Couldn't find event '" + event + "' in parent chain of ", this);
         },
         processInput: function (input) {
-            this.children.forEach(function (child) {
+            this.children && this.children.forEach(function (child) {
                 if (typeof child.processInput === "function") {
                     child.processInput(input);
                 }
             });
         },
         update: function (dtime) {
-            this.children.forEach(function (child) {
+            this.children && this.children.forEach(function (child) {
                 if (typeof child.update === "function") {
                     child.update(dtime);
                 }
@@ -57,7 +57,7 @@ DefineModule('models/game-object', function (require) {
             /* a place to verify that objects are within the screen constraints */
         },
         renderToFrame: function (frame) {
-            this.children.forEach(function (child) {
+            this.children && this.children.forEach(function (child) {
                 if (typeof child.renderToFrame === "function") {
                     child.renderToFrame(frame);
                 }
@@ -88,7 +88,7 @@ DefineModule('models/game-object', function (require) {
             this.children = null; // may need to iterate through children and destroy them too
             this.destroyed = true;
         },
-        applyDamage: function (damage) {
+        applyDamage: function (damage, sourceEntity) {
             if (this.maxLife) {
                 this.life -= damage;
 

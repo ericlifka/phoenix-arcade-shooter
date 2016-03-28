@@ -3,6 +3,10 @@ DefineModule('components/money-drop', function (require) {
     var ArcadeFont = require('fonts/arcade');
 
     return DefineClass(GameObject, {
+        isPhysicalEntity: true,
+        team: 1,
+        index: 4,
+
         constructor: function (parent, position, velocity) {
             this.super('constructor', arguments);
 
@@ -16,6 +20,12 @@ DefineModule('components/money-drop', function (require) {
                 || this.position.x > this.parent.width
                 || this.position.y > this.parent.height) {
 
+                this.destroy();
+            }
+        },
+        applyDamage: function (damage, sourceEntity) {
+            if (sourceEntity.type === "player") {
+                console.log("GET MONEY GET PAID!");
                 this.destroy();
             }
         }
