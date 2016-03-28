@@ -5,6 +5,7 @@ DefineModule('ships/player-controlled-ship', function (require) {
     var shipExplosion = require('sprites/animations/ship-explosion');
 
     return DefineClass(GameObject, {
+        type: "player",
         isPhysicalEntity: true,
         index: 5,
 
