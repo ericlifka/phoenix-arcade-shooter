@@ -9,6 +9,15 @@ DefineModule('components/money-drop', function (require) {
             this.position = position;
             this.velocity = { x: 0, y: 50 };
             this.sprite = dollarSprite;
+        },
+        checkBoundaries: function () {
+            if (this.position.x < 0
+                || this.position.y < 0
+                || this.position.x + this.sprite.width > this.parent.width
+                || this.position.y + this.sprite.height > this.parent.height) {
+
+                this.destroy();
+            }
         }
     });
 });
