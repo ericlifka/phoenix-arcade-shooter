@@ -7,6 +7,7 @@ DefineModule('models/sprite', function (require) {
             this.meta = meta || {};
             this.width = pixels.length;
             this.height = pixels[ 0 ].length;
+            this.offsetAdjustment = { x: 0, y: 0 };
 
             this.cells = [];
             for (var x = 0; x < this.width; x++) {
@@ -19,6 +20,13 @@ DefineModule('models/sprite', function (require) {
                     };
                 }
             }
+        },
+        setPermanentOffset: function (offset) {
+            offset = offset || { };
+            this.offsetAdjustment.x = offset.x || 0;
+            this.offsetAdjustment.y = offset.y || 0;
+
+            return this;
         },
         applyColor: function (color) {
             this.iterateCells(function (cell) {
@@ -37,10 +45,11 @@ DefineModule('models/sprite', function (require) {
         },
         renderToFrame: function (frame, x, y, index) {
             index = index || 0;
-
+            var offset_x = this.offsetAdjustment.x;
+            var offset_y = this.offsetAdjustment.y;
             this.iterateCells(function (cell, _x, _y) {
                 if (cell.color) {
-                    var frameCell = frame.cellAt(x + _x, y + _y);
+                    var frameCell = frame.cellAt(x + _x + offset_x, y + _y + offset_y);
                     if (index >= frameCell.index) {
                         frameCell.color = cell.color;
                         frameCell.index = index;
@@ -57,7 +66,10 @@ DefineModule('models/sprite', function (require) {
                 }
             }
 
-            return new Sprite(colorGrid);
+            var sprite = new Sprite(colorGrid);
+            sprite.setPermanentOffset(this.offsetAdjustment);
+
+            return sprite;
         },
         rotateLeft: function () {
             var width = this.width;
