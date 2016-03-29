@@ -33,7 +33,7 @@ DefineModule('levels/level-manager', function (require) {
         start: function () {
             this.running = true;
             this.loadNextLevel();
-            this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
+            //this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
         },
 
         stop: function () {
