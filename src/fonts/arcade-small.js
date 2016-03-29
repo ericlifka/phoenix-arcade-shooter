@@ -368,6 +368,20 @@ DefineModule('fonts/arcade-small', function (require) {
             [ w, w, w, w ],
             [ n, w, n, n ]
         ]).invertY().rotateRight().setPermanentOffset({x: 0, y: -1}),
+        '+': new Sprite([
+            [ n, n, n, n, n ],
+            [ n, n, w, n, n ],
+            [ n, w, w, w, n ],
+            [ n, n, w, n, n ],
+            [ n, n, n, n, n ]
+        ]),
+        '%': new Sprite([
+            [ w, n, n, w ],
+            [ n, n, w, w ],
+            [ n, w, w, n ],
+            [ w, w, n, n ],
+            [ w, n, n, w ]
+        ]).invertY().rotateRight(),
         ' ': new Sprite([
             [ n, n, n, n, n ],
             [ n, n, n, n, n ],
