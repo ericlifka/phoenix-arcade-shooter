@@ -6,9 +6,10 @@ DefineModule('levels/shop', function (require) {
         index: 1,
         headerDef: { message: "Ship Upgrades", position: { x: 50, y: 10 } },
         menuItems: [
-            { message: "10% faster Firing Rate", position: { x: 90, y: 90 } },
-            { message: "+1 Bullet Damage", position: { x: 89, y: 105 } },
-            { message: "+1 Ship Health", position: { x: 84, y: 120 } }
+            { message: "+1 Ship Health", position: { x: 90, y: 50 } },
+            { message: "10% faster Firing Rate", position: { x: 90, y: 65 } },
+            { message: "+1 Bullet Damage", position: { x: 90, y: 80 } },
+            { message: "Add wing guns", position: { x: 90, y: 95 } }
         ],
 
         constructor: function (parent, game) {
