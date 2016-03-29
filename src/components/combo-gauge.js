@@ -18,13 +18,13 @@ DefineModule('components/combo-gauge', function (require) {
                 font: "arcade-small",
                 color: this.color,
                 index: 1,
-                position: { x: 1 + 7, y: this.position.y + this.sprite.height - 5 }
+                position: { x: this.position.x + 7, y: this.position.y + this.sprite.height - 5 }
             });
             this.scoreDisplay = new TextDisplay(this, {
                 font: "arcade-small",
                 color: this.color,
                 index: 1,
-                position: { x: 1, y: this.position.y + this.sprite.height + 1 }
+                position: { x: this.position.x, y: this.position.y + this.sprite.height + 1 }
             });
 
             this.super('constructor', arguments);
