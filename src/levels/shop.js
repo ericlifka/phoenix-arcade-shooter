@@ -3,7 +3,15 @@ DefineModule('levels/level-group-01', function (require) {
 
     return DefineClass(GameObject, {
         constructor: function (parent, game) {
+            this.bank = game.bank;
+
             this.super('constructor', arguments);
+        },
+        start: function () {
+
+        },
+        checkIfLevelComplete: function () {
+            return false;
         }
     });
 });
