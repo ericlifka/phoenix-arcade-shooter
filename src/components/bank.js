@@ -7,7 +7,8 @@ DefineModule('components/bank', function (require) {
 
         constructor: function (parent, options) {
             options = options || { };
-            this.position = options.position;
+            this.anchorPoint = options.position; // this text expands from the right, so the position has to be dynamic
+            this.position = { x: 0, y: this.anchorPoint.y };
             this.color = options.color || "#ffffff";
 
             this.valueDisplay = new TextDisplay(this, {
@@ -28,6 +29,8 @@ DefineModule('components/bank', function (require) {
         },
         updateDisplay: function () {
             this.valueDisplay.changeMessage("$" + this.value);
+            var width = this.valueDisplay.width;
+            this.position.x = this.valueDisplay.position.x = this.anchorPoint.x - width;
         }
     });
 });

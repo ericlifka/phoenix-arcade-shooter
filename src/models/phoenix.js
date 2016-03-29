@@ -53,7 +53,7 @@ DefineModule('models/phoenix', function (require) {
                 borderColor: this.interfaceColor
             });
             this.bank = new Bank(this, {
-                position: { x: 5, y: 5 },
+                position: { x: this.width, y: 5 },
                 color: this.interfaceColor
             });
 
