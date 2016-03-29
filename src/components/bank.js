@@ -27,8 +27,12 @@ DefineModule('components/bank', function (require) {
             this.value = 0;
             this.updateDisplay();
         },
+        addMoney: function (value) {
+            this.value += value;
+            this.updateDisplay();
+        },
         updateDisplay: function () {
-            this.valueDisplay.changeMessage("$" + this.value);
+            this.valueDisplay.changeMessage("$" + this.value + ".0");
             var width = this.valueDisplay.width;
             this.position.x = this.valueDisplay.position.x = this.anchorPoint.x - width;
         }

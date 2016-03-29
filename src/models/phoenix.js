@@ -194,7 +194,7 @@ DefineModule('models/phoenix', function (require) {
             this.comboGauge.clearCombo();
         },
         moneyCollected: function (value) {
-
+            this.bank.addMoney(value);
         }
     });
 });
