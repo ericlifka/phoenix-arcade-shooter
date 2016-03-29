@@ -186,6 +186,9 @@ DefineModule('models/phoenix', function (require) {
         },
         playerHit: function () {
             this.comboGauge.clearCombo();
+        },
+        moneyCollected: function (value) {
+
         }
     });
 });

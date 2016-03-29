@@ -11,6 +11,7 @@ DefineModule('components/money-drop', function (require) {
         constructor: function (parent, position, velocity) {
             this.super('constructor', arguments);
 
+            this.value = 10;
             this.position = position;
             this.velocity = { x: 0, y: 50 };
             this.sprite = ArcadeFont[ '$' ];
@@ -26,7 +27,7 @@ DefineModule('components/money-drop', function (require) {
         },
         applyDamage: function (damage, sourceEntity) {
             if (sourceEntity.type === "player") {
-                console.log("GET MONEY GET PAID!");
+                this.triggerEvent('moneyCollected', this.value);
                 this.destroy();
             }
         }
