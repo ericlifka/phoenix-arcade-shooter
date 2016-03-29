@@ -6,11 +6,11 @@ DefineModule('levels/level-manager', function (require) {
 
     return DefineClass(GameObject, {
         constructor: function (game) {
-            this.super('constructor', arguments);
-
-            this.width = this.parent.width;
-            this.height = this.parent.height;
+            this.width = game.width;
+            this.height = game.height;
             this.game = game;
+
+            this.super('constructor', arguments);
         },
 
         reset: function () {
@@ -20,12 +20,13 @@ DefineModule('levels/level-manager', function (require) {
             this.complete = false;
             this.levelIndex = -1;
             this.currentLevel = null;
+
             this.levels = [
+                new Shop(this, this.game),
                 new Level_group_01(this, this.game, 1, "LEVEL 01"),
                 new Level_group_01(this, this.game, 2),
                 new Level_group_01(this, this.game, 3),
-                new Level_group_01(this, this.game, "boss"),
-                new Shop(this, this.game)
+                new Level_group_01(this, this.game, "boss")
             ];
         },
 
