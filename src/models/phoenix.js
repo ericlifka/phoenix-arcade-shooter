@@ -46,14 +46,14 @@ DefineModule('models/phoenix', function (require) {
                 color: this.interfaceColor
             });
             this.lifeMeter = new LifeMeter(this.player, {
-                position: { x: this.width - 7, y: this.height - 63 },
+                position: { x: this.width - 7, y: this.height - 69 },
                 length: 60,
                 width: 4,
                 showBorder: true,
                 borderColor: this.interfaceColor
             });
             this.bank = new Bank(this, {
-                position: { x: this.width, y: 5 },
+                position: { x: this.width, y: this.height - 6 },
                 color: this.interfaceColor
             });
 
