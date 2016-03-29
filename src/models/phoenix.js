@@ -1,4 +1,5 @@
 DefineModule('models/phoenix', function (require) {
+    var Bank = require('components/bank');
     var Bullet = require('components/bullet');
     var collectEntities = require('helpers/collect-entities');
     var Collisions = require('helpers/collisions');
@@ -51,6 +52,10 @@ DefineModule('models/phoenix', function (require) {
                 showBorder: true,
                 borderColor: this.interfaceColor
             });
+            this.bank = new Bank(this, {
+                position: { x: 5, y: 5 },
+                color: this.interfaceColor
+            });
 
             this.super('constructor');
         },
@@ -60,6 +65,7 @@ DefineModule('models/phoenix', function (require) {
             this.gameOver = false;
             this.paused = false;
 
+            this.bank.reset();
             this.comboGauge.reset();
             this.lifeMeter.reset();
             this.titleScreen.reset();
@@ -73,7 +79,7 @@ DefineModule('models/phoenix', function (require) {
             this.addChild(this.pauseInputTracker);
         },
         startNewGame: function () {
-
+            this.addChild(this.bank);
             this.addChild(this.comboGauge);
             this.addChild(this.lifeMeter);
 
