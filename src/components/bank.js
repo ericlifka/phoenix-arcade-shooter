@@ -24,11 +24,15 @@ DefineModule('components/bank', function (require) {
             this.super('reset');
 
             this.addChild(this.valueDisplay);
-            this.value = 0;
+            this.value = 100;
             this.updateDisplay();
         },
         addMoney: function (value) {
             this.value += value;
+            this.updateDisplay();
+        },
+        removeMoney: function (amount) {
+            this.value -= amount;
             this.updateDisplay();
         },
         updateDisplay: function () {

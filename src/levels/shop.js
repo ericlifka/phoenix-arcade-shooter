@@ -101,34 +101,18 @@ DefineModule('levels/shop', function (require) {
 
             if (items.health.cost > bank.value) {
                 items.health.costText.updateColor("#777");
-                items.health.canAfford = false;
-            }
-            else {
-                items.health.canAfford = true;
             }
 
             if (items.rate.cost > bank.value) {
                 items.rate.costText.updateColor("#777");
-                items.rate.canAfford = false;
-            }
-            else {
-                items.rate.canAfford = true;
             }
 
             if (items.damage.cost > bank.value) {
                 items.damage.costText.updateColor("#777");
-                items.damage.canAfford = false;
-            }
-            else {
-                items.damage.canAfford = true;
             }
 
             if (items.guns.cost > bank.value || player.wingGunsUnlocked) {
                 items.guns.costText.updateColor("#777");
-                items.guns.canAfford = false;
-            }
-            else {
-                items.guns.canAfford = true;
             }
         },
         createSelectorShip: function () {
@@ -156,38 +140,19 @@ DefineModule('levels/shop', function (require) {
         },
         onSelect: function () {
             if (!this.selecting) {
+                var selection;
                 switch (this.selectedMenuItem) {
-                    case 0: // health
-                        if (!this.menuItems.health.canAfford) return;
-                        this.player.lifeUpgrades++;
-                        this.player.maxLife++;
-                        this.bank.removeMoney(this.menuItems.health.cost);
-                        break;
-
-                    case 1: // rate
-                        if (!this.menuItems.rate.canAfford) return;
-                        this.player.rateUpgrades++;
-                        this.player.FIRE_RATE = Math.ceil(this.player.fireRate * .9);
-                        this.bank.removeMoney(this.menuItems.rate.cost);
-                        break;
-
-                    case 2: // damage
-                        if (!this.menuItems.damage.canAfford) return;
-                        this.player.damageUpgrades++;
-                        this.bank.removeMoney(this.menuItems.damage.cost);
-                        break;
-
-                    case 3: // guns
-                        if (!this.menuItems.guns.canAfford) return;
-                        this.player.wingGunsUnlocked = true;
-                        this.bank.removeMoney(this.menuItems.guns.cost);
-                        break;
-
-                    default:
-                        return;
+                    case 0: selection = this.menuItems.health; break;
+                    case 1: selection = this.menuItems.rate; break;
+                    case 2: selection = this.menuItems.damage; break;
+                    case 3: selection = this.menuItems.guns; break;
+                    default: return;
                 }
 
-                this.chooseSelected();
+                if (this.bank.value > selection.cost) {
+                    this.bank.removeMoney(selection.cost);
+                    this.chooseSelected();
+                }
             }
         },
         chooseSelected: function () {
@@ -200,10 +165,31 @@ DefineModule('levels/shop', function (require) {
             this.addChild(new Bullet(this, 2, { x: x1, y: y }, { x: 50, y: 0 }));
         },
         propagateSelection: function () {
-            this.selecting = false;
+            switch (this.selectedMenuItem) {
+                case 0:
+                    this.player.lifeUpgrades++;
+                    this.player.maxLife++;
+                    break;
 
+                case 1: // rate
+                    this.player.rateUpgrades++;
+                    this.player.FIRE_RATE = Math.ceil(this.player.fireRate * .9);
+                    break;
+
+                case 2: // damage
+                    this.player.damageUpgrades++;
+                    break;
+
+                case 3: // guns
+                    this.player.wingGunsUnlocked = true;
+                    break;
+
+                default:
+                    return;
+            }
 
             this.setCosts();
+            this.selecting = false;
         }
     });
 });
