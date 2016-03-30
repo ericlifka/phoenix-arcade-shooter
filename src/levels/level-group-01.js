@@ -13,9 +13,10 @@ DefineModule('levels/level-group-01', function (require) {
     var WatchForDeath = require('scripts/watch-for-death');
 
     return DefineClass(GameObject, {
-        constructor: function (parent, game, rowCount, levelName) {
+        constructor: function (parent, game, difficultyMultiplier, rowCount, levelName) {
             this.super('constructor', arguments);
 
+            this.difficultyMultiplier = difficultyMultiplier;
             this.width = this.parent.width;
             this.height = this.parent.height;
 

@@ -17,21 +17,24 @@ DefineModule('levels/level-manager', function (require) {
         reset: function () {
             this.super('reset');
 
+            this.difficultyMultiplier = 1;
             this.running = false;
             this.complete = false;
-            this.levelIndex = -1;
             this.currentLevel = null;
             this.shop = new Shop(this, this.game);
 
+            this.loadLevels();
+        },
+        loadLevels: function () {
             this.levels = [
-                new Level_group_01(this, this.game, 1, "LEVEL 01"),
-                new Level_group_01(this, this.game, 2),
-                new Level_group_01(this, this.game, 3),
-                new Level_group_01(this, this.game, "boss"),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, 1, "LEVEL 01"),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, 2),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, 3),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, "boss"),
                 this.shop
             ];
+            this.levelIndex = -1;
         },
-
         start: function () {
             this.running = true;
             this.loadNextLevel();
@@ -44,6 +47,11 @@ DefineModule('levels/level-manager', function (require) {
         },
 
         loadNextLevel: function () {
+            if (this.levelIndex >= this.levels.length - 1) { // last level was completed
+                this.difficultyMultiplier++;
+                this.loadLevels();
+            }
+
             this.levelIndex++;
             this.currentLevel = this.levels[ this.levelIndex ];
 
@@ -55,10 +63,6 @@ DefineModule('levels/level-manager', function (require) {
 
                 this.addChild(this.currentLevel);
                 this.currentLevel.start();
-            } else {
-                console.log('all levels complete');
-                this.complete = true;
-                this.running = false;
             }
         },
         update: function () {
