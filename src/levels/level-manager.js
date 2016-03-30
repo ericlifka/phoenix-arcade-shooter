@@ -17,6 +17,7 @@ DefineModule('levels/level-manager', function (require) {
         reset: function () {
             this.super('reset');
 
+            this.levelNameCounter = 0;
             this.difficultyMultiplier = 1;
             this.running = false;
             this.complete = false;
@@ -27,7 +28,7 @@ DefineModule('levels/level-manager', function (require) {
         },
         loadLevels: function () {
             this.levels = [
-                new Level_group_01(this, this.game, this.difficultyMultiplier, 1, "LEVEL 01"),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, 1, this.levelName()),
                 //new Level_group_01(this, this.game, this.difficultyMultiplier, 2),
                 //new Level_group_01(this, this.game, this.difficultyMultiplier, 3),
                 //new Level_group_01(this, this.game, this.difficultyMultiplier, "boss"),
@@ -76,6 +77,19 @@ DefineModule('levels/level-manager', function (require) {
                 }
 
                 this.loadNextLevel();
+            }
+        },
+
+        levelName: function () {
+            this.levelNameCounter++;
+            return "LEVEL " + this.pad(this.levelNameCounter);
+        },
+        pad: function (val) {
+            if (val < 10) {
+                return "00" + val;
+            }
+            if (val < 100) {
+                return "0" + val;
             }
         }
     });
