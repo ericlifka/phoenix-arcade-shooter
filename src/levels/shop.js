@@ -24,24 +24,28 @@ DefineModule('levels/shop', function (require) {
             this.bank = game.bank;
             this.player = game.player;
 
+            this.input = new EventedInput({
+                onUp: this.onUp.bind(this),
+                onDown: this.onDown.bind(this),
+                onSelect: this.onSelect.bind(this)
+            });
+
             this.super('constructor', arguments);
         },
         reset: function () {
             this.super('reset', arguments);
 
+            this.input.reset();
             this.isDoneShopping = false;
             this.selectedMenuItem = 0;
             this.createMenuText();
             this.setCosts();
             this.createSelectorShip();
 
-            this.addChild(new EventedInput({
-                onUp: this.onUp.bind(this),
-                onDown: this.onDown.bind(this),
-                onSelect: this.onSelect.bind(this)
-            }));
+            this.addChild(this.input);
         },
         start: function () {
+            this.input.reset();
             this.isDoneShopping = false;
             this.player.preventInputControl = true;
             this.player.position.x = -10;

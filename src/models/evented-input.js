@@ -1,16 +1,20 @@
 DefineModule('models/evented-input', function (require) {
     return DefineClass({
         constructor: function (options) {
-            this.upReleased = false;
-            this.downReleased = false;
-            this.fireReleased = false;
-            this.startReleased = false;
-
             this.onUp = options.onUp || function () {};
             this.onDown = options.onDown || function () {};
             this.onFire = options.onFire || function () {};
             this.onStart = options.onStart || function () {};
             this.onSelect = options.onSelect || function () {};
+
+            this.reset();
+        },
+
+        reset: function () {
+            this.upReleased = false;
+            this.downReleased = false;
+            this.fireReleased = false;
+            this.startReleased = false;
         },
 
         processInput: function (input) {
