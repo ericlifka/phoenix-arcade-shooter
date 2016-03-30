@@ -10,6 +10,10 @@ DefineModule('ships/arrow-ship', function (require) {
         team: 1,
         index: 5,
 
+        constructor: function (parent, difficultyMultiplier) {
+            this.difficultyMultiplier = difficultyMultiplier;
+            this.super('constructor', arguments);
+        },
         reset: function () {
             this.super('reset');
 
@@ -20,9 +24,9 @@ DefineModule('ships/arrow-ship', function (require) {
             this.position = { x: 0, y: 0 };
             this.velocity = { x: 0, y: 0 };
 
-            this.damage = 5;
-            this.maxLife = 1;
-            this.life = 1;
+            this.damage = 5 * this.difficultyMultiplier;
+            this.maxLife = this.difficultyMultiplier;
+            this.life = this.difficultyMultiplier;
         },
         fire: function () {
 
@@ -35,7 +39,8 @@ DefineModule('ships/arrow-ship', function (require) {
             this.triggerEvent('spawnBullet', {
                 team: this.team,
                 position: position,
-                velocity: velocity
+                velocity: velocity,
+                damage: this.difficultyMultiplier
             });
             this.addChild(new MuzzleFlash(this, this.gun));
         },

@@ -7,10 +7,13 @@ DefineModule('ships/arrow-boss', function (require) {
     return DefineClass(GameObject, {
         isPhysicalEntity: true,
         BULLET_SPEED: 120,
-        damage: 50,
         team: 1,
         index: 5,
 
+        constructor: function (parent, difficultyMultiplier) {
+            this.difficultyMultiplier = difficultyMultiplier;
+            this.super('constructor', arguments);
+        },
         reset: function () {
             this.super('reset');
 
@@ -21,8 +24,9 @@ DefineModule('ships/arrow-boss', function (require) {
             this.position = { x: 0, y: 0 };
             this.velocity = { x: 0, y: 0 };
 
-            this.life = 25;
-            this.maxLife = 25;
+            this.damage = 50 * this.difficultyMultiplier;
+            this.life = 25 * this.difficultyMultiplier;
+            this.maxLife = 25 * this.difficultyMultiplier;
         },
         fire: function (gunIndex) {
             var gun = this.guns[ gunIndex ];
@@ -36,7 +40,8 @@ DefineModule('ships/arrow-boss', function (require) {
             this.triggerEvent('spawnBullet', {
                 team: this.team,
                 position: position,
-                velocity: velocity
+                velocity: velocity,
+                damage: this.difficultyMultiplier
             });
             this.addChild(new MuzzleFlash(this, gun));
         },

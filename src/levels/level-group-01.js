@@ -75,7 +75,7 @@ DefineModule('levels/level-group-01', function (require) {
             return true;
         },
         newShip: function (startX, startY, endY, time) {
-            var ship = new EnemyShip(this);
+            var ship = new EnemyShip(this, this.difficultyMultiplier);
 
             ship.position.x = startX;
             ship.position.y = startY;
@@ -95,7 +95,7 @@ DefineModule('levels/level-group-01', function (require) {
             this.ships.push(ship);
         },
         newBossShip: function () {
-            var boss = window.boss = new BossShip(this);
+            var boss = window.boss = new BossShip(this, this.difficultyMultiplier);
             var gameWidth = this.game.width;
             var bossWidth = boss.sprite.width;
 

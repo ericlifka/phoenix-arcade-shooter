@@ -28,10 +28,10 @@ DefineModule('levels/level-manager', function (require) {
         loadLevels: function () {
             this.levels = [
                 new Level_group_01(this, this.game, this.difficultyMultiplier, 1, "LEVEL 01"),
-                new Level_group_01(this, this.game, this.difficultyMultiplier, 2),
-                new Level_group_01(this, this.game, this.difficultyMultiplier, 3),
-                new Level_group_01(this, this.game, this.difficultyMultiplier, "boss"),
-                this.shop
+                //new Level_group_01(this, this.game, this.difficultyMultiplier, 2),
+                //new Level_group_01(this, this.game, this.difficultyMultiplier, 3),
+                //new Level_group_01(this, this.game, this.difficultyMultiplier, "boss"),
+                //this.shop
             ];
             this.levelIndex = -1;
         },
