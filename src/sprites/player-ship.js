@@ -17,9 +17,7 @@ DefineModule('sprites/player-ship', function (require) {
         ],
         {
             guns: [
-                { x: 3, y: 1 },
-                { x: 0, y: 5 },
-                { x: 6, y: 5 }
+                { x: 3, y: 1 }
             ]
         });
     };
