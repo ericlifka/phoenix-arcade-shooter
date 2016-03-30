@@ -107,13 +107,13 @@ DefineModule('levels/shop', function (require) {
             this.selectorShip.position.y = this.menuSelectorPositions[ this.selectedMenuItem ];
         },
         onUp: function () {
-            if (this.selectedMenuItem > 0) {
+            if (!this.selecting && this.selectedMenuItem > 0) {
                 this.selectedMenuItem--;
                 this.updateSelectorPosition();
             }
         },
         onDown: function () {
-            if (this.selectedMenuItem < this.menuSelectorPositions.length - 1) {
+            if (!this.selecting && this.selectedMenuItem < this.menuSelectorPositions.length - 1) {
                 this.selectedMenuItem++;
                 this.updateSelectorPosition();
             }
@@ -134,6 +134,7 @@ DefineModule('levels/shop', function (require) {
         },
         propagateSelection: function () {
             this.selecting = false;
+            this.setCosts();
         }
     });
 });
