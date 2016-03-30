@@ -71,7 +71,8 @@ DefineModule('levels/shop', function (require) {
                     font: "arcade-small",
                     message: item.message,
                     position: item.position,
-                    color: this.game.interfaceColor
+                    color: this.game.interfaceColor,
+                    isPhysicalEntity: true
                 });
                 this.addChild(item.description);
 
@@ -147,6 +148,7 @@ DefineModule('levels/shop', function (require) {
                     case 1: selection = this.menuItems.rate; break;
                     case 2: selection = this.menuItems.damage; break;
                     case 3: selection = this.menuItems.guns; break;
+                    case 4: this.chooseSelected(); return;
                     default: return;
                 }
 
