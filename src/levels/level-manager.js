@@ -20,9 +20,11 @@ DefineModule('levels/level-manager', function (require) {
             this.complete = false;
             this.levelIndex = -1;
             this.currentLevel = null;
+            this.shop = new Shop(this, this.game);
 
             this.levels = [
-                new Shop(this, this.game),
+                this.shop,
+                this.shop,
                 new Level_group_01(this, this.game, 1, "LEVEL 01"),
                 new Level_group_01(this, this.game, 2),
                 new Level_group_01(this, this.game, 3),
@@ -59,7 +61,12 @@ DefineModule('levels/level-manager', function (require) {
             this.super('update', arguments);
 
             if (this.currentLevel && this.currentLevel.checkIfLevelComplete()) {
-                this.currentLevel.destroy();
+                if (this.currentLevel.isShop) {
+                    this.removeChild(this.currentLevel);
+                } else {
+                    this.currentLevel.destroy();
+                }
+
                 this.loadNextLevel();
             }
         }

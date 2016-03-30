@@ -41,8 +41,10 @@ DefineModule('levels/shop', function (require) {
             }));
         },
         start: function () {
+            this.isDoneShopping = false;
             this.player.preventInputControl = true;
             this.player.position.x = -10;
+            this.setCosts();
         },
         checkIfLevelComplete: function () {
             return this.isDoneShopping;
@@ -101,6 +103,7 @@ DefineModule('levels/shop', function (require) {
             items.health.costText.changeMessage("$" + items.health.cost);
             items.rate.costText.changeMessage("$" + items.rate.cost);
             items.guns.costText.changeMessage(player.wingGunsUnlocked ? "--" : "$" + items.guns.cost);
+            items.leave.description.changeMessage(items.leave.message);
 
             if (items.health.cost > bank.value) {
                 items.health.costText.updateColor("#777");
@@ -191,9 +194,6 @@ DefineModule('levels/shop', function (require) {
                 case 4: // done shopping
                     this.isDoneShopping = true;
                     break;
-
-                default:
-                    return;
             }
 
             this.setCosts();
