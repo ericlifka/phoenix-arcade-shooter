@@ -13,6 +13,7 @@ DefineModule('components/life-meter', function (require) {
 
             this.entity = boundEntity;
             this.position = options.position || { x: 0, y: 0 };
+            this.anchor = options.anchor || { };
             this.horizontal = !!options.horizontal;
             this.length = options.length || 10;
             this.width = options.width || 1;
@@ -51,6 +52,8 @@ DefineModule('components/life-meter', function (require) {
             if (this.horizontal) {
                 this.sprite.rotateRight();
             }
+
+            this.updatePosition();
         },
 
         buildSpriteColorArray: function () {
@@ -111,6 +114,24 @@ DefineModule('components/life-meter', function (require) {
 
             colors.push(border);
             colors.unshift(border);
+        },
+
+        updatePosition: function () {
+            if (this.anchor.left) {
+                this.position.x = this.anchor.left;
+            }
+
+            if (this.anchor.top) {
+                this.position.y = this.anchor.top;
+            }
+
+            if (this.anchor.right) {
+                this.position.x = this.anchor.right - this.sprite.width;
+            }
+
+            if (this.anchor.bottom) {
+                this.position.y = this.anchor.bottom - this.sprite.height;
+            }
         }
     });
 });
