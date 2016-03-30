@@ -28,6 +28,7 @@ DefineModule('levels/shop', function (require) {
         reset: function () {
             this.super('reset', arguments);
 
+            this.isDoneShopping = false;
             this.selectedMenuItem = 0;
             this.createMenuText();
             this.setCosts();
@@ -44,7 +45,7 @@ DefineModule('levels/shop', function (require) {
             this.player.position.x = -10;
         },
         checkIfLevelComplete: function () {
-            return false;
+            return this.isDoneShopping;
         },
         update: function (dtime) {
             this.super('update', arguments);
@@ -185,6 +186,10 @@ DefineModule('levels/shop', function (require) {
 
                 case 3: // guns
                     this.player.wingGunsUnlocked = true;
+                    break;
+
+                case 4: // done shopping
+                    this.isDoneShopping = true;
                     break;
 
                 default:
