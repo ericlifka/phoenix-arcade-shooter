@@ -1,5 +1,4 @@
 DefineModule('levels/level-manager', function (require) {
-    var FlyPlayerInFromBottom = require('scripts/fly-player-in-from-bottom');
     var GameObject = require('models/game-object');
     var Level_group_01 = require('levels/level-group-01');
     var Shop = require('levels/shop');
@@ -24,7 +23,6 @@ DefineModule('levels/level-manager', function (require) {
 
             this.levels = [
                 this.shop,
-                this.shop,
                 new Level_group_01(this, this.game, 1, "LEVEL 01"),
                 new Level_group_01(this, this.game, 2),
                 new Level_group_01(this, this.game, 3),
@@ -35,7 +33,6 @@ DefineModule('levels/level-manager', function (require) {
         start: function () {
             this.running = true;
             this.loadNextLevel();
-            //this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
         },
 
         stop: function () {
