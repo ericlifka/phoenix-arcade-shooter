@@ -101,15 +101,34 @@ DefineModule('levels/shop', function (require) {
 
             if (items.health.cost > bank.value) {
                 items.health.costText.updateColor("#777");
+                items.health.canAfford = false;
             }
+            else {
+                items.health.canAfford = true;
+            }
+
             if (items.rate.cost > bank.value) {
                 items.rate.costText.updateColor("#777");
+                items.rate.canAfford = false;
             }
+            else {
+                items.rate.canAfford = true;
+            }
+
             if (items.damage.cost > bank.value) {
                 items.damage.costText.updateColor("#777");
+                items.damage.canAfford = false;
             }
+            else {
+                items.damage.canAfford = true;
+            }
+
             if (items.guns.cost > bank.value || player.wingGunsUnlocked) {
                 items.guns.costText.updateColor("#777");
+                items.guns.canAfford = false;
+            }
+            else {
+                items.guns.canAfford = true;
             }
         },
         createSelectorShip: function () {
@@ -137,6 +156,33 @@ DefineModule('levels/shop', function (require) {
         },
         onSelect: function () {
             if (!this.selecting) {
+                switch (this.selectedMenuItem) {
+                    case 0: // health
+                        if (!this.menuItems.health.canAfford) return;
+                        this.player.lifeUpgrades++;
+                        this.player.maxLife++;
+                        break;
+
+                    case 1: // rate
+                        if (!this.menuItems.rate.canAfford) return;
+                        this.player.rateUpgrades++;
+                        this.player.FIRE_RATE = Math.ceil(this.player.fireRate * .9);
+                        break;
+
+                    case 2: // damage
+                        if (!this.menuItems.damage.canAfford) return;
+                        this.player.damageUpgrades++;
+                        break;
+
+                    case 3: // guns
+                        if (!this.menuItems.guns.canAfford) return;
+                        this.player.wingGunsUnlocked = true;
+                        break;
+
+                    default:
+                        return;
+                }
+
                 this.chooseSelected();
             }
         },
@@ -152,22 +198,6 @@ DefineModule('levels/shop', function (require) {
         propagateSelection: function () {
             this.selecting = false;
 
-            switch (this.selectedMenuItem) {
-                case 0: // health
-                    this.player.lifeUpgrades++;
-                    this.player.maxLife++;
-                    break;
-                case 1: // rate
-                    this.player.rateUpgrades++;
-                    this.player.FIRE_RATE = Math.ceil(this.player.fireRate * .9);
-                    break;
-                case 2: // damage
-                    this.player.damageUpgrades++;
-                    break;
-                case 3: // guns
-                    this.player.wingGunsUnlocked = true;
-                    break;
-            }
 
             this.setCosts();
         }
