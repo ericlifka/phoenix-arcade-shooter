@@ -20,6 +20,10 @@ DefineModule('ships/player-controlled-ship', function (require) {
 
             this.life = 10;
             this.maxLife = 10;
+            this.damageUpgrades = 0;
+            this.lifeUpgrades = 0;
+            this.rateUpgrades = 0;
+            this.wingGunsUnlocked = false;
 
             this.SPEED = 50;
             this.BULLET_SPEED = 100;

@@ -26,9 +26,9 @@ DefineModule('models/phoenix', function (require) {
             this.controlsScreen = new ControlsScreen(this);
             this.titleScreen = new TitleScreen(this);
             this.gameOverScreen = new GameOverScreen(this);
+            this.player = new PlayerShip(this);
             this.inputInterpreter = new InputInterpreter();
             this.levelManager = new LevelManager(this);
-            this.player = new PlayerShip(this);
 
             this.pauseInputTracker = new EventedInput({
                 onStart: this.togglePause.bind(this)
