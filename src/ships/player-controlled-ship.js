@@ -2,6 +2,7 @@ DefineModule('ships/player-controlled-ship', function (require) {
     var GameObject = require('models/game-object');
     var MuzzleFlash = require('components/muzzle-flash');
     var playerShipSprite = require('sprites/player-ship');
+    var playerShipSpriteWingGuns = require('sprites/player-ship-wing-guns');
     var shipExplosion = require('sprites/animations/ship-explosion');
 
     return DefineClass(GameObject, {
@@ -36,6 +37,10 @@ DefineModule('ships/player-controlled-ship', function (require) {
         },
         refillHealth: function () {
             this.life = this.maxLife;
+        },
+        addWingGuns: function () {
+            this.wingGunsUnlocked = true;
+            this.sprite = playerShipSpriteWingGuns().rotateRight();
         },
         processInput: function (input) {
             this.super('processInput', arguments);

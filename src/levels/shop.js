@@ -192,7 +192,7 @@ DefineModule('levels/shop', function (require) {
                     break;
 
                 case 3: // guns
-                    this.player.wingGunsUnlocked = true;
+                    this.player.addWingGuns();
                     break;
 
                 case 4: // done shopping
