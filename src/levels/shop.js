@@ -1,5 +1,6 @@
 DefineModule('levels/shop', function (require) {
     var ArrowShip = require('sprites/arrow-ship');
+    var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
     var TextDisplay = require('components/text-display');
 
@@ -12,6 +13,7 @@ DefineModule('levels/shop', function (require) {
             damage: { message: "+1 Bullet Damage", position: { x: 90, y: 80 } },
             guns: { message: "Install wing guns", position: { x: 90, y: 95 } }
         },
+        menuSelectorPositions: [ 49, 64, 79, 94 ],
 
         constructor: function (parent, game) {
             this.game = game;
@@ -23,9 +25,16 @@ DefineModule('levels/shop', function (require) {
         reset: function () {
             this.super('reset', arguments);
 
+            this.selectedMenuItem = 0;
             this.createMenuText();
             this.setCosts();
             this.createSelectorShip();
+
+            this.addChild(new EventedInput({
+                onUp: this.onUp.bind(this),
+                onDown: this.onDown.bind(this),
+                onSelect: this.onSelect.bind(this)
+            }));
         },
         start: function () {
             this.player.preventInputControl = true;
@@ -78,10 +87,28 @@ DefineModule('levels/shop', function (require) {
         createSelectorShip: function () {
             this.selectorShip = new GameObject();
             this.selectorShip.sprite = new ArrowShip();
-            this.selectorShip.position = { x: 48, y: 49 };
+            this.selectorShip.position = { x: 48, y: 0 };
             this.addChild(this.selectorShip);
 
-            //this.updateSelectorPosition();
+            this.updateSelectorPosition();
+        },
+        updateSelectorPosition: function () {
+            this.selectorShip.position.y = this.menuSelectorPositions[ this.selectedMenuItem ];
+        },
+        onUp: function () {
+            if (this.selectedMenuItem > 0) {
+                this.selectedMenuItem--;
+                this.updateSelectorPosition();
+            }
+        },
+        onDown: function () {
+            if (this.selectedMenuItem < this.menuSelectorPositions.length - 1) {
+                this.selectedMenuItem++;
+                this.updateSelectorPosition();
+            }
+        },
+        onSelect: function () {
+
         }
     });
 });
