@@ -24,7 +24,7 @@ DefineModule('components/bank', function (require) {
             this.super('reset');
 
             this.addChild(this.valueDisplay);
-            this.value = 100;
+            this.value = 10000;
             this.updateDisplay();
         },
         addMoney: function (value) {

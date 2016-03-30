@@ -180,7 +180,7 @@ DefineModule('levels/shop', function (require) {
 
                 case 1: // rate
                     this.player.rateUpgrades++;
-                    this.player.FIRE_RATE = Math.ceil(this.player.fireRate * .9);
+                    this.player.FIRE_RATE = Math.ceil(this.player.FIRE_RATE * .9);
                     break;
 
                 case 2: // damage
