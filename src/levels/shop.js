@@ -150,7 +150,7 @@ DefineModule('levels/shop', function (require) {
                     default: return;
                 }
 
-                if (this.bank.value > selection.cost) {
+                if (this.bank.value >= selection.cost) {
                     this.bank.removeMoney(selection.cost);
                     this.chooseSelected();
                 }
