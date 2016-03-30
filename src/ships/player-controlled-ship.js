@@ -89,7 +89,7 @@ DefineModule('ships/player-controlled-ship', function (require) {
                     team: this.team,
                     damage: this.damageUpgrades + 1,
                     velocity: {
-                        x: (index - 1) * 10,
+                        x: this.wingGunsUnlocked ? (index - 1) * 10 : 0,
                         y: -this.BULLET_SPEED
                     },
                     position: {
