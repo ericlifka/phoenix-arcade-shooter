@@ -1,5 +1,6 @@
 DefineModule('levels/shop', function (require) {
     var ArrowShip = require('sprites/arrow-ship');
+    var Bullet = require('components/bullet');
     var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
     var TextDisplay = require('components/text-display');
@@ -44,6 +45,14 @@ DefineModule('levels/shop', function (require) {
         checkIfLevelComplete: function () {
             return false;
         },
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            this.timeSinceSelected += dtime;
+            if (this.selecting && this.timeSinceSelected > 595) {
+                this.propagateSelection();
+            }
+        },
 
         createMenuText: function () {
             this.titleText = new TextDisplay(this, {
@@ -69,7 +78,8 @@ DefineModule('levels/shop', function (require) {
                     font: "arcade-small",
                     message: '',
                     position: { x: item.position.x - 30, y: item.position.y },
-                    color: this.game.interfaceColor
+                    color: this.game.interfaceColor,
+                    isPhysicalEntity: true
                 });
                 this.addChild(item.costText);
             }.bind(this));
@@ -88,7 +98,7 @@ DefineModule('levels/shop', function (require) {
         createSelectorShip: function () {
             this.selectorShip = new GameObject();
             this.selectorShip.sprite = new ArrowShip();
-            this.selectorShip.position = { x: 48, y: 0 };
+            this.selectorShip.position = { x: 40, y: 0 };
             this.addChild(this.selectorShip);
 
             this.updateSelectorPosition();
@@ -109,7 +119,21 @@ DefineModule('levels/shop', function (require) {
             }
         },
         onSelect: function () {
+            if (!this.selecting) {
+                this.chooseSelected();
+            }
+        },
+        chooseSelected: function () {
+            this.selecting = true;
+            this.timeSinceSelected = 0;
 
+            var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
+            var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
+
+            this.addChild(new Bullet(this, 2, { x: x1, y: y }, { x: 50, y: 0 }));
+        },
+        propagateSelection: function () {
+            this.selecting = false;
         }
     });
 });
