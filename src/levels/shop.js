@@ -17,6 +17,7 @@ DefineModule('levels/shop', function (require) {
             leave: { message: "Leave Shop", position: { x: 60, y: 110 } }
         },
         menuSelectorPositions: [ 49, 64, 79, 94, 109 ],
+        disabledColor: "#777",
 
         constructor: function (parent, game) {
             this.game = game;
@@ -105,21 +106,10 @@ DefineModule('levels/shop', function (require) {
             items.guns.costText.changeMessage(player.wingGunsUnlocked ? "--" : "$" + items.guns.cost);
             items.leave.description.changeMessage(items.leave.message);
 
-            if (items.health.cost > bank.value) {
-                items.health.costText.updateColor("#777");
-            }
-
-            if (items.rate.cost > bank.value) {
-                items.rate.costText.updateColor("#777");
-            }
-
-            if (items.damage.cost > bank.value) {
-                items.damage.costText.updateColor("#777");
-            }
-
-            if (items.guns.cost > bank.value || player.wingGunsUnlocked) {
-                items.guns.costText.updateColor("#777");
-            }
+            items.health.costText.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
+            items.rate.costText.updateColor(items.rate.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
+            items.damage.costText.updateColor(items.damage.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
+            items.guns.costText.updateColor(items.guns.cost > bank.value || player.wingGunsUnlocked ? this.disabledColor : this.game.interfaceColor);
         },
         createSelectorShip: function () {
             this.selectorShip = new GameObject();

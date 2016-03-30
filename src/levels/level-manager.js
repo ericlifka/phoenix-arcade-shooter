@@ -32,7 +32,7 @@ DefineModule('levels/level-manager', function (require) {
                 //new Level_group_01(this, this.game, this.difficultyMultiplier, 2),
                 //new Level_group_01(this, this.game, this.difficultyMultiplier, 3),
                 //new Level_group_01(this, this.game, this.difficultyMultiplier, "boss"),
-                //this.shop
+                this.shop
             ];
             this.levelIndex = -1;
         },
