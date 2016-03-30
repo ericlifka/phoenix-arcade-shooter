@@ -85,15 +85,32 @@ DefineModule('levels/shop', function (require) {
             }.bind(this));
         },
         setCosts: function () {
-            this.menuItems.health.cost = 10 + this.player.lifeUpgrades * 10;
-            this.menuItems.rate.cost  = 50 + this.player.rateUpgrades * 50;
-            this.menuItems.damage.cost = 100 + this.player.damageUpgrades * 100;
-            this.menuItems.guns.cost = 1000;
+            var items = this.menuItems;
+            var player = this.player;
+            var bank = this.bank;
 
-            this.menuItems.damage.costText.changeMessage("$" + this.menuItems.damage.cost);
-            this.menuItems.health.costText.changeMessage("$" + this.menuItems.health.cost);
-            this.menuItems.rate.costText.changeMessage("$" + this.menuItems.rate.cost);
-            this.menuItems.guns.costText.changeMessage(this.player.wingGunsUnlocked ? "--" : "$" + this.menuItems.guns.cost);
+            items.health.cost = 10 + player.lifeUpgrades * 10;
+            items.rate.cost = 50 + player.rateUpgrades * 50;
+            items.damage.cost = 100 + player.damageUpgrades * 100;
+            items.guns.cost = 1000;
+
+            items.damage.costText.changeMessage("$" + items.damage.cost);
+            items.health.costText.changeMessage("$" + items.health.cost);
+            items.rate.costText.changeMessage("$" + items.rate.cost);
+            items.guns.costText.changeMessage(player.wingGunsUnlocked ? "--" : "$" + items.guns.cost);
+
+            if (items.health.cost > bank.value) {
+                items.health.costText.updateColor("#777");
+            }
+            if (items.rate.cost > bank.value) {
+                items.rate.costText.updateColor("#777");
+            }
+            if (items.damage.cost > bank.value) {
+                items.damage.costText.updateColor("#777");
+            }
+            if (items.guns.cost > bank.value || player.wingGunsUnlocked) {
+                items.guns.costText.updateColor("#777");
+            }
         },
         createSelectorShip: function () {
             this.selectorShip = new GameObject();
@@ -135,7 +152,7 @@ DefineModule('levels/shop', function (require) {
         propagateSelection: function () {
             this.selecting = false;
 
-            switch(this.selectedMenuItem) {
+            switch (this.selectedMenuItem) {
                 case 0: // health
                     this.player.lifeUpgrades++;
                     this.player.maxLife++;

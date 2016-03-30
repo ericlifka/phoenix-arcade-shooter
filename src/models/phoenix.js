@@ -28,7 +28,6 @@ DefineModule('models/phoenix', function (require) {
             this.gameOverScreen = new GameOverScreen(this);
             this.player = new PlayerShip(this);
             this.inputInterpreter = new InputInterpreter();
-            this.levelManager = new LevelManager(this);
 
             this.pauseInputTracker = new EventedInput({
                 onStart: this.togglePause.bind(this)
@@ -56,6 +55,9 @@ DefineModule('models/phoenix', function (require) {
                 position: { x: this.width, y: this.height - 6 },
                 color: this.interfaceColor
             });
+
+            // the level manager reaches into all sorts of places, so it needs to be created last
+            this.levelManager = new LevelManager(this);
 
             this.super('constructor');
         },
