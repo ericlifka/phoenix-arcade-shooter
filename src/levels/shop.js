@@ -169,7 +169,11 @@ DefineModule('levels/shop', function (require) {
             var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
             var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
 
-            this.addChild(new Bullet(this, 2, { x: x1, y: y }, { x: 50, y: 0 }));
+            this.addChild(new Bullet(this, {
+                team: 2,
+                position: { x: x1, y: y },
+                velocity: { x: 50, y: 0 }
+            }));
         },
         propagateSelection: function () {
             switch (this.selectedMenuItem) {

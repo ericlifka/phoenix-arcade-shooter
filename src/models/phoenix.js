@@ -180,11 +180,7 @@ DefineModule('models/phoenix', function (require) {
             }
         },
         spawnBullet: function (data) {
-            var team = data.team;
-            var position = data.position;
-            var velocity = data.velocity;
-
-            this.addChild(new Bullet(this, team, position, velocity));
+            this.addChild(new Bullet(this,data));
         },
         enemyDestroyed: function (data) {
             this.comboGauge.addPoints(data.shipValue);

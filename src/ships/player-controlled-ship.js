@@ -90,7 +90,8 @@ DefineModule('ships/player-controlled-ship', function (require) {
             this.triggerEvent('spawnBullet', {
                 team: this.team,
                 position: position,
-                velocity: velocity
+                velocity: velocity,
+                damage: this.damageUpgrades + 1
             });
             this.addChild(new MuzzleFlash(this, gun));
         },

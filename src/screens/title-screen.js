@@ -107,8 +107,16 @@ DefineModule('screens/title-screen', function (require) {
             var x2 = this.selectorRight.position.x;
             var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
 
-            this.addChild(new Bullet(this, 2, { x: x1, y: y }, { x: 50, y: 0 }));
-            this.addChild(new Bullet(this, 3, { x: x2, y: y }, { x: -50, y: 0 }));
+            this.addChild(new Bullet(this, {
+                team: 2,
+                position: { x: x1, y: y },
+                velocity: { x: 50, y: 0 }
+            }));
+            this.addChild(new Bullet(this, {
+                team: 3,
+                position: { x: x2, y: y },
+                velocity: { x: -50, y: 0}
+            }));
         },
 
         propagateSelection: function () {

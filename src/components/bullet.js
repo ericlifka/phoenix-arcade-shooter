@@ -7,20 +7,20 @@ DefineModule('components/bullet', function (require) {
         isPhysicalEntity: true,
         index: 5,
 
-        constructor: function (parent, team, position, velocity, acceleration) {
+        constructor: function (parent, options) {
             this.super('constructor', arguments);
 
-            this.team = team;
-            this.position = position;
-            this.velocity = velocity;
-            this.acceleration = acceleration;
+            options = options || { };
+            this.team = options.team || 0;
+            this.position = options.position || { x: 0, y: 0 };
+            this.velocity = options.velocity || { x: 0, y: 0 };
+            this.acceleration = options.acceleration || { x: 0, y: 0 };
+            this.damage = options.damage || 1;
+            this.life = options.life || 0;
+            this.maxLife = options.maxLife || 1;
 
             this.sprite = bulletSprite();
             this.explosion = smallExplosion;
-
-            this.life = 0;
-            this.maxLife = 1;
-            this.damage = 1;
 
             this.updateBulletDirection();
             this.updateColor();
