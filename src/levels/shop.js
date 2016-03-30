@@ -47,8 +47,6 @@ DefineModule('levels/shop', function (require) {
         start: function () {
             this.input.reset();
             this.isDoneShopping = false;
-            this.player.preventInputControl = true;
-            this.player.position.x = -10;
             this.setCosts();
         },
         checkIfLevelComplete: function () {

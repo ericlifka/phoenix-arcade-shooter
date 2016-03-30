@@ -64,6 +64,12 @@ DefineModule('ships/player-controlled-ship', function (require) {
                 this.fire();
             }
         },
+        hideOffscreen: function () {
+            this.preventInputControl = true;
+            this.position.x = -100;
+            this.velocity.x = 0;
+            this.velocity.y = 0;
+        },
         checkBoundaries: function () {
             if (this.preventInputControl) {
                 // don't check screen boundaries when an external script is controlling the player

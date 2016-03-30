@@ -4,6 +4,7 @@ DefineModule('components/bullet', function (require) {
     var smallExplosion = require('sprites/animations/small-explosion');
 
     return DefineClass(GameObject, {
+        type: "bullet",
         isPhysicalEntity: true,
         index: 5,
 

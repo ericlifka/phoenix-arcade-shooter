@@ -56,15 +56,18 @@ DefineModule('levels/level-manager', function (require) {
             this.levelIndex++;
             this.currentLevel = this.levels[ this.levelIndex ];
 
-            if (this.currentLevel) {
-                if (this.currentLevel.levelName) { // kinda derp way of knowing where the level blocks start
-                    this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
-                    this.player.refillHealth();
-                }
-
-                this.addChild(this.currentLevel);
-                this.currentLevel.start();
+            if (this.currentLevel.isShop) {
+                this.game.clearBullets();
+                this.player.hideOffscreen();
             }
+
+            if (this.currentLevel.levelName) { // kinda derp way of knowing where the level blocks start
+                this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
+                this.player.refillHealth();
+            }
+
+            this.addChild(this.currentLevel);
+            this.currentLevel.start();
         },
         update: function () {
             this.super('update', arguments);

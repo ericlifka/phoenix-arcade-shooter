@@ -47,7 +47,7 @@ DefineModule('models/phoenix', function (require) {
             this.lifeMeter = new LifeMeter(this.player, {
                 scale: 2,
                 width: 4,
-                anchor: { right: this.width - 1, bottom: this.height - 7},
+                anchor: { right: this.width - 1, bottom: this.height - 7 },
                 showBorder: true,
                 borderColor: this.interfaceColor
             });
@@ -79,6 +79,11 @@ DefineModule('models/phoenix', function (require) {
             this.addChild(this.levelManager);
             this.addChild(this.titleScreen);
             this.addChild(this.pauseInputTracker);
+        },
+        clearBullets: function () {
+            this.children
+                .filter(function (entity) { return entity.type === "bullet" })
+                .forEach(function (bullet) { this.removeChild(bullet) }.bind(this));
         },
         startNewGame: function () {
             this.addChild(this.bank);
@@ -180,7 +185,7 @@ DefineModule('models/phoenix', function (require) {
             }
         },
         spawnBullet: function (data) {
-            this.addChild(new Bullet(this,data));
+            this.addChild(new Bullet(this, data));
         },
         enemyDestroyed: function (data) {
             this.comboGauge.addPoints(data.shipValue);
