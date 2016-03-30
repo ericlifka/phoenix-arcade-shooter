@@ -13,9 +13,10 @@ DefineModule('levels/shop', function (require) {
             health: { message: "+1 Ship Health", position: { x: 90, y: 50 } },
             rate: { message: "10% faster Firing Rate", position: { x: 90, y: 65 } },
             damage: { message: "+1 Bullet Damage", position: { x: 90, y: 80 } },
-            guns: { message: "Install wing guns", position: { x: 90, y: 95 } }
+            guns: { message: "Install wing guns", position: { x: 90, y: 95 } },
+            leave: { message: "Leave Shop", position: { x: 60, y: 110 } }
         },
-        menuSelectorPositions: [ 49, 64, 79, 94 ],
+        menuSelectorPositions: [ 49, 64, 79, 94, 109 ],
 
         constructor: function (parent, game) {
             this.game = game;
