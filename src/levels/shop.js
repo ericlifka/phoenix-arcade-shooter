@@ -161,22 +161,26 @@ DefineModule('levels/shop', function (require) {
                         if (!this.menuItems.health.canAfford) return;
                         this.player.lifeUpgrades++;
                         this.player.maxLife++;
+                        this.bank.removeMoney(this.menuItems.health.cost);
                         break;
 
                     case 1: // rate
                         if (!this.menuItems.rate.canAfford) return;
                         this.player.rateUpgrades++;
                         this.player.FIRE_RATE = Math.ceil(this.player.fireRate * .9);
+                        this.bank.removeMoney(this.menuItems.rate.cost);
                         break;
 
                     case 2: // damage
                         if (!this.menuItems.damage.canAfford) return;
                         this.player.damageUpgrades++;
+                        this.bank.removeMoney(this.menuItems.damage.cost);
                         break;
 
                     case 3: // guns
                         if (!this.menuItems.guns.canAfford) return;
                         this.player.wingGunsUnlocked = true;
+                        this.bank.removeMoney(this.menuItems.guns.cost);
                         break;
 
                     default:
