@@ -84,21 +84,19 @@ DefineModule('ships/player-controlled-ship', function (require) {
             }
         },
         fire: function () {
-            var gun = this.sprite.meta.guns[0];
+            this.sprite.meta.guns.forEach(function (gun) {
+                this.triggerEvent('spawnBullet', {
+                    team: this.team,
+                    damage: this.damageUpgrades + 1,
+                    velocity: { x: 0, y: -this.BULLET_SPEED },
+                    position: {
+                        x: this.position.x + gun.x,
+                        y: this.position.y + gun.y
+                    }
+                });
 
-            var position = {
-                x: this.position.x + gun.x,
-                y: this.position.y + gun.y
-            };
-            var velocity = { x: 0, y: -this.BULLET_SPEED };
-
-            this.triggerEvent('spawnBullet', {
-                team: this.team,
-                position: position,
-                velocity: velocity,
-                damage: this.damageUpgrades + 1
-            });
-            this.addChild(new MuzzleFlash(this, gun));
+                this.addChild(new MuzzleFlash(this, gun));
+            }.bind(this));
         },
 
         applyDamage: function (damage, sourceEntity) {
