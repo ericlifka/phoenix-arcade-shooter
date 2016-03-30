@@ -17,8 +17,8 @@ DefineModule('sprites/player-ship-wing-guns', function (require) {
             ],
             {
                 guns: [
-                    { x: 4, y: 1 },
                     { x: 0, y: 5 },
+                    { x: 4, y: 1 },
                     { x: 8, y: 5 }
                 ]
             });
