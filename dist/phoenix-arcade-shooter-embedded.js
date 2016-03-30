@@ -192,6 +192,7 @@ DefineModule('components/bullet', function (require) {
     var smallExplosion = require('sprites/animations/small-explosion');
 
     return DefineClass(GameObject, {
+        type: "bullet",
         isPhysicalEntity: true,
         index: 5,
 
@@ -2035,469 +2036,6 @@ DefineModule('fonts/phoenix', function (require) {
     };
 });
 
-DefineModule('levels/level-group-01', function (require) {
-    var Banner = require('components/fadeout-banner');
-    var BossShip = require('ships/arrow-boss');
-    var ChainGunFire = require('scripts/chain-gun-fire');
-    var EnemyShip = require('ships/arrow-ship');
-    var FireSingleGunRandomRate = require('scripts/fire-single-gun-random-rate');
-    var GameObject = require('models/game-object');
-    var LifeMeter = require('components/life-meter');
-    var MoneyDrop = require('components/money-drop');
-    var MoveObjectToPoint = require('scripts/move-object-to-point');
-    var ScriptChain = require('models/script-chain');
-    var Random = require('helpers/random');
-    var WatchForDeath = require('scripts/watch-for-death');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, game, rowCount, levelName) {
-            this.super('constructor', arguments);
-
-            this.width = this.parent.width;
-            this.height = this.parent.height;
-
-            if (rowCount === "boss") {
-                rowCount = 1;
-                this.boss = true;
-            }
-
-            this.game = game;
-            this.levelName = levelName;
-            this.rowCount = rowCount;
-        },
-        start: function () {
-            this.ships = [];
-            this.scripts = [];
-
-            for (var i = 1; i <= 10; i++) {
-                this.newShip(10 * i + 39, -40, 45, 3);
-
-                if (this.rowCount >= 2) {
-                    this.newShip(10 * i + 39, -30, 55, 3);
-                }
-
-                if (this.rowCount >= 3) {
-                    this.newShip(10 * i + 39, -20, 65, 3);
-                }
-            }
-
-            this.attachMoneyScripts();
-
-            if (this.boss) {
-                this.newBossShip();
-            }
-
-            if (this.levelName) {
-                this.scripts.push(new Banner(this, this.levelName, 2000));
-            }
-
-            this.ships.forEach(function (ship) {
-                this.addChild(ship);
-            }.bind(this));
-
-            this.scripts.forEach(function (script) {
-                script.start();
-                this.addChild(script);
-            }.bind(this));
-        },
-        checkIfLevelComplete: function () {
-            for (var i = 0; i < this.children.length; i++) {
-                var child = this.children[ i ];
-                if (child && child.position && !child.destroyed) {
-                    return false;
-                }
-            }
-
-            return true;
-        },
-        newShip: function (startX, startY, endY, time) {
-            var ship = new EnemyShip(this);
-
-            ship.position.x = startX;
-            ship.position.y = startY;
-
-            this.scripts.push(new FireSingleGunRandomRate(this, ship));
-            this.scripts.push(new ScriptChain(this, false, [
-                new MoveObjectToPoint(null, ship, { x: startX, y: endY }, time * 2),
-                new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time),
-                new ScriptChain(this, true, [
-                    new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY - 30 }, time),
-                    new MoveObjectToPoint(null, ship, { x: startX + 40, y: endY - 30 }, time * 2),
-                    new MoveObjectToPoint(null, ship, { x: startX + 40, y: endY }, time),
-                    new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time * 2)
-                ])
-            ]));
-
-            this.ships.push(ship);
-        },
-        newBossShip: function () {
-            var boss = window.boss = new BossShip(this);
-            var gameWidth = this.game.width;
-            var bossWidth = boss.sprite.width;
-
-            boss.position.x = -this.game.width / 2;
-            boss.position.y = 1;
-
-            boss.addChild(new LifeMeter(boss, {
-                position: { x: 0, y: 0 },
-                length: this.game.width,
-                width: 1,
-                horizontal: true
-            }));
-
-            this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));
-            this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
-            this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
-
-            this.scripts.push(new ScriptChain(this, true, [
-                new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
-                new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
-            ]));
-            this.scripts.push(new WatchForDeath(this, boss, function () {
-                var p = boss.position;
-                this.addChild(new MoneyDrop(this, {
-                    x: p.x,
-                    y: p.y
-                }));
-                this.addChild(new MoneyDrop(this, {
-                    x: p.x + 7,
-                    y: p.y
-                }));
-                this.addChild(new MoneyDrop(this, {
-                    x: p.x + 4,
-                    y: p.y + 8
-                }));
-            }.bind(this)));
-
-            this.ships.push(boss);
-        },
-        attachMoneyScripts: function () {
-            var count = this.ships.length / 5;
-            var selectedShips = Random.sample(this.ships, count);
-
-            selectedShips.forEach(function (ship) {
-                this.scripts.push(new WatchForDeath(this, ship, function () {
-                    this.addChild(new MoneyDrop(this, ship.position));
-                }.bind(this)));
-            }.bind(this));
-        }
-    });
-});
-
-DefineModule('levels/level-group-02', function (require) {
-    var GameObject = require('models/game-object');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, game, groupCount, levelName) {
-            this.super('constructor', arguments);
-
-            if (groupCount === "boss") {
-                groupCount = 1;
-                this.boss = true;
-            }
-
-            this.game = game;
-            this.levelName = levelName;
-            this.rowCount = groupCount;
-        },
-
-        start: function () {
-
-        },
-
-        checkIfLevelComplete: function () {
-
-        }
-    });
-});
-
-DefineModule('levels/level-manager', function (require) {
-    var FlyPlayerInFromBottom = require('scripts/fly-player-in-from-bottom');
-    var GameObject = require('models/game-object');
-    var Level_group_01 = require('levels/level-group-01');
-    var Shop = require('levels/shop');
-
-    return DefineClass(GameObject, {
-        constructor: function (game) {
-            this.game = game;
-            this.width = game.width;
-            this.height = game.height;
-            this.player = game.player;
-
-            this.super('constructor', arguments);
-        },
-
-        reset: function () {
-            this.super('reset');
-
-            this.running = false;
-            this.complete = false;
-            this.levelIndex = -1;
-            this.currentLevel = null;
-            this.shop = new Shop(this, this.game);
-
-            this.levels = [
-                new Level_group_01(this, this.game, 1, "LEVEL 01"),
-                new Level_group_01(this, this.game, 2),
-                new Level_group_01(this, this.game, 3),
-                new Level_group_01(this, this.game, "boss"),
-                this.shop
-            ];
-        },
-
-        start: function () {
-            this.running = true;
-            this.loadNextLevel();
-        },
-
-        stop: function () {
-            this.running = false;
-            this.removeChild(this.currentLevel);
-            this.currentLevel = null;
-        },
-
-        loadNextLevel: function () {
-            this.levelIndex++;
-            this.currentLevel = this.levels[ this.levelIndex ];
-
-            if (this.currentLevel) {
-                if (this.currentLevel.levelName) { // kinda derp way of knowing where the level blocks start
-                    this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
-                    this.player.refillHealth();
-                }
-
-                this.addChild(this.currentLevel);
-                this.currentLevel.start();
-            } else {
-                console.log('all levels complete');
-                this.complete = true;
-                this.running = false;
-            }
-        },
-        update: function () {
-            this.super('update', arguments);
-
-            if (this.currentLevel && this.currentLevel.checkIfLevelComplete()) {
-                if (this.currentLevel.isShop) {
-                    this.removeChild(this.currentLevel);
-                } else {
-                    this.currentLevel.destroy();
-                }
-
-                this.loadNextLevel();
-            }
-        }
-    });
-});
-
-DefineModule('levels/shop', function (require) {
-    var ArrowShip = require('sprites/arrow-ship');
-    var Bullet = require('components/bullet');
-    var EventedInput = require('models/evented-input');
-    var GameObject = require('models/game-object');
-    var TextDisplay = require('components/text-display');
-
-    return DefineClass(GameObject, {
-        isShop: true,
-        index: 1,
-        headerDef: { message: "Ship Upgrades", position: { x: 50, y: 10 } },
-        menuItems: {
-            health: { message: "+1 Ship Health", position: { x: 90, y: 50 } },
-            rate: { message: "10% faster Firing Rate", position: { x: 90, y: 65 } },
-            damage: { message: "+1 Bullet Damage", position: { x: 90, y: 80 } },
-            guns: { message: "Install wing guns", position: { x: 90, y: 95 } },
-            leave: { message: "Leave Shop", position: { x: 60, y: 110 } }
-        },
-        menuSelectorPositions: [ 49, 64, 79, 94, 109 ],
-
-        constructor: function (parent, game) {
-            this.game = game;
-            this.bank = game.bank;
-            this.player = game.player;
-
-            this.super('constructor', arguments);
-        },
-        reset: function () {
-            this.super('reset', arguments);
-
-            this.isDoneShopping = false;
-            this.selectedMenuItem = 0;
-            this.createMenuText();
-            this.setCosts();
-            this.createSelectorShip();
-
-            this.addChild(new EventedInput({
-                onUp: this.onUp.bind(this),
-                onDown: this.onDown.bind(this),
-                onSelect: this.onSelect.bind(this)
-            }));
-        },
-        start: function () {
-            this.isDoneShopping = false;
-            this.player.preventInputControl = true;
-            this.player.position.x = -10;
-            this.setCosts();
-        },
-        checkIfLevelComplete: function () {
-            return this.isDoneShopping;
-        },
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            this.timeSinceSelected += dtime;
-            if (this.selecting && this.timeSinceSelected > 595) {
-                this.propagateSelection();
-            }
-        },
-
-        createMenuText: function () {
-            this.titleText = new TextDisplay(this, {
-                font: "arcade",
-                message: this.headerDef.message,
-                position: this.headerDef.position,
-                color: this.game.interfaceColor
-            });
-            this.addChild(this.titleText);
-
-            Object.keys(this.menuItems).forEach(function (key) {
-                var item = this.menuItems[ key ];
-
-                item.description = new TextDisplay(this, {
-                    font: "arcade-small",
-                    message: item.message,
-                    position: item.position,
-                    color: this.game.interfaceColor,
-                    isPhysicalEntity: true
-                });
-                this.addChild(item.description);
-
-                item.costText = new TextDisplay(this, {
-                    font: "arcade-small",
-                    message: '',
-                    position: { x: item.position.x - 30, y: item.position.y },
-                    color: this.game.interfaceColor,
-                    isPhysicalEntity: true
-                });
-                this.addChild(item.costText);
-            }.bind(this));
-        },
-        setCosts: function () {
-            var items = this.menuItems;
-            var player = this.player;
-            var bank = this.bank;
-
-            items.health.cost = 10 + player.lifeUpgrades * 10;
-            items.rate.cost = 50 + player.rateUpgrades * 50;
-            items.damage.cost = 100 + player.damageUpgrades * 100;
-            items.guns.cost = player.wingGunsUnlocked ? -1 : 1000;
-
-            items.damage.costText.changeMessage("$" + items.damage.cost);
-            items.health.costText.changeMessage("$" + items.health.cost);
-            items.rate.costText.changeMessage("$" + items.rate.cost);
-            items.guns.costText.changeMessage(player.wingGunsUnlocked ? "--" : "$" + items.guns.cost);
-            items.leave.description.changeMessage(items.leave.message);
-
-            if (items.health.cost > bank.value) {
-                items.health.costText.updateColor("#777");
-            }
-
-            if (items.rate.cost > bank.value) {
-                items.rate.costText.updateColor("#777");
-            }
-
-            if (items.damage.cost > bank.value) {
-                items.damage.costText.updateColor("#777");
-            }
-
-            if (items.guns.cost > bank.value || player.wingGunsUnlocked) {
-                items.guns.costText.updateColor("#777");
-            }
-        },
-        createSelectorShip: function () {
-            this.selectorShip = new GameObject();
-            this.selectorShip.sprite = new ArrowShip();
-            this.selectorShip.position = { x: 40, y: 0 };
-            this.addChild(this.selectorShip);
-
-            this.updateSelectorPosition();
-        },
-        updateSelectorPosition: function () {
-            this.selectorShip.position.y = this.menuSelectorPositions[ this.selectedMenuItem ];
-        },
-        onUp: function () {
-            if (!this.selecting && this.selectedMenuItem > 0) {
-                this.selectedMenuItem--;
-                this.updateSelectorPosition();
-            }
-        },
-        onDown: function () {
-            if (!this.selecting && this.selectedMenuItem < this.menuSelectorPositions.length - 1) {
-                this.selectedMenuItem++;
-                this.updateSelectorPosition();
-            }
-        },
-        onSelect: function () {
-            if (!this.selecting) {
-                var selection;
-                switch (this.selectedMenuItem) {
-                    case 0: selection = this.menuItems.health; break;
-                    case 1: selection = this.menuItems.rate; break;
-                    case 2: selection = this.menuItems.damage; break;
-                    case 3: selection = this.menuItems.guns; break;
-                    case 4: this.chooseSelected(); return;
-                    default: return;
-                }
-
-                if (this.bank.value >= selection.cost && selection.cost !== -1) {
-                    this.bank.removeMoney(selection.cost);
-                    this.chooseSelected();
-                }
-            }
-        },
-        chooseSelected: function () {
-            this.selecting = true;
-            this.timeSinceSelected = 0;
-
-            var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
-            var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
-
-            this.addChild(new Bullet(this, {
-                team: 2,
-                position: { x: x1, y: y },
-                velocity: { x: 50, y: 0 }
-            }));
-        },
-        propagateSelection: function () {
-            switch (this.selectedMenuItem) {
-                case 0:
-                    this.player.lifeUpgrades++;
-                    this.player.maxLife++;
-                    break;
-
-                case 1: // rate
-                    this.player.rateUpgrades++;
-                    this.player.FIRE_RATE = Math.ceil(this.player.FIRE_RATE * .9);
-                    break;
-
-                case 2: // damage
-                    this.player.damageUpgrades++;
-                    break;
-
-                case 3: // guns
-                    this.player.addWingGuns();
-                    break;
-
-                case 4: // done shopping
-                    this.isDoneShopping = true;
-                    break;
-            }
-
-            this.setCosts();
-            this.selecting = false;
-        }
-    });
-});
-
 DefineModule('helpers/collect-entities', function () {
     return function visitNode(node, matcherFn, collection) {
         collection = collection || [];
@@ -2850,6 +2388,484 @@ DefineModule('helpers/run-loop', function (require) {
     });
 });
 
+DefineModule('levels/level-group-01', function (require) {
+    var Banner = require('components/fadeout-banner');
+    var BossShip = require('ships/arrow-boss');
+    var ChainGunFire = require('scripts/chain-gun-fire');
+    var EnemyShip = require('ships/arrow-ship');
+    var FireSingleGunRandomRate = require('scripts/fire-single-gun-random-rate');
+    var GameObject = require('models/game-object');
+    var LifeMeter = require('components/life-meter');
+    var MoneyDrop = require('components/money-drop');
+    var MoveObjectToPoint = require('scripts/move-object-to-point');
+    var ScriptChain = require('models/script-chain');
+    var Random = require('helpers/random');
+    var WatchForDeath = require('scripts/watch-for-death');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, game, difficultyMultiplier, rowCount, levelName) {
+            this.super('constructor', arguments);
+
+            this.difficultyMultiplier = difficultyMultiplier;
+            this.width = this.parent.width;
+            this.height = this.parent.height;
+
+            if (rowCount === "boss") {
+                rowCount = 1;
+                this.boss = true;
+            }
+
+            this.game = game;
+            this.levelName = levelName;
+            this.rowCount = rowCount;
+        },
+        start: function () {
+            this.ships = [];
+            this.scripts = [];
+
+            for (var i = 1; i <= 10; i++) {
+                this.newShip(10 * i + 39, -40, 45, 3);
+
+                if (this.rowCount >= 2) {
+                    this.newShip(10 * i + 39, -30, 55, 3);
+                }
+
+                if (this.rowCount >= 3) {
+                    this.newShip(10 * i + 39, -20, 65, 3);
+                }
+            }
+
+            this.attachMoneyScripts();
+
+            if (this.boss) {
+                this.newBossShip();
+            }
+
+            if (this.levelName) {
+                this.scripts.push(new Banner(this, this.levelName, 2000));
+            }
+
+            this.ships.forEach(function (ship) {
+                this.addChild(ship);
+            }.bind(this));
+
+            this.scripts.forEach(function (script) {
+                script.start();
+                this.addChild(script);
+            }.bind(this));
+        },
+        checkIfLevelComplete: function () {
+            for (var i = 0; i < this.children.length; i++) {
+                var child = this.children[ i ];
+                if (child && child.position && !child.destroyed) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+        newShip: function (startX, startY, endY, time) {
+            var ship = new EnemyShip(this, this.difficultyMultiplier);
+
+            ship.position.x = startX;
+            ship.position.y = startY;
+
+            this.scripts.push(new FireSingleGunRandomRate(this, ship));
+            this.scripts.push(new ScriptChain(this, false, [
+                new MoveObjectToPoint(null, ship, { x: startX, y: endY }, time * 2),
+                new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time),
+                new ScriptChain(this, true, [
+                    new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY - 30 }, time),
+                    new MoveObjectToPoint(null, ship, { x: startX + 40, y: endY - 30 }, time * 2),
+                    new MoveObjectToPoint(null, ship, { x: startX + 40, y: endY }, time),
+                    new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time * 2)
+                ])
+            ]));
+
+            this.ships.push(ship);
+        },
+        newBossShip: function () {
+            var boss = window.boss = new BossShip(this, this.difficultyMultiplier);
+            var gameWidth = this.game.width;
+            var bossWidth = boss.sprite.width;
+
+            boss.position.x = -this.game.width / 2;
+            boss.position.y = 1;
+
+            boss.addChild(new LifeMeter(boss, {
+                position: { x: 0, y: 0 },
+                length: this.game.width,
+                width: 1,
+                horizontal: true
+            }));
+
+            this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));
+            this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
+            this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
+
+            this.scripts.push(new ScriptChain(this, true, [
+                new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
+                new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
+            ]));
+            this.scripts.push(new WatchForDeath(this, boss, function () {
+                var p = boss.position;
+                this.addChild(new MoneyDrop(this, {
+                    x: p.x,
+                    y: p.y
+                }));
+                this.addChild(new MoneyDrop(this, {
+                    x: p.x + 7,
+                    y: p.y
+                }));
+                this.addChild(new MoneyDrop(this, {
+                    x: p.x + 4,
+                    y: p.y + 8
+                }));
+            }.bind(this)));
+
+            this.ships.push(boss);
+        },
+        attachMoneyScripts: function () {
+            var count = this.ships.length / 5;
+            var selectedShips = Random.sample(this.ships, count);
+
+            selectedShips.forEach(function (ship) {
+                this.scripts.push(new WatchForDeath(this, ship, function () {
+                    this.addChild(new MoneyDrop(this, ship.position));
+                }.bind(this)));
+            }.bind(this));
+        }
+    });
+});
+
+DefineModule('levels/level-group-02', function (require) {
+    var GameObject = require('models/game-object');
+    var FlyingSaucer = require('ships/flying-saucer');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, game, difficultyMultiplier, shipCount, levelName) {
+            this.super('constructor', arguments);
+
+            if (groupCount === "boss") {
+                groupCount = 1;
+                this.boss = true;
+            }
+
+            this.game = game;
+            this.levelName = levelName;
+            this.rowCount = groupCount;
+        },
+
+        start: function () {
+
+        },
+
+        checkIfLevelComplete: function () {
+
+        }
+    });
+});
+
+DefineModule('levels/level-manager', function (require) {
+    var FlyPlayerInFromBottom = require('scripts/fly-player-in-from-bottom');
+    var GameObject = require('models/game-object');
+    var Level_group_01 = require('levels/level-group-01');
+    var Shop = require('levels/shop');
+
+    return DefineClass(GameObject, {
+        constructor: function (game) {
+            this.game = game;
+            this.width = game.width;
+            this.height = game.height;
+            this.player = game.player;
+
+            this.super('constructor', arguments);
+        },
+
+        reset: function () {
+            this.super('reset');
+
+            this.levelNameCounter = 0;
+            this.difficultyMultiplier = 1;
+            this.running = false;
+            this.complete = false;
+            this.currentLevel = null;
+            this.shop = new Shop(this, this.game);
+
+            this.loadLevels();
+        },
+        loadLevels: function () {
+            this.levels = [
+                new Level_group_01(this, this.game, this.difficultyMultiplier, 1, this.levelName()),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, 2),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, 3),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, "boss"),
+                this.shop
+            ];
+            this.levelIndex = -1;
+        },
+        start: function () {
+            this.running = true;
+            this.loadNextLevel();
+        },
+
+        stop: function () {
+            this.running = false;
+            this.removeChild(this.currentLevel);
+            this.currentLevel = null;
+        },
+
+        loadNextLevel: function () {
+            if (this.levelIndex >= this.levels.length - 1) { // last level was completed
+                this.difficultyMultiplier++;
+                this.loadLevels();
+            }
+
+            this.levelIndex++;
+            this.currentLevel = this.levels[ this.levelIndex ];
+
+            if (this.currentLevel.isShop) {
+                this.game.clearBullets();
+                this.player.hideOffscreen();
+            }
+
+            if (this.currentLevel.levelName) { // kinda derp way of knowing where the level blocks start
+                this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
+                this.player.refillHealth();
+            }
+
+            this.addChild(this.currentLevel);
+            this.currentLevel.start();
+        },
+        update: function () {
+            this.super('update', arguments);
+
+            if (this.currentLevel && this.currentLevel.checkIfLevelComplete()) {
+                if (this.currentLevel.isShop) {
+                    this.removeChild(this.currentLevel);
+                } else {
+                    this.currentLevel.destroy();
+                }
+
+                this.loadNextLevel();
+            }
+        },
+
+        levelName: function () {
+            this.levelNameCounter++;
+            return "LEVEL " + this.pad(this.levelNameCounter);
+        },
+        pad: function (val) {
+            if (val < 10) {
+                return "00" + val;
+            }
+            if (val < 100) {
+                return "0" + val;
+            }
+        }
+    });
+});
+
+DefineModule('levels/shop', function (require) {
+    var ArrowShip = require('sprites/arrow-ship');
+    var Bullet = require('components/bullet');
+    var EventedInput = require('models/evented-input');
+    var GameObject = require('models/game-object');
+    var TextDisplay = require('components/text-display');
+
+    return DefineClass(GameObject, {
+        isShop: true,
+        index: 1,
+        headerDef: { message: "Ship Upgrades", position: { x: 50, y: 10 } },
+        menuItems: {
+            health: { message: "+1 Ship Health", position: { x: 90, y: 50 } },
+            rate: { message: "10% faster Firing Rate", position: { x: 90, y: 65 } },
+            damage: { message: "+1 Bullet Damage", position: { x: 90, y: 80 } },
+            guns: { message: "Install wing guns", position: { x: 90, y: 95 } },
+            leave: { message: "Leave Shop", position: { x: 60, y: 110 } }
+        },
+        menuSelectorPositions: [ 49, 64, 79, 94, 109 ],
+        disabledColor: "#777",
+
+        constructor: function (parent, game) {
+            this.game = game;
+            this.bank = game.bank;
+            this.player = game.player;
+
+            this.input = new EventedInput({
+                onUp: this.onUp.bind(this),
+                onDown: this.onDown.bind(this),
+                onSelect: this.onSelect.bind(this)
+            });
+
+            this.super('constructor', arguments);
+        },
+        reset: function () {
+            this.super('reset', arguments);
+
+            this.input.reset();
+            this.isDoneShopping = false;
+            this.selectedMenuItem = 0;
+            this.createMenuText();
+            this.setCosts();
+            this.createSelectorShip();
+
+            this.addChild(this.input);
+        },
+        start: function () {
+            this.input.reset();
+            this.isDoneShopping = false;
+            this.setCosts();
+        },
+        checkIfLevelComplete: function () {
+            return this.isDoneShopping;
+        },
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            this.timeSinceSelected += dtime;
+            if (this.selecting && this.timeSinceSelected > 595) {
+                this.propagateSelection();
+            }
+        },
+
+        createMenuText: function () {
+            this.titleText = new TextDisplay(this, {
+                font: "arcade",
+                message: this.headerDef.message,
+                position: this.headerDef.position,
+                color: this.game.interfaceColor
+            });
+            this.addChild(this.titleText);
+
+            Object.keys(this.menuItems).forEach(function (key) {
+                var item = this.menuItems[ key ];
+
+                item.description = new TextDisplay(this, {
+                    font: "arcade-small",
+                    message: item.message,
+                    position: item.position,
+                    color: this.game.interfaceColor,
+                    isPhysicalEntity: true
+                });
+                this.addChild(item.description);
+
+                item.costText = new TextDisplay(this, {
+                    font: "arcade-small",
+                    message: '',
+                    position: { x: item.position.x - 30, y: item.position.y },
+                    color: this.game.interfaceColor,
+                    isPhysicalEntity: true
+                });
+                this.addChild(item.costText);
+            }.bind(this));
+        },
+        setCosts: function () {
+            var items = this.menuItems;
+            var player = this.player;
+            var bank = this.bank;
+
+            items.health.cost = 10 + player.lifeUpgrades * 10;
+            items.rate.cost = 50 + player.rateUpgrades * 50;
+            items.damage.cost = 100 + player.damageUpgrades * 100;
+            items.guns.cost = player.wingGunsUnlocked ? -1 : 1000;
+
+            items.damage.costText.changeMessage("$" + items.damage.cost);
+            items.health.costText.changeMessage("$" + items.health.cost);
+            items.rate.costText.changeMessage("$" + items.rate.cost);
+            items.guns.costText.changeMessage(player.wingGunsUnlocked ? "--" : "$" + items.guns.cost);
+            items.leave.description.changeMessage(items.leave.message);
+
+            items.health.costText.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
+            items.rate.costText.updateColor(items.rate.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
+            items.damage.costText.updateColor(items.damage.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
+            items.guns.costText.updateColor(items.guns.cost > bank.value || player.wingGunsUnlocked ? this.disabledColor : this.game.interfaceColor);
+        },
+        createSelectorShip: function () {
+            this.selectorShip = new GameObject();
+            this.selectorShip.sprite = new ArrowShip();
+            this.selectorShip.position = { x: 40, y: 0 };
+            this.addChild(this.selectorShip);
+
+            this.updateSelectorPosition();
+        },
+        updateSelectorPosition: function () {
+            this.selectorShip.position.y = this.menuSelectorPositions[ this.selectedMenuItem ];
+        },
+        onUp: function () {
+            if (!this.selecting && this.selectedMenuItem > 0) {
+                this.selectedMenuItem--;
+                this.updateSelectorPosition();
+            }
+        },
+        onDown: function () {
+            if (!this.selecting && this.selectedMenuItem < this.menuSelectorPositions.length - 1) {
+                this.selectedMenuItem++;
+                this.updateSelectorPosition();
+            }
+        },
+        onSelect: function () {
+            if (!this.selecting) {
+                var selection;
+                switch (this.selectedMenuItem) {
+                    case 0: selection = this.menuItems.health; break;
+                    case 1: selection = this.menuItems.rate; break;
+                    case 2: selection = this.menuItems.damage; break;
+                    case 3: selection = this.menuItems.guns; break;
+                    case 4: this.chooseSelected(); return;
+                    default: return;
+                }
+
+                if (this.bank.value >= selection.cost && selection.cost !== -1) {
+                    this.bank.removeMoney(selection.cost);
+                    this.chooseSelected();
+                }
+            }
+        },
+        chooseSelected: function () {
+            this.selecting = true;
+            this.timeSinceSelected = 0;
+
+            var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
+            var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
+
+            this.addChild(new Bullet(this, {
+                team: 2,
+                position: { x: x1, y: y },
+                velocity: { x: 50, y: 0 }
+            }));
+        },
+        propagateSelection: function () {
+            switch (this.selectedMenuItem) {
+                case 0:
+                    this.player.lifeUpgrades++;
+                    this.player.maxLife++;
+                    break;
+
+                case 1: // rate
+                    this.player.rateUpgrades++;
+                    this.player.FIRE_RATE = Math.ceil(this.player.FIRE_RATE * .9);
+                    break;
+
+                case 2: // damage
+                    this.player.damageUpgrades++;
+                    break;
+
+                case 3: // guns
+                    this.player.addWingGuns();
+                    break;
+
+                case 4: // done shopping
+                    this.isDoneShopping = true;
+                    break;
+            }
+
+            this.setCosts();
+            this.selecting = false;
+        }
+    });
+});
+
 DefineModule('models/animation', function (require) {
     return DefineClass({
         finished: false,
@@ -2913,16 +2929,20 @@ DefineModule('models/cell-grid', function (require) {
 DefineModule('models/evented-input', function (require) {
     return DefineClass({
         constructor: function (options) {
-            this.upReleased = false;
-            this.downReleased = false;
-            this.fireReleased = false;
-            this.startReleased = false;
-
             this.onUp = options.onUp || function () {};
             this.onDown = options.onDown || function () {};
             this.onFire = options.onFire || function () {};
             this.onStart = options.onStart || function () {};
             this.onSelect = options.onSelect || function () {};
+
+            this.reset();
+        },
+
+        reset: function () {
+            this.upReleased = false;
+            this.downReleased = false;
+            this.fireReleased = false;
+            this.startReleased = false;
         },
 
         processInput: function (input) {
@@ -3161,7 +3181,7 @@ DefineModule('models/phoenix', function (require) {
             this.lifeMeter = new LifeMeter(this.player, {
                 scale: 2,
                 width: 4,
-                anchor: { right: this.width - 1, bottom: this.height - 7},
+                anchor: { right: this.width - 1, bottom: this.height - 7 },
                 showBorder: true,
                 borderColor: this.interfaceColor
             });
@@ -3193,6 +3213,11 @@ DefineModule('models/phoenix', function (require) {
             this.addChild(this.levelManager);
             this.addChild(this.titleScreen);
             this.addChild(this.pauseInputTracker);
+        },
+        clearBullets: function () {
+            this.children
+                .filter(function (entity) { return entity.type === "bullet" })
+                .forEach(function (bullet) { this.removeChild(bullet) }.bind(this));
         },
         startNewGame: function () {
             this.addChild(this.bank);
@@ -3294,7 +3319,7 @@ DefineModule('models/phoenix', function (require) {
             }
         },
         spawnBullet: function (data) {
-            this.addChild(new Bullet(this,data));
+            this.addChild(new Bullet(this, data));
         },
         enemyDestroyed: function (data) {
             this.comboGauge.addPoints(data.shipValue);
@@ -3994,231 +4019,6 @@ DefineModule('scripts/watch-for-death', function (require) {
     });
 });
 
-DefineModule('ships/arrow-boss', function (require) {
-    var GameObject = require('models/game-object');
-    var shipSprite = require('sprites/arrow-boss');
-    var shipExplosion = require('sprites/animations/ship-explosion');
-    var MuzzleFlash = require('components/muzzle-flash');
-
-    return DefineClass(GameObject, {
-        isPhysicalEntity: true,
-        BULLET_SPEED: 120,
-        damage: 50,
-        team: 1,
-        index: 5,
-
-        reset: function () {
-            this.super('reset');
-
-            this.sprite = shipSprite().rotateRight();
-            this.explosion = shipExplosion;
-            this.guns = this.sprite.meta.guns;
-
-            this.position = { x: 0, y: 0 };
-            this.velocity = { x: 0, y: 0 };
-
-            this.life = 25;
-            this.maxLife = 25;
-        },
-        fire: function (gunIndex) {
-            var gun = this.guns[ gunIndex ];
-
-            var position = {
-                x: this.position.x + gun.x,
-                y: this.position.y + gun.y
-            };
-            var velocity = { x: 0, y: this.BULLET_SPEED };
-
-            this.triggerEvent('spawnBullet', {
-                team: this.team,
-                position: position,
-                velocity: velocity
-            });
-            this.addChild(new MuzzleFlash(this, gun));
-        },
-        applyDamage: function () {
-            this.triggerEvent('enemyHit');
-            this.super('applyDamage', arguments);
-        },
-        destroy: function () {
-            this.triggerEvent('enemyDestroyed', {
-                shipValue: this.maxLife
-            });
-
-            this.super('destroy', arguments);
-        }
-    });
-});
-
-DefineModule('ships/arrow-ship', function (require) {
-    var GameObject = require('models/game-object');
-    var MuzzleFlash = require('components/muzzle-flash');
-    var shipSprite = require('sprites/arrow-ship');
-    var shipExplosion = require('sprites/animations/ship-explosion');
-
-    return DefineClass(GameObject, {
-        isPhysicalEntity: true,
-        BULLET_SPEED: 100,
-        team: 1,
-        index: 5,
-
-        reset: function () {
-            this.super('reset');
-
-            this.sprite = shipSprite().rotateRight();
-            this.explosion = shipExplosion;
-            this.gun = this.sprite.meta.guns[ 0 ];
-
-            this.position = { x: 0, y: 0 };
-            this.velocity = { x: 0, y: 0 };
-
-            this.damage = 5;
-            this.maxLife = 1;
-            this.life = 1;
-        },
-        fire: function () {
-
-            var position = {
-                x: this.position.x + this.gun.x,
-                y: this.position.y + this.gun.y
-            };
-            var velocity = { x: 0, y: this.BULLET_SPEED };
-
-            this.triggerEvent('spawnBullet', {
-                team: this.team,
-                position: position,
-                velocity: velocity
-            });
-            this.addChild(new MuzzleFlash(this, this.gun));
-        },
-        applyDamage: function () {
-            this.triggerEvent('enemyHit');
-            this.super('applyDamage', arguments);
-        },
-        destroy: function () {
-            this.triggerEvent('enemyDestroyed', {
-                shipValue: this.maxLife
-            });
-
-            this.super('destroy', arguments);
-        }
-    });
-});
-
-DefineModule('ships/player-controlled-ship', function (require) {
-    var GameObject = require('models/game-object');
-    var MuzzleFlash = require('components/muzzle-flash');
-    var playerShipSprite = require('sprites/player-ship');
-    var playerShipSpriteWingGuns = require('sprites/player-ship-wing-guns');
-    var shipExplosion = require('sprites/animations/ship-explosion');
-
-    return DefineClass(GameObject, {
-        type: "player",
-        isPhysicalEntity: true,
-        index: 5,
-
-        reset: function () {
-            this.super('reset');
-
-            this.sprite = playerShipSprite().rotateRight();
-            this.explosion = shipExplosion;
-
-            this.position = { x: -100, y: -100 };
-            this.velocity = { x: 0, y: 0 };
-
-            this.life = 10;
-            this.maxLife = 10;
-            this.damageUpgrades = 0;
-            this.lifeUpgrades = 0;
-            this.rateUpgrades = 0;
-            this.wingGunsUnlocked = false;
-            this.SPEED = 50;
-            this.BULLET_SPEED = 100;
-            this.FIRE_RATE = 500;
-
-            this.preventInputControl = true;
-            this.exploding = false;
-            this.team = 0;
-            this.damage = 5;
-            this.timeSinceFired = 0;
-        },
-        refillHealth: function () {
-            this.life = this.maxLife;
-        },
-        addWingGuns: function () {
-            this.wingGunsUnlocked = true;
-            this.sprite = playerShipSpriteWingGuns().rotateRight();
-        },
-        processInput: function (input) {
-            this.super('processInput', arguments);
-            if (this.preventInputControl || this.exploding || this.destroyed) {
-                // ship in a state where input isn't appropriate
-                return;
-            }
-
-            this.velocity.x = input.movementVector.x * this.SPEED;
-            this.velocity.y = input.movementVector.y * this.SPEED;
-
-            this.firing = input.fire;
-        },
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            this.timeSinceFired += dtime;
-            if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
-                this.timeSinceFired = 0;
-
-                this.fire();
-            }
-        },
-        checkBoundaries: function () {
-            if (this.preventInputControl) {
-                // don't check screen boundaries when an external script is controlling the player
-                return;
-            }
-
-            if (this.position.x < 0) {
-                this.position.x = 0;
-            }
-            if (this.position.y < 0) {
-                this.position.y = 0;
-            }
-            if (this.position.x + this.sprite.width > this.parent.width) {
-                this.position.x = this.parent.width - this.sprite.width;
-            }
-            if (this.position.y + this.sprite.height > this.parent.height) {
-                this.position.y = this.parent.height - this.sprite.height;
-            }
-        },
-        fire: function () {
-            this.sprite.meta.guns.forEach(function (gun, index) {
-                this.triggerEvent('spawnBullet', {
-                    team: this.team,
-                    damage: this.damageUpgrades + 1,
-                    velocity: {
-                        x: this.wingGunsUnlocked ? (index - 1) * 10 : 0,
-                        y: -this.BULLET_SPEED
-                    },
-                    position: {
-                        x: this.position.x + gun.x,
-                        y: this.position.y + gun.y
-                    }
-                });
-
-                this.addChild(new MuzzleFlash(this, gun));
-            }.bind(this));
-        },
-
-        applyDamage: function (damage, sourceEntity) {
-            if (damage > 0) {
-                this.triggerEvent('playerHit');
-            }
-
-            this.super('applyDamage', arguments);
-        }
-    });
-});
-
 DefineModule('sprites/arrow-boss', function (require) {
     var Sprite = require('models/sprite');
 
@@ -4328,6 +4128,32 @@ DefineModule('sprites/dagger-ship', function (require) {
             [ n, w, n ]
         ]);
     }
+});
+
+DefineModule('sprites/flying-saucer', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "white";
+        var n = null;
+        return new Sprite([
+                [ n, n, n, w, w, w, w, w, n, n, n ],
+                [ n, n, w, n, n, n, n, n, w, n, n ],
+                [ n, w, n, n, n, n, n, n, n, w, n ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, w, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ n, w, n, n, n, n, n, n, n, w, n ],
+                [ n, n, w, n, n, n, n, n, w, n, n ],
+                [ n, n, n, w, w, w, w, w, n, n, n ]
+            ],
+            {
+                guns: [
+                ]
+            });
+    };
 });
 
 DefineModule('sprites/player-ship-wing-guns', function (require) {
@@ -4685,6 +4511,262 @@ DefineModule('views/webgl-renderer', function (require) {
             this.frames.forEach(function (frame) {
                 frame.setFillColor(fillColor);
             });
+        }
+    });
+});
+
+DefineModule('ships/arrow-boss', function (require) {
+    var GameObject = require('models/game-object');
+    var shipSprite = require('sprites/arrow-boss');
+    var shipExplosion = require('sprites/animations/ship-explosion');
+    var MuzzleFlash = require('components/muzzle-flash');
+
+    return DefineClass(GameObject, {
+        isPhysicalEntity: true,
+        BULLET_SPEED: 120,
+        team: 1,
+        index: 5,
+
+        constructor: function (parent, difficultyMultiplier) {
+            this.difficultyMultiplier = difficultyMultiplier;
+            this.super('constructor', arguments);
+        },
+        reset: function () {
+            this.super('reset');
+
+            this.sprite = shipSprite().rotateRight();
+            this.explosion = shipExplosion;
+            this.guns = this.sprite.meta.guns;
+
+            this.position = { x: 0, y: 0 };
+            this.velocity = { x: 0, y: 0 };
+
+            this.damage = 50 * this.difficultyMultiplier;
+            this.life = 25 * this.difficultyMultiplier;
+            this.maxLife = 25 * this.difficultyMultiplier;
+        },
+        fire: function (gunIndex) {
+            var gun = this.guns[ gunIndex ];
+
+            var position = {
+                x: this.position.x + gun.x,
+                y: this.position.y + gun.y
+            };
+            var velocity = { x: 0, y: this.BULLET_SPEED };
+
+            this.triggerEvent('spawnBullet', {
+                team: this.team,
+                position: position,
+                velocity: velocity,
+                damage: this.difficultyMultiplier
+            });
+            this.addChild(new MuzzleFlash(this, gun));
+        },
+        applyDamage: function () {
+            this.triggerEvent('enemyHit');
+            this.super('applyDamage', arguments);
+        },
+        destroy: function () {
+            this.triggerEvent('enemyDestroyed', {
+                shipValue: this.maxLife
+            });
+
+            this.super('destroy', arguments);
+        }
+    });
+});
+
+DefineModule('ships/arrow-ship', function (require) {
+    var GameObject = require('models/game-object');
+    var MuzzleFlash = require('components/muzzle-flash');
+    var shipSprite = require('sprites/arrow-ship');
+    var shipExplosion = require('sprites/animations/ship-explosion');
+
+    return DefineClass(GameObject, {
+        isPhysicalEntity: true,
+        BULLET_SPEED: 100,
+        team: 1,
+        index: 5,
+
+        constructor: function (parent, difficultyMultiplier) {
+            this.difficultyMultiplier = difficultyMultiplier;
+            this.super('constructor', arguments);
+        },
+        reset: function () {
+            this.super('reset');
+
+            this.sprite = shipSprite().rotateRight();
+            this.explosion = shipExplosion;
+            this.gun = this.sprite.meta.guns[ 0 ];
+
+            this.position = { x: 0, y: 0 };
+            this.velocity = { x: 0, y: 0 };
+
+            this.damage = 5 * this.difficultyMultiplier;
+            this.maxLife = this.difficultyMultiplier;
+            this.life = this.difficultyMultiplier;
+        },
+        fire: function () {
+
+            var position = {
+                x: this.position.x + this.gun.x,
+                y: this.position.y + this.gun.y
+            };
+            var velocity = { x: 0, y: this.BULLET_SPEED };
+
+            this.triggerEvent('spawnBullet', {
+                team: this.team,
+                position: position,
+                velocity: velocity,
+                damage: this.difficultyMultiplier
+            });
+            this.addChild(new MuzzleFlash(this, this.gun));
+        },
+        applyDamage: function () {
+            this.triggerEvent('enemyHit');
+            this.super('applyDamage', arguments);
+        },
+        destroy: function () {
+            this.triggerEvent('enemyDestroyed', {
+                shipValue: this.maxLife
+            });
+
+            this.super('destroy', arguments);
+        }
+    });
+});
+
+DefineModule('ships/flying-saucer', function (require) {
+    var GameObject = require('models/game-object');
+
+    return DefineClass(GameObject, {
+        isPhysicalEntity: true,
+        BULLET_SPEED: 100,
+        team: 1,
+        index: 5,
+
+        reset: function () {
+            this.super('reset');
+        }
+    });
+});
+
+DefineModule('ships/player-controlled-ship', function (require) {
+    var GameObject = require('models/game-object');
+    var MuzzleFlash = require('components/muzzle-flash');
+    var playerShipSprite = require('sprites/player-ship');
+    var playerShipSpriteWingGuns = require('sprites/player-ship-wing-guns');
+    var shipExplosion = require('sprites/animations/ship-explosion');
+
+    return DefineClass(GameObject, {
+        type: "player",
+        isPhysicalEntity: true,
+        index: 5,
+
+        reset: function () {
+            this.super('reset');
+
+            this.sprite = playerShipSprite().rotateRight();
+            this.explosion = shipExplosion;
+
+            this.position = { x: -100, y: -100 };
+            this.velocity = { x: 0, y: 0 };
+
+            this.life = 10;
+            this.maxLife = 10;
+            this.damageUpgrades = 0;
+            this.lifeUpgrades = 0;
+            this.rateUpgrades = 0;
+            this.wingGunsUnlocked = false;
+            this.SPEED = 50;
+            this.BULLET_SPEED = 100;
+            this.FIRE_RATE = 500;
+
+            this.preventInputControl = true;
+            this.exploding = false;
+            this.team = 0;
+            this.damage = 5;
+            this.timeSinceFired = 0;
+        },
+        refillHealth: function () {
+            this.life = this.maxLife;
+        },
+        addWingGuns: function () {
+            this.wingGunsUnlocked = true;
+            this.sprite = playerShipSpriteWingGuns().rotateRight();
+        },
+        processInput: function (input) {
+            this.super('processInput', arguments);
+            if (this.preventInputControl || this.exploding || this.destroyed) {
+                // ship in a state where input isn't appropriate
+                return;
+            }
+
+            this.velocity.x = input.movementVector.x * this.SPEED;
+            this.velocity.y = input.movementVector.y * this.SPEED;
+
+            this.firing = input.fire;
+        },
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            this.timeSinceFired += dtime;
+            if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
+                this.timeSinceFired = 0;
+
+                this.fire();
+            }
+        },
+        hideOffscreen: function () {
+            this.preventInputControl = true;
+            this.position.x = -100;
+            this.velocity.x = 0;
+            this.velocity.y = 0;
+        },
+        checkBoundaries: function () {
+            if (this.preventInputControl) {
+                // don't check screen boundaries when an external script is controlling the player
+                return;
+            }
+
+            if (this.position.x < 0) {
+                this.position.x = 0;
+            }
+            if (this.position.y < 0) {
+                this.position.y = 0;
+            }
+            if (this.position.x + this.sprite.width > this.parent.width) {
+                this.position.x = this.parent.width - this.sprite.width;
+            }
+            if (this.position.y + this.sprite.height > this.parent.height) {
+                this.position.y = this.parent.height - this.sprite.height;
+            }
+        },
+        fire: function () {
+            this.sprite.meta.guns.forEach(function (gun, index) {
+                this.triggerEvent('spawnBullet', {
+                    team: this.team,
+                    damage: this.damageUpgrades + 1,
+                    velocity: {
+                        x: this.wingGunsUnlocked ? (index - 1) * 10 : 0,
+                        y: -this.BULLET_SPEED
+                    },
+                    position: {
+                        x: this.position.x + gun.x,
+                        y: this.position.y + gun.y
+                    }
+                });
+
+                this.addChild(new MuzzleFlash(this, gun));
+            }.bind(this));
+        },
+
+        applyDamage: function (damage, sourceEntity) {
+            if (damage > 0) {
+                this.triggerEvent('playerHit');
+            }
+
+            this.super('applyDamage', arguments);
         }
     });
 });
