@@ -1,8 +1,9 @@
 DefineModule('levels/level-group-02', function (require) {
     var GameObject = require('models/game-object');
+    var FlyingSaucer = require('ships/flying-saucer');
 
     return DefineClass(GameObject, {
-        constructor: function (parent, game, groupCount, levelName) {
+        constructor: function (parent, game, difficultyMultiplier, shipCount, levelName) {
             this.super('constructor', arguments);
 
             if (groupCount === "boss") {
