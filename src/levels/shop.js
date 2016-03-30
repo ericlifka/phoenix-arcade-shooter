@@ -134,6 +134,24 @@ DefineModule('levels/shop', function (require) {
         },
         propagateSelection: function () {
             this.selecting = false;
+
+            switch(this.selectedMenuItem) {
+                case 0: // health
+                    this.player.lifeUpgrades++;
+                    this.player.maxLife++;
+                    break;
+                case 1: // rate
+                    this.player.rateUpgrades++;
+                    this.player.FIRE_RATE = Math.ceil(this.player.fireRate * .9);
+                    break;
+                case 2: // damage
+                    this.player.damageUpgrades++;
+                    break;
+                case 3: // guns
+                    this.player.wingGunsUnlocked = true;
+                    break;
+            }
+
             this.setCosts();
         }
     });
