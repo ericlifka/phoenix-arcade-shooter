@@ -45,9 +45,9 @@ DefineModule('models/phoenix', function (require) {
                 color: this.interfaceColor
             });
             this.lifeMeter = new LifeMeter(this.player, {
-                position: { x: this.width - 7, y: this.height - 69 },
-                length: 60,
+                scale: 2,
                 width: 4,
+                position: { x: this.width - 7, y: 1 },
                 showBorder: true,
                 borderColor: this.interfaceColor
             });

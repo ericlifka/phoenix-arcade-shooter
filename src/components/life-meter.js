@@ -16,6 +16,7 @@ DefineModule('components/life-meter', function (require) {
             this.horizontal = !!options.horizontal;
             this.length = options.length || 10;
             this.width = options.width || 1;
+            this.scale = options.scale;
             this.showBorder = !!options.showBorder;
             this.borderColor = options.borderColor || "#ffffff";
         },
@@ -24,6 +25,15 @@ DefineModule('components/life-meter', function (require) {
             if (this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife) {
                 this.currentLife = this.entity.life;
                 this.maxLife = this.entity.maxLife;
+
+                if (this.scale) {
+                    this.length = this.maxLife * this.scale;
+                    if (this.length > 70) {
+                        // this just applies to the player's health if they get so many upgrades
+                        // it would overflow the screen, manually set lengths will always honor them.
+                        this.length = 70;
+                    }
+                }
 
                 this.redrawMeter();
             }
