@@ -97,7 +97,7 @@ DefineModule('levels/shop', function (require) {
             items.health.cost = 10 + player.lifeUpgrades * 10;
             items.rate.cost = 50 + player.rateUpgrades * 50;
             items.damage.cost = 100 + player.damageUpgrades * 100;
-            items.guns.cost = 1000;
+            items.guns.cost = player.wingGunsUnlocked ? -1 : 1000;
 
             items.damage.costText.changeMessage("$" + items.damage.cost);
             items.health.costText.changeMessage("$" + items.health.cost);
@@ -156,7 +156,7 @@ DefineModule('levels/shop', function (require) {
                     default: return;
                 }
 
-                if (this.bank.value >= selection.cost) {
+                if (this.bank.value >= selection.cost && selection.cost !== -1) {
                     this.bank.removeMoney(selection.cost);
                     this.chooseSelected();
                 }
