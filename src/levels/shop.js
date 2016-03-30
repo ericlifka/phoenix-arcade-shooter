@@ -10,7 +10,7 @@ DefineModule('levels/shop', function (require) {
             health: { message: "+1 Ship Health", position: { x: 90, y: 50 } },
             rate: { message: "10% faster Firing Rate", position: { x: 90, y: 65 } },
             damage: { message: "+1 Bullet Damage", position: { x: 90, y: 80 } },
-            guns: { message: "Add wing guns", position: { x: 90, y: 95 } }
+            guns: { message: "Install wing guns", position: { x: 90, y: 95 } }
         },
 
         constructor: function (parent, game) {
@@ -65,9 +65,9 @@ DefineModule('levels/shop', function (require) {
             }.bind(this));
         },
         setCosts: function () {
-            this.menuItems.damage.cost = (this.player.damageUpgrades + 1) * 200;
-            this.menuItems.health.cost = (this.player.lifeUpgrades + 1) * 50;
-            this.menuItems.rate.cost  = (this.player.rateUpgrades + 1) * 100;
+            this.menuItems.health.cost = 10 + this.player.lifeUpgrades * 10;
+            this.menuItems.rate.cost  = 50 + this.player.rateUpgrades * 50;
+            this.menuItems.damage.cost = 100 + this.player.damageUpgrades * 100;
             this.menuItems.guns.cost = 1000;
 
             this.menuItems.damage.costText.changeMessage("$" + this.menuItems.damage.cost);
