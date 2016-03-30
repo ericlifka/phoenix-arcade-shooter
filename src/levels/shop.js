@@ -35,7 +35,7 @@ DefineModule('levels/shop', function (require) {
                 item.costText = new TextDisplay(this, {
                     font: "arcade-small",
                     message: '',
-                    position: { x: item.position.x - 20, y: item.position.y },
+                    position: { x: item.position.x - 30, y: item.position.y },
                     color: this.game.interfaceColor
                 });
             }.bind(this));
@@ -63,9 +63,9 @@ DefineModule('levels/shop', function (require) {
         },
 
         setCosts: function () {
-            this.menuItems.damage.cost = this.player.damageUpgrades * 200;
-            this.menuItems.health.cost = this.player.lifeUpgrades * 50;
-            this.menuItems.rate.cost  = this.player.rateUpgrades * 100;
+            this.menuItems.damage.cost = (this.player.damageUpgrades + 1) * 200;
+            this.menuItems.health.cost = (this.player.lifeUpgrades + 1) * 50;
+            this.menuItems.rate.cost  = (this.player.rateUpgrades + 1) * 100;
             this.menuItems.guns.cost = 1000;
 
             this.menuItems.damage.costText.changeMessage("$" + this.menuItems.damage.cost);
