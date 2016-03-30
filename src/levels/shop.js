@@ -5,6 +5,7 @@ DefineModule('levels/shop', function (require) {
     var TextDisplay = require('components/text-display');
 
     return DefineClass(GameObject, {
+        isShop: true,
         index: 1,
         headerDef: { message: "Ship Upgrades", position: { x: 50, y: 10 } },
         menuItems: {

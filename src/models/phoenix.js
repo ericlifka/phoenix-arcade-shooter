@@ -108,7 +108,7 @@ DefineModule('models/phoenix', function (require) {
             }
         },
         pause: function () {
-            if (this.levelManager.running && !this.paused && !this.gameOver) {
+            if (this.levelManager.running && !this.paused && !this.gameOver && !this.levelManager.currentLevel.isShop) {
                 this.paused = true;
                 this.addChild(this.pausedText);
             }
