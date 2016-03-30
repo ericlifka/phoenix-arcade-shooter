@@ -24,11 +24,11 @@ DefineModule('levels/level-manager', function (require) {
             this.shop = new Shop(this, this.game);
 
             this.levels = [
-                this.shop,
                 new Level_group_01(this, this.game, 1, "LEVEL 01"),
                 new Level_group_01(this, this.game, 2),
                 new Level_group_01(this, this.game, 3),
-                new Level_group_01(this, this.game, "boss")
+                new Level_group_01(this, this.game, "boss"),
+                this.shop
             ];
         },
 
