@@ -4,7 +4,6 @@ DefineModule('levels/level-group-01', function (require) {
     var ChainGunFire = require('scripts/chain-gun-fire');
     var EnemyShip = require('ships/arrow-ship');
     var FireSingleGunRandomRate = require('scripts/fire-single-gun-random-rate');
-    var FlyPlayerInFromBottom = require('scripts/fly-player-in-from-bottom');
     var GameObject = require('models/game-object');
     var LifeMeter = require('components/life-meter');
     var MoneyDrop = require('components/money-drop');
@@ -53,7 +52,6 @@ DefineModule('levels/level-group-01', function (require) {
 
             if (this.levelName) {
                 this.scripts.push(new Banner(this, this.levelName, 2000));
-                this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
             }
 
             this.ships.forEach(function (ship) {

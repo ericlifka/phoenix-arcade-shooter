@@ -34,6 +34,9 @@ DefineModule('ships/player-controlled-ship', function (require) {
             this.damage = 5;
             this.timeSinceFired = 0;
         },
+        refillHealth: function () {
+            this.life = this.maxLife;
+        },
         processInput: function (input) {
             this.super('processInput', arguments);
             if (this.preventInputControl || this.exploding || this.destroyed) {

@@ -26,7 +26,7 @@ DefineModule('scripts/fly-player-in-from-bottom', function (require) {
 
             if (this.player.position.y < this.game.height - this.player.sprite.height - 2) {
                 this.player.preventInputControl = false;
-                this.parent.removeChild(this);
+                this.destroy();
             }
         }
     });

@@ -1,13 +1,15 @@
 DefineModule('levels/level-manager', function (require) {
+    var FlyPlayerInFromBottom = require('scripts/fly-player-in-from-bottom');
     var GameObject = require('models/game-object');
     var Level_group_01 = require('levels/level-group-01');
     var Shop = require('levels/shop');
 
     return DefineClass(GameObject, {
         constructor: function (game) {
+            this.game = game;
             this.width = game.width;
             this.height = game.height;
-            this.game = game;
+            this.player = game.player;
 
             this.super('constructor', arguments);
         },
@@ -46,6 +48,11 @@ DefineModule('levels/level-manager', function (require) {
             this.currentLevel = this.levels[ this.levelIndex ];
 
             if (this.currentLevel) {
+                if (this.currentLevel.levelName) { // kinda derp way of knowing where the level blocks start
+                    this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
+                    this.player.refillHealth();
+                }
+
                 this.addChild(this.currentLevel);
                 this.currentLevel.start();
             } else {
