@@ -48,16 +48,16 @@ DefineModule('screens/title-screen', function (require) {
         },
 
         createShipSelectors: function () {
-            this.selectorLeft = new GameObject();
+            this.selectorShip = new GameObject();
             this.selectorRight = new GameObject();
 
-            this.selectorLeft.sprite = new ArrowShip();
+            this.selectorShip.sprite = new ArrowShip();
             this.selectorRight.sprite = new ArrowShip().invertX();
 
-            this.selectorLeft.position = { x: 70, y: 0 };
+            this.selectorShip.position = { x: 70, y: 0 };
             this.selectorRight.position = { x: 115, y: 0 };
 
-            this.addChild(this.selectorLeft);
+            this.addChild(this.selectorShip);
             this.addChild(this.selectorRight);
 
             this.updateSelectorPosition();
@@ -95,7 +95,7 @@ DefineModule('screens/title-screen', function (require) {
         updateSelectorPosition: function () {
             var selectedY = this.menuItems[ this.selectedMenuItem ].position.y;
 
-            this.selectorLeft.position.y = selectedY;
+            this.selectorShip.position.y = selectedY;
             this.selectorRight.position.y = selectedY;
         },
 
@@ -103,9 +103,9 @@ DefineModule('screens/title-screen', function (require) {
             this.selecting = true;
             this.timeSinceSelected = 0;
 
-            var x1 = this.selectorLeft.position.x + this.selectorLeft.sprite.width;
+            var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
             var x2 = this.selectorRight.position.x;
-            var y = this.selectorLeft.position.y + Math.floor(this.selectorLeft.sprite.height / 2);
+            var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
 
             this.addChild(new Bullet(this, 2, { x: x1, y: y }, { x: 50, y: 0 }));
             this.addChild(new Bullet(this, 3, { x: x2, y: y }, { x: -50, y: 0 }));

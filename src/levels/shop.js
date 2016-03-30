@@ -1,4 +1,5 @@
 DefineModule('levels/shop', function (require) {
+    var ArrowShip = require('sprites/arrow-ship');
     var GameObject = require('models/game-object');
     var TextDisplay = require('components/text-display');
 
@@ -17,42 +18,14 @@ DefineModule('levels/shop', function (require) {
             this.bank = game.bank;
             this.player = game.player;
 
-            this.titleText = new TextDisplay(this, {
-                font: "arcade",
-                message: this.headerDef.message,
-                position: this.headerDef.position,
-                color: this.game.interfaceColor
-            });
-
-            Object.keys(this.menuItems).forEach(function (key) {
-                var item = this.menuItems[ key ];
-                item.description = new TextDisplay(this, {
-                    font: "arcade-small",
-                    message: item.message,
-                    position: item.position,
-                    color: this.game.interfaceColor
-                });
-                item.costText = new TextDisplay(this, {
-                    font: "arcade-small",
-                    message: '',
-                    position: { x: item.position.x - 30, y: item.position.y },
-                    color: this.game.interfaceColor
-                });
-            }.bind(this));
-
-            this.setCosts();
-
             this.super('constructor', arguments);
         },
         reset: function () {
             this.super('reset', arguments);
 
-            this.addChild(this.titleText);
-            Object.keys(this.menuItems).forEach(function (key) {
-                var item = this.menuItems[ key ];
-                this.addChild(item.description);
-                this.addChild(item.costText);
-            }.bind(this));
+            this.createMenuText();
+            this.setCosts();
+            this.createSelectorShip();
         },
         start: function () {
             this.player.preventInputControl = true;
@@ -62,6 +35,35 @@ DefineModule('levels/shop', function (require) {
             return false;
         },
 
+        createMenuText: function () {
+            this.titleText = new TextDisplay(this, {
+                font: "arcade",
+                message: this.headerDef.message,
+                position: this.headerDef.position,
+                color: this.game.interfaceColor
+            });
+            this.addChild(this.titleText);
+
+            Object.keys(this.menuItems).forEach(function (key) {
+                var item = this.menuItems[ key ];
+
+                item.description = new TextDisplay(this, {
+                    font: "arcade-small",
+                    message: item.message,
+                    position: item.position,
+                    color: this.game.interfaceColor
+                });
+                this.addChild(item.description);
+
+                item.costText = new TextDisplay(this, {
+                    font: "arcade-small",
+                    message: '',
+                    position: { x: item.position.x - 30, y: item.position.y },
+                    color: this.game.interfaceColor
+                });
+                this.addChild(item.costText);
+            }.bind(this));
+        },
         setCosts: function () {
             this.menuItems.damage.cost = (this.player.damageUpgrades + 1) * 200;
             this.menuItems.health.cost = (this.player.lifeUpgrades + 1) * 50;
@@ -72,6 +74,14 @@ DefineModule('levels/shop', function (require) {
             this.menuItems.health.costText.changeMessage("$" + this.menuItems.health.cost);
             this.menuItems.rate.costText.changeMessage("$" + this.menuItems.rate.cost);
             this.menuItems.guns.costText.changeMessage(this.player.wingGunsUnlocked ? "--" : "$" + this.menuItems.guns.cost);
+        },
+        createSelectorShip: function () {
+            this.selectorShip = new GameObject();
+            this.selectorShip.sprite = new ArrowShip();
+            this.selectorShip.position = { x: 48, y: 49 };
+            this.addChild(this.selectorShip);
+
+            //this.updateSelectorPosition();
         }
     });
 });
