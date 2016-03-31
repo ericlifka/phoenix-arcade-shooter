@@ -2802,17 +2802,17 @@ DefineModule('levels/shop', function (require) {
                     case 1: selection = this.menuItems.rate; break;
                     case 2: selection = this.menuItems.damage; break;
                     case 3: selection = this.menuItems.guns; break;
-                    case 4: this.chooseSelected(); return;
+                    case 4: this.startGame(); return;
                     default: return;
                 }
 
                 if (this.bank.value >= selection.cost && selection.cost !== -1) {
                     this.bank.removeMoney(selection.cost);
-                    this.chooseSelected();
+                    this.startGame();
                 }
             }
         },
-        chooseSelected: function () {
+        startGame: function () {
             this.selecting = true;
             this.timeSinceSelected = 0;
 
@@ -3129,6 +3129,7 @@ DefineModule('models/phoenix', function (require) {
     var Collisions = require('helpers/collisions');
     var ComboGauge = require('components/combo-gauge');
     var ControlsScreen = require('screens/controls-description');
+    var EmbeddedTitleScreen = require('screens/embedded-title-screen');
     var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
     var GameOverScreen = require('screens/game-over-screen');
@@ -3143,12 +3144,17 @@ DefineModule('models/phoenix', function (require) {
         FILL_COLOR: "#000031",
         interfaceColor: "#ffd",
 
-        constructor: function (gameDimensions) {
-            this.width = gameDimensions.width;
-            this.height = gameDimensions.height;
+        constructor: function (options) {
+            this.embedded = !!options.embedded;
+            this.width = options.width;
+            this.height = options.height;
+
+            //this.titleScreen = this.embedded ?
+            //    new EmbeddedTitleScreen(this) :
+            //    new TitleScreen(this);
+            this.titleScreen = new EmbeddedTitleScreen(this);
 
             this.controlsScreen = new ControlsScreen(this);
-            this.titleScreen = new TitleScreen(this);
             this.gameOverScreen = new GameOverScreen(this);
             this.player = new PlayerShip(this);
             this.inputInterpreter = new InputInterpreter();
@@ -3687,7 +3693,7 @@ DefineModule('screens/title-screen', function (require) {
             this.timeSinceSelected = 0;
             this.selecting = false;
 
-            this.createTextMenu();
+            this.addDisplayText();
             this.createShipSelectors();
 
             this.addChild(new EventedInput({
@@ -3697,7 +3703,7 @@ DefineModule('screens/title-screen', function (require) {
             }));
         },
 
-        createTextMenu: function () {
+        addDisplayText: function () {
             this.addChild(new TextDisplay(this, {
                 font: 'phoenix',
                 message: this.headerDef.message,
@@ -3755,7 +3761,7 @@ DefineModule('screens/title-screen', function (require) {
 
         onSelect: function () {
             if (!this.selecting) {
-                this.chooseSelected();
+                this.startGame();
             }
         },
 
@@ -3766,7 +3772,7 @@ DefineModule('screens/title-screen', function (require) {
             this.selectorRight.position.y = selectedY;
         },
 
-        chooseSelected: function () {
+        startGame: function () {
             this.selecting = true;
             this.timeSinceSelected = 0;
 
@@ -3800,220 +3806,6 @@ DefineModule('screens/title-screen', function (require) {
                     console.error('Unsupported menu option');
             }
 
-        }
-    });
-});
-
-DefineModule('scripts/chain-gun-fire', function (require) {
-    var GameObject = require('models/game-object');
-    var Random = require('helpers/random');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, ship, options) {
-            this.super('constructor', arguments);
-            options = options || {};
-
-            this.ship = ship;
-            this.gunIndex = options.gunIndex || 0;
-            this.fireRate = options.fireRate || 150;
-            this.burstSize = options.burstSize || 5;
-            this.thresholdMin = options.thresholdMin || 2000;
-            this.thresholdMax = options.thresholdMax || 6000;
-        },
-
-        start: function () {
-            this.resetTimer();
-            this.threshold += this.thresholdMax;
-        },
-
-        update: function (dtime) {
-            if (this.ship.destroyed) {
-                this.destroy();
-            }
-
-            this.elapsed += dtime;
-
-            if (this.firing) {
-
-                if (this.elapsed > this.fireRate) {
-                    this.elapsed -= this.fireRate;
-                    this.burstCount++;
-                    this.ship.fire(this.gunIndex);
-
-                    if (this.burstCount > this.burstSize) {
-                        this.firing = false;
-                        this.resetTimer();
-                    }
-                }
-
-            }
-            else {
-
-                if (this.elapsed > this.threshold) {
-                    this.firing = true;
-                    this.elapsed = 0;
-                    this.burstCount = 0;
-                }
-
-            }
-        },
-
-        resetTimer: function () {
-            this.elapsed = 0;
-            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
-        }
-    });
-});
-
-DefineModule('scripts/fire-single-gun-random-rate', function (require) {
-    var GameObject = require('models/game-object');
-    var Random = require('helpers/random');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, ship, options) {
-            this.super('constructor', arguments);
-            options = options || {};
-
-            this.ship = ship;
-            this.gunIndex = options.gunIndex || 0;
-            this.thresholdMin = options.thresholdMin || 1000;
-            this.thresholdMax = options.thresholdMax || 3000;
-        },
-
-        start: function () {
-            this.resetTimer();
-            this.threshold += this.thresholdMax;
-        },
-
-        update: function (dtime) {
-            if (this.ship.destroyed) {
-                this.destroy();
-            }
-
-            this.elapsed += dtime;
-
-            if (this.elapsed > this.threshold) {
-                this.resetTimer();
-                this.ship.fire(this.gunIndex);
-            }
-        },
-
-        resetTimer: function () {
-            this.elapsed = 0;
-            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
-        }
-    });
-});
-
-DefineModule('scripts/fly-player-in-from-bottom', function (require) {
-    var GameObject = require('models/game-object');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, game) {
-            this.super('constructor', arguments);
-
-            this.game = game;
-            this.player = game.player;
-        },
-        start: function () {
-            this.player.preventInputControl = true;
-
-            var position = this.player.position;
-            var velocity = this.player.velocity;
-
-            position.x = Math.floor(this.game.width / 2 - this.player.sprite.width / 2);
-            position.y = this.game.height + 30;
-            velocity.x = 0;
-            velocity.y = -this.player.SPEED / 5;
-
-            return this;
-        },
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            if (this.player.position.y < this.game.height - this.player.sprite.height - 2) {
-                this.player.preventInputControl = false;
-                this.destroy();
-            }
-        }
-    });
-});
-
-DefineModule('scripts/move-object-to-point', function (require) {
-    var GameObject = require('models/game-object');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, object, targetPoint, timeDelta) {
-            this.super('constructor', arguments);
-
-            this.object = object;
-            this.target = targetPoint;
-            this.delta = timeDelta;
-        },
-        start: function () {
-            var current = this.object.position;
-
-            var xDiff = this.target.x - current.x;
-            var yDiff = this.target.y - current.y;
-
-            this.object.velocity.x = xDiff / this.delta;
-            this.object.velocity.y = yDiff / this.delta;
-
-            this.xPositive = xDiff > 0;
-            this.yPositive = yDiff > 0;
-        },
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            if (this.metXThreshold() && this.metYThreshold()) {
-                this.object.velocity.x = 0;
-                this.object.velocity.y = 0;
-
-                this.object.position.x = this.target.x;
-                this.object.position.y = this.target.y;
-
-                this.parent.removeChild(this);
-            }
-        },
-
-        metXThreshold: function () {
-            return (
-                this.xPositive && this.object.position.x >= this.target.x ||
-                !this.xPositive && this.object.position.x <= this.target.x
-            );
-        },
-
-        metYThreshold: function () {
-            return (
-                this.yPositive && this.object.position.y >= this.target.y ||
-                !this.yPositive && this.object.position.y <= this.target.y
-            );
-        }
-    });
-});
-
-DefineModule('scripts/watch-for-death', function (require) {
-    var GameObject = require('models/game-object');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, entity, callback) {
-            this.super('constructor', arguments);
-
-            this.entity = entity;
-            this.callback = callback;
-            this.started = false;
-        },
-
-        update: function () {
-            if (this.entity.destroyed && this.started) {
-                this.started = false;
-                this.callback();
-                this.destroy();
-            }
-        },
-
-        start: function () {
-            this.started = true;
         }
     });
 });
@@ -4274,193 +4066,218 @@ DefineModule('ships/player-controlled-ship', function (require) {
     });
 });
 
-DefineModule('sprites/arrow-boss', function (require) {
-    var Sprite = require('models/sprite');
+DefineModule('scripts/chain-gun-fire', function (require) {
+    var GameObject = require('models/game-object');
+    var Random = require('helpers/random');
 
-    return function () {
-        var w1 = "#ffffff";
-        var w2 = "#cccccc";
-        var g1 = "#aaaaaa";
-        var g2 = "#888888";
-        var g3 = "#666666";
-        var g4 = "#222222";
-        var nn = null;
-        return new Sprite([
-                [ g3, nn, nn, nn, nn, nn, nn, nn, g3, nn, nn, nn, nn, nn, nn, nn, g3 ],
-                [ g2, g2, nn, nn, nn, nn, g2, g2, w2, g2, g2, nn, nn, nn, nn, g2, g2 ],
-                [ nn, g2, g1, nn, g1, g1, w2, w2, w2, w2, w2, g1, g1, nn, g1, g2, nn ],
-                [ nn, g1, g1, g1, g1, w2, w2, w2, g3, w2, w2, w2, g1, g1, g1, g1, nn ],
-                [ nn, nn, w2, g1, w2, w1, w2, g3, g4, g3, w2, w1, w2, g1, w2, nn, nn ],
-                [ nn, nn, w2, w1, w2, w1, w1, w2, g3, w2, w1, w1, w2, w1, w2, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, w1, w1, w2, w1, w1, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, nn, w1, w1, w1, nn, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ],
-                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ]
-            ],
-            {
-                guns: [
-                    { x: 3, y: 8 },
-                    { x: 8, y: 10 },
-                    { x: 13, y: 8 }
-                ]
-            });
-    };
+    return DefineClass(GameObject, {
+        constructor: function (parent, ship, options) {
+            this.super('constructor', arguments);
+            options = options || {};
+
+            this.ship = ship;
+            this.gunIndex = options.gunIndex || 0;
+            this.fireRate = options.fireRate || 150;
+            this.burstSize = options.burstSize || 5;
+            this.thresholdMin = options.thresholdMin || 2000;
+            this.thresholdMax = options.thresholdMax || 6000;
+        },
+
+        start: function () {
+            this.resetTimer();
+            this.threshold += this.thresholdMax;
+        },
+
+        update: function (dtime) {
+            if (this.ship.destroyed) {
+                this.destroy();
+            }
+
+            this.elapsed += dtime;
+
+            if (this.firing) {
+
+                if (this.elapsed > this.fireRate) {
+                    this.elapsed -= this.fireRate;
+                    this.burstCount++;
+                    this.ship.fire(this.gunIndex);
+
+                    if (this.burstCount > this.burstSize) {
+                        this.firing = false;
+                        this.resetTimer();
+                    }
+                }
+
+            }
+            else {
+
+                if (this.elapsed > this.threshold) {
+                    this.firing = true;
+                    this.elapsed = 0;
+                    this.burstCount = 0;
+                }
+
+            }
+        },
+
+        resetTimer: function () {
+            this.elapsed = 0;
+            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
+        }
+    });
 });
 
-DefineModule('sprites/arrow-ship', function (require) {
-    var Sprite = require('models/sprite');
+DefineModule('scripts/fire-single-gun-random-rate', function (require) {
+    var GameObject = require('models/game-object');
+    var Random = require('helpers/random');
 
-    return function () {
-        var w1 = "#ffffff";
-        var w2 = "#cccccc";
-        var g1 = "#aaaaaa";
-        var g2 = "#888888";
-        var g3 = "#666666";
-        var g4 = "#222222";
-        var nn = null;
-        return new Sprite([
-                [ g3, nn, nn, nn, nn, nn, g3 ],
-                [ g2, g2, nn, nn, nn, g2, g2 ],
-                [ nn, g2, g1, nn, g1, g2, nn ],
-                [ nn, g1, g1, w1, g1, g1, nn ],
-                [ nn, nn, w2, g4, w2, nn, nn ],
-                [ nn, nn, w2, w1, w2, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, nn ]
-            ],
-            {
-                guns: [
-                    { x: 3, y: 7 }
-                ]
-            });
-    };
+    return DefineClass(GameObject, {
+        constructor: function (parent, ship, options) {
+            this.super('constructor', arguments);
+            options = options || {};
+
+            this.ship = ship;
+            this.gunIndex = options.gunIndex || 0;
+            this.thresholdMin = options.thresholdMin || 1000;
+            this.thresholdMax = options.thresholdMax || 3000;
+        },
+
+        start: function () {
+            this.resetTimer();
+            this.threshold += this.thresholdMax;
+        },
+
+        update: function (dtime) {
+            if (this.ship.destroyed) {
+                this.destroy();
+            }
+
+            this.elapsed += dtime;
+
+            if (this.elapsed > this.threshold) {
+                this.resetTimer();
+                this.ship.fire(this.gunIndex);
+            }
+        },
+
+        resetTimer: function () {
+            this.elapsed = 0;
+            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
+        }
+    });
 });
 
-DefineModule('sprites/bullet', function (require) {
-    var Sprite = require('models/sprite');
+DefineModule('scripts/fly-player-in-from-bottom', function (require) {
+    var GameObject = require('models/game-object');
 
-    return function () {
-        return new Sprite([
-            [ "white", "white" ]
-        ]);
-    }
+    return DefineClass(GameObject, {
+        constructor: function (parent, game) {
+            this.super('constructor', arguments);
+
+            this.game = game;
+            this.player = game.player;
+        },
+        start: function () {
+            this.player.preventInputControl = true;
+
+            var position = this.player.position;
+            var velocity = this.player.velocity;
+
+            position.x = Math.floor(this.game.width / 2 - this.player.sprite.width / 2);
+            position.y = this.game.height + 30;
+            velocity.x = 0;
+            velocity.y = -this.player.SPEED / 5;
+
+            return this;
+        },
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            if (this.player.position.y < this.game.height - this.player.sprite.height - 2) {
+                this.player.preventInputControl = false;
+                this.destroy();
+            }
+        }
+    });
 });
 
-DefineModule('sprites/combo-gauge', function (require) {
-    var Sprite = require('models/sprite');
+DefineModule('scripts/move-object-to-point', function (require) {
+    var GameObject = require('models/game-object');
 
-    return function () {
-        var w = "#fff";
-        var n = null;
+    return DefineClass(GameObject, {
+        constructor: function (parent, object, targetPoint, timeDelta) {
+            this.super('constructor', arguments);
 
-        return new Sprite([
-            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n],
-            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
-            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
-            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
-            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
-            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n]
-        ]);
-    };
+            this.object = object;
+            this.target = targetPoint;
+            this.delta = timeDelta;
+        },
+        start: function () {
+            var current = this.object.position;
+
+            var xDiff = this.target.x - current.x;
+            var yDiff = this.target.y - current.y;
+
+            this.object.velocity.x = xDiff / this.delta;
+            this.object.velocity.y = yDiff / this.delta;
+
+            this.xPositive = xDiff > 0;
+            this.yPositive = yDiff > 0;
+        },
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            if (this.metXThreshold() && this.metYThreshold()) {
+                this.object.velocity.x = 0;
+                this.object.velocity.y = 0;
+
+                this.object.position.x = this.target.x;
+                this.object.position.y = this.target.y;
+
+                this.parent.removeChild(this);
+            }
+        },
+
+        metXThreshold: function () {
+            return (
+                this.xPositive && this.object.position.x >= this.target.x ||
+                !this.xPositive && this.object.position.x <= this.target.x
+            );
+        },
+
+        metYThreshold: function () {
+            return (
+                this.yPositive && this.object.position.y >= this.target.y ||
+                !this.yPositive && this.object.position.y <= this.target.y
+            );
+        }
+    });
 });
 
-DefineModule('sprites/dagger-ship', function (require) {
-    var Sprite = require('models/sprite');
+DefineModule('scripts/watch-for-death', function (require) {
+    var GameObject = require('models/game-object');
 
-    return function () {
-        var w = "white";
-        var n = null;
-        return new Sprite([
-            [ n, w, n ],
-            [ n, w, n ],
-            [ n, w, n ],
-            [ w, w, w ],
-            [ w, w, w ],
-            [ w, w, w ],
-            [ w, w, w ],
-            [ w, w, w ],
-            [ n, w, n ]
-        ]);
-    }
-});
+    return DefineClass(GameObject, {
+        constructor: function (parent, entity, callback) {
+            this.super('constructor', arguments);
 
-DefineModule('sprites/flying-saucer', function (require) {
-    var Sprite = require('models/sprite');
+            this.entity = entity;
+            this.callback = callback;
+            this.started = false;
+        },
 
-    return function () {
-        var w = "white";
-        var n = null;
-        return new Sprite([
-                [ n, n, n, w, w, w, w, w, n, n, n ],
-                [ n, n, w, n, n, n, n, n, w, n, n ],
-                [ n, w, n, n, n, n, n, n, n, w, n ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ w, n, n, n, n, w, n, n, n, n, w ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ n, w, n, n, n, n, n, n, n, w, n ],
-                [ n, n, w, n, n, n, n, n, w, n, n ],
-                [ n, n, n, w, w, w, w, w, n, n, n ]
-            ],
-            {
-                guns: [
-                ]
-            });
-    };
-});
+        update: function () {
+            if (this.entity.destroyed && this.started) {
+                this.started = false;
+                this.callback();
+                this.destroy();
+            }
+        },
 
-DefineModule('sprites/player-ship-wing-guns', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "white";
-        var n = null;
-        return new Sprite([
-                [ n, n, n, n, w, n, n, n, n ],
-                [ n, n, n, n, w, n, n, n, n ],
-                [ n, n, n, w, w, w, n, n, n ],
-                [ n, n, n, w, w, w, n, n, n ],
-                [ w, n, n, w, w, w, n, n, w ],
-                [ w, n, w, w, w, w, w, n, w ],
-                [ w, w, w, w, w, w, w, w, w ],
-                [ n, n, n, w, w, w, n, n, n ],
-                [ n, n, n, n, w, n, n, n, n ]
-            ],
-            {
-                guns: [
-                    { x: 0, y: 5 },
-                    { x: 4, y: 1 },
-                    { x: 8, y: 5 }
-                ]
-            });
-    };
-});
-
-DefineModule('sprites/player-ship', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "white";
-        var n = null;
-        return new Sprite([
-            [ n, n, n, w, n, n, n ],
-            [ n, n, n, w, n, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, w, w, w, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, n, w, n, n, n ]
-        ],
-        {
-            guns: [
-                { x: 3, y: 1 }
-            ]
-        });
-    };
+        start: function () {
+            this.started = true;
+        }
+    });
 });
 
 DefineModule('views/canvas-renderer', function (require) {
@@ -4768,6 +4585,195 @@ DefineModule('views/webgl-renderer', function (require) {
             });
         }
     });
+});
+
+DefineModule('sprites/arrow-boss', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w1 = "#ffffff";
+        var w2 = "#cccccc";
+        var g1 = "#aaaaaa";
+        var g2 = "#888888";
+        var g3 = "#666666";
+        var g4 = "#222222";
+        var nn = null;
+        return new Sprite([
+                [ g3, nn, nn, nn, nn, nn, nn, nn, g3, nn, nn, nn, nn, nn, nn, nn, g3 ],
+                [ g2, g2, nn, nn, nn, nn, g2, g2, w2, g2, g2, nn, nn, nn, nn, g2, g2 ],
+                [ nn, g2, g1, nn, g1, g1, w2, w2, w2, w2, w2, g1, g1, nn, g1, g2, nn ],
+                [ nn, g1, g1, g1, g1, w2, w2, w2, g3, w2, w2, w2, g1, g1, g1, g1, nn ],
+                [ nn, nn, w2, g1, w2, w1, w2, g3, g4, g3, w2, w1, w2, g1, w2, nn, nn ],
+                [ nn, nn, w2, w1, w2, w1, w1, w2, g3, w2, w1, w1, w2, w1, w2, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, w1, w1, w2, w1, w1, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, nn, w1, w1, w1, nn, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ],
+                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ]
+            ],
+            {
+                guns: [
+                    { x: 3, y: 8 },
+                    { x: 8, y: 10 },
+                    { x: 13, y: 8 }
+                ]
+            });
+    };
+});
+
+DefineModule('sprites/arrow-ship', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w1 = "#ffffff";
+        var w2 = "#cccccc";
+        var g1 = "#aaaaaa";
+        var g2 = "#888888";
+        var g3 = "#666666";
+        var g4 = "#222222";
+        var nn = null;
+        return new Sprite([
+                [ g3, nn, nn, nn, nn, nn, g3 ],
+                [ g2, g2, nn, nn, nn, g2, g2 ],
+                [ nn, g2, g1, nn, g1, g2, nn ],
+                [ nn, g1, g1, w1, g1, g1, nn ],
+                [ nn, nn, w2, g4, w2, nn, nn ],
+                [ nn, nn, w2, w1, w2, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, nn ]
+            ],
+            {
+                guns: [
+                    { x: 3, y: 7 }
+                ]
+            });
+    };
+});
+
+DefineModule('sprites/bullet', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        return new Sprite([
+            [ "white", "white" ]
+        ]);
+    }
+});
+
+DefineModule('sprites/combo-gauge', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "#fff";
+        var n = null;
+
+        return new Sprite([
+            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n],
+            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
+            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
+            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
+            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
+            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n]
+        ]);
+    };
+});
+
+DefineModule('sprites/dagger-ship', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "white";
+        var n = null;
+        return new Sprite([
+            [ n, w, n ],
+            [ n, w, n ],
+            [ n, w, n ],
+            [ w, w, w ],
+            [ w, w, w ],
+            [ w, w, w ],
+            [ w, w, w ],
+            [ w, w, w ],
+            [ n, w, n ]
+        ]);
+    }
+});
+
+DefineModule('sprites/flying-saucer', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "white";
+        var n = null;
+        return new Sprite([
+                [ n, n, n, w, w, w, w, w, n, n, n ],
+                [ n, n, w, n, n, n, n, n, w, n, n ],
+                [ n, w, n, n, n, n, n, n, n, w, n ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, w, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ n, w, n, n, n, n, n, n, n, w, n ],
+                [ n, n, w, n, n, n, n, n, w, n, n ],
+                [ n, n, n, w, w, w, w, w, n, n, n ]
+            ],
+            {
+                guns: [
+                ]
+            });
+    };
+});
+
+DefineModule('sprites/player-ship-wing-guns', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "white";
+        var n = null;
+        return new Sprite([
+                [ n, n, n, n, w, n, n, n, n ],
+                [ n, n, n, n, w, n, n, n, n ],
+                [ n, n, n, w, w, w, n, n, n ],
+                [ n, n, n, w, w, w, n, n, n ],
+                [ w, n, n, w, w, w, n, n, w ],
+                [ w, n, w, w, w, w, w, n, w ],
+                [ w, w, w, w, w, w, w, w, w ],
+                [ n, n, n, w, w, w, n, n, n ],
+                [ n, n, n, n, w, n, n, n, n ]
+            ],
+            {
+                guns: [
+                    { x: 0, y: 5 },
+                    { x: 4, y: 1 },
+                    { x: 8, y: 5 }
+                ]
+            });
+    };
+});
+
+DefineModule('sprites/player-ship', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "white";
+        var n = null;
+        return new Sprite([
+            [ n, n, n, w, n, n, n ],
+            [ n, n, n, w, n, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, w, w, w, w, w, n ],
+            [ w, w, w, w, w, w, w ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, n, w, n, n, n ]
+        ],
+        {
+            guns: [
+                { x: 3, y: 1 }
+            ]
+        });
+    };
 });
 
 DefineModule('sprites/animations/ship-explosion', function (require) {
