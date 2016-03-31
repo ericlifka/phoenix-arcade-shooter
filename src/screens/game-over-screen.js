@@ -46,7 +46,7 @@ DefineModule('screens/game-over-screen', function (require) {
         },
 
         onStart: function () {
-            this.parent.reset();
+            this.parent.finishGame();
         },
 
         setResult: function (result) {

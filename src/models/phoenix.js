@@ -92,6 +92,18 @@ DefineModule('models/phoenix', function (require) {
 
             this.levelManager.start();
         },
+        finishGame: function () {
+            if (this.gameOverCallback) {
+                this.gameOverCallback({
+                    score: this.comboGauge.getScore(),
+                    level: this.levelManager.levelNameCounter
+                });
+                this.destroy();
+            }
+            else {
+                this.reset();
+            }
+        },
         showControlsScreen: function () {
             this.addChild(this.controlsScreen);
         },
@@ -176,9 +188,6 @@ DefineModule('models/phoenix', function (require) {
                 this.gameOver = true;
                 this.gameOverScreen.setResult(gameResult);
                 this.gameOverScreen.setFinalScore(this.comboGauge.getScore());
-                if (this.gameOverCallback) {
-                    this.gameOverCallback(this.comboGauge.getScore());
-                }
 
                 this.removeChild(this.player);
                 this.addChild(this.gameOverScreen);
