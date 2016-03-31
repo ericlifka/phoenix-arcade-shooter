@@ -34,6 +34,17 @@ DefineModule('screens/embedded-title-screen', function (require) {
                 position: { x: 90, y: 80 },
                 isPhysicalEntity: true
             }));
+
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "WASD - move ship",
+                position: { x: 65, y: 120 }
+            }));
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "SPACE - fire gun",
+                position: { x: 65, y: 130 }
+            }));
         },
 
         createShipSelectors: function () {
