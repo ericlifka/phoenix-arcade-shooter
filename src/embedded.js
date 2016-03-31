@@ -9,7 +9,8 @@ DefineModule('main', function (require) {
         var gameDimensions = {
             width: 200,
             height: 150,
-            container: targetDiv
+            container: targetDiv,
+            embedded: true
         };
         var gamepadInput = new GamepadController();
         var keyboardInput = new KeyboardController();

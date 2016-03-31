@@ -5,6 +5,7 @@ DefineModule('models/phoenix', function (require) {
     var Collisions = require('helpers/collisions');
     var ComboGauge = require('components/combo-gauge');
     var ControlsScreen = require('screens/controls-description');
+    var EmbeddedTitleScreen = require('screens/embedded-title-screen');
     var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
     var GameOverScreen = require('screens/game-over-screen');
@@ -19,12 +20,17 @@ DefineModule('models/phoenix', function (require) {
         FILL_COLOR: "#000031",
         interfaceColor: "#ffd",
 
-        constructor: function (gameDimensions) {
-            this.width = gameDimensions.width;
-            this.height = gameDimensions.height;
+        constructor: function (options) {
+            this.embedded = !!options.embedded;
+            this.width = options.width;
+            this.height = options.height;
+
+            //this.titleScreen = this.embedded ?
+            //    new EmbeddedTitleScreen(this) :
+            //    new TitleScreen(this);
+            this.titleScreen = new EmbeddedTitleScreen(this);
 
             this.controlsScreen = new ControlsScreen(this);
-            this.titleScreen = new TitleScreen(this);
             this.gameOverScreen = new GameOverScreen(this);
             this.player = new PlayerShip(this);
             this.inputInterpreter = new InputInterpreter();
