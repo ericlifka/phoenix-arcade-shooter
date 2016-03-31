@@ -144,17 +144,17 @@ DefineModule('levels/shop', function (require) {
                     case 1: selection = this.menuItems.rate; break;
                     case 2: selection = this.menuItems.damage; break;
                     case 3: selection = this.menuItems.guns; break;
-                    case 4: this.chooseSelected(); return;
+                    case 4: this.startGame(); return;
                     default: return;
                 }
 
                 if (this.bank.value >= selection.cost && selection.cost !== -1) {
                     this.bank.removeMoney(selection.cost);
-                    this.chooseSelected();
+                    this.startGame();
                 }
             }
         },
-        chooseSelected: function () {
+        startGame: function () {
             this.selecting = true;
             this.timeSinceSelected = 0;
 

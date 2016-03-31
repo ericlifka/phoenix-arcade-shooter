@@ -6,11 +6,6 @@ DefineModule('screens/embedded-title-screen', function (require) {
     var ArrowShip = require('sprites/arrow-ship');
 
     return DefineClass(GameObject, {
-        headerDef: { message: "PHOENIX", position: { x: 50, y: 30 } },
-        menuItems: [
-            { message: "Start", position: { x: 90, y: 90 } }
-        ],
-
         reset: function () {
             this.super('reset');
 
@@ -18,7 +13,7 @@ DefineModule('screens/embedded-title-screen', function (require) {
             this.timeSinceSelected = 0;
             this.selecting = false;
 
-            this.createTextMenu();
+            this.addDisplayText();
             this.createShipSelectors();
 
             this.addChild(new EventedInput({
@@ -26,21 +21,19 @@ DefineModule('screens/embedded-title-screen', function (require) {
             }));
         },
 
-        createTextMenu: function () {
+        addDisplayText: function () {
             this.addChild(new TextDisplay(this, {
                 font: 'phoenix',
-                message: this.headerDef.message,
-                position: this.headerDef.position
+                message: "PHOENIX",
+                position: { x: 50, y: 30 }
             }));
 
-            this.menuItems.forEach(function (item) {
-                this.addChild(new TextDisplay(this, {
-                    font: "arcade-small",
-                    message: item.message,
-                    position: item.position,
-                    isPhysicalEntity: true
-                }));
-            }.bind(this));
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "Start",
+                position: { x: 90, y: 80 },
+                isPhysicalEntity: true
+            }));
         },
 
         createShipSelectors: function () {
@@ -50,13 +43,11 @@ DefineModule('screens/embedded-title-screen', function (require) {
             this.selectorShip.sprite = new ArrowShip();
             this.selectorRight.sprite = new ArrowShip().invertX();
 
-            this.selectorShip.position = { x: 70, y: 0 };
-            this.selectorRight.position = { x: 115, y: 0 };
+            this.selectorShip.position = { x: 70, y: 80 };
+            this.selectorRight.position = { x: 120, y: 80 };
 
             this.addChild(this.selectorShip);
             this.addChild(this.selectorRight);
-
-            this.updateSelectorPosition();
         },
 
         update: function (dtime) {
@@ -70,18 +61,11 @@ DefineModule('screens/embedded-title-screen', function (require) {
 
         onSelect: function () {
             if (!this.selecting) {
-                this.chooseSelected();
+                this.startGame();
             }
         },
 
-        updateSelectorPosition: function () {
-            var selectedY = this.menuItems[ this.selectedMenuItem ].position.y;
-
-            this.selectorShip.position.y = selectedY;
-            this.selectorRight.position.y = selectedY;
-        },
-
-        chooseSelected: function () {
+        startGame: function () {
             this.selecting = true;
             this.timeSinceSelected = 0;
 
@@ -102,19 +86,8 @@ DefineModule('screens/embedded-title-screen', function (require) {
         },
 
         propagateSelection: function () {
+            this.parent.startNewGame();
             this.destroy();
-            switch (this.selectedMenuItem) {
-                case 0:
-                case 1:
-                    this.parent.startNewGame();
-                    break;
-                case 2:
-                    this.parent.showControlsScreen();
-                    break;
-                default:
-                    console.error('Unsupported menu option');
-            }
-
         }
     });
 });

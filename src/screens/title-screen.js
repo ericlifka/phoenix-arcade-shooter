@@ -20,7 +20,7 @@ DefineModule('screens/title-screen', function (require) {
             this.timeSinceSelected = 0;
             this.selecting = false;
 
-            this.createTextMenu();
+            this.addDisplayText();
             this.createShipSelectors();
 
             this.addChild(new EventedInput({
@@ -30,7 +30,7 @@ DefineModule('screens/title-screen', function (require) {
             }));
         },
 
-        createTextMenu: function () {
+        addDisplayText: function () {
             this.addChild(new TextDisplay(this, {
                 font: 'phoenix',
                 message: this.headerDef.message,
@@ -88,7 +88,7 @@ DefineModule('screens/title-screen', function (require) {
 
         onSelect: function () {
             if (!this.selecting) {
-                this.chooseSelected();
+                this.startGame();
             }
         },
 
@@ -99,7 +99,7 @@ DefineModule('screens/title-screen', function (require) {
             this.selectorRight.position.y = selectedY;
         },
 
-        chooseSelected: function () {
+        startGame: function () {
             this.selecting = true;
             this.timeSinceSelected = 0;
 
