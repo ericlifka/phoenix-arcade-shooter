@@ -5,57 +5,53 @@ DefineModule('main', function (require) {
     var Phoenix = require('models/phoenix');
     var RunLoop = require('helpers/run-loop');
 
-    var gameDimensions = { width: 200, height: 150 };
+    window.createPhoenixGameInstance = function (targetDiv, gameOverCallback) {
+        var gameDimensions = {
+            width: 200,
+            height: 150,
+            container: targetDiv
+        };
+        var gamepadInput = new GamepadController();
+        var keyboardInput = new KeyboardController();
 
-    window.PhoenixArcadeShooter = {
-        setRenderTarget: function (targetDiv) {
-            gameDimensions.container = targetDiv;
-        },
-        start: function () {
-            var gamepadInput = new GamepadController();
-            var keyboardInput = new KeyboardController();
+        var phoenix = new Phoenix(gameDimensions);
+        var renderer = new CanvasRenderer(gameDimensions);
+        var runLoop = new RunLoop();
 
-            var phoenix = new Phoenix(gameDimensions);
-            var renderer = new CanvasRenderer(gameDimensions);
-            var runLoop = new RunLoop();
+        phoenix.gameOverCallback = gameOverCallback;
+        renderer.setFillColor(phoenix.FILL_COLOR);
 
-            renderer.setFillColor(phoenix.FILL_COLOR);
+        runLoop.addCallback(function (dtime) {
+            phoenix.processInput([
+                keyboardInput.getInputState(),
+                gamepadInput.getInputState()
+            ]);
 
-            runLoop.addCallback(function (dtime) {
-                phoenix.processInput([
-                    keyboardInput.getInputState(),
-                    gamepadInput.getInputState()
-                ]);
+            phoenix.update(dtime);
 
-                phoenix.update(dtime);
+            var frame = renderer.newRenderFrame();
+            frame.clear();
+            phoenix.renderToFrame(frame);
 
-                var frame = renderer.newRenderFrame();
-                frame.clear();
-                phoenix.renderToFrame(frame);
+            renderer.renderFrame(frame);
+        });
 
-                renderer.renderFrame(frame);
-            });
-
-            document.addEventListener("visibilitychange", function () {
-                if (document.hidden) {
-                    phoenix.pause();
-                }
-            });
-
-            window.addEventListener("blur", function () {
+        document.addEventListener("visibilitychange", function () {
+            if (document.hidden) {
                 phoenix.pause();
-            });
+            }
+        });
 
-            window.addEventListener("focus", function () {
-                keyboardInput.clearState();
-                gamepadInput.clearState();
-            });
+        window.addEventListener("blur", function () {
+            phoenix.pause();
+        });
 
-            runLoop.start();
-            this.activeGame = phoenix;
-        },
-        setGameEndCallback: function (callback) {
-            this.activeGame.gameOverCallback = callback;
-        }
+        window.addEventListener("focus", function () {
+            keyboardInput.clearState();
+            gamepadInput.clearState();
+        });
+
+        runLoop.start();
+        return phoenix;
     };
 });
