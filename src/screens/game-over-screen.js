@@ -43,6 +43,7 @@ DefineModule('screens/game-over-screen', function (require) {
             this.addChild(this.scoreDisplay);
 
             this.addChild(this.inputEvents);
+            this.inputEvents.reset();
         },
 
         onStart: function () {
