@@ -2242,6 +2242,8 @@ DefineModule('helpers/pad-score-display', function () {
             case 1: score = "0" + score;
             case 2: score = "0" + score;
             case 3: score = "0" + score;
+            case 4: score = "0" + score;
+            case 5: score = "0" + score;
         }
 
         return score;
@@ -2400,9 +2402,10 @@ DefineModule('levels/level-group-01', function (require) {
     var WatchForDeath = require('scripts/watch-for-death');
 
     return DefineClass(GameObject, {
-        constructor: function (parent, game, difficultyMultiplier, rowCount, levelName) {
+        constructor: function (parent, game, difficultyMultiplier, alternateShip, rowCount, levelName) {
             this.super('constructor', arguments);
 
+            this.alternateShip = alternateShip;
             this.difficultyMultiplier = difficultyMultiplier;
             this.width = this.parent.width;
             this.height = this.parent.height;
@@ -2420,7 +2423,12 @@ DefineModule('levels/level-group-01', function (require) {
             this.ships = [];
             this.scripts = [];
 
-            for (var i = 1; i <= 10; i++) {
+            var start = 4 - this.difficultyMultiplier;
+            start = start < 1 ? 1 : start;
+            var end = 7 + this.difficultyMultiplier;
+            end = end > 10 ? 10 : end;
+
+            for (var i = start; i <= end; i++) {
                 this.newShip(10 * i + 39, -40, 45, 3);
 
                 if (this.rowCount >= 2) {
@@ -2429,6 +2437,10 @@ DefineModule('levels/level-group-01', function (require) {
 
                 if (this.rowCount >= 3) {
                     this.newShip(10 * i + 39, -20, 65, 3);
+                }
+
+                if (this.rowCount >= 4) {
+                    this.newShip(10 * i + 39, -10, 75, 3);
                 }
             }
 
@@ -2462,7 +2474,7 @@ DefineModule('levels/level-group-01', function (require) {
             return true;
         },
         newShip: function (startX, startY, endY, time) {
-            var ship = new EnemyShip(this, this.difficultyMultiplier);
+            var ship = new EnemyShip(this, this.difficultyMultiplier, this.alternateShip);
 
             ship.position.x = startX;
             ship.position.y = startY;
@@ -2523,7 +2535,8 @@ DefineModule('levels/level-group-01', function (require) {
             this.ships.push(boss);
         },
         attachMoneyScripts: function () {
-            var count = this.ships.length / 5;
+            var divisor = this.difficultyMultiplier > 4 ? 2 : 3;
+            var count = Math.floor(this.ships.length / divisor);
             var selectedShips = Random.sample(this.ships, count);
 
             selectedShips.forEach(function (ship) {
@@ -2593,10 +2606,17 @@ DefineModule('levels/level-manager', function (require) {
         },
         loadLevels: function () {
             this.levels = [
-                new Level_group_01(this, this.game, this.difficultyMultiplier, 1, this.levelName()),
-                new Level_group_01(this, this.game, this.difficultyMultiplier, 2),
-                new Level_group_01(this, this.game, this.difficultyMultiplier, 3),
-                new Level_group_01(this, this.game, this.difficultyMultiplier, "boss"),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, false, 2),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, false, 3),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, false, 4),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, false, "boss"),
+                this.shop,
+                new Level_group_01(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, true, 2),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, true, 3),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, true, 4),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, true, "boss"),
                 this.shop
             ];
             this.levelIndex = -1;
@@ -3649,12 +3669,17 @@ DefineModule('screens/embedded-title-screen', function (require) {
             this.addChild(new TextDisplay(this, {
                 font: "arcade-small",
                 message: "WASD - move ship",
-                position: { x: 65, y: 120 }
+                position: { x: 5, y: 120 }
             }));
             this.addChild(new TextDisplay(this, {
                 font: "arcade-small",
                 message: "SPACE - fire gun",
-                position: { x: 65, y: 130 }
+                position: { x: 5, y: 130 }
+            }));
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "ENTER - pause",
+                position: { x: 5, y: 140 }
             }));
         },
 
@@ -3721,25 +3746,32 @@ DefineModule('screens/game-over-screen', function (require) {
     var TextDisplay = require('components/text-display');
 
     return DefineClass(GameObject, {
-        headerDef: {
+        resultMessage: {
             font: "arcade",
+            message: "GAME OVER",
+            position: { x: 67, y: 53 }
+        },
+        headerDef: {
+            font: "arcade-small",
             border: 1,
             padding: 20,
-            position: { x: 45, y: 45 }
+            message: "< hit enter >",
+            position: { x: 55, y: 45 }
         },
         subHeaderDef: {
             font: "arcade-small",
             message: "Final Score:",
-            position: { x: 66, y: 81 }
+            position: { x: 68, y: 77 }
         },
         scoreDisplayDef: {
             font: "arcade-small",
             message: "0",
             color: "yellow",
-            position: { x: 110, y: 81 }
+            position: { x: 111, y: 77 }
         },
 
         constructor: function () {
+            this.result = new TextDisplay(this, this.resultMessage);
             this.header = new TextDisplay(this, this.headerDef);
             this.subHeader = new TextDisplay(this, this.subHeaderDef);
             this.scoreDisplay = new TextDisplay(this, this.scoreDisplayDef);
@@ -3754,11 +3786,13 @@ DefineModule('screens/game-over-screen', function (require) {
         reset: function () {
             this.super('reset');
 
+            this.addChild(this.result);
             this.addChild(this.header);
             this.addChild(this.subHeader);
             this.addChild(this.scoreDisplay);
 
             this.addChild(this.inputEvents);
+            this.inputEvents.reset();
         },
 
         onStart: function () {
@@ -3768,12 +3802,14 @@ DefineModule('screens/game-over-screen', function (require) {
         setResult: function (result) {
             if (result === "win") {
                 this.header.updateColor("green");
+                this.result.updateColor("green");
                 this.subHeader.updateColor("green");
-                this.header.changeMessage("YOU WIN!");
+                this.result.changeMessage("YOU WIN!");
             } else if (result === "loss") {
                 this.header.updateColor("red");
+                this.result.updateColor("red");
                 this.subHeader.updateColor("red");
-                this.header.changeMessage("GAME OVER");
+                this.result.changeMessage("GAME OVER");
             }
         },
 
@@ -3918,262 +3954,6 @@ DefineModule('screens/title-screen', function (require) {
                     console.error('Unsupported menu option');
             }
 
-        }
-    });
-});
-
-DefineModule('ships/arrow-boss', function (require) {
-    var GameObject = require('models/game-object');
-    var shipSprite = require('sprites/arrow-boss');
-    var shipExplosion = require('sprites/animations/ship-explosion');
-    var MuzzleFlash = require('components/muzzle-flash');
-
-    return DefineClass(GameObject, {
-        isPhysicalEntity: true,
-        BULLET_SPEED: 120,
-        team: 1,
-        index: 5,
-
-        constructor: function (parent, difficultyMultiplier) {
-            this.difficultyMultiplier = difficultyMultiplier;
-            this.super('constructor', arguments);
-        },
-        reset: function () {
-            this.super('reset');
-
-            this.sprite = shipSprite().rotateRight();
-            this.explosion = shipExplosion;
-            this.guns = this.sprite.meta.guns;
-
-            this.position = { x: 0, y: 0 };
-            this.velocity = { x: 0, y: 0 };
-
-            this.damage = 50 * this.difficultyMultiplier;
-            this.life = 25 * this.difficultyMultiplier;
-            this.maxLife = 25 * this.difficultyMultiplier;
-        },
-        fire: function (gunIndex) {
-            var gun = this.guns[ gunIndex ];
-
-            var position = {
-                x: this.position.x + gun.x,
-                y: this.position.y + gun.y
-            };
-            var velocity = { x: 0, y: this.BULLET_SPEED };
-
-            this.triggerEvent('spawnBullet', {
-                team: this.team,
-                position: position,
-                velocity: velocity,
-                damage: this.difficultyMultiplier
-            });
-            this.addChild(new MuzzleFlash(this, gun));
-        },
-        applyDamage: function () {
-            this.triggerEvent('enemyHit');
-            this.super('applyDamage', arguments);
-        },
-        destroy: function () {
-            this.triggerEvent('enemyDestroyed', {
-                shipValue: this.maxLife
-            });
-
-            this.super('destroy', arguments);
-        }
-    });
-});
-
-DefineModule('ships/arrow-ship', function (require) {
-    var GameObject = require('models/game-object');
-    var MuzzleFlash = require('components/muzzle-flash');
-    var shipSprite = require('sprites/arrow-ship');
-    var shipExplosion = require('sprites/animations/ship-explosion');
-
-    return DefineClass(GameObject, {
-        isPhysicalEntity: true,
-        BULLET_SPEED: 100,
-        team: 1,
-        index: 5,
-
-        constructor: function (parent, difficultyMultiplier) {
-            this.difficultyMultiplier = difficultyMultiplier;
-            this.super('constructor', arguments);
-        },
-        reset: function () {
-            this.super('reset');
-
-            this.sprite = shipSprite().rotateRight();
-            this.explosion = shipExplosion;
-            this.gun = this.sprite.meta.guns[ 0 ];
-
-            this.position = { x: 0, y: 0 };
-            this.velocity = { x: 0, y: 0 };
-
-            this.damage = 5 * this.difficultyMultiplier;
-            this.maxLife = this.difficultyMultiplier;
-            this.life = this.difficultyMultiplier;
-        },
-        fire: function () {
-
-            var position = {
-                x: this.position.x + this.gun.x,
-                y: this.position.y + this.gun.y
-            };
-            var velocity = { x: 0, y: this.BULLET_SPEED };
-
-            this.triggerEvent('spawnBullet', {
-                team: this.team,
-                position: position,
-                velocity: velocity,
-                damage: this.difficultyMultiplier
-            });
-            this.addChild(new MuzzleFlash(this, this.gun));
-        },
-        applyDamage: function () {
-            this.triggerEvent('enemyHit');
-            this.super('applyDamage', arguments);
-        },
-        destroy: function () {
-            this.triggerEvent('enemyDestroyed', {
-                shipValue: this.maxLife
-            });
-
-            this.super('destroy', arguments);
-        }
-    });
-});
-
-DefineModule('ships/flying-saucer', function (require) {
-    var GameObject = require('models/game-object');
-
-    return DefineClass(GameObject, {
-        isPhysicalEntity: true,
-        BULLET_SPEED: 100,
-        team: 1,
-        index: 5,
-
-        reset: function () {
-            this.super('reset');
-        }
-    });
-});
-
-DefineModule('ships/player-controlled-ship', function (require) {
-    var GameObject = require('models/game-object');
-    var MuzzleFlash = require('components/muzzle-flash');
-    var playerShipSprite = require('sprites/player-ship');
-    var playerShipSpriteWingGuns = require('sprites/player-ship-wing-guns');
-    var shipExplosion = require('sprites/animations/ship-explosion');
-
-    return DefineClass(GameObject, {
-        type: "player",
-        isPhysicalEntity: true,
-        index: 5,
-
-        reset: function () {
-            this.super('reset');
-
-            this.sprite = playerShipSprite().rotateRight();
-            this.explosion = shipExplosion;
-
-            this.position = { x: -100, y: -100 };
-            this.velocity = { x: 0, y: 0 };
-
-            this.life = 10;
-            this.maxLife = 10;
-            this.damageUpgrades = 0;
-            this.lifeUpgrades = 0;
-            this.rateUpgrades = 0;
-            this.wingGunsUnlocked = false;
-            this.SPEED = 50;
-            this.BULLET_SPEED = 100;
-            this.FIRE_RATE = 500;
-
-            this.preventInputControl = true;
-            this.exploding = false;
-            this.team = 0;
-            this.damage = 5;
-            this.timeSinceFired = 0;
-        },
-        refillHealth: function () {
-            this.life = this.maxLife;
-        },
-        addWingGuns: function () {
-            this.wingGunsUnlocked = true;
-            this.sprite = playerShipSpriteWingGuns().rotateRight();
-        },
-        processInput: function (input) {
-            this.super('processInput', arguments);
-            if (this.preventInputControl || this.exploding || this.destroyed) {
-                // ship in a state where input isn't appropriate
-                return;
-            }
-
-            this.velocity.x = input.movementVector.x * this.SPEED;
-            this.velocity.y = input.movementVector.y * this.SPEED;
-
-            this.firing = input.fire;
-        },
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            this.timeSinceFired += dtime;
-            if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
-                this.timeSinceFired = 0;
-
-                this.fire();
-            }
-        },
-        hideOffscreen: function () {
-            this.preventInputControl = true;
-            this.position.x = -100;
-            this.velocity.x = 0;
-            this.velocity.y = 0;
-        },
-        checkBoundaries: function () {
-            if (this.preventInputControl) {
-                // don't check screen boundaries when an external script is controlling the player
-                return;
-            }
-
-            if (this.position.x < 0) {
-                this.position.x = 0;
-            }
-            if (this.position.y < 0) {
-                this.position.y = 0;
-            }
-            if (this.position.x + this.sprite.width > this.parent.width) {
-                this.position.x = this.parent.width - this.sprite.width;
-            }
-            if (this.position.y + this.sprite.height > this.parent.height) {
-                this.position.y = this.parent.height - this.sprite.height;
-            }
-        },
-        fire: function () {
-            this.sprite.meta.guns.forEach(function (gun, index) {
-                this.triggerEvent('spawnBullet', {
-                    team: this.team,
-                    damage: this.damageUpgrades + 1,
-                    velocity: {
-                        x: this.wingGunsUnlocked ? (index - 1) * 10 : 0,
-                        y: -this.BULLET_SPEED
-                    },
-                    position: {
-                        x: this.position.x + gun.x,
-                        y: this.position.y + gun.y
-                    }
-                });
-
-                this.addChild(new MuzzleFlash(this, gun));
-            }.bind(this));
-        },
-
-        applyDamage: function (damage, sourceEntity) {
-            if (damage > 0) {
-                this.triggerEvent('playerHit');
-            }
-
-            this.super('applyDamage', arguments);
         }
     });
 });
@@ -4388,6 +4168,269 @@ DefineModule('scripts/watch-for-death', function (require) {
 
         start: function () {
             this.started = true;
+        }
+    });
+});
+
+DefineModule('ships/arrow-boss', function (require) {
+    var GameObject = require('models/game-object');
+    var shipSprite = require('sprites/arrow-boss');
+    var shipExplosion = require('sprites/animations/ship-explosion');
+    var MuzzleFlash = require('components/muzzle-flash');
+
+    return DefineClass(GameObject, {
+        isPhysicalEntity: true,
+        BULLET_SPEED: 120,
+        team: 1,
+        index: 5,
+
+        constructor: function (parent, difficultyMultiplier) {
+            this.difficultyMultiplier = difficultyMultiplier;
+            this.super('constructor', arguments);
+        },
+        reset: function () {
+            this.super('reset');
+
+            this.sprite = shipSprite().rotateRight();
+            this.explosion = shipExplosion;
+            this.guns = this.sprite.meta.guns;
+
+            this.position = { x: 0, y: 0 };
+            this.velocity = { x: 0, y: 0 };
+
+            this.damage = 50 * this.difficultyMultiplier;
+            this.life = 20 * this.difficultyMultiplier;
+            this.maxLife = 20 * this.difficultyMultiplier;
+        },
+        fire: function (gunIndex) {
+            var gun = this.guns[ gunIndex ];
+
+            var position = {
+                x: this.position.x + gun.x,
+                y: this.position.y + gun.y
+            };
+            var velocity = { x: 0, y: this.BULLET_SPEED };
+
+            this.triggerEvent('spawnBullet', {
+                team: this.team,
+                position: position,
+                velocity: velocity,
+                damage: this.difficultyMultiplier
+            });
+            this.addChild(new MuzzleFlash(this, gun));
+        },
+        applyDamage: function () {
+            this.triggerEvent('enemyHit');
+            this.super('applyDamage', arguments);
+        },
+        destroy: function () {
+            this.triggerEvent('enemyDestroyed', {
+                shipValue: this.maxLife
+            });
+
+            this.super('destroy', arguments);
+        }
+    });
+});
+
+DefineModule('ships/arrow-ship', function (require) {
+    var GameObject = require('models/game-object');
+    var MuzzleFlash = require('components/muzzle-flash');
+    var shipSprite = require('sprites/arrow-ship');
+    var daggerSprite = require('sprites/dagger-ship');
+    var shipExplosion = require('sprites/animations/ship-explosion');
+
+    return DefineClass(GameObject, {
+        isPhysicalEntity: true,
+        BULLET_SPEED: 100,
+        team: 1,
+        index: 5,
+
+        constructor: function (parent, difficultyMultiplier, alternateShip) {
+            this.difficultyMultiplier = difficultyMultiplier;
+            this.alternateShip = alternateShip;
+            this.super('constructor', arguments);
+        },
+        reset: function () {
+            this.super('reset');
+
+            if (this.alternateShip) {
+                this.sprite = daggerSprite().rotateLeft();
+            } else {
+                this.sprite = shipSprite().rotateRight();
+            }
+
+            this.explosion = shipExplosion;
+            this.gun = this.sprite.meta.guns[ 0 ];
+
+            this.position = { x: 0, y: 0 };
+            this.velocity = { x: 0, y: 0 };
+
+            this.damage = 5 * this.difficultyMultiplier;
+            this.maxLife = this.difficultyMultiplier;
+            this.life = this.difficultyMultiplier;
+        },
+        fire: function () {
+
+            var position = {
+                x: this.position.x + this.gun.x,
+                y: this.position.y + this.gun.y
+            };
+            var velocity = { x: 0, y: this.BULLET_SPEED };
+
+            this.triggerEvent('spawnBullet', {
+                team: this.team,
+                position: position,
+                velocity: velocity,
+                damage: this.difficultyMultiplier
+            });
+            this.addChild(new MuzzleFlash(this, this.gun));
+        },
+        applyDamage: function () {
+            this.triggerEvent('enemyHit');
+            this.super('applyDamage', arguments);
+        },
+        destroy: function () {
+            this.triggerEvent('enemyDestroyed', {
+                shipValue: this.maxLife
+            });
+
+            this.super('destroy', arguments);
+        }
+    });
+});
+
+DefineModule('ships/flying-saucer', function (require) {
+    var GameObject = require('models/game-object');
+
+    return DefineClass(GameObject, {
+        isPhysicalEntity: true,
+        BULLET_SPEED: 100,
+        team: 1,
+        index: 5,
+
+        reset: function () {
+            this.super('reset');
+        }
+    });
+});
+
+DefineModule('ships/player-controlled-ship', function (require) {
+    var GameObject = require('models/game-object');
+    var MuzzleFlash = require('components/muzzle-flash');
+    var playerShipSprite = require('sprites/player-ship');
+    var playerShipSpriteWingGuns = require('sprites/player-ship-wing-guns');
+    var shipExplosion = require('sprites/animations/ship-explosion');
+
+    return DefineClass(GameObject, {
+        type: "player",
+        isPhysicalEntity: true,
+        index: 5,
+
+        reset: function () {
+            this.super('reset');
+
+            this.sprite = playerShipSprite().rotateRight();
+            this.explosion = shipExplosion;
+
+            this.position = { x: -100, y: -100 };
+            this.velocity = { x: 0, y: 0 };
+
+            this.life = 10;
+            this.maxLife = 10;
+            this.damageUpgrades = 0;
+            this.lifeUpgrades = 0;
+            this.rateUpgrades = 0;
+            this.wingGunsUnlocked = false;
+            this.SPEED = 50;
+            this.BULLET_SPEED = 100;
+            this.FIRE_RATE = 500;
+
+            this.preventInputControl = true;
+            this.exploding = false;
+            this.team = 0;
+            this.damage = 5;
+            this.timeSinceFired = 0;
+        },
+        refillHealth: function () {
+            this.life = this.maxLife;
+        },
+        addWingGuns: function () {
+            this.wingGunsUnlocked = true;
+            this.sprite = playerShipSpriteWingGuns().rotateRight();
+        },
+        processInput: function (input) {
+            this.super('processInput', arguments);
+            if (this.preventInputControl || this.exploding || this.destroyed) {
+                // ship in a state where input isn't appropriate
+                return;
+            }
+
+            this.velocity.x = input.movementVector.x * this.SPEED;
+            this.velocity.y = input.movementVector.y * this.SPEED;
+
+            this.firing = input.fire;
+        },
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            this.timeSinceFired += dtime;
+            if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
+                this.timeSinceFired = 0;
+
+                this.fire();
+            }
+        },
+        hideOffscreen: function () {
+            this.preventInputControl = true;
+            this.position.x = -100;
+            this.velocity.x = 0;
+            this.velocity.y = 0;
+        },
+        checkBoundaries: function () {
+            if (this.preventInputControl) {
+                // don't check screen boundaries when an external script is controlling the player
+                return;
+            }
+
+            if (this.position.x < 0) {
+                this.position.x = 0;
+            }
+            if (this.position.y < 0) {
+                this.position.y = 0;
+            }
+            if (this.position.x + this.sprite.width > this.parent.width) {
+                this.position.x = this.parent.width - this.sprite.width;
+            }
+            if (this.position.y + this.sprite.height > this.parent.height) {
+                this.position.y = this.parent.height - this.sprite.height;
+            }
+        },
+        fire: function () {
+            this.sprite.meta.guns.forEach(function (gun, index) {
+                this.triggerEvent('spawnBullet', {
+                    team: this.team,
+                    damage: this.damageUpgrades + 1,
+                    velocity: {
+                        x: this.wingGunsUnlocked ? (index - 1) * 10 : 0,
+                        y: -this.BULLET_SPEED
+                    },
+                    position: {
+                        x: this.position.x + gun.x,
+                        y: this.position.y + gun.y
+                    }
+                });
+
+                this.addChild(new MuzzleFlash(this, gun));
+            }.bind(this));
+        },
+
+        applyDamage: function (damage, sourceEntity) {
+            if (damage > 0) {
+                this.triggerEvent('playerHit');
+            }
+
+            this.super('applyDamage', arguments);
         }
     });
 });
@@ -4745,20 +4788,17 @@ DefineModule('sprites/arrow-ship', function (require) {
         var g4 = "#222222";
         var nn = null;
         return new Sprite([
-                [ g3, nn, nn, nn, nn, nn, g3 ],
-                [ g2, g2, nn, nn, nn, g2, g2 ],
-                [ nn, g2, g1, nn, g1, g2, nn ],
-                [ nn, g1, g1, w1, g1, g1, nn ],
-                [ nn, nn, w2, g4, w2, nn, nn ],
-                [ nn, nn, w2, w1, w2, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, nn ]
-            ],
-            {
-                guns: [
-                    { x: 3, y: 7 }
-                ]
-            });
+            [ g3, nn, nn, nn, nn, nn, g3 ],
+            [ g2, g2, nn, nn, nn, g2, g2 ],
+            [ nn, g2, g1, nn, g1, g2, nn ],
+            [ nn, g1, g1, w1, g1, g1, nn ],
+            [ nn, nn, w2, g4, w2, nn, nn ],
+            [ nn, nn, w2, w1, w2, nn, nn ],
+            [ nn, nn, nn, w1, nn, nn, nn ],
+            [ nn, nn, nn, w1, nn, nn, nn ]
+        ], {
+            guns: [ { x: 3, y: 7 } ]
+        });
     };
 });
 
@@ -4794,19 +4834,26 @@ DefineModule('sprites/dagger-ship', function (require) {
     var Sprite = require('models/sprite');
 
     return function () {
-        var w = "white";
-        var n = null;
+        var w1 = "#ffffff";
+        var w2 = "#cccccc";
+        var g1 = "#aaaaaa";
+        var g2 = "#888888";
+        var g3 = "#666666";
+        var g4 = "#222222";
+        var nn = null;
         return new Sprite([
-            [ n, w, n ],
-            [ n, w, n ],
-            [ n, w, n ],
-            [ w, w, w ],
-            [ w, w, w ],
-            [ w, w, w ],
-            [ w, w, w ],
-            [ w, w, w ],
-            [ n, w, n ]
-        ]);
+            [ nn, nn, w1, nn, nn ],
+            [ nn, nn, w1, nn, nn ],
+            [ nn, nn, w1, nn, nn ],
+            [ nn, w2, w1, w2, nn ],
+            [ nn, w2, g4, w2, nn ],
+            [ nn, w2, w1, w2, nn ],
+            [ nn, g2, g1, g2, nn ],
+            [ g2, g2, nn, g2, g2 ],
+            [ g3, nn, nn, nn, g3 ]
+        ], {
+            guns: [ { x: 2, y: 8 } ]
+        });
     }
 });
 
