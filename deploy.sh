@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 cd dist
-tar cvzf build.tar.gz favicon.ico index.html game.css phoenix-arcade-shooter.js
+tar cvzf ../build.tar.gz favicon.ico index.html game.css phoenix-arcade-shooter.js
 cd ..
 
 git co gh-pages
