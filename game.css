@@ -1,0 +1,23 @@
+html, body {
+    height: 100%;
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: #555;
+}
+
+.fps-counter {
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: white;
+    font-size: 24px;
+    padding: 20px;
+}
