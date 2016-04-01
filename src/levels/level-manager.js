@@ -31,11 +31,13 @@ DefineModule('levels/level-manager', function (require) {
                 new Level_group_01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
                 new Level_group_01(this, this.game, this.difficultyMultiplier, false, 2),
                 new Level_group_01(this, this.game, this.difficultyMultiplier, false, 3),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, false, 4),
                 new Level_group_01(this, this.game, this.difficultyMultiplier, false, "boss"),
                 this.shop,
                 new Level_group_01(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
                 new Level_group_01(this, this.game, this.difficultyMultiplier, true, 2),
                 new Level_group_01(this, this.game, this.difficultyMultiplier, true, 3),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, true, 4),
                 new Level_group_01(this, this.game, this.difficultyMultiplier, true, "boss"),
                 this.shop
             ];

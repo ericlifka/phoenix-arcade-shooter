@@ -49,6 +49,10 @@ DefineModule('levels/level-group-01', function (require) {
                 if (this.rowCount >= 3) {
                     this.newShip(10 * i + 39, -20, 65, 3);
                 }
+
+                if (this.rowCount >= 4) {
+                    this.newShip(10 * i + 39, -10, 75, 3);
+                }
             }
 
             this.attachMoneyScripts();
