@@ -38,12 +38,17 @@ DefineModule('screens/embedded-title-screen', function (require) {
             this.addChild(new TextDisplay(this, {
                 font: "arcade-small",
                 message: "WASD - move ship",
-                position: { x: 65, y: 120 }
+                position: { x: 5, y: 120 }
             }));
             this.addChild(new TextDisplay(this, {
                 font: "arcade-small",
                 message: "SPACE - fire gun",
-                position: { x: 65, y: 130 }
+                position: { x: 5, y: 130 }
+            }));
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "ENTER - pause",
+                position: { x: 5, y: 140 }
             }));
         },
 
