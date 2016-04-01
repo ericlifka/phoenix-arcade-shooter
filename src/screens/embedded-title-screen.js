@@ -1,4 +1,4 @@
-DefineModule('screens/embedded-title-screen', function (require) {
+DefineModule('screens/slim-title-screen', function (require) {
     var Bullet = require('components/bullet');
     var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');

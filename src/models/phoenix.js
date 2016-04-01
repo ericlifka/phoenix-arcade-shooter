@@ -5,7 +5,7 @@ DefineModule('models/phoenix', function (require) {
     var Collisions = require('helpers/collisions');
     var ComboGauge = require('components/combo-gauge');
     var ControlsScreen = require('screens/controls-description');
-    var EmbeddedTitleScreen = require('screens/embedded-title-screen');
+    var EmbeddedTitleScreen = require('screens/slim-title-screen');
     var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
     var GameOverScreen = require('screens/game-over-screen');
