@@ -34,7 +34,12 @@ DefineModule('levels/level-group-01', function (require) {
             this.ships = [];
             this.scripts = [];
 
-            for (var i = 1; i <= 10; i++) {
+            var start = 4 - this.difficultyMultiplier;
+            start = start < 1 ? 1 : start;
+            var end = 7 + this.difficultyMultiplier;
+            end = end > 10 ? 10 : end;
+
+            for (var i = start; i <= end; i++) {
                 this.newShip(10 * i + 39, -40, 45, 3);
 
                 if (this.rowCount >= 2) {
@@ -137,7 +142,8 @@ DefineModule('levels/level-group-01', function (require) {
             this.ships.push(boss);
         },
         attachMoneyScripts: function () {
-            var count = this.ships.length / 5;
+            var divisor = this.difficultyMultiplier > 4 ? 2 : 3;
+            var count = Math.floor(this.ships.length / divisor);
             var selectedShips = Random.sample(this.ships, count);
 
             selectedShips.forEach(function (ship) {
