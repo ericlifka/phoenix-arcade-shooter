@@ -2,6 +2,7 @@ DefineModule('ships/arrow-ship', function (require) {
     var GameObject = require('models/game-object');
     var MuzzleFlash = require('components/muzzle-flash');
     var shipSprite = require('sprites/arrow-ship');
+    var daggerSprite = require('sprites/dagger-ship');
     var shipExplosion = require('sprites/animations/ship-explosion');
 
     return DefineClass(GameObject, {
@@ -10,14 +11,20 @@ DefineModule('ships/arrow-ship', function (require) {
         team: 1,
         index: 5,
 
-        constructor: function (parent, difficultyMultiplier) {
+        constructor: function (parent, difficultyMultiplier, alternateShip) {
             this.difficultyMultiplier = difficultyMultiplier;
+            this.alternateShip = alternateShip;
             this.super('constructor', arguments);
         },
         reset: function () {
             this.super('reset');
 
-            this.sprite = shipSprite().rotateRight();
+            if (this.alternateShip) {
+                this.sprite = daggerSprite().rotateLeft();
+            } else {
+                this.sprite = shipSprite().rotateRight();
+            }
+
             this.explosion = shipExplosion;
             this.gun = this.sprite.meta.guns[ 0 ];
 
