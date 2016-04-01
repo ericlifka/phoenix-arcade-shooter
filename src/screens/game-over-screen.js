@@ -5,25 +5,32 @@ DefineModule('screens/game-over-screen', function (require) {
     var TextDisplay = require('components/text-display');
 
     return DefineClass(GameObject, {
-        headerDef: {
+        resultMessage: {
             font: "arcade",
+            message: "GAME OVER",
+            position: { x: 67, y: 53 }
+        },
+        headerDef: {
+            font: "arcade-small",
             border: 1,
             padding: 20,
-            position: { x: 45, y: 45 }
+            message: "< hit enter >",
+            position: { x: 55, y: 45 }
         },
         subHeaderDef: {
             font: "arcade-small",
             message: "Final Score:",
-            position: { x: 66, y: 81 }
+            position: { x: 68, y: 77 }
         },
         scoreDisplayDef: {
             font: "arcade-small",
             message: "0",
             color: "yellow",
-            position: { x: 110, y: 81 }
+            position: { x: 111, y: 77 }
         },
 
         constructor: function () {
+            this.result = new TextDisplay(this, this.resultMessage);
             this.header = new TextDisplay(this, this.headerDef);
             this.subHeader = new TextDisplay(this, this.subHeaderDef);
             this.scoreDisplay = new TextDisplay(this, this.scoreDisplayDef);
@@ -38,6 +45,7 @@ DefineModule('screens/game-over-screen', function (require) {
         reset: function () {
             this.super('reset');
 
+            this.addChild(this.result);
             this.addChild(this.header);
             this.addChild(this.subHeader);
             this.addChild(this.scoreDisplay);
@@ -53,12 +61,14 @@ DefineModule('screens/game-over-screen', function (require) {
         setResult: function (result) {
             if (result === "win") {
                 this.header.updateColor("green");
+                this.result.updateColor("green");
                 this.subHeader.updateColor("green");
-                this.header.changeMessage("YOU WIN!");
+                this.result.changeMessage("YOU WIN!");
             } else if (result === "loss") {
                 this.header.updateColor("red");
+                this.result.updateColor("red");
                 this.subHeader.updateColor("red");
-                this.header.changeMessage("GAME OVER");
+                this.result.changeMessage("GAME OVER");
             }
         },
 
