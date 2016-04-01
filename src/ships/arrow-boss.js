@@ -25,8 +25,8 @@ DefineModule('ships/arrow-boss', function (require) {
             this.velocity = { x: 0, y: 0 };
 
             this.damage = 50 * this.difficultyMultiplier;
-            this.life = 25 * this.difficultyMultiplier;
-            this.maxLife = 25 * this.difficultyMultiplier;
+            this.life = 20 * this.difficultyMultiplier;
+            this.maxLife = 20 * this.difficultyMultiplier;
         },
         fire: function (gunIndex) {
             var gun = this.guns[ gunIndex ];
