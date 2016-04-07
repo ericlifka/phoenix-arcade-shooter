@@ -1,143 +1,4 @@
 (function () {
-var DefineClass;
-var DefineModule;
-
-(function () {
-    var moduleDefinitions = {};
-    var evaluatedModules = {};
-    var evaluationStack = [];
-
-    function require(moduleName) {
-        if (evaluationStack.indexOf(moduleName) > -1) {
-            throw "Circular dependencies not supported: " + moduleName
-            + " required while still being evaluated";
-        }
-
-        var module = evaluatedModules[ moduleName ];
-        if (module) {
-            return module;
-        }
-
-        var moduleDefinition = moduleDefinitions[ moduleName ];
-        if (moduleDefinition) {
-            evaluationStack.push(moduleName);
-            module = evaluatedModules[ moduleName ] = moduleDefinition(require);
-            evaluationStack.pop();
-
-            return module;
-        }
-        else {
-            throw "No module found: " + moduleName;
-        }
-    }
-
-    function mixIn(_class, properties) {
-        Object.keys(properties).forEach(function (key) {
-            _class.prototype[ key ] = properties[ key ];
-        });
-    }
-
-    DefineClass = function (Base, definition) {
-        if (typeof Base === "object" && !definition) {
-            definition = Base;
-            Base = function () {
-            };
-        }
-
-        function Constructor() {
-            if (typeof this.constructor === "function") {
-                this.constructor.apply(this, arguments);
-            }
-        }
-
-        Constructor.prototype = new Base();
-        mixIn(Constructor, definition);
-        mixIn(Constructor, {
-            super: function (name, args) {
-                // WARNING: this is known to only work for one level of base class
-                // if the base class has a parent and uses a super call it won't work
-                if (typeof Base.prototype[ name ] === "function") {
-                    Base.prototype[ name ].apply(this, args);
-                }
-            }
-        });
-
-        return Constructor;
-    };
-
-    DefineModule = function (moduleName, moduleDefinition) {
-        if (moduleDefinitions[ moduleName ]) {
-            throw "Duplicate module definition: " + moduleName;
-        }
-
-        moduleDefinitions[ moduleName ] = moduleDefinition;
-    };
-
-    window.addEventListener('load', function () {
-        require('main');
-    });
-
-}());
-
-DefineModule('main', function (require) {
-    var CanvasRenderer = require('views/canvas-renderer');
-    var GamepadController = require('controllers/gamepad-input');
-    var KeyboardController = require('controllers/keyboard-input');
-    var Phoenix = require('models/phoenix');
-    var RunLoop = require('helpers/run-loop');
-
-    window.createPhoenixGameInstance = function (targetDiv, gameOverCallback) {
-        var gameDimensions = {
-            width: 200,
-            height: 150,
-            container: targetDiv,
-            embedded: true
-        };
-        var gamepadInput = new GamepadController();
-        var keyboardInput = new KeyboardController();
-
-        var phoenix = new Phoenix(gameDimensions);
-        var renderer = new CanvasRenderer(gameDimensions);
-        var runLoop = new RunLoop();
-
-        phoenix.gameOverCallback = gameOverCallback;
-        renderer.setFillColor(phoenix.FILL_COLOR);
-
-        runLoop.addCallback(function (dtime) {
-            phoenix.processInput([
-                keyboardInput.getInputState(),
-                gamepadInput.getInputState()
-            ]);
-
-            phoenix.update(dtime);
-
-            var frame = renderer.newRenderFrame();
-            frame.clear();
-            phoenix.renderToFrame(frame);
-
-            renderer.renderFrame(frame);
-        });
-
-        document.addEventListener("visibilitychange", function () {
-            if (document.hidden) {
-                phoenix.pause();
-            }
-        });
-
-        window.addEventListener("blur", function () {
-            phoenix.pause();
-        });
-
-        window.addEventListener("focus", function () {
-            keyboardInput.clearState();
-            gamepadInput.clearState();
-        });
-
-        runLoop.start();
-        return phoenix;
-    };
-});
-
 DefineModule('components/bank', function (require) {
     var GameObject = require('models/game-object');
     var TextDisplay = require('components/text-display');
@@ -4172,199 +4033,6 @@ DefineModule('scripts/watch-for-death', function (require) {
     });
 });
 
-DefineModule('sprites/arrow-boss', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w1 = "#ffffff";
-        var w2 = "#cccccc";
-        var g1 = "#aaaaaa";
-        var g2 = "#888888";
-        var g3 = "#666666";
-        var g4 = "#222222";
-        var nn = null;
-        return new Sprite([
-                [ g3, nn, nn, nn, nn, nn, nn, nn, g3, nn, nn, nn, nn, nn, nn, nn, g3 ],
-                [ g2, g2, nn, nn, nn, nn, g2, g2, w2, g2, g2, nn, nn, nn, nn, g2, g2 ],
-                [ nn, g2, g1, nn, g1, g1, w2, w2, w2, w2, w2, g1, g1, nn, g1, g2, nn ],
-                [ nn, g1, g1, g1, g1, w2, w2, w2, g3, w2, w2, w2, g1, g1, g1, g1, nn ],
-                [ nn, nn, w2, g1, w2, w1, w2, g3, g4, g3, w2, w1, w2, g1, w2, nn, nn ],
-                [ nn, nn, w2, w1, w2, w1, w1, w2, g3, w2, w1, w1, w2, w1, w2, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, w1, w1, w2, w1, w1, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, nn, w1, w1, w1, nn, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ],
-                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ]
-            ],
-            {
-                guns: [
-                    { x: 3, y: 8 },
-                    { x: 8, y: 10 },
-                    { x: 13, y: 8 }
-                ]
-            });
-    };
-});
-
-DefineModule('sprites/arrow-ship', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w1 = "#ffffff";
-        var w2 = "#cccccc";
-        var g1 = "#aaaaaa";
-        var g2 = "#888888";
-        var g3 = "#666666";
-        var g4 = "#222222";
-        var nn = null;
-        return new Sprite([
-            [ g3, nn, nn, nn, nn, nn, g3 ],
-            [ g2, g2, nn, nn, nn, g2, g2 ],
-            [ nn, g2, g1, nn, g1, g2, nn ],
-            [ nn, g1, g1, w1, g1, g1, nn ],
-            [ nn, nn, w2, g4, w2, nn, nn ],
-            [ nn, nn, w2, w1, w2, nn, nn ],
-            [ nn, nn, nn, w1, nn, nn, nn ],
-            [ nn, nn, nn, w1, nn, nn, nn ]
-        ], {
-            guns: [ { x: 3, y: 7 } ]
-        });
-    };
-});
-
-DefineModule('sprites/bullet', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        return new Sprite([
-            [ "white", "white" ]
-        ]);
-    }
-});
-
-DefineModule('sprites/combo-gauge', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "#fff";
-        var n = null;
-
-        return new Sprite([
-            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n],
-            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
-            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
-            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
-            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
-            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n]
-        ]);
-    };
-});
-
-DefineModule('sprites/dagger-ship', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w1 = "#ffffff";
-        var w2 = "#cccccc";
-        var g1 = "#aaaaaa";
-        var g2 = "#888888";
-        var g3 = "#666666";
-        var g4 = "#222222";
-        var nn = null;
-        return new Sprite([
-            [ nn, nn, w1, nn, nn ],
-            [ nn, nn, w1, nn, nn ],
-            [ nn, nn, w1, nn, nn ],
-            [ nn, w2, w1, w2, nn ],
-            [ nn, w2, g4, w2, nn ],
-            [ nn, w2, w1, w2, nn ],
-            [ nn, g2, g1, g2, nn ],
-            [ g2, g2, nn, g2, g2 ],
-            [ g3, nn, nn, nn, g3 ]
-        ], {
-            guns: [ { x: 2, y: 8 } ]
-        });
-    }
-});
-
-DefineModule('sprites/flying-saucer', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "white";
-        var n = null;
-        return new Sprite([
-                [ n, n, n, w, w, w, w, w, n, n, n ],
-                [ n, n, w, n, n, n, n, n, w, n, n ],
-                [ n, w, n, n, n, n, n, n, n, w, n ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ w, n, n, n, n, w, n, n, n, n, w ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ n, w, n, n, n, n, n, n, n, w, n ],
-                [ n, n, w, n, n, n, n, n, w, n, n ],
-                [ n, n, n, w, w, w, w, w, n, n, n ]
-            ],
-            {
-                guns: [
-                ]
-            });
-    };
-});
-
-DefineModule('sprites/player-ship-wing-guns', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "white";
-        var n = null;
-        return new Sprite([
-                [ n, n, n, n, w, n, n, n, n ],
-                [ n, n, n, n, w, n, n, n, n ],
-                [ n, n, n, w, w, w, n, n, n ],
-                [ n, n, n, w, w, w, n, n, n ],
-                [ w, n, n, w, w, w, n, n, w ],
-                [ w, n, w, w, w, w, w, n, w ],
-                [ w, w, w, w, w, w, w, w, w ],
-                [ n, n, n, w, w, w, n, n, n ],
-                [ n, n, n, n, w, n, n, n, n ]
-            ],
-            {
-                guns: [
-                    { x: 0, y: 5 },
-                    { x: 4, y: 1 },
-                    { x: 8, y: 5 }
-                ]
-            });
-    };
-});
-
-DefineModule('sprites/player-ship', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "white";
-        var n = null;
-        return new Sprite([
-            [ n, n, n, w, n, n, n ],
-            [ n, n, n, w, n, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, w, w, w, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, n, w, n, n, n ]
-        ],
-        {
-            guns: [
-                { x: 3, y: 1 }
-            ]
-        });
-    };
-});
-
 DefineModule('ships/arrow-boss', function (require) {
     var GameObject = require('models/game-object');
     var shipSprite = require('sprites/arrow-boss');
@@ -4626,6 +4294,199 @@ DefineModule('ships/player-controlled-ship', function (require) {
             this.super('applyDamage', arguments);
         }
     });
+});
+
+DefineModule('sprites/arrow-boss', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w1 = "#ffffff";
+        var w2 = "#cccccc";
+        var g1 = "#aaaaaa";
+        var g2 = "#888888";
+        var g3 = "#666666";
+        var g4 = "#222222";
+        var nn = null;
+        return new Sprite([
+                [ g3, nn, nn, nn, nn, nn, nn, nn, g3, nn, nn, nn, nn, nn, nn, nn, g3 ],
+                [ g2, g2, nn, nn, nn, nn, g2, g2, w2, g2, g2, nn, nn, nn, nn, g2, g2 ],
+                [ nn, g2, g1, nn, g1, g1, w2, w2, w2, w2, w2, g1, g1, nn, g1, g2, nn ],
+                [ nn, g1, g1, g1, g1, w2, w2, w2, g3, w2, w2, w2, g1, g1, g1, g1, nn ],
+                [ nn, nn, w2, g1, w2, w1, w2, g3, g4, g3, w2, w1, w2, g1, w2, nn, nn ],
+                [ nn, nn, w2, w1, w2, w1, w1, w2, g3, w2, w1, w1, w2, w1, w2, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, w1, w1, w2, w1, w1, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, nn, w1, w1, w1, nn, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ],
+                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ]
+            ],
+            {
+                guns: [
+                    { x: 3, y: 8 },
+                    { x: 8, y: 10 },
+                    { x: 13, y: 8 }
+                ]
+            });
+    };
+});
+
+DefineModule('sprites/arrow-ship', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w1 = "#ffffff";
+        var w2 = "#cccccc";
+        var g1 = "#aaaaaa";
+        var g2 = "#888888";
+        var g3 = "#666666";
+        var g4 = "#222222";
+        var nn = null;
+        return new Sprite([
+            [ g3, nn, nn, nn, nn, nn, g3 ],
+            [ g2, g2, nn, nn, nn, g2, g2 ],
+            [ nn, g2, g1, nn, g1, g2, nn ],
+            [ nn, g1, g1, w1, g1, g1, nn ],
+            [ nn, nn, w2, g4, w2, nn, nn ],
+            [ nn, nn, w2, w1, w2, nn, nn ],
+            [ nn, nn, nn, w1, nn, nn, nn ],
+            [ nn, nn, nn, w1, nn, nn, nn ]
+        ], {
+            guns: [ { x: 3, y: 7 } ]
+        });
+    };
+});
+
+DefineModule('sprites/bullet', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        return new Sprite([
+            [ "white", "white" ]
+        ]);
+    }
+});
+
+DefineModule('sprites/combo-gauge', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "#fff";
+        var n = null;
+
+        return new Sprite([
+            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n],
+            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
+            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
+            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
+            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
+            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n]
+        ]);
+    };
+});
+
+DefineModule('sprites/dagger-ship', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w1 = "#ffffff";
+        var w2 = "#cccccc";
+        var g1 = "#aaaaaa";
+        var g2 = "#888888";
+        var g3 = "#666666";
+        var g4 = "#222222";
+        var nn = null;
+        return new Sprite([
+            [ nn, nn, w1, nn, nn ],
+            [ nn, nn, w1, nn, nn ],
+            [ nn, nn, w1, nn, nn ],
+            [ nn, w2, w1, w2, nn ],
+            [ nn, w2, g4, w2, nn ],
+            [ nn, w2, w1, w2, nn ],
+            [ nn, g2, g1, g2, nn ],
+            [ g2, g2, nn, g2, g2 ],
+            [ g3, nn, nn, nn, g3 ]
+        ], {
+            guns: [ { x: 2, y: 8 } ]
+        });
+    }
+});
+
+DefineModule('sprites/flying-saucer', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "white";
+        var n = null;
+        return new Sprite([
+                [ n, n, n, w, w, w, w, w, n, n, n ],
+                [ n, n, w, n, n, n, n, n, w, n, n ],
+                [ n, w, n, n, n, n, n, n, n, w, n ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, w, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ n, w, n, n, n, n, n, n, n, w, n ],
+                [ n, n, w, n, n, n, n, n, w, n, n ],
+                [ n, n, n, w, w, w, w, w, n, n, n ]
+            ],
+            {
+                guns: [
+                ]
+            });
+    };
+});
+
+DefineModule('sprites/player-ship-wing-guns', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "white";
+        var n = null;
+        return new Sprite([
+                [ n, n, n, n, w, n, n, n, n ],
+                [ n, n, n, n, w, n, n, n, n ],
+                [ n, n, n, w, w, w, n, n, n ],
+                [ n, n, n, w, w, w, n, n, n ],
+                [ w, n, n, w, w, w, n, n, w ],
+                [ w, n, w, w, w, w, w, n, w ],
+                [ w, w, w, w, w, w, w, w, w ],
+                [ n, n, n, w, w, w, n, n, n ],
+                [ n, n, n, n, w, n, n, n, n ]
+            ],
+            {
+                guns: [
+                    { x: 0, y: 5 },
+                    { x: 4, y: 1 },
+                    { x: 8, y: 5 }
+                ]
+            });
+    };
+});
+
+DefineModule('sprites/player-ship', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "white";
+        var n = null;
+        return new Sprite([
+            [ n, n, n, w, n, n, n ],
+            [ n, n, n, w, n, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, w, w, w, w, w, n ],
+            [ w, w, w, w, w, w, w ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, n, w, n, n, n ]
+        ],
+        {
+            guns: [
+                { x: 3, y: 1 }
+            ]
+        });
+    };
 });
 
 DefineModule('views/canvas-renderer', function (require) {
@@ -5028,5 +4889,64 @@ DefineModule('sprites/animations/small-explosion', function (require) {
             millisPerFrame: 50
         });
     }
+});
+
+DefineModule('main', function (require) {
+    var CanvasRenderer = require('views/canvas-renderer');
+    var GamepadController = require('controllers/gamepad-input');
+    var KeyboardController = require('controllers/keyboard-input');
+    var Phoenix = require('models/phoenix');
+    var RunLoop = require('helpers/run-loop');
+
+    window.createPhoenixGameInstance = function (targetDiv, gameOverCallback) {
+        var gameDimensions = {
+            width: 200,
+            height: 150,
+            container: targetDiv,
+            embedded: true
+        };
+        var gamepadInput = new GamepadController();
+        var keyboardInput = new KeyboardController();
+
+        var phoenix = new Phoenix(gameDimensions);
+        var renderer = new CanvasRenderer(gameDimensions);
+        var runLoop = new RunLoop();
+
+        phoenix.gameOverCallback = gameOverCallback;
+        renderer.setFillColor(phoenix.FILL_COLOR);
+
+        runLoop.addCallback(function (dtime) {
+            phoenix.processInput([
+                keyboardInput.getInputState(),
+                gamepadInput.getInputState()
+            ]);
+
+            phoenix.update(dtime);
+
+            var frame = renderer.newRenderFrame();
+            frame.clear();
+            phoenix.renderToFrame(frame);
+
+            renderer.renderFrame(frame);
+        });
+
+        document.addEventListener("visibilitychange", function () {
+            if (document.hidden) {
+                phoenix.pause();
+            }
+        });
+
+        window.addEventListener("blur", function () {
+            phoenix.pause();
+        });
+
+        window.addEventListener("focus", function () {
+            keyboardInput.clearState();
+            gamepadInput.clearState();
+        });
+
+        runLoop.start();
+        return phoenix;
+    };
 });
 }());
