@@ -21,5 +21,8 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "simple-web-modules": "git@github.com:ericlifka/simple-web-modules.git#^1.0.0"
+  }
 }
