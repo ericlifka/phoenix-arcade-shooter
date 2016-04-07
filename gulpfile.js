@@ -18,8 +18,13 @@ gulp.task('default', function () {
         }))
         .pipe(gulp.dest('./dist'));
 
-    gulp.src([ './modules.js', './src/**/*.js' ])
-        .pipe(filter(function (file) { return !/embedded/.test(file.path) }))
+    gulp.src([
+            'bower_components/simple-web-modules/index.js',
+            './src/**/*.js'
+        ])
+        .pipe(filter(function (file) {
+            return !/embedded/.test(file.path)
+        }))
         .pipe(concat({ path: 'phoenix-arcade-shooter.js' }))
         .pipe(wrapper({
             header: '(function () {\n',
