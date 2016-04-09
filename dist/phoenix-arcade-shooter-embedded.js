@@ -770,1130 +770,6 @@ DefineModule('controllers/keyboard-input', function (require) {
     });
 });
 
-DefineModule('fonts/arcade-small', function (require) {
-    var Sprite = require('models/sprite');
-
-    var w = "white";
-    var n = null;
-
-    return {
-        meta: {
-            width: 3,
-            height: 5,
-            lineHeight: 8,
-            letterSpacing: 1,
-            credit: "me"
-        },
-        A: new Sprite([
-            [ n, w, w, w, w ],
-            [ w, n, w, n, n ],
-            [ n, w, w, w, w ]
-        ]),
-        B: new Sprite([
-            [ w, w, w, w, w ],
-            [ w, n, w, n, w ],
-            [ n, w, n, w, n ]
-        ]),
-        C: new Sprite([
-            [ n, w, w, w, n ],
-            [ w, n, n, n, w ],
-            [ n, w, n, w, n ]
-        ]),
-        D: new Sprite([
-            [ w, w, w, w, w ],
-            [ w, n, n, n, w ],
-            [ n, w, w, w, n ]
-        ]),
-        E: new Sprite([
-            [ w, w, w, w, w ],
-            [ w, n, w, n, w ],
-            [ w, n, n, n, w ]
-        ]),
-        F: new Sprite([
-            [ w, w, w, w, w ],
-            [ w, n, w, n, n ],
-            [ w, n, n, n, n ]
-        ]),
-        G: new Sprite([
-            [ n, w, w, w, n ],
-            [ w, n, n, n, w ],
-            [ w, n, n, w, w ]
-        ]),
-        H: new Sprite([
-            [ w, w, w, w, w ],
-            [ n, n, w, n, n ],
-            [ w, w, w, w, w ]
-        ]),
-        I: new Sprite([
-            [ w, n, n, n, w ],
-            [ w, w, w, w, w ],
-            [ w, n, n, n, w ]
-        ]),
-        J: new Sprite([
-            [ n, n, n, w, n ],
-            [ n, n, n, n, w ],
-            [ w, w, w, w, n ]
-        ]),
-        K: new Sprite([
-            [ w, w, w, w, w ],
-            [ n, n, w, n, n ],
-            [ w, w, n, w, w ]
-        ]),
-        L: new Sprite([
-            [ w, w, w, w, w ],
-            [ n, n, n, n, w ],
-            [ n, n, n, n, w ]
-        ]),
-        M: new Sprite([
-            [ w, w, w, w, w ],
-            [ n, w, n, n, n ],
-            [ n, n, w, n, n ],
-            [ n, w, n, n, n ],
-            [ w, w, w, w, w ]
-        ]),
-        N: new Sprite([
-            [ w, w, w, w, w ],
-            [ n, w, n, n, n ],
-            [ n, n, w, n, n ],
-            [ w, w, w, w, w ]
-        ]),
-        O: new Sprite([
-            [ n, w, w, w, n ],
-            [ w, n, n, n, w ],
-            [ n, w, w, w, n ]
-        ]),
-        P: new Sprite([
-            [ w, w, w, w, w ],
-            [ w, n, w, n, n ],
-            [ n, w, n, n, n ]
-        ]),
-        Q: new Sprite([
-            [ n, w, w, w, n ],
-            [ w, n, n, n, w ],
-            [ w, n, n, w, w ],
-            [ n, w, w, w, w ]
-        ]),
-        R: new Sprite([
-            [ w, w, w, w, w ],
-            [ w, n, w, n, n ],
-            [ n, w, n, w, w ]
-        ]),
-        S: new Sprite([
-            [ n, w, n, n, w ],
-            [ w, n, w, n, w ],
-            [ w, n, n, w, n ]
-        ]),
-        T: new Sprite([
-            [ w, n, n, n, n ],
-            [ w, w, w, w, w ],
-            [ w, n, n, n, n ]
-        ]),
-        U: new Sprite([
-            [ w, w, w, w, n ],
-            [ n, n, n, n, w ],
-            [ w, w, w, w, w ]
-        ]),
-        V: new Sprite([
-            [ w, w, w, w, n ],
-            [ n, n, n, n, w ],
-            [ w, w, w, w, n ]
-        ]),
-        W: new Sprite([
-            [ w, w, w, w, n ],
-            [ n, n, n, n, w ],
-            [ n, n, n, w, n ],
-            [ n, n, n, n, w ],
-            [ w, w, w, w, n ]
-        ]),
-        X: new Sprite([
-            [ w, w, n, w, w ],
-            [ n, n, w, n, n ],
-            [ w, w, n, w, w ]
-        ]),
-        Y: new Sprite([
-            [ w, w, n, n, n ],
-            [ n, n, w, n, w ],
-            [ w, w, w, w, n ]
-        ]),
-        Z: new Sprite([
-            [ w, n, n, w, w ],
-            [ w, n, w, n, w ],
-            [ w, w, n, n, w ]
-        ]),
-        a: new Sprite([
-            [ n, n, n, n, w, n ],
-            [ n, w, n, w, n, w ],
-            [ n, w, w, w, w, w ]
-        ]),
-        b: new Sprite([
-            [ w, w, w, w, w ],
-            [ n, n, w, n, w ],
-            [ n, n, n, w, w ]
-        ]),
-        c: new Sprite([
-            [ n, w, w, w, w ],
-            [ n, w, n, n, w ]
-        ]),
-        d: new Sprite([
-            [ n, n, n, w, w ],
-            [ n, n, w, n, w ],
-            [ w, w, w, w, w ]
-        ]),
-        e: new Sprite([
-            [ n, w, w, w, w, n ],
-            [ n, w, n, w, n, w ],
-            [ n, n, w, w, n, n ]
-        ]),
-        f: new Sprite([
-            [ w, w, w, w, w ],
-            [ w, n, w, n, n ]
-        ]),
-        g: new Sprite([
-            [ n, n, w, w, n, n, w ],
-            [ n, n, w, n, w, n, w ],
-            [ n, n, w, w, w, w, n ]
-        ]),
-        h: new Sprite([
-            [ w, w, w, w, w ],
-            [ n, n, w, n, n ],
-            [ n, n, n, w, w ]
-        ]),
-        i: new Sprite([
-            [ w, n, w, w, w ]
-        ]),
-        j: new Sprite([
-            [ n, n, n, n, n, w ],
-            [ n, w, n, w, w, w ]
-        ]),
-        k: new Sprite([
-            [ w, w, w, w, w ],
-            [ n, n, w, n, n ],
-            [ n, w, n, w, w ]
-        ]),
-        l: new Sprite([
-            [ w, w, w, w, w ]
-        ]),
-        m: new Sprite([
-            [ n, n, w, w, w ],
-            [ n, n, w, n, n ],
-            [ n, n, n, w, n ],
-            [ n, n, w, n, n ],
-            [ n, n, w, w, w ]
-        ]),
-        n: new Sprite([
-            [ n, n, w, w, w ],
-            [ n, n, w, n, n ],
-            [ n, n, n, w, w ]
-        ]),
-        o: new Sprite([
-            [ n, n, w, w, w ],
-            [ n, n, w, n, w ],
-            [ n, n, w, w, w ]
-        ]),
-        p: new Sprite([
-            [ n, n, w, w, w, w, w ],
-            [ n, n, w, n, w, n, n ],
-            [ n, n, w, w, n, n, n ]
-        ]),
-        q: new Sprite([
-            [ n, n, w, w, n, n, n ],
-            [ n, n, w, n, w, n, n ],
-            [ n, n, w, w, w, w, w ]
-        ]),
-        r: new Sprite([
-            [ n, n, w, w, w ],
-            [ n, n, w, n, n ]
-        ]),
-        s: new Sprite([
-            [ n, w, w, n, w ],
-            [ n, w, n, w, w ]
-        ]),
-        t: new Sprite([
-            [ n, w, n, n, n ],
-            [ w, w, w, w, w ],
-            [ n, w, n, n, n ]
-        ]),
-        u: new Sprite([
-            [ n, n, w, w, n ],
-            [ n, n, n, n, w ],
-            [ n, n, w, w, w ]
-        ]),
-        v: new Sprite([
-            [ n, n, w, w, n ],
-            [ n, n, n, n, w ],
-            [ n, n, w, w, n ]
-        ]),
-        w: new Sprite([
-            [ n, n, w, w, n ],
-            [ n, n, n, n, w ],
-            [ n, n, n, w, w ],
-            [ n, n, n, n, w ],
-            [ n, n, w, w, n ]
-        ]),
-        x: new Sprite([
-            [ n, n, w, n, w ],
-            [ n, n, n, w, n ],
-            [ n, n, w, n, w ]
-        ]),
-        y: new Sprite([
-            [ n, n, w, w, w, n, w ],
-            [ n, n, n, n, w, n, w ],
-            [ n, n, w, w, w, w, n ]
-        ]),
-        z: new Sprite([
-            [ n, n, w, n, n ],
-            [ n, n, w, w, w ],
-            [ n, n, n, n, w ]
-        ]),
-        '0': new Sprite([
-            [ w, w, w, w, w ],
-            [ w, n, n, n, w ],
-            [ w, w, w, w, w ]
-        ]),
-        '1': new Sprite([
-            [ w, n, n, n, w ],
-            [ w, w, w, w, w ],
-            [ n, n, n, n, w ]
-        ]),
-        '2': new Sprite([
-            [ w, n, w, w, w ],
-            [ w, n, w, n, w ],
-            [ n, w, w, n, w ]
-        ]),
-        '3': new Sprite([
-            [ w, n, w, n, w ],
-            [ w, n, w, n, w ],
-            [ w, w, w, w, w ]
-        ]),
-        '4': new Sprite([
-            [ w, w, n, n, n ],
-            [ n, n, w, n, n ],
-            [ w, w, w, w, w ]
-        ]),
-        '5': new Sprite([
-            [ w, w, w, n, w ],
-            [ w, n, w, n, w ],
-            [ w, n, n, w, w ]
-        ]),
-        '6': new Sprite([
-            [ w, w, w, w, w ],
-            [ w, n, w, n, w ],
-            [ w, n, n, w, w ]
-        ]),
-        '7': new Sprite([
-            [ w, n, n, w, w ],
-            [ w, n, w, n, n ],
-            [ w, w, n, n, n ]
-        ]),
-        '8': new Sprite([
-            [ w, w, n, w, w ],
-            [ w, n, w, n, w ],
-            [ w, w, n, w, w ]
-        ]),
-        '9': new Sprite([
-            [ w, w, n, n, w ],
-            [ w, n, w, n, w ],
-            [ w, w, w, w, w ]
-        ]),
-        '!': new Sprite([
-            [ w, w, w, n, w ]
-        ]),
-        '.': new Sprite([
-            [ n, n, n, n, w ]
-        ]),
-        ',': new Sprite([
-            [ n, n, n, n, w, w ]
-        ]),
-        '?': new Sprite([
-            [ w, n, w, w, n, w ],
-            [ n, w, n, n, n, n ]
-        ]),
-        '<': new Sprite([
-            [ n, n, w, n, n],
-            [ n, w, w, w, n],
-            [ w, w, n, w, w],
-            [ w, n, n, n, w]
-
-        ]),
-        '>': new Sprite([
-            [ w, n, n, n, w],
-            [ w, w, n, w, w],
-            [ n, w, w, w, n],
-            [ n, n, w, n, n]
-        ]),
-        '-': new Sprite([
-            [ n, n, w, n, n ],
-            [ n, n, w, n, n ],
-            [ n, n, w, n, n ]
-        ]),
-        ':': new Sprite([
-            [ n, n, n, n, n ],
-            [ n, n, w, n, w ],
-            [ n, n, n, n, n ]
-        ]),
-        '$': new Sprite([
-            [ n, n, w, n ],
-            [ w, w, w, w ],
-            [ w, n, w, n ],
-            [ w, w, w, w ],
-            [ n, w, n, w ],
-            [ w, w, w, w ],
-            [ n, w, n, n ]
-        ]).invertY().rotateRight().setPermanentOffset({x: 0, y: -1}),
-        '+': new Sprite([
-            [ n, n, n ],
-            [ n, w, n ],
-            [ w, w, w ],
-            [ n, w, n ],
-            [ n, n, n ]
-        ]).invertY().rotateRight(),
-        '%': new Sprite([
-            [ w, n, n, w ],
-            [ n, n, w, w ],
-            [ n, w, w, n ],
-            [ w, w, n, n ],
-            [ w, n, n, w ]
-        ]).invertY().rotateRight(),
-        ' ': new Sprite([
-            [ n, n, n, n, n ],
-            [ n, n, n, n, n ],
-            [ n, n, n, n, n ]
-        ])
-    };
-});
-
-DefineModule('fonts/arcade', function (require) {
-    var Sprite = require('models/sprite');
-
-    var w = "white";
-    var n = null;
-
-    return {
-        meta: {
-            width: 7,
-            height: 7,
-            lineHeight: 11,
-            letterSpacing: 1,
-            credit: "http://www.urbanfonts.com/fonts/Arcade.htm"
-        },
-        A: new Sprite([
-            [ n, n, w, w, w, w, w ],
-            [ n, w, w, w, w, w, w ],
-            [ w, w, n, n, w, n, n ],
-            [ w, n, n, n, w, n, n ],
-            [ w, w, n, n, w, n, n ],
-            [ n, w, w, w, w, w, w ],
-            [ n, n, w, w, w, w, w ]
-        ]),
-        B: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, w, w, n, w, w, n ]
-        ]),
-        C: new Sprite([
-            [ n, w, w, w, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, w, n, n, n, w, w ],
-            [ n, w, n, n, n, w, n ]
-        ]),
-        D: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, w, w, w, w, w, n ]
-        ]),
-        E: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, n, n, n, w ]
-        ]),
-        F: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, w, n, n, n ],
-            [ w, n, n, w, n, n, n ],
-            [ w, n, n, w, n, n, n ],
-            [ w, n, n, w, n, n, n ],
-            [ w, n, n, n, n, n, n ]
-        ]),
-        G: new Sprite([
-            [ n, w, w, w, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, w, n, w, w, w, w ],
-            [ n, w, n, w, w, w, n ]
-        ]),
-        H: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, n, w, n, n, n ],
-            [ n, n, n, w, n, n, n ],
-            [ n, n, n, w, n, n, n ],
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ]
-        ]),
-        I: new Sprite([
-            [ w, n, n, n, n, n, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, n, n, n, n, n, w ]
-        ]),
-        J: new Sprite([
-            [ n, n, n, n, n, w, n ],
-            [ n, n, n, n, n, w, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, n ],
-            [ w, n, n, n, n, n, n ]
-        ]),
-        K: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, n, w, w, n, n ],
-            [ n, n, w, w, w, w, n ],
-            [ n, w, w, n, w, w, n ],
-            [ w, w, n, n, n, w, w ],
-            [ w, n, n, n, n, n, w ]
-        ]),
-        L: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, n, n, n, n, w ],
-            [ n, n, n, n, n, n, w ],
-            [ n, n, n, n, n, n, w ],
-            [ n, n, n, n, n, n, w ],
-            [ n, n, n, n, n, n, w ]
-        ]),
-        M: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ n, w, w, w, w, w, w ],
-            [ n, n, w, w, n, n, n ],
-            [ n, n, n, w, w, n, n ],
-            [ n, n, w, w, n, n, n ],
-            [ n, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ]
-        ]),
-        N: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, w, w, n, n, n, n ],
-            [ n, n, w, w, n, n, n ],
-            [ n, n, n, w, w, n, n ],
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ]
-        ]),
-        O: new Sprite([
-            [ n, w, w, w, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, w, w, w, w, w, n ]
-        ]),
-        P: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, w, n, n, n ],
-            [ w, n, n, w, n, n, n ],
-            [ w, n, n, w, n, n, n ],
-            [ w, w, w, w, n, n, n ],
-            [ n, w, w, n, n, n, n ]
-        ]),
-        Q: new Sprite([
-            [ n, w, w, w, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, n, n, n, w, n, w ],
-            [ w, n, n, n, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ n, w, w, w, w, n, w ]
-        ]),
-        R: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, w, n, n, n ],
-            [ w, n, n, w, w, n, n ],
-            [ w, n, n, w, w, w, n ],
-            [ w, w, w, w, n, w, w ],
-            [ n, w, w, n, n, n, w ]
-        ]),
-        S: new Sprite([
-            [ n, w, w, n, n, w, n ],
-            [ w, w, w, w, n, w, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, w, n, w, w, w, w ],
-            [ n, w, n, n, w, w, n ]
-        ]),
-        T: new Sprite([
-            [ w, n, n, n, n, n, n ],
-            [ w, n, n, n, n, n, n ],
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, n, n, n, n ],
-            [ w, n, n, n, n, n, n ]
-        ]),
-        U: new Sprite([
-            [ w, w, w, w, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, n, n, n, n, w ],
-            [ n, n, n, n, n, n, w ],
-            [ n, n, n, n, n, n, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, n ]
-        ]),
-        V: new Sprite([
-            [ w, w, w, w, w, n, n ],
-            [ w, w, w, w, w, w, n ],
-            [ n, n, n, n, n, w, w ],
-            [ n, n, n, n, n, n, w ],
-            [ n, n, n, n, n, w, w ],
-            [ w, w, w, w, w, w, n ],
-            [ w, w, w, w, w, n, n ]
-        ]),
-        W: new Sprite([
-            [ w, w, w, w, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, n, n, n, w, w ],
-            [ n, n, n, n, w, w, n ],
-            [ n, n, n, n, n, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, n ]
-        ]),
-        X: new Sprite([
-            [ w, n, n, n, n, w, w ],
-            [ w, w, n, n, w, w, n ],
-            [ n, w, w, w, w, n, n ],
-            [ n, n, w, w, n, n, n ],
-            [ n, w, w, w, w, n, n ],
-            [ w, w, n, n, w, w, n ],
-            [ w, n, n, n, n, w, w ]
-        ]),
-        Y: new Sprite([
-            [ w, w, w, n, n, n, n ],
-            [ w, w, w, w, n, n, n ],
-            [ n, n, n, w, w, w, w ],
-            [ n, n, n, w, w, w, w ],
-            [ w, w, w, w, n, n, n ],
-            [ w, w, w, n, n, n, n ],
-            [ n, n, n, n, n, n, n ]
-        ]),
-        Z: new Sprite([
-            [ w, n, n, n, n, w, w ],
-            [ w, n, n, n, w, w, w ],
-            [ w, n, n, w, w, n, w ],
-            [ w, n, w, w, n, n, w ],
-            [ w, w, w, n, n, n, w ],
-            [ w, w, n, n, n, n, w ],
-            [ w, n, n, n, n, n, w ]
-        ]),
-        a: new Sprite([
-            [ n, n, n, n, n, w, n ],
-            [ n, n, w, n, w, w, w ],
-            [ n, n, w, n, w, n, w ],
-            [ n, n, w, n, w, n, w ],
-            [ n, n, w, n, w, n, w ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, n, w, w, w, w ]
-        ]),
-        b: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, w, n, n, n, w ],
-            [ n, n, w, n, n, n, w ],
-            [ n, n, w, n, n, n, w ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, n, w, w, w, n ]
-        ]),
-        c: new Sprite([
-            [ n, n, n, w, w, w, n ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, w, n, n, n, w ],
-            [ n, n, w, n, n, n, w ],
-            [ n, n, w, n, n, n, w ],
-            [ n, n, w, w, n, w, w ],
-            [ n, n, n, w, n, w, n ]
-        ]),
-        d: new Sprite([
-            [ n, n, n, w, w, w, n ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, w, n, n, n, w ],
-            [ n, n, w, n, n, n, w ],
-            [ n, n, w, n, n, n, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ]
-        ]),
-        e: new Sprite([
-            [ n, n, n, w, w, w, n ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, w, n, w, n, w ],
-            [ n, n, w, n, w, n, w ],
-            [ n, n, w, n, w, n, w ],
-            [ n, n, w, w, w, n, w ],
-            [ n, n, n, w, w, n, n ]
-        ]),
-        f: new Sprite([
-            [ n, n, w, n, n, n, n ],
-            [ n, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, w, n, n, n, n ],
-            [ w, n, n, n, n, n, n ]
-        ]),
-        g: new Sprite([
-            [ n, n, n, w, w, w, n, n, n ],
-            [ n, n, w, w, w, w, w, n, w ],
-            [ n, n, w, n, n, n, w, n, w ],
-            [ n, n, w, n, n, n, w, n, w ],
-            [ n, n, w, n, n, n, w, n, w ],
-            [ n, n, w, w, w, w, w, w, w ],
-            [ n, n, n, w, w, w, w, w, n ]
-        ]),
-        h: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, w, n, n, n, n ],
-            [ n, n, w, n, n, n, n ],
-            [ n, n, w, n, n, n, n ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, n, w, w, w, w ]
-        ]),
-        i: new Sprite([
-            [ w, n, w, w, w, w, w ],
-            [ w, n, w, w, w, w, w ]
-        ]),
-        j: new Sprite([
-            [ n, n, n, n, n, n, w ],
-            [ n, n, w, n, n, n, w ],
-            [ w, n, w, w, w, w, w ],
-            [ w, n, w, w, w, w, n ]
-        ]),
-        k: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, n, n, w, n, n ],
-            [ n, n, n, w, w, w, n ],
-            [ n, n, w, w, n, w, w ],
-            [ n, n, w, n, n, n, w ]
-        ]),
-        l: new Sprite([
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ]
-        ]),
-        m: new Sprite([
-            [ n, n, w, w, w, w, w ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, w, n, n, n, n ],
-            [ n, n, n, w, w, w, w ],
-            [ n, n, w, n, n, n, n ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, n, w, w, w, w ]
-        ]),
-        n: new Sprite([
-            [ n, n, w, w, w, w, w ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, w, n, n, n, n ],
-            [ n, n, w, n, n, n, n ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, n, w, w, w, w ]
-        ]),
-        o: new Sprite([
-            [ n, n, n, w, w, w, n ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, w, n, n, n, w ],
-            [ n, n, w, n, n, n, w ],
-            [ n, n, w, n, n, n, w ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, n, w, w, w, n ]
-        ]),
-        p: new Sprite([
-            [ n, n, w, w, w, w, w, w, w ],
-            [ n, n, w, w, w, w, w, w, w ],
-            [ n, n, w, n, n, n, w, n, n ],
-            [ n, n, w, n, n, n, w, n, n ],
-            [ n, n, w, n, n, n, w, n, n ],
-            [ n, n, w, w, w, w, w, n, n ],
-            [ n, n, n, w, w, w, n, n, n ]
-        ]),
-        q: new Sprite([
-            [ n, n, n, w, w, w, n, n, n ],
-            [ n, n, w, w, w, w, w, n, n ],
-            [ n, n, w, n, n, n, w, n, n ],
-            [ n, n, w, n, n, n, w, n, n ],
-            [ n, n, w, n, n, n, w, n, n ],
-            [ n, n, w, w, w, w, w, w, w ],
-            [ n, n, w, w, w, w, w, w, w ]
-        ]),
-        r: new Sprite([
-            [ n, n, w, w, w, w, w ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, n, w, n, n, n ],
-            [ n, n, w, n, n, n, n ],
-            [ n, n, w, n, n, n, n ]
-        ]),
-        s: new Sprite([
-            [ n, n, n, w, n, n, n ],
-            [ n, n, w, w, w, n, w ],
-            [ n, n, w, n, w, n, w ],
-            [ n, n, w, n, w, n, w ],
-            [ n, n, w, n, w, n, w ],
-            [ n, n, w, n, w, w, w ],
-            [ n, n, n, n, n, w, n ]
-        ]),
-        t: new Sprite([
-            [ n, n, w, n, n, n, n ],
-            [ w, w, w, w, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, w, n, n, n, w ],
-            [ n, n, n, n, n, n, w ]
-        ]),
-        u: new Sprite([
-            [ n, n, w, w, w, w, w ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, n, n, n, n, w ],
-            [ n, n, n, n, n, n, w ],
-            [ n, n, n, n, n, n, w ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, w, w, w, w, n ]
-        ]),
-        v: new Sprite([
-            [ n, n, w, w, w, n, n ],
-            [ n, n, w, w, w, w, n ],
-            [ n, n, n, n, n, w, w ],
-            [ n, n, n, n, n, n, w ],
-            [ n, n, n, n, n, w, w ],
-            [ n, n, w, w, w, w, n ],
-            [ n, n, w, w, w, n, n ]
-        ]),
-        w: new Sprite([
-            [ n, n, w, w, w, w, n ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, n, n, n, n, w ],
-            [ n, n, n, n, n, w, n ],
-            [ n, n, n, n, n, n, w ],
-            [ n, n, w, w, w, w, w ],
-            [ n, n, w, w, w, w, n ]
-        ]),
-        x: new Sprite([
-            [ n, n, w, n, n, n, w ],
-            [ n, n, w, w, n, w, w ],
-            [ n, n, n, w, w, w, n ],
-            [ n, n, n, n, w, n, n ],
-            [ n, n, n, w, w, w, n ],
-            [ n, n, w, w, n, w, w ],
-            [ n, n, w, n, n, n, w ]
-        ]),
-        y: new Sprite([
-            [ n, n, w, w, w, w, n, n, n ],
-            [ n, n, w, w, w, w, w, n, w ],
-            [ n, n, n, n, n, n, w, n, w ],
-            [ n, n, n, n, n, n, w, n, w ],
-            [ n, n, n, n, n, n, w, n, w ],
-            [ n, n, w, w, w, w, w, w, w ],
-            [ n, n, w, w, w, w, w, w, n ]
-        ]),
-        z: new Sprite([
-            [ n, n, w, n, n, n, w ],
-            [ n, n, w, n, n, w, w ],
-            [ n, n, w, n, w, w, w ],
-            [ n, n, w, n, w, n, w ],
-            [ n, n, w, w, w, n, w ],
-            [ n, n, w, w, n, n, w ],
-            [ n, n, w, n, n, n, w ]
-        ]),
-        ' ': new Sprite([
-            [ n, n, n, n, n, n, n ],
-            [ n, n, n, n, n, n, n ],
-            [ n, n, n, n, n, n, n ],
-            [ n, n, n, n, n, n, n ],
-            [ n, n, n, n, n, n, n ]
-        ]),
-        '0': new Sprite([
-            [ n, w, w, w, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, w, w, w, w, w, n ]
-        ]),
-        '1': new Sprite([
-            [ n, n, n, n, n, n, w ],
-            [ n, w, n, n, n, n, w ],
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, n, n, n, n, w ],
-            [ n, n, n, n, n, n, w ]
-        ]),
-        '2': new Sprite([
-            [ n, w, n, n, n, w, w ],
-            [ w, w, n, n, w, w, w ],
-            [ w, n, n, w, w, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, w, w, n, n, w ],
-            [ w, w, w, n, n, n, w ],
-            [ n, w, n, n, n, n, w ]
-        ]),
-        '3': new Sprite([
-            [ n, w, n, n, n, w, n ],
-            [ w, w, n, n, n, w, w ],
-            [ w, n, n, n, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, w, w, n, w, w, n ]
-        ]),
-        '4': new Sprite([
-            [ n, n, n, w, w, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, w, w, n, w, n, n ],
-            [ w, w, n, n, w, n, n ],
-            [ w, w, w, w, w, w, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, n, n, w, n, n ]
-        ]),
-        '5': new Sprite([
-            [ w, w, w, n, n, w, n ],
-            [ w, w, w, n, n, w, w ],
-            [ w, n, w, n, n, n, w ],
-            [ w, n, w, n, n, n, w ],
-            [ w, n, w, n, n, n, w ],
-            [ w, n, w, w, w, w, w ],
-            [ n, n, n, w, w, w, n ]
-
-        ]),
-        '6': new Sprite([
-            [ n, w, w, w, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, w, n, w, w, w, w ],
-            [ n, w, n, n, w, w, n ]
-        ]),
-        '7': new Sprite([
-            [ w, n, n, n, n, n, n ],
-            [ w, n, n, n, n, n, n ],
-            [ w, n, n, w, w, w, w ],
-            [ w, n, w, w, w, w, w ],
-            [ w, w, w, n, n, n, n ],
-            [ w, w, n, n, n, n, n ],
-            [ w, n, n, n, n, n, n ]
-        ]),
-        '8': new Sprite([
-            [ n, w, w, n, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, w, w, w, w, w, w ],
-            [ n, w, w, n, w, w, n ]
-        ]),
-        '9': new Sprite([
-            [ n, w, w, n, n, n, n ],
-            [ w, w, w, w, n, n, n ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, w, n, n, w ],
-            [ w, n, n, w, n, w, w ],
-            [ w, w, w, w, w, w, n ],
-            [ n, w, w, w, w, n, n ]
-        ]),
-        '!': new Sprite([
-            [ n, n, n, n, n, n, w ],
-            [ n, n, n, n, w, n, w ],
-            [ n, n, n, w, w, n, n ],
-            [ n, n, w, w, n, n, n ],
-            [ n, w, w, w, n, n, n ],
-            [ w, w, w, n, n, n, n ],
-            [ w, w, w, n, n, n, n ]
-        ]),
-        '.': new Sprite([
-            [ n, n, n, n, n, w, w ],
-            [ n, n, n, n, n, w, w ],
-            [ n, n, n, n, n, n, n ],
-            [ n, n, n, n, n, n, n ]
-        ]),
-        ',': new Sprite([
-            [ n, n, n, n, n, n, n, w ],
-            [ n, n, n, n, n, w, w, w ],
-            [ n, n, n, n, n, w, w, n ]
-        ]),
-        '?': new Sprite([
-            [ n, w, n, n, n, n, n ],
-            [ w, w, n, n, n, n, n ],
-            [ w, n, n, w, n, w, w ],
-            [ w, n, w, w, n, w, w ],
-            [ w, w, w, n, n, n, n ],
-            [ n, w, n, n, n, n, n ]
-        ]),
-        '$': new Sprite([
-            [ n, n, w, n, n ],
-            [ n, w, w, w, n ],
-            [ w, n, w, n, w ],
-            [ n, w, w, n, n ],
-            [ n, n, w, n, n ],
-            [ n, n, w, w, n ],
-            [ w, n, w, n, w ],
-            [ n, w, w, w, n ],
-            [ n, n, w, n, n ]
-        ]).invertY().rotateRight()
-    };
-});
-
-DefineModule('fonts/phoenix', function (require) {
-    var Sprite = require('models/sprite');
-
-    var w = "white";
-    var n = null;
-
-    return {
-        meta: {
-            width: 15,
-            height: 15,
-            lineHeight: 16,
-            letterSpacing: -1
-        },
-        P: new Sprite([
-            [ n, n, n, w, w, w, w, w, w, w, w, w, n, n ],
-            [ n, n, n, n, n, w, w, w, n, n, w, w, w, n ],
-            [ n, n, n, n, n, w, w, n, n, n, n, w, w, w ],
-            [ n, n, n, n, w, w, n, n, n, n, n, n, w, w ],
-            [ n, n, n, n, w, w, n, n, n, n, n, n, w, w ],
-            [ n, n, n, n, w, w, n, n, n, n, n, n, w, w ],
-            [ n, n, n, n, w, w, w, n, n, n, n, w, w, w ],
-            [ n, n, n, w, w, w, w, w, n, n, w, w, w, n ],
-            [ n, n, n, w, w, n, w, w, w, w, w, w, n, n ],
-            [ n, n, n, w, w, n, n, n, n, n, n, n, n, n ],
-            [ n, n, n, w, w, n, n, n, n, n, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n, n, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n, n, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n, n, n, n, n, n ],
-            [ w, w, w, w, w, w, n, n, n, n, n, n, n, n ]
-        ]).invertY().rotateRight(),
-        H: new Sprite([
-            [ n, n, n, w, w, w, w, w, w, n, n, w, w, w, w, w, w ],
-            [ n, n, n, n, n, w, w, n, n, n, n, n, n, w, w, n, n ],
-            [ n, n, n, n, n, w, w, n, n, n, n, n, n, w, w, n, n ],
-            [ n, n, n, n, w, w, n, n, n, n, n, n, w, w, n, n, n ],
-            [ n, n, n, n, w, w, n, n, n, n, n, n, w, w, n, n, n ],
-            [ n, n, n, n, w, w, n, n, n, n, n, n, w, w, n, n, n ],
-            [ n, n, n, n, w, w, n, n, n, n, n, n, w, w, n, n, n ],
-            [ n, n, n, w, w, w, w, w, w, w, w, w, w, n, n, n, n ],
-            [ n, n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n ],
-            [ n, n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n ],
-            [ n, n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n, n ],
-            [ w, w, w, w, w, w, n, n, w, w, w, w, w, w, n, n, n ]
-        ]).invertY().rotateRight(),
-        O: new Sprite([
-            [ n, n, n, n, n, w, w, w, w, w, n, n ],
-            [ n, n, n, n, w, w, w, n, w, w, w, n ],
-            [ n, n, n, w, w, w, n, n, n, w, w, n ],
-            [ n, n, n, w, w, n, n, n, n, w, w, w ],
-            [ n, n, w, w, n, n, n, n, n, n, w, w ],
-            [ n, n, w, w, n, n, n, n, n, n, w, w ],
-            [ n, w, w, n, n, n, n, n, n, n, w, w ],
-            [ n, w, w, n, n, n, n, n, n, n, w, w ],
-            [ n, w, w, n, n, n, n, n, n, w, w, n ],
-            [ w, w, n, n, n, n, n, n, n, w, w, n ],
-            [ w, w, n, n, n, n, n, n, n, w, w, n ],
-            [ w, w, n, n, n, n, n, n, w, w, n, n ],
-            [ n, w, w, n, n, n, n, w, w, n, n, n ],
-            [ n, n, w, w, n, n, w, w, n, n, n, n ],
-            [ n, n, n, w, w, w, w, n, n, n, n, n ]
-        ]).invertY().rotateRight(),
-        E: new Sprite([
-            [ n, n, n, w, w, w, w, w, w, w, w, w, w, w ],
-            [ n, n, n, n, n, w, w, n, n, n, n, n, n, w ],
-            [ n, n, n, n, n, w, w, n, n, n, n, n, n, n ],
-            [ n, n, n, n, w, w, n, n, n, n, n, n, n, n ],
-            [ n, n, n, n, w, w, n, n, n, n, n, n, n, n ],
-            [ n, n, n, n, w, w, n, n, n, n, n, n, n, n ],
-            [ n, n, n, n, w, w, n, n, n, n, w, n, n, n ],
-            [ n, n, n, w, w, w, w, w, w, w, w, n, n, n ],
-            [ n, n, n, w, w, n, n, n, n, n, w, n, n, n ],
-            [ n, n, n, w, w, n, n, n, n, n, n, n, n, n ],
-            [ n, n, n, w, w, n, n, n, n, n, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n, n, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n, n, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n, n, n, w, n, n ],
-            [ w, w, w, w, w, w, w, w, w, w, w, w, n, n ]
-        ]).invertY().rotateRight(),
-        N: new Sprite([
-            [ n, n, n, w, w, w, w, n, n, n, n, w, w, w, w, w, w ],
-            [ n, n, n, n, n, w, w, n, n, n, n, n, n, w, w, n, n ],
-            [ n, n, n, n, n, w, w, w, n, n, n, n, n, w, w, n, n ],
-            [ n, n, n, n, w, w, w, w, n, n, n, n, w, w, n, n, n ],
-            [ n, n, n, n, w, w, n, w, w, n, n, n, w, w, n, n, n ],
-            [ n, n, n, n, w, w, n, w, w, n, n, n, w, w, n, n, n ],
-            [ n, n, n, n, w, w, n, w, w, n, n, n, w, w, n, n, n ],
-            [ n, n, n, w, w, n, n, n, w, w, n, w, w, n, n, n, n ],
-            [ n, n, n, w, w, n, n, n, w, w, n, w, w, n, n, n, n ],
-            [ n, n, n, w, w, n, n, n, w, w, n, w, w, n, n, n, n ],
-            [ n, n, n, w, w, n, n, n, n, w, w, w, w, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n, w, w, w, n, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n, n ],
-            [ w, w, w, w, w, w, n, n, n, n, w, w, w, w, n, n, n ]
-        ]).invertY().rotateRight(),
-        I: new Sprite([
-            [ n, n, n, w, w, w, w, w, w ],
-            [ n, n, n, n, n, w, w, n, n ],
-            [ n, n, n, n, n, w, w, n, n ],
-            [ n, n, n, n, w, w, n, n, n ],
-            [ n, n, n, n, w, w, n, n, n ],
-            [ n, n, n, n, w, w, n, n, n ],
-            [ n, n, n, n, w, w, n, n, n ],
-            [ n, n, n, w, w, n, n, n, n ],
-            [ n, n, n, w, w, n, n, n, n ],
-            [ n, n, n, w, w, n, n, n, n ],
-            [ n, n, n, w, w, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n ],
-            [ w, w, w, w, w, w, n, n, n ]
-        ]).invertY().rotateRight(),
-        X: new Sprite([
-            [ n, n, n, w, w, w, w, w, w, n, n, w, w, w, w, w, w ],
-            [ n, n, n, n, n, w, w, n, n, n, n, n, n, w, w, n, n ],
-            [ n, n, n, n, n, w, w, n, n, n, n, n, w, w, n, n, n ],
-            [ n, n, n, n, n, n, w, w, n, n, n, w, w, n, n, n, n ],
-            [ n, n, n, n, n, n, w, w, n, n, w, w, n, n, n, n, n ],
-            [ n, n, n, n, n, n, n, w, w, w, w, n, n, n, n, n, n ],
-            [ n, n, n, n, n, n, n, w, w, w, n, n, n, n, n, n, n ],
-            [ n, n, n, n, n, n, n, w, w, w, n, n, n, n, n, n, n ],
-            [ n, n, n, n, n, n, n, w, w, w, n, n, n, n, n, n, n ],
-            [ n, n, n, n, n, n, w, w, w, w, n, n, n, n, n, n, n ],
-            [ n, n, n, n, n, w, w, n, n, w, w, n, n, n, n, n, n ],
-            [ n, n, n, n, w, w, n, n, n, w, w, n, n, n, n, n, n ],
-            [ n, n, n, w, w, n, n, n, n, n, w, w, n, n, n, n, n ],
-            [ n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n, n ],
-            [ w, w, w, w, w, w, n, n, w, w, w, w, w, w, n, n, n ]
-        ]).invertY().rotateRight()
-    };
-});
-
 DefineModule('helpers/collect-entities', function () {
     return function visitNode(node, matcherFn, collection) {
         collection = collection || [];
@@ -2744,6 +1620,387 @@ DefineModule('levels/shop', function (require) {
     });
 });
 
+DefineModule('screens/controls-description', function (require) {
+    var EventedInput = require('models/evented-input');
+    var GameObject = require('models/game-object');
+    var TextDisplay = require('components/text-display');
+
+    return DefineClass(GameObject, {
+        headerDef: {
+            font: "arcade",
+            message: "Controls",
+            color: "white",
+            position: { x: 5, y: 5 }
+        },
+        inputDescriptions: [
+            {
+                message: [ "", "Move", "Fire" ],
+                position: { x: 5, y: 20 }
+            },
+            {
+                message: [ "- Keyboard", "- WASD", "- Space" ],
+                position: { x: 35, y: 20 }
+            },
+            {
+                message: [ "- Controller", "- Left Stick", "- A" ],
+                position: { x: 85, y: 20 }
+            }
+        ],
+
+        reset: function () {
+            this.super('reset');
+
+            this.addChild(new TextDisplay(this, this.headerDef));
+
+            this.inputDescriptions.forEach(function (item) {
+                this.addChild(new TextDisplay(this, {
+                    font: "arcade-small",
+                    color: "#F6EC9A",
+                    message: item.message,
+                    position: item.position
+                }))
+            }.bind(this));
+
+            this.addChild(new EventedInput({
+                onSelect: this.onSelect.bind(this)
+            }));
+        },
+
+        onSelect: function () {
+            this.parent.reset();
+        }
+    })
+});
+
+DefineModule('screens/game-over-screen', function (require) {
+    var EventedInput = require('models/evented-input');
+    var GameObject = require('models/game-object');
+    var padScoreDisplay = require('helpers/pad-score-display');
+    var TextDisplay = require('components/text-display');
+
+    return DefineClass(GameObject, {
+        resultMessage: {
+            font: "arcade",
+            message: "GAME OVER",
+            position: { x: 67, y: 53 }
+        },
+        headerDef: {
+            font: "arcade-small",
+            border: 1,
+            padding: 20,
+            message: "< hit enter >",
+            position: { x: 55, y: 45 }
+        },
+        subHeaderDef: {
+            font: "arcade-small",
+            message: "Final Score:",
+            position: { x: 68, y: 77 }
+        },
+        scoreDisplayDef: {
+            font: "arcade-small",
+            message: "0",
+            color: "yellow",
+            position: { x: 111, y: 77 }
+        },
+
+        constructor: function () {
+            this.result = new TextDisplay(this, this.resultMessage);
+            this.header = new TextDisplay(this, this.headerDef);
+            this.subHeader = new TextDisplay(this, this.subHeaderDef);
+            this.scoreDisplay = new TextDisplay(this, this.scoreDisplayDef);
+
+            this.inputEvents = new EventedInput({
+                onStart: this.onStart.bind(this)
+            });
+
+            this.super('constructor', arguments);
+        },
+
+        reset: function () {
+            this.super('reset');
+
+            this.addChild(this.result);
+            this.addChild(this.header);
+            this.addChild(this.subHeader);
+            this.addChild(this.scoreDisplay);
+
+            this.addChild(this.inputEvents);
+            this.inputEvents.reset();
+        },
+
+        onStart: function () {
+            this.parent.finishGame();
+        },
+
+        setResult: function (result) {
+            if (result === "win") {
+                this.header.updateColor("green");
+                this.result.updateColor("green");
+                this.subHeader.updateColor("green");
+                this.result.changeMessage("YOU WIN!");
+            } else if (result === "loss") {
+                this.header.updateColor("red");
+                this.result.updateColor("red");
+                this.subHeader.updateColor("red");
+                this.result.changeMessage("GAME OVER");
+            }
+        },
+
+        setFinalScore: function (score) {
+            this.scoreDisplay.changeMessage(padScoreDisplay(score));
+        }
+    })
+});
+
+DefineModule('screens/slim-title-screen', function (require) {
+    var Bullet = require('components/bullet');
+    var EventedInput = require('models/evented-input');
+    var GameObject = require('models/game-object');
+    var TextDisplay = require('components/text-display');
+    var ArrowShip = require('sprites/arrow-ship');
+
+    return DefineClass(GameObject, {
+        reset: function () {
+            this.super('reset');
+
+            this.selectedMenuItem = 0;
+            this.timeSinceSelected = 0;
+            this.selecting = false;
+
+            this.addDisplayText();
+            this.createShipSelectors();
+
+            this.addChild(new EventedInput({
+                onSelect: this.onSelect.bind(this)
+            }));
+        },
+
+        addDisplayText: function () {
+            this.addChild(new TextDisplay(this, {
+                font: 'phoenix',
+                message: "PHOENIX",
+                position: { x: 50, y: 30 }
+            }));
+
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "Start",
+                position: { x: 90, y: 80 },
+                isPhysicalEntity: true
+            }));
+
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "WASD - move ship",
+                position: { x: 5, y: 120 }
+            }));
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "SPACE - fire gun",
+                position: { x: 5, y: 130 }
+            }));
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "ENTER - pause",
+                position: { x: 5, y: 140 }
+            }));
+        },
+
+        createShipSelectors: function () {
+            this.selectorShip = new GameObject();
+            this.selectorRight = new GameObject();
+
+            this.selectorShip.sprite = new ArrowShip();
+            this.selectorRight.sprite = new ArrowShip().invertX();
+
+            this.selectorShip.position = { x: 70, y: 80 };
+            this.selectorRight.position = { x: 120, y: 80 };
+
+            this.addChild(this.selectorShip);
+            this.addChild(this.selectorRight);
+        },
+
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            this.timeSinceSelected += dtime;
+            if (this.selecting && this.timeSinceSelected > 595) {
+                this.propagateSelection();
+            }
+        },
+
+        onSelect: function () {
+            if (!this.selecting) {
+                this.startGame();
+            }
+        },
+
+        startGame: function () {
+            this.selecting = true;
+            this.timeSinceSelected = 0;
+
+            var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
+            var x2 = this.selectorRight.position.x;
+            var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
+
+            this.addChild(new Bullet(this, {
+                team: 2,
+                position: { x: x1, y: y },
+                velocity: { x: 50, y: 0 }
+            }));
+            this.addChild(new Bullet(this, {
+                team: 3,
+                position: { x: x2, y: y },
+                velocity: { x: -50, y: 0}
+            }));
+        },
+
+        propagateSelection: function () {
+            this.parent.startNewGame();
+            this.destroy();
+        }
+    });
+});
+
+DefineModule('screens/title-screen', function (require) {
+    var Bullet = require('components/bullet');
+    var EventedInput = require('models/evented-input');
+    var GameObject = require('models/game-object');
+    var TextDisplay = require('components/text-display');
+    var ArrowShip = require('sprites/arrow-ship');
+
+    return DefineClass(GameObject, {
+        headerDef: { message: "PHOENIX", position: { x: 50, y: 30 } },
+        menuItems: [
+            { message: "New", position: { x: 90, y: 90 } },
+            { message: "Load", position: { x: 89, y: 105 } },
+            { message: "controls", position: { x: 84, y: 120 } }
+        ],
+
+        reset: function () {
+            this.super('reset');
+
+            this.selectedMenuItem = 0;
+            this.timeSinceSelected = 0;
+            this.selecting = false;
+
+            this.addDisplayText();
+            this.createShipSelectors();
+
+            this.addChild(new EventedInput({
+                onUp: this.onUp.bind(this),
+                onDown: this.onDown.bind(this),
+                onSelect: this.onSelect.bind(this)
+            }));
+        },
+
+        addDisplayText: function () {
+            this.addChild(new TextDisplay(this, {
+                font: 'phoenix',
+                message: this.headerDef.message,
+                position: this.headerDef.position
+            }));
+
+            this.menuItems.forEach(function (item) {
+                this.addChild(new TextDisplay(this, {
+                    font: "arcade-small",
+                    message: item.message,
+                    position: item.position,
+                    isPhysicalEntity: true
+                }));
+            }.bind(this));
+        },
+
+        createShipSelectors: function () {
+            this.selectorShip = new GameObject();
+            this.selectorRight = new GameObject();
+
+            this.selectorShip.sprite = new ArrowShip();
+            this.selectorRight.sprite = new ArrowShip().invertX();
+
+            this.selectorShip.position = { x: 70, y: 0 };
+            this.selectorRight.position = { x: 115, y: 0 };
+
+            this.addChild(this.selectorShip);
+            this.addChild(this.selectorRight);
+
+            this.updateSelectorPosition();
+        },
+
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            this.timeSinceSelected += dtime;
+            if (this.selecting && this.timeSinceSelected > 595) {
+                this.propagateSelection();
+            }
+        },
+
+        onUp: function () {
+            if (this.selectedMenuItem > 0 && !this.selecting) {
+                this.selectedMenuItem--;
+                this.updateSelectorPosition();
+            }
+        },
+
+        onDown: function () {
+            if (this.selectedMenuItem < this.menuItems.length - 1 && !this.selecting) {
+                this.selectedMenuItem++;
+                this.updateSelectorPosition();
+            }
+        },
+
+        onSelect: function () {
+            if (!this.selecting) {
+                this.startGame();
+            }
+        },
+
+        updateSelectorPosition: function () {
+            var selectedY = this.menuItems[ this.selectedMenuItem ].position.y;
+
+            this.selectorShip.position.y = selectedY;
+            this.selectorRight.position.y = selectedY;
+        },
+
+        startGame: function () {
+            this.selecting = true;
+            this.timeSinceSelected = 0;
+
+            var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
+            var x2 = this.selectorRight.position.x;
+            var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
+
+            this.addChild(new Bullet(this, {
+                team: 2,
+                position: { x: x1, y: y },
+                velocity: { x: 50, y: 0 }
+            }));
+            this.addChild(new Bullet(this, {
+                team: 3,
+                position: { x: x2, y: y },
+                velocity: { x: -50, y: 0}
+            }));
+        },
+
+        propagateSelection: function () {
+            this.destroy();
+            switch (this.selectedMenuItem) {
+                case 0:
+                case 1:
+                    this.parent.startNewGame();
+                    break;
+                case 2:
+                    this.parent.showControlsScreen();
+                    break;
+                default:
+                    console.error('Unsupported menu option');
+            }
+
+        }
+    });
+});
+
 DefineModule('models/animation', function (require) {
     return DefineClass({
         finished: false,
@@ -3436,387 +2693,6 @@ DefineModule('models/sprite', function (require) {
     });
 
     return Sprite;
-});
-
-DefineModule('screens/controls-description', function (require) {
-    var EventedInput = require('models/evented-input');
-    var GameObject = require('models/game-object');
-    var TextDisplay = require('components/text-display');
-
-    return DefineClass(GameObject, {
-        headerDef: {
-            font: "arcade",
-            message: "Controls",
-            color: "white",
-            position: { x: 5, y: 5 }
-        },
-        inputDescriptions: [
-            {
-                message: [ "", "Move", "Fire" ],
-                position: { x: 5, y: 20 }
-            },
-            {
-                message: [ "- Keyboard", "- WASD", "- Space" ],
-                position: { x: 35, y: 20 }
-            },
-            {
-                message: [ "- Controller", "- Left Stick", "- A" ],
-                position: { x: 85, y: 20 }
-            }
-        ],
-
-        reset: function () {
-            this.super('reset');
-
-            this.addChild(new TextDisplay(this, this.headerDef));
-
-            this.inputDescriptions.forEach(function (item) {
-                this.addChild(new TextDisplay(this, {
-                    font: "arcade-small",
-                    color: "#F6EC9A",
-                    message: item.message,
-                    position: item.position
-                }))
-            }.bind(this));
-
-            this.addChild(new EventedInput({
-                onSelect: this.onSelect.bind(this)
-            }));
-        },
-
-        onSelect: function () {
-            this.parent.reset();
-        }
-    })
-});
-
-DefineModule('screens/game-over-screen', function (require) {
-    var EventedInput = require('models/evented-input');
-    var GameObject = require('models/game-object');
-    var padScoreDisplay = require('helpers/pad-score-display');
-    var TextDisplay = require('components/text-display');
-
-    return DefineClass(GameObject, {
-        resultMessage: {
-            font: "arcade",
-            message: "GAME OVER",
-            position: { x: 67, y: 53 }
-        },
-        headerDef: {
-            font: "arcade-small",
-            border: 1,
-            padding: 20,
-            message: "< hit enter >",
-            position: { x: 55, y: 45 }
-        },
-        subHeaderDef: {
-            font: "arcade-small",
-            message: "Final Score:",
-            position: { x: 68, y: 77 }
-        },
-        scoreDisplayDef: {
-            font: "arcade-small",
-            message: "0",
-            color: "yellow",
-            position: { x: 111, y: 77 }
-        },
-
-        constructor: function () {
-            this.result = new TextDisplay(this, this.resultMessage);
-            this.header = new TextDisplay(this, this.headerDef);
-            this.subHeader = new TextDisplay(this, this.subHeaderDef);
-            this.scoreDisplay = new TextDisplay(this, this.scoreDisplayDef);
-
-            this.inputEvents = new EventedInput({
-                onStart: this.onStart.bind(this)
-            });
-
-            this.super('constructor', arguments);
-        },
-
-        reset: function () {
-            this.super('reset');
-
-            this.addChild(this.result);
-            this.addChild(this.header);
-            this.addChild(this.subHeader);
-            this.addChild(this.scoreDisplay);
-
-            this.addChild(this.inputEvents);
-            this.inputEvents.reset();
-        },
-
-        onStart: function () {
-            this.parent.finishGame();
-        },
-
-        setResult: function (result) {
-            if (result === "win") {
-                this.header.updateColor("green");
-                this.result.updateColor("green");
-                this.subHeader.updateColor("green");
-                this.result.changeMessage("YOU WIN!");
-            } else if (result === "loss") {
-                this.header.updateColor("red");
-                this.result.updateColor("red");
-                this.subHeader.updateColor("red");
-                this.result.changeMessage("GAME OVER");
-            }
-        },
-
-        setFinalScore: function (score) {
-            this.scoreDisplay.changeMessage(padScoreDisplay(score));
-        }
-    })
-});
-
-DefineModule('screens/slim-title-screen', function (require) {
-    var Bullet = require('components/bullet');
-    var EventedInput = require('models/evented-input');
-    var GameObject = require('models/game-object');
-    var TextDisplay = require('components/text-display');
-    var ArrowShip = require('sprites/arrow-ship');
-
-    return DefineClass(GameObject, {
-        reset: function () {
-            this.super('reset');
-
-            this.selectedMenuItem = 0;
-            this.timeSinceSelected = 0;
-            this.selecting = false;
-
-            this.addDisplayText();
-            this.createShipSelectors();
-
-            this.addChild(new EventedInput({
-                onSelect: this.onSelect.bind(this)
-            }));
-        },
-
-        addDisplayText: function () {
-            this.addChild(new TextDisplay(this, {
-                font: 'phoenix',
-                message: "PHOENIX",
-                position: { x: 50, y: 30 }
-            }));
-
-            this.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                message: "Start",
-                position: { x: 90, y: 80 },
-                isPhysicalEntity: true
-            }));
-
-            this.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                message: "WASD - move ship",
-                position: { x: 5, y: 120 }
-            }));
-            this.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                message: "SPACE - fire gun",
-                position: { x: 5, y: 130 }
-            }));
-            this.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                message: "ENTER - pause",
-                position: { x: 5, y: 140 }
-            }));
-        },
-
-        createShipSelectors: function () {
-            this.selectorShip = new GameObject();
-            this.selectorRight = new GameObject();
-
-            this.selectorShip.sprite = new ArrowShip();
-            this.selectorRight.sprite = new ArrowShip().invertX();
-
-            this.selectorShip.position = { x: 70, y: 80 };
-            this.selectorRight.position = { x: 120, y: 80 };
-
-            this.addChild(this.selectorShip);
-            this.addChild(this.selectorRight);
-        },
-
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            this.timeSinceSelected += dtime;
-            if (this.selecting && this.timeSinceSelected > 595) {
-                this.propagateSelection();
-            }
-        },
-
-        onSelect: function () {
-            if (!this.selecting) {
-                this.startGame();
-            }
-        },
-
-        startGame: function () {
-            this.selecting = true;
-            this.timeSinceSelected = 0;
-
-            var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
-            var x2 = this.selectorRight.position.x;
-            var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
-
-            this.addChild(new Bullet(this, {
-                team: 2,
-                position: { x: x1, y: y },
-                velocity: { x: 50, y: 0 }
-            }));
-            this.addChild(new Bullet(this, {
-                team: 3,
-                position: { x: x2, y: y },
-                velocity: { x: -50, y: 0}
-            }));
-        },
-
-        propagateSelection: function () {
-            this.parent.startNewGame();
-            this.destroy();
-        }
-    });
-});
-
-DefineModule('screens/title-screen', function (require) {
-    var Bullet = require('components/bullet');
-    var EventedInput = require('models/evented-input');
-    var GameObject = require('models/game-object');
-    var TextDisplay = require('components/text-display');
-    var ArrowShip = require('sprites/arrow-ship');
-
-    return DefineClass(GameObject, {
-        headerDef: { message: "PHOENIX", position: { x: 50, y: 30 } },
-        menuItems: [
-            { message: "New", position: { x: 90, y: 90 } },
-            { message: "Load", position: { x: 89, y: 105 } },
-            { message: "controls", position: { x: 84, y: 120 } }
-        ],
-
-        reset: function () {
-            this.super('reset');
-
-            this.selectedMenuItem = 0;
-            this.timeSinceSelected = 0;
-            this.selecting = false;
-
-            this.addDisplayText();
-            this.createShipSelectors();
-
-            this.addChild(new EventedInput({
-                onUp: this.onUp.bind(this),
-                onDown: this.onDown.bind(this),
-                onSelect: this.onSelect.bind(this)
-            }));
-        },
-
-        addDisplayText: function () {
-            this.addChild(new TextDisplay(this, {
-                font: 'phoenix',
-                message: this.headerDef.message,
-                position: this.headerDef.position
-            }));
-
-            this.menuItems.forEach(function (item) {
-                this.addChild(new TextDisplay(this, {
-                    font: "arcade-small",
-                    message: item.message,
-                    position: item.position,
-                    isPhysicalEntity: true
-                }));
-            }.bind(this));
-        },
-
-        createShipSelectors: function () {
-            this.selectorShip = new GameObject();
-            this.selectorRight = new GameObject();
-
-            this.selectorShip.sprite = new ArrowShip();
-            this.selectorRight.sprite = new ArrowShip().invertX();
-
-            this.selectorShip.position = { x: 70, y: 0 };
-            this.selectorRight.position = { x: 115, y: 0 };
-
-            this.addChild(this.selectorShip);
-            this.addChild(this.selectorRight);
-
-            this.updateSelectorPosition();
-        },
-
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            this.timeSinceSelected += dtime;
-            if (this.selecting && this.timeSinceSelected > 595) {
-                this.propagateSelection();
-            }
-        },
-
-        onUp: function () {
-            if (this.selectedMenuItem > 0 && !this.selecting) {
-                this.selectedMenuItem--;
-                this.updateSelectorPosition();
-            }
-        },
-
-        onDown: function () {
-            if (this.selectedMenuItem < this.menuItems.length - 1 && !this.selecting) {
-                this.selectedMenuItem++;
-                this.updateSelectorPosition();
-            }
-        },
-
-        onSelect: function () {
-            if (!this.selecting) {
-                this.startGame();
-            }
-        },
-
-        updateSelectorPosition: function () {
-            var selectedY = this.menuItems[ this.selectedMenuItem ].position.y;
-
-            this.selectorShip.position.y = selectedY;
-            this.selectorRight.position.y = selectedY;
-        },
-
-        startGame: function () {
-            this.selecting = true;
-            this.timeSinceSelected = 0;
-
-            var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
-            var x2 = this.selectorRight.position.x;
-            var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
-
-            this.addChild(new Bullet(this, {
-                team: 2,
-                position: { x: x1, y: y },
-                velocity: { x: 50, y: 0 }
-            }));
-            this.addChild(new Bullet(this, {
-                team: 3,
-                position: { x: x2, y: y },
-                velocity: { x: -50, y: 0}
-            }));
-        },
-
-        propagateSelection: function () {
-            this.destroy();
-            switch (this.selectedMenuItem) {
-                case 0:
-                case 1:
-                    this.parent.startNewGame();
-                    break;
-                case 2:
-                    this.parent.showControlsScreen();
-                    break;
-                default:
-                    console.error('Unsupported menu option');
-            }
-
-        }
-    });
 });
 
 DefineModule('scripts/chain-gun-fire', function (require) {

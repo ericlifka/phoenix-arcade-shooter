@@ -20,6 +20,7 @@ gulp.task('default', function () {
 
     gulp.src([
             'bower_components/simple-web-modules/index.js',
+            'bower_components/pxlr-fonts/dist/index.js',
             './src/**/*.js'
         ])
         .pipe(filter(function (file) {
