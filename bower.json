@@ -3,9 +3,17 @@
   "description": "Arcade shooter in a classic graphical style",
   "main": "src/main.js",
   "authors": [
-    "Eric Lifka"
+    "Eric Lifka <eric.lifka@gmail.com>"
   ],
+  "homepage": "https://github.com/ericlifka/phoenix-arcade-shooter",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ericlifka/phoenix-arcade-shooter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ericlifka/phoenix-arcade-shooter/issues"
+  },
   "keywords": [
     "game",
     "html5",
@@ -13,8 +21,6 @@
     "shooter",
     "arcade"
   ],
-  "homepage": "https://github.com/ericlifka/phoenix-arcade-shooter",
-  "moduleType": [],
   "ignore": [
     "**/.*",
     "node_modules",

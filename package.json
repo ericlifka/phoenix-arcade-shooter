@@ -1,28 +1,4 @@
 {
-  "name": "phoenix-arcade-shooter",
-  "version": "1.0.0",
-  "description": "Arcade shooter in a classic graphical style",
-  "main": "modules.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ericlifka/phoenix-arcade-shooter.git"
-  },
-  "keywords": [
-    "game",
-    "html5",
-    "pixel",
-    "shooter",
-    "arcade"
-  ],
-  "author": "Eric Lifka",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/ericlifka/phoenix-arcade-shooter/issues"
-  },
-  "homepage": "https://github.com/ericlifka/phoenix-arcade-shooter#readme",
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
