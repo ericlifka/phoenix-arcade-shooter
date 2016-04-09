@@ -5,7 +5,10 @@ const wrapper = require('gulp-wrapper');
 const htmlbuild = require('gulp-htmlbuild');
 
 gulp.task('default', function () {
-    gulp.src([ './index.html', './styles/game.css', './favicon.ico' ])
+    gulp.src([ './favicon.ico' ])
+        .pipe(gulp.dest('./dist'));
+
+    gulp.src([ './index.html', './styles/game.css' ])
         .pipe(htmlbuild({
             js: htmlbuild.preprocess.js(function (block) {
                 block.write('phoenix-arcade-shooter.js');
@@ -23,9 +26,7 @@ gulp.task('default', function () {
             'bower_components/pxlr-fonts/dist/index.js',
             './src/**/*.js'
         ])
-        .pipe(filter(function (file) {
-            return !/embedded/.test(file.path)
-        }))
+        .pipe(filter(function (file) { return !/embedded/.test(file.path) }))
         .pipe(concat({ path: 'phoenix-arcade-shooter.js' }))
         .pipe(wrapper({
             header: '(function () {\n',
