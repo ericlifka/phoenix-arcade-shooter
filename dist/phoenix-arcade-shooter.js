@@ -2903,387 +2903,6 @@ DefineModule('levels/shop', function (require) {
     });
 });
 
-DefineModule('screens/controls-description', function (require) {
-    var EventedInput = require('models/evented-input');
-    var GameObject = require('models/game-object');
-    var TextDisplay = require('components/text-display');
-
-    return DefineClass(GameObject, {
-        headerDef: {
-            font: "arcade",
-            message: "Controls",
-            color: "white",
-            position: { x: 5, y: 5 }
-        },
-        inputDescriptions: [
-            {
-                message: [ "", "Move", "Fire" ],
-                position: { x: 5, y: 20 }
-            },
-            {
-                message: [ "- Keyboard", "- WASD", "- Space" ],
-                position: { x: 35, y: 20 }
-            },
-            {
-                message: [ "- Controller", "- Left Stick", "- A" ],
-                position: { x: 85, y: 20 }
-            }
-        ],
-
-        reset: function () {
-            this.super('reset');
-
-            this.addChild(new TextDisplay(this, this.headerDef));
-
-            this.inputDescriptions.forEach(function (item) {
-                this.addChild(new TextDisplay(this, {
-                    font: "arcade-small",
-                    color: "#F6EC9A",
-                    message: item.message,
-                    position: item.position
-                }))
-            }.bind(this));
-
-            this.addChild(new EventedInput({
-                onSelect: this.onSelect.bind(this)
-            }));
-        },
-
-        onSelect: function () {
-            this.parent.reset();
-        }
-    })
-});
-
-DefineModule('screens/game-over-screen', function (require) {
-    var EventedInput = require('models/evented-input');
-    var GameObject = require('models/game-object');
-    var padScoreDisplay = require('helpers/pad-score-display');
-    var TextDisplay = require('components/text-display');
-
-    return DefineClass(GameObject, {
-        resultMessage: {
-            font: "arcade",
-            message: "GAME OVER",
-            position: { x: 67, y: 53 }
-        },
-        headerDef: {
-            font: "arcade-small",
-            border: 1,
-            padding: 20,
-            message: "< hit enter >",
-            position: { x: 55, y: 45 }
-        },
-        subHeaderDef: {
-            font: "arcade-small",
-            message: "Final Score:",
-            position: { x: 68, y: 77 }
-        },
-        scoreDisplayDef: {
-            font: "arcade-small",
-            message: "0",
-            color: "yellow",
-            position: { x: 111, y: 77 }
-        },
-
-        constructor: function () {
-            this.result = new TextDisplay(this, this.resultMessage);
-            this.header = new TextDisplay(this, this.headerDef);
-            this.subHeader = new TextDisplay(this, this.subHeaderDef);
-            this.scoreDisplay = new TextDisplay(this, this.scoreDisplayDef);
-
-            this.inputEvents = new EventedInput({
-                onStart: this.onStart.bind(this)
-            });
-
-            this.super('constructor', arguments);
-        },
-
-        reset: function () {
-            this.super('reset');
-
-            this.addChild(this.result);
-            this.addChild(this.header);
-            this.addChild(this.subHeader);
-            this.addChild(this.scoreDisplay);
-
-            this.addChild(this.inputEvents);
-            this.inputEvents.reset();
-        },
-
-        onStart: function () {
-            this.parent.finishGame();
-        },
-
-        setResult: function (result) {
-            if (result === "win") {
-                this.header.updateColor("green");
-                this.result.updateColor("green");
-                this.subHeader.updateColor("green");
-                this.result.changeMessage("YOU WIN!");
-            } else if (result === "loss") {
-                this.header.updateColor("red");
-                this.result.updateColor("red");
-                this.subHeader.updateColor("red");
-                this.result.changeMessage("GAME OVER");
-            }
-        },
-
-        setFinalScore: function (score) {
-            this.scoreDisplay.changeMessage(padScoreDisplay(score));
-        }
-    })
-});
-
-DefineModule('screens/slim-title-screen', function (require) {
-    var Bullet = require('components/bullet');
-    var EventedInput = require('models/evented-input');
-    var GameObject = require('models/game-object');
-    var TextDisplay = require('components/text-display');
-    var ArrowShip = require('sprites/arrow-ship');
-
-    return DefineClass(GameObject, {
-        reset: function () {
-            this.super('reset');
-
-            this.selectedMenuItem = 0;
-            this.timeSinceSelected = 0;
-            this.selecting = false;
-
-            this.addDisplayText();
-            this.createShipSelectors();
-
-            this.addChild(new EventedInput({
-                onSelect: this.onSelect.bind(this)
-            }));
-        },
-
-        addDisplayText: function () {
-            this.addChild(new TextDisplay(this, {
-                font: 'phoenix',
-                message: "PHOENIX",
-                position: { x: 50, y: 30 }
-            }));
-
-            this.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                message: "Start",
-                position: { x: 90, y: 80 },
-                isPhysicalEntity: true
-            }));
-
-            this.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                message: "WASD - move ship",
-                position: { x: 5, y: 120 }
-            }));
-            this.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                message: "SPACE - fire gun",
-                position: { x: 5, y: 130 }
-            }));
-            this.addChild(new TextDisplay(this, {
-                font: "arcade-small",
-                message: "ENTER - pause",
-                position: { x: 5, y: 140 }
-            }));
-        },
-
-        createShipSelectors: function () {
-            this.selectorShip = new GameObject();
-            this.selectorRight = new GameObject();
-
-            this.selectorShip.sprite = new ArrowShip();
-            this.selectorRight.sprite = new ArrowShip().invertX();
-
-            this.selectorShip.position = { x: 70, y: 80 };
-            this.selectorRight.position = { x: 120, y: 80 };
-
-            this.addChild(this.selectorShip);
-            this.addChild(this.selectorRight);
-        },
-
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            this.timeSinceSelected += dtime;
-            if (this.selecting && this.timeSinceSelected > 595) {
-                this.propagateSelection();
-            }
-        },
-
-        onSelect: function () {
-            if (!this.selecting) {
-                this.startGame();
-            }
-        },
-
-        startGame: function () {
-            this.selecting = true;
-            this.timeSinceSelected = 0;
-
-            var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
-            var x2 = this.selectorRight.position.x;
-            var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
-
-            this.addChild(new Bullet(this, {
-                team: 2,
-                position: { x: x1, y: y },
-                velocity: { x: 50, y: 0 }
-            }));
-            this.addChild(new Bullet(this, {
-                team: 3,
-                position: { x: x2, y: y },
-                velocity: { x: -50, y: 0}
-            }));
-        },
-
-        propagateSelection: function () {
-            this.parent.startNewGame();
-            this.destroy();
-        }
-    });
-});
-
-DefineModule('screens/title-screen', function (require) {
-    var Bullet = require('components/bullet');
-    var EventedInput = require('models/evented-input');
-    var GameObject = require('models/game-object');
-    var TextDisplay = require('components/text-display');
-    var ArrowShip = require('sprites/arrow-ship');
-
-    return DefineClass(GameObject, {
-        headerDef: { message: "PHOENIX", position: { x: 50, y: 30 } },
-        menuItems: [
-            { message: "New", position: { x: 90, y: 90 } },
-            { message: "Load", position: { x: 89, y: 105 } },
-            { message: "controls", position: { x: 84, y: 120 } }
-        ],
-
-        reset: function () {
-            this.super('reset');
-
-            this.selectedMenuItem = 0;
-            this.timeSinceSelected = 0;
-            this.selecting = false;
-
-            this.addDisplayText();
-            this.createShipSelectors();
-
-            this.addChild(new EventedInput({
-                onUp: this.onUp.bind(this),
-                onDown: this.onDown.bind(this),
-                onSelect: this.onSelect.bind(this)
-            }));
-        },
-
-        addDisplayText: function () {
-            this.addChild(new TextDisplay(this, {
-                font: 'phoenix',
-                message: this.headerDef.message,
-                position: this.headerDef.position
-            }));
-
-            this.menuItems.forEach(function (item) {
-                this.addChild(new TextDisplay(this, {
-                    font: "arcade-small",
-                    message: item.message,
-                    position: item.position,
-                    isPhysicalEntity: true
-                }));
-            }.bind(this));
-        },
-
-        createShipSelectors: function () {
-            this.selectorShip = new GameObject();
-            this.selectorRight = new GameObject();
-
-            this.selectorShip.sprite = new ArrowShip();
-            this.selectorRight.sprite = new ArrowShip().invertX();
-
-            this.selectorShip.position = { x: 70, y: 0 };
-            this.selectorRight.position = { x: 115, y: 0 };
-
-            this.addChild(this.selectorShip);
-            this.addChild(this.selectorRight);
-
-            this.updateSelectorPosition();
-        },
-
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            this.timeSinceSelected += dtime;
-            if (this.selecting && this.timeSinceSelected > 595) {
-                this.propagateSelection();
-            }
-        },
-
-        onUp: function () {
-            if (this.selectedMenuItem > 0 && !this.selecting) {
-                this.selectedMenuItem--;
-                this.updateSelectorPosition();
-            }
-        },
-
-        onDown: function () {
-            if (this.selectedMenuItem < this.menuItems.length - 1 && !this.selecting) {
-                this.selectedMenuItem++;
-                this.updateSelectorPosition();
-            }
-        },
-
-        onSelect: function () {
-            if (!this.selecting) {
-                this.startGame();
-            }
-        },
-
-        updateSelectorPosition: function () {
-            var selectedY = this.menuItems[ this.selectedMenuItem ].position.y;
-
-            this.selectorShip.position.y = selectedY;
-            this.selectorRight.position.y = selectedY;
-        },
-
-        startGame: function () {
-            this.selecting = true;
-            this.timeSinceSelected = 0;
-
-            var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
-            var x2 = this.selectorRight.position.x;
-            var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
-
-            this.addChild(new Bullet(this, {
-                team: 2,
-                position: { x: x1, y: y },
-                velocity: { x: 50, y: 0 }
-            }));
-            this.addChild(new Bullet(this, {
-                team: 3,
-                position: { x: x2, y: y },
-                velocity: { x: -50, y: 0}
-            }));
-        },
-
-        propagateSelection: function () {
-            this.destroy();
-            switch (this.selectedMenuItem) {
-                case 0:
-                case 1:
-                    this.parent.startNewGame();
-                    break;
-                case 2:
-                    this.parent.showControlsScreen();
-                    break;
-                default:
-                    console.error('Unsupported menu option');
-            }
-
-        }
-    });
-});
-
 DefineModule('models/animation', function (require) {
     return DefineClass({
         finished: false,
@@ -3978,6 +3597,387 @@ DefineModule('models/sprite', function (require) {
     return Sprite;
 });
 
+DefineModule('screens/controls-description', function (require) {
+    var EventedInput = require('models/evented-input');
+    var GameObject = require('models/game-object');
+    var TextDisplay = require('components/text-display');
+
+    return DefineClass(GameObject, {
+        headerDef: {
+            font: "arcade",
+            message: "Controls",
+            color: "white",
+            position: { x: 5, y: 5 }
+        },
+        inputDescriptions: [
+            {
+                message: [ "", "Move", "Fire" ],
+                position: { x: 5, y: 20 }
+            },
+            {
+                message: [ "- Keyboard", "- WASD", "- Space" ],
+                position: { x: 35, y: 20 }
+            },
+            {
+                message: [ "- Controller", "- Left Stick", "- A" ],
+                position: { x: 85, y: 20 }
+            }
+        ],
+
+        reset: function () {
+            this.super('reset');
+
+            this.addChild(new TextDisplay(this, this.headerDef));
+
+            this.inputDescriptions.forEach(function (item) {
+                this.addChild(new TextDisplay(this, {
+                    font: "arcade-small",
+                    color: "#F6EC9A",
+                    message: item.message,
+                    position: item.position
+                }))
+            }.bind(this));
+
+            this.addChild(new EventedInput({
+                onSelect: this.onSelect.bind(this)
+            }));
+        },
+
+        onSelect: function () {
+            this.parent.reset();
+        }
+    })
+});
+
+DefineModule('screens/game-over-screen', function (require) {
+    var EventedInput = require('models/evented-input');
+    var GameObject = require('models/game-object');
+    var padScoreDisplay = require('helpers/pad-score-display');
+    var TextDisplay = require('components/text-display');
+
+    return DefineClass(GameObject, {
+        resultMessage: {
+            font: "arcade",
+            message: "GAME OVER",
+            position: { x: 67, y: 53 }
+        },
+        headerDef: {
+            font: "arcade-small",
+            border: 1,
+            padding: 20,
+            message: "< hit enter >",
+            position: { x: 55, y: 45 }
+        },
+        subHeaderDef: {
+            font: "arcade-small",
+            message: "Final Score:",
+            position: { x: 68, y: 77 }
+        },
+        scoreDisplayDef: {
+            font: "arcade-small",
+            message: "0",
+            color: "yellow",
+            position: { x: 111, y: 77 }
+        },
+
+        constructor: function () {
+            this.result = new TextDisplay(this, this.resultMessage);
+            this.header = new TextDisplay(this, this.headerDef);
+            this.subHeader = new TextDisplay(this, this.subHeaderDef);
+            this.scoreDisplay = new TextDisplay(this, this.scoreDisplayDef);
+
+            this.inputEvents = new EventedInput({
+                onStart: this.onStart.bind(this)
+            });
+
+            this.super('constructor', arguments);
+        },
+
+        reset: function () {
+            this.super('reset');
+
+            this.addChild(this.result);
+            this.addChild(this.header);
+            this.addChild(this.subHeader);
+            this.addChild(this.scoreDisplay);
+
+            this.addChild(this.inputEvents);
+            this.inputEvents.reset();
+        },
+
+        onStart: function () {
+            this.parent.finishGame();
+        },
+
+        setResult: function (result) {
+            if (result === "win") {
+                this.header.updateColor("green");
+                this.result.updateColor("green");
+                this.subHeader.updateColor("green");
+                this.result.changeMessage("YOU WIN!");
+            } else if (result === "loss") {
+                this.header.updateColor("red");
+                this.result.updateColor("red");
+                this.subHeader.updateColor("red");
+                this.result.changeMessage("GAME OVER");
+            }
+        },
+
+        setFinalScore: function (score) {
+            this.scoreDisplay.changeMessage(padScoreDisplay(score));
+        }
+    })
+});
+
+DefineModule('screens/slim-title-screen', function (require) {
+    var Bullet = require('components/bullet');
+    var EventedInput = require('models/evented-input');
+    var GameObject = require('models/game-object');
+    var TextDisplay = require('components/text-display');
+    var ArrowShip = require('sprites/arrow-ship');
+
+    return DefineClass(GameObject, {
+        reset: function () {
+            this.super('reset');
+
+            this.selectedMenuItem = 0;
+            this.timeSinceSelected = 0;
+            this.selecting = false;
+
+            this.addDisplayText();
+            this.createShipSelectors();
+
+            this.addChild(new EventedInput({
+                onSelect: this.onSelect.bind(this)
+            }));
+        },
+
+        addDisplayText: function () {
+            this.addChild(new TextDisplay(this, {
+                font: 'phoenix',
+                message: "PHOENIX",
+                position: { x: 50, y: 30 }
+            }));
+
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "Start",
+                position: { x: 90, y: 80 },
+                isPhysicalEntity: true
+            }));
+
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "WASD - move ship",
+                position: { x: 5, y: 120 }
+            }));
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "SPACE - fire gun",
+                position: { x: 5, y: 130 }
+            }));
+            this.addChild(new TextDisplay(this, {
+                font: "arcade-small",
+                message: "ENTER - pause",
+                position: { x: 5, y: 140 }
+            }));
+        },
+
+        createShipSelectors: function () {
+            this.selectorShip = new GameObject();
+            this.selectorRight = new GameObject();
+
+            this.selectorShip.sprite = new ArrowShip();
+            this.selectorRight.sprite = new ArrowShip().invertX();
+
+            this.selectorShip.position = { x: 70, y: 80 };
+            this.selectorRight.position = { x: 120, y: 80 };
+
+            this.addChild(this.selectorShip);
+            this.addChild(this.selectorRight);
+        },
+
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            this.timeSinceSelected += dtime;
+            if (this.selecting && this.timeSinceSelected > 595) {
+                this.propagateSelection();
+            }
+        },
+
+        onSelect: function () {
+            if (!this.selecting) {
+                this.startGame();
+            }
+        },
+
+        startGame: function () {
+            this.selecting = true;
+            this.timeSinceSelected = 0;
+
+            var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
+            var x2 = this.selectorRight.position.x;
+            var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
+
+            this.addChild(new Bullet(this, {
+                team: 2,
+                position: { x: x1, y: y },
+                velocity: { x: 50, y: 0 }
+            }));
+            this.addChild(new Bullet(this, {
+                team: 3,
+                position: { x: x2, y: y },
+                velocity: { x: -50, y: 0}
+            }));
+        },
+
+        propagateSelection: function () {
+            this.parent.startNewGame();
+            this.destroy();
+        }
+    });
+});
+
+DefineModule('screens/title-screen', function (require) {
+    var Bullet = require('components/bullet');
+    var EventedInput = require('models/evented-input');
+    var GameObject = require('models/game-object');
+    var TextDisplay = require('components/text-display');
+    var ArrowShip = require('sprites/arrow-ship');
+
+    return DefineClass(GameObject, {
+        headerDef: { message: "PHOENIX", position: { x: 50, y: 30 } },
+        menuItems: [
+            { message: "New", position: { x: 90, y: 90 } },
+            { message: "Load", position: { x: 89, y: 105 } },
+            { message: "controls", position: { x: 84, y: 120 } }
+        ],
+
+        reset: function () {
+            this.super('reset');
+
+            this.selectedMenuItem = 0;
+            this.timeSinceSelected = 0;
+            this.selecting = false;
+
+            this.addDisplayText();
+            this.createShipSelectors();
+
+            this.addChild(new EventedInput({
+                onUp: this.onUp.bind(this),
+                onDown: this.onDown.bind(this),
+                onSelect: this.onSelect.bind(this)
+            }));
+        },
+
+        addDisplayText: function () {
+            this.addChild(new TextDisplay(this, {
+                font: 'phoenix',
+                message: this.headerDef.message,
+                position: this.headerDef.position
+            }));
+
+            this.menuItems.forEach(function (item) {
+                this.addChild(new TextDisplay(this, {
+                    font: "arcade-small",
+                    message: item.message,
+                    position: item.position,
+                    isPhysicalEntity: true
+                }));
+            }.bind(this));
+        },
+
+        createShipSelectors: function () {
+            this.selectorShip = new GameObject();
+            this.selectorRight = new GameObject();
+
+            this.selectorShip.sprite = new ArrowShip();
+            this.selectorRight.sprite = new ArrowShip().invertX();
+
+            this.selectorShip.position = { x: 70, y: 0 };
+            this.selectorRight.position = { x: 115, y: 0 };
+
+            this.addChild(this.selectorShip);
+            this.addChild(this.selectorRight);
+
+            this.updateSelectorPosition();
+        },
+
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            this.timeSinceSelected += dtime;
+            if (this.selecting && this.timeSinceSelected > 595) {
+                this.propagateSelection();
+            }
+        },
+
+        onUp: function () {
+            if (this.selectedMenuItem > 0 && !this.selecting) {
+                this.selectedMenuItem--;
+                this.updateSelectorPosition();
+            }
+        },
+
+        onDown: function () {
+            if (this.selectedMenuItem < this.menuItems.length - 1 && !this.selecting) {
+                this.selectedMenuItem++;
+                this.updateSelectorPosition();
+            }
+        },
+
+        onSelect: function () {
+            if (!this.selecting) {
+                this.startGame();
+            }
+        },
+
+        updateSelectorPosition: function () {
+            var selectedY = this.menuItems[ this.selectedMenuItem ].position.y;
+
+            this.selectorShip.position.y = selectedY;
+            this.selectorRight.position.y = selectedY;
+        },
+
+        startGame: function () {
+            this.selecting = true;
+            this.timeSinceSelected = 0;
+
+            var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
+            var x2 = this.selectorRight.position.x;
+            var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
+
+            this.addChild(new Bullet(this, {
+                team: 2,
+                position: { x: x1, y: y },
+                velocity: { x: 50, y: 0 }
+            }));
+            this.addChild(new Bullet(this, {
+                team: 3,
+                position: { x: x2, y: y },
+                velocity: { x: -50, y: 0}
+            }));
+        },
+
+        propagateSelection: function () {
+            this.destroy();
+            switch (this.selectedMenuItem) {
+                case 0:
+                case 1:
+                    this.parent.startNewGame();
+                    break;
+                case 2:
+                    this.parent.showControlsScreen();
+                    break;
+                default:
+                    console.error('Unsupported menu option');
+            }
+
+        }
+    });
+});
+
 DefineModule('scripts/chain-gun-fire', function (require) {
     var GameObject = require('models/game-object');
     var Random = require('helpers/random');
@@ -4455,199 +4455,6 @@ DefineModule('ships/player-controlled-ship', function (require) {
     });
 });
 
-DefineModule('sprites/arrow-boss', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w1 = "#ffffff";
-        var w2 = "#cccccc";
-        var g1 = "#aaaaaa";
-        var g2 = "#888888";
-        var g3 = "#666666";
-        var g4 = "#222222";
-        var nn = null;
-        return new Sprite([
-                [ g3, nn, nn, nn, nn, nn, nn, nn, g3, nn, nn, nn, nn, nn, nn, nn, g3 ],
-                [ g2, g2, nn, nn, nn, nn, g2, g2, w2, g2, g2, nn, nn, nn, nn, g2, g2 ],
-                [ nn, g2, g1, nn, g1, g1, w2, w2, w2, w2, w2, g1, g1, nn, g1, g2, nn ],
-                [ nn, g1, g1, g1, g1, w2, w2, w2, g3, w2, w2, w2, g1, g1, g1, g1, nn ],
-                [ nn, nn, w2, g1, w2, w1, w2, g3, g4, g3, w2, w1, w2, g1, w2, nn, nn ],
-                [ nn, nn, w2, w1, w2, w1, w1, w2, g3, w2, w1, w1, w2, w1, w2, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, w1, w1, w2, w1, w1, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, nn, w1, w1, w1, nn, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ],
-                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ]
-            ],
-            {
-                guns: [
-                    { x: 3, y: 8 },
-                    { x: 8, y: 10 },
-                    { x: 13, y: 8 }
-                ]
-            });
-    };
-});
-
-DefineModule('sprites/arrow-ship', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w1 = "#ffffff";
-        var w2 = "#cccccc";
-        var g1 = "#aaaaaa";
-        var g2 = "#888888";
-        var g3 = "#666666";
-        var g4 = "#222222";
-        var nn = null;
-        return new Sprite([
-            [ g3, nn, nn, nn, nn, nn, g3 ],
-            [ g2, g2, nn, nn, nn, g2, g2 ],
-            [ nn, g2, g1, nn, g1, g2, nn ],
-            [ nn, g1, g1, w1, g1, g1, nn ],
-            [ nn, nn, w2, g4, w2, nn, nn ],
-            [ nn, nn, w2, w1, w2, nn, nn ],
-            [ nn, nn, nn, w1, nn, nn, nn ],
-            [ nn, nn, nn, w1, nn, nn, nn ]
-        ], {
-            guns: [ { x: 3, y: 7 } ]
-        });
-    };
-});
-
-DefineModule('sprites/bullet', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        return new Sprite([
-            [ "white", "white" ]
-        ]);
-    }
-});
-
-DefineModule('sprites/combo-gauge', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "#fff";
-        var n = null;
-
-        return new Sprite([
-            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n],
-            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
-            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
-            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
-            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
-            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n]
-        ]);
-    };
-});
-
-DefineModule('sprites/dagger-ship', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w1 = "#ffffff";
-        var w2 = "#cccccc";
-        var g1 = "#aaaaaa";
-        var g2 = "#888888";
-        var g3 = "#666666";
-        var g4 = "#222222";
-        var nn = null;
-        return new Sprite([
-            [ nn, nn, w1, nn, nn ],
-            [ nn, nn, w1, nn, nn ],
-            [ nn, nn, w1, nn, nn ],
-            [ nn, w2, w1, w2, nn ],
-            [ nn, w2, g4, w2, nn ],
-            [ nn, w2, w1, w2, nn ],
-            [ nn, g2, g1, g2, nn ],
-            [ g2, g2, nn, g2, g2 ],
-            [ g3, nn, nn, nn, g3 ]
-        ], {
-            guns: [ { x: 2, y: 8 } ]
-        });
-    }
-});
-
-DefineModule('sprites/flying-saucer', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "white";
-        var n = null;
-        return new Sprite([
-                [ n, n, n, w, w, w, w, w, n, n, n ],
-                [ n, n, w, n, n, n, n, n, w, n, n ],
-                [ n, w, n, n, n, n, n, n, n, w, n ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ w, n, n, n, n, w, n, n, n, n, w ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ n, w, n, n, n, n, n, n, n, w, n ],
-                [ n, n, w, n, n, n, n, n, w, n, n ],
-                [ n, n, n, w, w, w, w, w, n, n, n ]
-            ],
-            {
-                guns: [
-                ]
-            });
-    };
-});
-
-DefineModule('sprites/player-ship-wing-guns', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "white";
-        var n = null;
-        return new Sprite([
-                [ n, n, n, n, w, n, n, n, n ],
-                [ n, n, n, n, w, n, n, n, n ],
-                [ n, n, n, w, w, w, n, n, n ],
-                [ n, n, n, w, w, w, n, n, n ],
-                [ w, n, n, w, w, w, n, n, w ],
-                [ w, n, w, w, w, w, w, n, w ],
-                [ w, w, w, w, w, w, w, w, w ],
-                [ n, n, n, w, w, w, n, n, n ],
-                [ n, n, n, n, w, n, n, n, n ]
-            ],
-            {
-                guns: [
-                    { x: 0, y: 5 },
-                    { x: 4, y: 1 },
-                    { x: 8, y: 5 }
-                ]
-            });
-    };
-});
-
-DefineModule('sprites/player-ship', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "white";
-        var n = null;
-        return new Sprite([
-            [ n, n, n, w, n, n, n ],
-            [ n, n, n, w, n, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, w, w, w, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, n, w, n, n, n ]
-        ],
-        {
-            guns: [
-                { x: 3, y: 1 }
-            ]
-        });
-    };
-});
-
 DefineModule('views/canvas-renderer', function (require) {
     var Frame = require('models/frame');
 
@@ -4953,6 +4760,199 @@ DefineModule('views/webgl-renderer', function (require) {
             });
         }
     });
+});
+
+DefineModule('sprites/arrow-boss', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w1 = "#ffffff";
+        var w2 = "#cccccc";
+        var g1 = "#aaaaaa";
+        var g2 = "#888888";
+        var g3 = "#666666";
+        var g4 = "#222222";
+        var nn = null;
+        return new Sprite([
+                [ g3, nn, nn, nn, nn, nn, nn, nn, g3, nn, nn, nn, nn, nn, nn, nn, g3 ],
+                [ g2, g2, nn, nn, nn, nn, g2, g2, w2, g2, g2, nn, nn, nn, nn, g2, g2 ],
+                [ nn, g2, g1, nn, g1, g1, w2, w2, w2, w2, w2, g1, g1, nn, g1, g2, nn ],
+                [ nn, g1, g1, g1, g1, w2, w2, w2, g3, w2, w2, w2, g1, g1, g1, g1, nn ],
+                [ nn, nn, w2, g1, w2, w1, w2, g3, g4, g3, w2, w1, w2, g1, w2, nn, nn ],
+                [ nn, nn, w2, w1, w2, w1, w1, w2, g3, w2, w1, w1, w2, w1, w2, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, w1, w1, w2, w1, w1, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, nn, w1, w1, w1, nn, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ],
+                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ]
+            ],
+            {
+                guns: [
+                    { x: 3, y: 8 },
+                    { x: 8, y: 10 },
+                    { x: 13, y: 8 }
+                ]
+            });
+    };
+});
+
+DefineModule('sprites/arrow-ship', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w1 = "#ffffff";
+        var w2 = "#cccccc";
+        var g1 = "#aaaaaa";
+        var g2 = "#888888";
+        var g3 = "#666666";
+        var g4 = "#222222";
+        var nn = null;
+        return new Sprite([
+            [ g3, nn, nn, nn, nn, nn, g3 ],
+            [ g2, g2, nn, nn, nn, g2, g2 ],
+            [ nn, g2, g1, nn, g1, g2, nn ],
+            [ nn, g1, g1, w1, g1, g1, nn ],
+            [ nn, nn, w2, g4, w2, nn, nn ],
+            [ nn, nn, w2, w1, w2, nn, nn ],
+            [ nn, nn, nn, w1, nn, nn, nn ],
+            [ nn, nn, nn, w1, nn, nn, nn ]
+        ], {
+            guns: [ { x: 3, y: 7 } ]
+        });
+    };
+});
+
+DefineModule('sprites/bullet', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        return new Sprite([
+            [ "white", "white" ]
+        ]);
+    }
+});
+
+DefineModule('sprites/combo-gauge', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "#fff";
+        var n = null;
+
+        return new Sprite([
+            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n],
+            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
+            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
+            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
+            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
+            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n]
+        ]);
+    };
+});
+
+DefineModule('sprites/dagger-ship', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w1 = "#ffffff";
+        var w2 = "#cccccc";
+        var g1 = "#aaaaaa";
+        var g2 = "#888888";
+        var g3 = "#666666";
+        var g4 = "#222222";
+        var nn = null;
+        return new Sprite([
+            [ nn, nn, w1, nn, nn ],
+            [ nn, nn, w1, nn, nn ],
+            [ nn, nn, w1, nn, nn ],
+            [ nn, w2, w1, w2, nn ],
+            [ nn, w2, g4, w2, nn ],
+            [ nn, w2, w1, w2, nn ],
+            [ nn, g2, g1, g2, nn ],
+            [ g2, g2, nn, g2, g2 ],
+            [ g3, nn, nn, nn, g3 ]
+        ], {
+            guns: [ { x: 2, y: 8 } ]
+        });
+    }
+});
+
+DefineModule('sprites/flying-saucer', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "white";
+        var n = null;
+        return new Sprite([
+                [ n, n, n, w, w, w, w, w, n, n, n ],
+                [ n, n, w, n, n, n, n, n, w, n, n ],
+                [ n, w, n, n, n, n, n, n, n, w, n ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, w, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ n, w, n, n, n, n, n, n, n, w, n ],
+                [ n, n, w, n, n, n, n, n, w, n, n ],
+                [ n, n, n, w, w, w, w, w, n, n, n ]
+            ],
+            {
+                guns: [
+                ]
+            });
+    };
+});
+
+DefineModule('sprites/player-ship-wing-guns', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "white";
+        var n = null;
+        return new Sprite([
+                [ n, n, n, n, w, n, n, n, n ],
+                [ n, n, n, n, w, n, n, n, n ],
+                [ n, n, n, w, w, w, n, n, n ],
+                [ n, n, n, w, w, w, n, n, n ],
+                [ w, n, n, w, w, w, n, n, w ],
+                [ w, n, w, w, w, w, w, n, w ],
+                [ w, w, w, w, w, w, w, w, w ],
+                [ n, n, n, w, w, w, n, n, n ],
+                [ n, n, n, n, w, n, n, n, n ]
+            ],
+            {
+                guns: [
+                    { x: 0, y: 5 },
+                    { x: 4, y: 1 },
+                    { x: 8, y: 5 }
+                ]
+            });
+    };
+});
+
+DefineModule('sprites/player-ship', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "white";
+        var n = null;
+        return new Sprite([
+            [ n, n, n, w, n, n, n ],
+            [ n, n, n, w, n, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, w, w, w, w, w, n ],
+            [ w, w, w, w, w, w, w ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, n, w, n, n, n ]
+        ],
+        {
+            guns: [
+                { x: 3, y: 1 }
+            ]
+        });
+    };
 });
 
 DefineModule('sprites/animations/ship-explosion', function (require) {

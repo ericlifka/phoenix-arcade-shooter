@@ -4,11 +4,13 @@ const filter = require('gulp-filter');
 const wrapper = require('gulp-wrapper');
 const htmlbuild = require('gulp-htmlbuild');
 
-gulp.task('default', function () {
-    gulp.src([ './favicon.ico' ])
+gulp.task('static-files', function () {
+    return gulp.src([ './favicon.ico', './styles/game.css' ])
         .pipe(gulp.dest('./dist'));
+});
 
-    gulp.src([ './index.html', './styles/game.css' ])
+gulp.task('build-html', function () {
+    return gulp.src([ './index.html' ])
         .pipe(htmlbuild({
             js: htmlbuild.preprocess.js(function (block) {
                 block.write('phoenix-arcade-shooter.js');
@@ -20,8 +22,10 @@ gulp.task('default', function () {
             })
         }))
         .pipe(gulp.dest('./dist'));
+});
 
-    gulp.src([
+gulp.task('build-js-blob', function () {
+    return gulp.src([
             'bower_components/simple-web-modules/index.js',
             'bower_components/pxlr-fonts/dist/index.js',
             './src/**/*.js'
@@ -33,7 +37,9 @@ gulp.task('default', function () {
             footer: '}());\n'
         }))
         .pipe(gulp.dest('./dist'));
+});
 
+gulp.task('build-embedded-blob', function () {
     return gulp.src([ './modules.js', './src/**/*.js' ])
         .pipe(filter(function (file) { return !/main/.test(file.path) }))
         .pipe(concat({ path: 'phoenix-arcade-shooter-embedded.js' }))
@@ -43,3 +49,5 @@ gulp.task('default', function () {
         }))
         .pipe(gulp.dest('./dist'));
 });
+
+gulp.task('default', [ 'static-files', 'build-html', 'build-js-blob', 'build-embedded-blob' ]);
