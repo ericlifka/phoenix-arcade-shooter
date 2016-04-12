@@ -333,6 +333,367 @@ DefineModule('pxlr/core/sprite', function (require) {
 }());
 
 (function () {
+/* start:pxlr-gl */
+DefineModule('pxlr/gl', function () {
+  return {
+    name: "pxlr-gl",
+    information: "Rendering pipeline for pxlr"
+  }
+});
+
+DefineModule('views/canvas-renderer', function (require) {
+  return require('pxlr/gl/canvas');
+});
+
+DefineModule('pxlr/gl/canvas', function (require) {
+  var Frame = require('pxlr/gl/frame');
+
+  function maximumPixelSize(width, height) {
+    var maxWidth = window.innerWidth;
+    var maxHeight = window.innerHeight;
+    var pixelSize = 1;
+    while (true) {
+      if (width * pixelSize > maxWidth ||
+        height * pixelSize > maxHeight) {
+
+        pixelSize--;
+        break;
+      }
+
+      pixelSize++;
+    }
+
+    if (pixelSize <= 0) {
+      pixelSize = 1;
+    }
+
+    return pixelSize;
+  }
+
+  function createCanvasEl(dimensions) {
+    dimensions.fullWidth = dimensions.width * dimensions.pixelSize;
+    dimensions.fullHeight = dimensions.height * dimensions.pixelSize;
+
+    var el = document.createElement('canvas');
+    el.width = dimensions.fullWidth;
+    el.height = dimensions.fullHeight;
+    el.classList.add('pixel-engine-canvas');
+
+    return el;
+  }
+
+  return DefineClass({
+    width: 80,
+    height: 50,
+    pixelSize: 1,
+    nextFrame: 0,
+
+    constructor: function Renderer(options) {
+      options = options || {};
+
+      this.width = options.width || this.width;
+      this.height = options.height || this.height;
+      this.pixelSize = maximumPixelSize(this.width, this.height);
+
+      this.container = options.container || document.body;
+      this.canvas = createCanvasEl(this);
+      this.container.appendChild(this.canvas);
+
+      this.canvasDrawContext = this.canvas.getContext("2d", { alpha: false });
+      this.frames = [
+        new Frame(this),
+        new Frame(this)
+      ];
+    },
+
+    newRenderFrame: function () {
+      return this.frames[ this.nextFrame ];
+    },
+    renderFrame: function () {
+      var frame = this.frames[ this.nextFrame ];
+      var pixelSize = this.pixelSize;
+      var ctx = this.canvasDrawContext;
+      var fillColor = frame.fillColor;
+
+      ctx.fillStyle = fillColor;
+      ctx.fillRect(0, 0, this.fullWidth, this.fullHeight);
+
+      frame.iterateCells(function (cell, x, y) {
+        if (cell.color !== fillColor) {
+          ctx.beginPath();
+          ctx.rect(cell.render_x, cell.render_y, pixelSize, pixelSize);
+          ctx.fillStyle = cell.color;
+          ctx.fill();
+          ctx.closePath();
+        }
+      });
+
+      this.nextFrame = +!this.nextFrame; // switch the frames
+    },
+    setFillColor: function (fillColor) {
+      this.frames.forEach(function (frame) {
+        frame.setFillColor(fillColor);
+      });
+    }
+  });
+});
+
+DefineModule('pxlr/gl/frame', function (require) {
+  var CellGrid = require('pxlr/core/cell-grid');
+
+  return DefineClass(CellGrid, {
+    constructor: function Frame(dimensions) {
+      this.width = dimensions.width;
+      this.height = dimensions.height;
+      this.cells = [];
+
+      for (var x = 0; x < this.width; x++) {
+        this.cells[ x ] = [];
+
+        for (var y = 0; y < this.height; y++) {
+          this.cells[ x ][ y ] = {
+            x: x,
+            y: y,
+            render_x: x * dimensions.pixelSize,
+            render_y: y * dimensions.pixelSize,
+            color: "#000000",
+            index: -1
+          };
+        }
+      }
+    },
+    clear: function () {
+      var color = this.fillColor;
+      if (color) {
+        this.iterateCells(function (cell) {
+          cell.color = color;
+          cell.index = -1;
+        });
+      }
+    },
+    setFillColor: function (fillColor) {
+      this.fillColor = fillColor;
+    }
+  });
+});
+
+DefineModule('pxlr/gl/webgl', function (require) {
+  var Frame = require('pxlr/gl/frame');
+
+  function maximumPixelSize(width, height) {
+    var maxWidth = window.innerWidth;
+    var maxHeight = window.innerHeight;
+    var pixelSize = 1;
+    while (true) {
+      if (width * pixelSize > maxWidth ||
+        height * pixelSize > maxHeight) {
+
+        pixelSize--;
+        break;
+      }
+
+      pixelSize++;
+    }
+
+    if (pixelSize <= 0) {
+      pixelSize = 1;
+    }
+
+    return pixelSize;
+  }
+
+  function createCanvasEl(dimensions) {
+    dimensions.fullWidth = dimensions.width * dimensions.pixelSize;
+    dimensions.fullHeight = dimensions.height * dimensions.pixelSize;
+
+    var el = document.createElement('canvas');
+    el.width = dimensions.fullWidth;
+    el.height = dimensions.fullHeight;
+    el.classList.add('pixel-engine-canvas');
+
+    return el;
+  }
+
+  var horizAspect = 480.0/640.0;
+
+  function loadIdentity() {
+    mvMatrix = Matrix.I(4);
+  }
+
+  function multMatrix(m) {
+    mvMatrix = mvMatrix.x(m);
+  }
+
+  function mvTranslate(v) {
+    multMatrix(Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4());
+  }
+
+  function setMatrixUniforms() {
+    var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+    gl.uniformMatrix4fv(pUniform, false, new Float32Array(perspectiveMatrix.flatten()));
+
+    var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()));
+  }
+
+  function drawScene(gl) {
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    perspectiveMatrix = makePerspective(45, 640.0/480.0, 0.1, 100.0);
+
+    loadIdentity();
+    mvTranslate([-0.0, 0.0, -6.0]);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
+    gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+    setMatrixUniforms();
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+
+  function initBuffers(gl) {
+    squareVerticesBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
+
+    var vertices = [
+      1.0,  1.0,  0.0,
+      -1.0, 1.0,  0.0,
+      1.0,  -1.0, 0.0,
+      -1.0, -1.0, 0.0
+    ];
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+  }
+
+  function getShader(gl, id) {
+    var shaderScript, theSource, currentChild, shader;
+
+    shaderScript = document.getElementById(id);
+
+    if (!shaderScript) {
+      return null;
+    }
+
+    theSource = "";
+    currentChild = shaderScript.firstChild;
+
+    while (currentChild) {
+      if (currentChild.nodeType == currentChild.TEXT_NODE) {
+        theSource += currentChild.textContent;
+      }
+
+      currentChild = currentChild.nextSibling;
+    }
+
+    if (shaderScript.type == "x-shader/x-fragment") {
+      shader = gl.createShader(gl.FRAGMENT_SHADER);
+    } else if (shaderScript.type == "x-shader/x-vertex") {
+      shader = gl.createShader(gl.VERTEX_SHADER);
+    } else {
+      // Unknown shader type
+      return null;
+    }
+
+    gl.shaderSource(shader, theSource);
+
+    // Compile the shader program
+    gl.compileShader(shader);
+
+    // See if it compiled successfully
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader));
+      return null;
+    }
+
+    return shader;
+  }
+
+  function initShaders(gl) {
+    var fragmentShader = getShader(gl, "shader-fs");
+    var vertexShader = getShader(gl, "shader-vs");
+
+    // Create the shader program
+
+    shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+
+    // If creating the shader program failed, alert
+
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+      alert("Unable to initialize the shader program.");
+    }
+
+    gl.useProgram(shaderProgram);
+
+    vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    gl.enableVertexAttribArray(vertexPositionAttribute);
+  }
+
+  return DefineClass({
+    width: 80,
+    height: 50,
+    pixelSize: 1,
+    nextFrame: 0,
+
+    constructor: function Renderer(options) {
+      options = options || {};
+
+      this.width = options.width || this.width;
+      this.height = options.height || this.height;
+      this.pixelSize = maximumPixelSize(this.width, this.height);
+
+      this.container = options.container || document.body;
+      this.canvas = createCanvasEl(this);
+      this.container.appendChild(this.canvas);
+
+      this.canvasDrawContext = this.canvas.getContext("webgl");
+      this.canvasDrawContext.clearColor(0.0, 0.0, 0.0, 1.0);
+      this.canvasDrawContext.enable(this.canvasDrawContext.DEPTH_TEST);
+      this.canvasDrawContext.depthFunc(this.canvasDrawContext.LEQUAL);
+      this.canvasDrawContext.clear(this.canvasDrawContext.COLOR_BUFFER_BIT | this.canvasDrawContext.DEPTH_BUFFER_BIT);
+
+      this.frames = [
+        new Frame(this),
+        new Frame(this)
+      ];
+    },
+
+    newRenderFrame: function () {
+      return this.frames[ this.nextFrame ];
+    },
+    renderFrame: function () {
+      //var frame = this.frames[ this.nextFrame ];
+      //var pixelSize = this.pixelSize;
+      //var ctx = this.canvasDrawContext;
+      //var fillColor = frame.fillColor;
+      //
+      //ctx.fillStyle = fillColor;
+      //ctx.fillRect(0, 0, this.fullWidth, this.fullHeight);
+      //
+      //frame.iterateCells(function (cell, x, y) {
+      //    if (cell.color !== fillColor) {
+      //        ctx.beginPath();
+      //        ctx.rect(cell.render_x, cell.render_y, pixelSize, pixelSize);
+      //        ctx.fillStyle = cell.color;
+      //        ctx.fill();
+      //        ctx.closePath();
+      //    }
+      //});
+      //
+      //this.nextFrame = +!this.nextFrame; // switch the frames
+    },
+    setFillColor: function (fillColor) {
+      this.frames.forEach(function (frame) {
+        frame.setFillColor(fillColor);
+      });
+    }
+  });
+});
+/* end:pxlr-gl */
+}());
+
+(function () {
 /* start:pxlr-fonts */
 DefineModule('pxlr/fonts', function () {
     return {
@@ -3213,45 +3574,6 @@ DefineModule('models/evented-input', function (require) {
     });
 });
 
-DefineModule('models/frame', function (require) {
-    var CellGrid = require('models/cell-grid');
-
-    return DefineClass(CellGrid, {
-        constructor: function Frame(dimensions) {
-            this.width = dimensions.width;
-            this.height = dimensions.height;
-            this.cells = [];
-
-            for (var x = 0; x < this.width; x++) {
-                this.cells[ x ] = [];
-
-                for (var y = 0; y < this.height; y++) {
-                    this.cells[ x ][ y ] = {
-                        x: x,
-                        y: y,
-                        render_x: x * dimensions.pixelSize,
-                        render_y: y * dimensions.pixelSize,
-                        color: "#000000",
-                        index: -1
-                    };
-                }
-            }
-        },
-        clear: function () {
-            var color = this.fillColor;
-            if (color) {
-                this.iterateCells(function (cell) {
-                    cell.color = color;
-                    cell.index = -1;
-                });
-            }
-        },
-        setFillColor: function (fillColor) {
-            this.fillColor = fillColor;
-        }
-    });
-});
-
 DefineModule('models/game-object', function (require) {
     return DefineClass({
         damage: 0,
@@ -4221,6 +4543,199 @@ DefineModule('scripts/watch-for-death', function (require) {
     });
 });
 
+DefineModule('sprites/arrow-boss', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w1 = "#ffffff";
+        var w2 = "#cccccc";
+        var g1 = "#aaaaaa";
+        var g2 = "#888888";
+        var g3 = "#666666";
+        var g4 = "#222222";
+        var nn = null;
+        return new Sprite([
+                [ g3, nn, nn, nn, nn, nn, nn, nn, g3, nn, nn, nn, nn, nn, nn, nn, g3 ],
+                [ g2, g2, nn, nn, nn, nn, g2, g2, w2, g2, g2, nn, nn, nn, nn, g2, g2 ],
+                [ nn, g2, g1, nn, g1, g1, w2, w2, w2, w2, w2, g1, g1, nn, g1, g2, nn ],
+                [ nn, g1, g1, g1, g1, w2, w2, w2, g3, w2, w2, w2, g1, g1, g1, g1, nn ],
+                [ nn, nn, w2, g1, w2, w1, w2, g3, g4, g3, w2, w1, w2, g1, w2, nn, nn ],
+                [ nn, nn, w2, w1, w2, w1, w1, w2, g3, w2, w1, w1, w2, w1, w2, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, w1, w1, w2, w1, w1, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, nn, w1, w1, w1, nn, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ],
+                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ]
+            ],
+            {
+                guns: [
+                    { x: 3, y: 8 },
+                    { x: 8, y: 10 },
+                    { x: 13, y: 8 }
+                ]
+            });
+    };
+});
+
+DefineModule('sprites/arrow-ship', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w1 = "#ffffff";
+        var w2 = "#cccccc";
+        var g1 = "#aaaaaa";
+        var g2 = "#888888";
+        var g3 = "#666666";
+        var g4 = "#222222";
+        var nn = null;
+        return new Sprite([
+            [ g3, nn, nn, nn, nn, nn, g3 ],
+            [ g2, g2, nn, nn, nn, g2, g2 ],
+            [ nn, g2, g1, nn, g1, g2, nn ],
+            [ nn, g1, g1, w1, g1, g1, nn ],
+            [ nn, nn, w2, g4, w2, nn, nn ],
+            [ nn, nn, w2, w1, w2, nn, nn ],
+            [ nn, nn, nn, w1, nn, nn, nn ],
+            [ nn, nn, nn, w1, nn, nn, nn ]
+        ], {
+            guns: [ { x: 3, y: 7 } ]
+        });
+    };
+});
+
+DefineModule('sprites/bullet', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        return new Sprite([
+            [ "white", "white" ]
+        ]);
+    }
+});
+
+DefineModule('sprites/combo-gauge', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "#fff";
+        var n = null;
+
+        return new Sprite([
+            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n],
+            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
+            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
+            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
+            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
+            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n]
+        ]);
+    };
+});
+
+DefineModule('sprites/dagger-ship', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w1 = "#ffffff";
+        var w2 = "#cccccc";
+        var g1 = "#aaaaaa";
+        var g2 = "#888888";
+        var g3 = "#666666";
+        var g4 = "#222222";
+        var nn = null;
+        return new Sprite([
+            [ nn, nn, w1, nn, nn ],
+            [ nn, nn, w1, nn, nn ],
+            [ nn, nn, w1, nn, nn ],
+            [ nn, w2, w1, w2, nn ],
+            [ nn, w2, g4, w2, nn ],
+            [ nn, w2, w1, w2, nn ],
+            [ nn, g2, g1, g2, nn ],
+            [ g2, g2, nn, g2, g2 ],
+            [ g3, nn, nn, nn, g3 ]
+        ], {
+            guns: [ { x: 2, y: 8 } ]
+        });
+    }
+});
+
+DefineModule('sprites/flying-saucer', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "white";
+        var n = null;
+        return new Sprite([
+                [ n, n, n, w, w, w, w, w, n, n, n ],
+                [ n, n, w, n, n, n, n, n, w, n, n ],
+                [ n, w, n, n, n, n, n, n, n, w, n ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, w, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ w, n, n, n, n, n, n, n, n, n, w ],
+                [ n, w, n, n, n, n, n, n, n, w, n ],
+                [ n, n, w, n, n, n, n, n, w, n, n ],
+                [ n, n, n, w, w, w, w, w, n, n, n ]
+            ],
+            {
+                guns: [
+                ]
+            });
+    };
+});
+
+DefineModule('sprites/player-ship-wing-guns', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "white";
+        var n = null;
+        return new Sprite([
+                [ n, n, n, n, w, n, n, n, n ],
+                [ n, n, n, n, w, n, n, n, n ],
+                [ n, n, n, w, w, w, n, n, n ],
+                [ n, n, n, w, w, w, n, n, n ],
+                [ w, n, n, w, w, w, n, n, w ],
+                [ w, n, w, w, w, w, w, n, w ],
+                [ w, w, w, w, w, w, w, w, w ],
+                [ n, n, n, w, w, w, n, n, n ],
+                [ n, n, n, n, w, n, n, n, n ]
+            ],
+            {
+                guns: [
+                    { x: 0, y: 5 },
+                    { x: 4, y: 1 },
+                    { x: 8, y: 5 }
+                ]
+            });
+    };
+});
+
+DefineModule('sprites/player-ship', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        var w = "white";
+        var n = null;
+        return new Sprite([
+            [ n, n, n, w, n, n, n ],
+            [ n, n, n, w, n, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, w, w, w, w, w, n ],
+            [ w, w, w, w, w, w, w ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, n, w, n, n, n ]
+        ],
+        {
+            guns: [
+                { x: 3, y: 1 }
+            ]
+        });
+    };
+});
+
 DefineModule('ships/arrow-boss', function (require) {
     var GameObject = require('models/game-object');
     var shipSprite = require('sprites/arrow-boss');
@@ -4480,506 +4995,6 @@ DefineModule('ships/player-controlled-ship', function (require) {
             }
 
             this.super('applyDamage', arguments);
-        }
-    });
-});
-
-DefineModule('sprites/arrow-boss', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w1 = "#ffffff";
-        var w2 = "#cccccc";
-        var g1 = "#aaaaaa";
-        var g2 = "#888888";
-        var g3 = "#666666";
-        var g4 = "#222222";
-        var nn = null;
-        return new Sprite([
-                [ g3, nn, nn, nn, nn, nn, nn, nn, g3, nn, nn, nn, nn, nn, nn, nn, g3 ],
-                [ g2, g2, nn, nn, nn, nn, g2, g2, w2, g2, g2, nn, nn, nn, nn, g2, g2 ],
-                [ nn, g2, g1, nn, g1, g1, w2, w2, w2, w2, w2, g1, g1, nn, g1, g2, nn ],
-                [ nn, g1, g1, g1, g1, w2, w2, w2, g3, w2, w2, w2, g1, g1, g1, g1, nn ],
-                [ nn, nn, w2, g1, w2, w1, w2, g3, g4, g3, w2, w1, w2, g1, w2, nn, nn ],
-                [ nn, nn, w2, w1, w2, w1, w1, w2, g3, w2, w1, w1, w2, w1, w2, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, w1, w1, w2, w1, w1, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, nn, w1, w1, w1, nn, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ],
-                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ]
-            ],
-            {
-                guns: [
-                    { x: 3, y: 8 },
-                    { x: 8, y: 10 },
-                    { x: 13, y: 8 }
-                ]
-            });
-    };
-});
-
-DefineModule('sprites/arrow-ship', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w1 = "#ffffff";
-        var w2 = "#cccccc";
-        var g1 = "#aaaaaa";
-        var g2 = "#888888";
-        var g3 = "#666666";
-        var g4 = "#222222";
-        var nn = null;
-        return new Sprite([
-            [ g3, nn, nn, nn, nn, nn, g3 ],
-            [ g2, g2, nn, nn, nn, g2, g2 ],
-            [ nn, g2, g1, nn, g1, g2, nn ],
-            [ nn, g1, g1, w1, g1, g1, nn ],
-            [ nn, nn, w2, g4, w2, nn, nn ],
-            [ nn, nn, w2, w1, w2, nn, nn ],
-            [ nn, nn, nn, w1, nn, nn, nn ],
-            [ nn, nn, nn, w1, nn, nn, nn ]
-        ], {
-            guns: [ { x: 3, y: 7 } ]
-        });
-    };
-});
-
-DefineModule('sprites/bullet', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        return new Sprite([
-            [ "white", "white" ]
-        ]);
-    }
-});
-
-DefineModule('sprites/combo-gauge', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "#fff";
-        var n = null;
-
-        return new Sprite([
-            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n],
-            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
-            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
-            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
-            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
-            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n]
-        ]);
-    };
-});
-
-DefineModule('sprites/dagger-ship', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w1 = "#ffffff";
-        var w2 = "#cccccc";
-        var g1 = "#aaaaaa";
-        var g2 = "#888888";
-        var g3 = "#666666";
-        var g4 = "#222222";
-        var nn = null;
-        return new Sprite([
-            [ nn, nn, w1, nn, nn ],
-            [ nn, nn, w1, nn, nn ],
-            [ nn, nn, w1, nn, nn ],
-            [ nn, w2, w1, w2, nn ],
-            [ nn, w2, g4, w2, nn ],
-            [ nn, w2, w1, w2, nn ],
-            [ nn, g2, g1, g2, nn ],
-            [ g2, g2, nn, g2, g2 ],
-            [ g3, nn, nn, nn, g3 ]
-        ], {
-            guns: [ { x: 2, y: 8 } ]
-        });
-    }
-});
-
-DefineModule('sprites/flying-saucer', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "white";
-        var n = null;
-        return new Sprite([
-                [ n, n, n, w, w, w, w, w, n, n, n ],
-                [ n, n, w, n, n, n, n, n, w, n, n ],
-                [ n, w, n, n, n, n, n, n, n, w, n ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ w, n, n, n, n, w, n, n, n, n, w ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ w, n, n, n, n, n, n, n, n, n, w ],
-                [ n, w, n, n, n, n, n, n, n, w, n ],
-                [ n, n, w, n, n, n, n, n, w, n, n ],
-                [ n, n, n, w, w, w, w, w, n, n, n ]
-            ],
-            {
-                guns: [
-                ]
-            });
-    };
-});
-
-DefineModule('sprites/player-ship-wing-guns', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "white";
-        var n = null;
-        return new Sprite([
-                [ n, n, n, n, w, n, n, n, n ],
-                [ n, n, n, n, w, n, n, n, n ],
-                [ n, n, n, w, w, w, n, n, n ],
-                [ n, n, n, w, w, w, n, n, n ],
-                [ w, n, n, w, w, w, n, n, w ],
-                [ w, n, w, w, w, w, w, n, w ],
-                [ w, w, w, w, w, w, w, w, w ],
-                [ n, n, n, w, w, w, n, n, n ],
-                [ n, n, n, n, w, n, n, n, n ]
-            ],
-            {
-                guns: [
-                    { x: 0, y: 5 },
-                    { x: 4, y: 1 },
-                    { x: 8, y: 5 }
-                ]
-            });
-    };
-});
-
-DefineModule('sprites/player-ship', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "white";
-        var n = null;
-        return new Sprite([
-            [ n, n, n, w, n, n, n ],
-            [ n, n, n, w, n, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, w, w, w, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, n, w, n, n, n ]
-        ],
-        {
-            guns: [
-                { x: 3, y: 1 }
-            ]
-        });
-    };
-});
-
-DefineModule('views/canvas-renderer', function (require) {
-    var Frame = require('models/frame');
-
-    function maximumPixelSize(width, height) {
-        var maxWidth = window.innerWidth;
-        var maxHeight = window.innerHeight;
-        var pixelSize = 1;
-        while (true) {
-            if (width * pixelSize > maxWidth ||
-                height * pixelSize > maxHeight) {
-
-                pixelSize--;
-                break;
-            }
-
-            pixelSize++;
-        }
-
-        if (pixelSize <= 0) {
-            pixelSize = 1;
-        }
-
-        return pixelSize;
-    }
-
-    function createCanvasEl(dimensions) {
-        dimensions.fullWidth = dimensions.width * dimensions.pixelSize;
-        dimensions.fullHeight = dimensions.height * dimensions.pixelSize;
-
-        var el = document.createElement('canvas');
-        el.width = dimensions.fullWidth;
-        el.height = dimensions.fullHeight;
-        el.classList.add('pixel-engine-canvas');
-
-        return el;
-    }
-
-    return DefineClass({
-        width: 80,
-        height: 50,
-        pixelSize: 1,
-        nextFrame: 0,
-
-        constructor: function Renderer(options) {
-            options = options || {};
-
-            this.width = options.width || this.width;
-            this.height = options.height || this.height;
-            this.pixelSize = maximumPixelSize(this.width, this.height);
-
-            this.container = options.container || document.body;
-            this.canvas = createCanvasEl(this);
-            this.container.appendChild(this.canvas);
-
-            this.canvasDrawContext = this.canvas.getContext("2d", { alpha: false });
-            this.frames = [
-                new Frame(this),
-                new Frame(this)
-            ];
-        },
-
-        newRenderFrame: function () {
-            return this.frames[ this.nextFrame ];
-        },
-        renderFrame: function () {
-            var frame = this.frames[ this.nextFrame ];
-            var pixelSize = this.pixelSize;
-            var ctx = this.canvasDrawContext;
-            var fillColor = frame.fillColor;
-
-            ctx.fillStyle = fillColor;
-            ctx.fillRect(0, 0, this.fullWidth, this.fullHeight);
-
-            frame.iterateCells(function (cell, x, y) {
-                if (cell.color !== fillColor) {
-                    ctx.beginPath();
-                    ctx.rect(cell.render_x, cell.render_y, pixelSize, pixelSize);
-                    ctx.fillStyle = cell.color;
-                    ctx.fill();
-                    ctx.closePath();
-                }
-            });
-
-            this.nextFrame = +!this.nextFrame; // switch the frames
-        },
-        setFillColor: function (fillColor) {
-            this.frames.forEach(function (frame) {
-                frame.setFillColor(fillColor);
-            });
-        }
-    });
-});
-
-DefineModule('views/webgl-renderer', function (require) {
-    var Frame = require('models/frame');
-
-    function maximumPixelSize(width, height) {
-        var maxWidth = window.innerWidth;
-        var maxHeight = window.innerHeight;
-        var pixelSize = 1;
-        while (true) {
-            if (width * pixelSize > maxWidth ||
-                height * pixelSize > maxHeight) {
-
-                pixelSize--;
-                break;
-            }
-
-            pixelSize++;
-        }
-
-        if (pixelSize <= 0) {
-            pixelSize = 1;
-        }
-
-        return pixelSize;
-    }
-
-    function createCanvasEl(dimensions) {
-        dimensions.fullWidth = dimensions.width * dimensions.pixelSize;
-        dimensions.fullHeight = dimensions.height * dimensions.pixelSize;
-
-        var el = document.createElement('canvas');
-        el.width = dimensions.fullWidth;
-        el.height = dimensions.fullHeight;
-        el.classList.add('pixel-engine-canvas');
-
-        return el;
-    }
-
-    var horizAspect = 480.0/640.0;
-
-    function loadIdentity() {
-        mvMatrix = Matrix.I(4);
-    }
-
-    function multMatrix(m) {
-        mvMatrix = mvMatrix.x(m);
-    }
-
-    function mvTranslate(v) {
-        multMatrix(Matrix.Translation($V([v[0], v[1], v[2]])).ensure4x4());
-    }
-
-    function setMatrixUniforms() {
-        var pUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-        gl.uniformMatrix4fv(pUniform, false, new Float32Array(perspectiveMatrix.flatten()));
-
-        var mvUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-        gl.uniformMatrix4fv(mvUniform, false, new Float32Array(mvMatrix.flatten()));
-    }
-
-    function drawScene(gl) {
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-        perspectiveMatrix = makePerspective(45, 640.0/480.0, 0.1, 100.0);
-
-        loadIdentity();
-        mvTranslate([-0.0, 0.0, -6.0]);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
-        gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-        setMatrixUniforms();
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    }
-
-    function initBuffers(gl) {
-        squareVerticesBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
-
-        var vertices = [
-            1.0,  1.0,  0.0,
-            -1.0, 1.0,  0.0,
-            1.0,  -1.0, 0.0,
-            -1.0, -1.0, 0.0
-        ];
-
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    }
-
-    function getShader(gl, id) {
-        var shaderScript, theSource, currentChild, shader;
-
-        shaderScript = document.getElementById(id);
-
-        if (!shaderScript) {
-            return null;
-        }
-
-        theSource = "";
-        currentChild = shaderScript.firstChild;
-
-        while (currentChild) {
-            if (currentChild.nodeType == currentChild.TEXT_NODE) {
-                theSource += currentChild.textContent;
-            }
-
-            currentChild = currentChild.nextSibling;
-        }
-
-        if (shaderScript.type == "x-shader/x-fragment") {
-            shader = gl.createShader(gl.FRAGMENT_SHADER);
-        } else if (shaderScript.type == "x-shader/x-vertex") {
-            shader = gl.createShader(gl.VERTEX_SHADER);
-        } else {
-            // Unknown shader type
-            return null;
-        }
-
-        gl.shaderSource(shader, theSource);
-
-        // Compile the shader program
-        gl.compileShader(shader);
-
-        // See if it compiled successfully
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader));
-            return null;
-        }
-
-        return shader;
-    }
-
-    function initShaders(gl) {
-        var fragmentShader = getShader(gl, "shader-fs");
-        var vertexShader = getShader(gl, "shader-vs");
-
-        // Create the shader program
-
-        shaderProgram = gl.createProgram();
-        gl.attachShader(shaderProgram, vertexShader);
-        gl.attachShader(shaderProgram, fragmentShader);
-        gl.linkProgram(shaderProgram);
-
-        // If creating the shader program failed, alert
-
-        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-            alert("Unable to initialize the shader program.");
-        }
-
-        gl.useProgram(shaderProgram);
-
-        vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-        gl.enableVertexAttribArray(vertexPositionAttribute);
-    }
-
-    return DefineClass({
-        width: 80,
-        height: 50,
-        pixelSize: 1,
-        nextFrame: 0,
-
-        constructor: function Renderer(options) {
-            options = options || {};
-
-            this.width = options.width || this.width;
-            this.height = options.height || this.height;
-            this.pixelSize = maximumPixelSize(this.width, this.height);
-
-            this.container = options.container || document.body;
-            this.canvas = createCanvasEl(this);
-            this.container.appendChild(this.canvas);
-
-            this.canvasDrawContext = this.canvas.getContext("webgl");
-            this.canvasDrawContext.clearColor(0.0, 0.0, 0.0, 1.0);
-            this.canvasDrawContext.enable(this.canvasDrawContext.DEPTH_TEST);
-            this.canvasDrawContext.depthFunc(this.canvasDrawContext.LEQUAL);
-            this.canvasDrawContext.clear(this.canvasDrawContext.COLOR_BUFFER_BIT | this.canvasDrawContext.DEPTH_BUFFER_BIT);
-
-            this.frames = [
-                new Frame(this),
-                new Frame(this)
-            ];
-        },
-
-        newRenderFrame: function () {
-            return this.frames[ this.nextFrame ];
-        },
-        renderFrame: function () {
-            //var frame = this.frames[ this.nextFrame ];
-            //var pixelSize = this.pixelSize;
-            //var ctx = this.canvasDrawContext;
-            //var fillColor = frame.fillColor;
-            //
-            //ctx.fillStyle = fillColor;
-            //ctx.fillRect(0, 0, this.fullWidth, this.fullHeight);
-            //
-            //frame.iterateCells(function (cell, x, y) {
-            //    if (cell.color !== fillColor) {
-            //        ctx.beginPath();
-            //        ctx.rect(cell.render_x, cell.render_y, pixelSize, pixelSize);
-            //        ctx.fillStyle = cell.color;
-            //        ctx.fill();
-            //        ctx.closePath();
-            //    }
-            //});
-            //
-            //this.nextFrame = +!this.nextFrame; // switch the frames
-        },
-        setFillColor: function (fillColor) {
-            this.frames.forEach(function (frame) {
-                frame.setFillColor(fillColor);
-            });
         }
     });
 });

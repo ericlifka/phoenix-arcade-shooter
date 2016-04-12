@@ -31,6 +31,7 @@
   "dependencies": {
     "simple-web-modules": "git@github.com:ericlifka/simple-web-modules.git#^1.0.0",
     "pxlr-fonts": "git@github.com:ericlifka/pxlr-fonts.git#^1.0.1",
-    "pxlr-core": "git@github.com:ericlifka/pxlr-core.git#^1.0.0"
+    "pxlr-core": "git@github.com:ericlifka/pxlr-core.git#^1.0.0",
+    "pxlr-gl": "git@github.com:ericlifka/pxlr-gl.git#^1.0.2"
   }
 }

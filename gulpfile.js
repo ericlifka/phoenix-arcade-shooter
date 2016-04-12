@@ -7,6 +7,7 @@ const htmlbuild = require('gulp-htmlbuild');
 const JsSrc = [
     'bower_components/simple-web-modules/index.js',
     'bower_components/pxlr-core/dist/index.js',
+    'bower_components/pxlr-gl/dist/index.js',
     'bower_components/pxlr-fonts/dist/index.js',
     'src/**/*.js'
 ];
