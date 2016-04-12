@@ -333,30 +333,26 @@ DefineModule('pxlr/core/sprite', function (require) {
 }());
 
 (function () {
-DefineModule('pxlr-fonts', function (require) {
-    var arcade = require('pxlr-fonts/arcade');
-    var arcadeSmall = require('pxlr-fonts/arcade-small');
-    var phoenix = require('pxlr-fonts/phoenix');
-
+/* start:pxlr-fonts */
+DefineModule('pxlr/fonts', function () {
     return {
-        arcade: arcade,
-        arcadeSmall: arcadeSmall,
-        phoenix: phoenix
+        name: "pxlr-fonts",
+        information: "Collection of pixel fonts meant for use with the pxlr engine"
     };
 });
 
 /* provide namespace backwards compatibility for v1 */
 DefineModule('fonts/arcade', function (require) {
-    return require('pxlr-fonts/arcade');
+    return require('pxlr/fonts/arcade');
 });
 DefineModule('fonts/arcade-small', function (require) {
-    return require('pxlr-fonts/arcade-small');
+    return require('pxlr/fonts/arcade-small');
 });
 DefineModule('fonts/phoenix', function (require) {
-    return require('pxlr-fonts/phoenix');
+    return require('pxlr/fonts/phoenix');
 });
 
-DefineModule('pxlr-fonts/arcade-small', function (require) {
+DefineModule('pxlr/fonts/arcade-small', function (require) {
     var Sprite = require('models/sprite');
 
     var w = "white";
@@ -748,7 +744,7 @@ DefineModule('pxlr-fonts/arcade-small', function (require) {
     };
 });
 
-DefineModule('pxlr-fonts/arcade', function (require) {
+DefineModule('pxlr/fonts/arcade', function (require) {
     var Sprite = require('models/sprite');
 
     var w = "white";
@@ -1345,7 +1341,7 @@ DefineModule('pxlr-fonts/arcade', function (require) {
     };
 });
 
-DefineModule('pxlr-fonts/phoenix', function (require) {
+DefineModule('pxlr/fonts/phoenix', function (require) {
     var Sprite = require('models/sprite');
 
     var w = "white";
@@ -1479,6 +1475,7 @@ DefineModule('pxlr-fonts/phoenix', function (require) {
         ]).invertY().rotateRight()
     };
 });
+/* end:pxlr-fonts */
 }());
 
 DefineModule('main', function (require) {
