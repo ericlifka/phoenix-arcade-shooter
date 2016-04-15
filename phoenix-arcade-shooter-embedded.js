@@ -1845,50 +1845,57 @@ DefineModule('main', function (require) {
     var KeyboardController = require('controllers/keyboard-input');
     var Phoenix = require('models/phoenix');
     var RunLoop = require('helpers/run-loop');
-    //var WebGLRenderer = require('views/webgl-renderer');
 
-    var gameDimensions = { width: 200, height: 150 };
-    var gamepadInput = new GamepadController();
-    var keyboardInput = new KeyboardController();
+    window.createPhoenixGameInstance = function (targetDiv, gameOverCallback) {
+        var gameDimensions = {
+            width: 200,
+            height: 150,
+            container: targetDiv,
+            embedded: true
+        };
+        var gamepadInput = new GamepadController();
+        var keyboardInput = new KeyboardController();
 
-    var phoenix = new Phoenix(gameDimensions);
-    var renderer = new CanvasRenderer(gameDimensions);
-    var runLoop = new RunLoop();
+        var phoenix = new Phoenix(gameDimensions);
+        var renderer = new CanvasRenderer(gameDimensions);
+        var runLoop = new RunLoop();
 
-    renderer.setFillColor(phoenix.FILL_COLOR);
+        phoenix.gameOverCallback = gameOverCallback;
+        renderer.setFillColor(phoenix.FILL_COLOR);
 
-    runLoop.addCallback(function (dtime) {
-        phoenix.processInput([
-            keyboardInput.getInputState(),
-            gamepadInput.getInputState()
-        ]);
+        runLoop.addCallback(function (dtime) {
+            phoenix.processInput([
+                keyboardInput.getInputState(),
+                gamepadInput.getInputState()
+            ]);
 
-        phoenix.update(dtime);
+            phoenix.update(dtime);
 
-        var frame = renderer.newRenderFrame();
-        frame.clear();
-        phoenix.renderToFrame(frame);
+            var frame = renderer.newRenderFrame();
+            frame.clear();
+            phoenix.renderToFrame(frame);
 
-        renderer.renderFrame(frame);
-    });
+            renderer.renderFrame(frame);
+        });
 
-    document.addEventListener("visibilitychange", function () {
-        if (document.hidden) {
+        document.addEventListener("visibilitychange", function () {
+            if (document.hidden) {
+                phoenix.pause();
+            }
+        });
+
+        window.addEventListener("blur", function () {
             phoenix.pause();
-        }
-    });
+        });
 
-    window.addEventListener("blur", function () {
-        phoenix.pause();
-    });
+        window.addEventListener("focus", function () {
+            keyboardInput.clearState();
+            gamepadInput.clearState();
+        });
 
-    window.addEventListener("focus", function () {
-        keyboardInput.clearState();
-        gamepadInput.clearState();
-    });
-
-    runLoop.start();
-    window.activeGame = phoenix;
+        runLoop.start();
+        return phoenix;
+    };
 });
 
 DefineModule('components/bank', function (require) {
