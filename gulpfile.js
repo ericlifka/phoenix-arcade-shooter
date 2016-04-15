@@ -1,8 +1,9 @@
-const gulp = require('gulp');
 const concat = require('gulp-concat');
 const filter = require('gulp-filter');
-const wrapper = require('gulp-wrapper');
+const ghPages = require('gulp-gh-pages');
+const gulp = require('gulp');
 const htmlbuild = require('gulp-htmlbuild');
+const wrapper = require('gulp-wrapper');
 
 const JsSrc = [
     'bower_components/simple-web-modules/index.js',
@@ -56,3 +57,8 @@ gulp.task('build-embedded-blob', function () {
 });
 
 gulp.task('default', [ 'static-files', 'build-html', 'build-js-blob', 'build-embedded-blob' ]);
+
+gulp.task('deploy', [ 'default' ], function () {
+    return gulp.src('dist/**/*')
+        .pipe(ghPages());
+});

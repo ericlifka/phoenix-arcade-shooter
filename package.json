@@ -3,6 +3,7 @@
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
     "gulp-filter": "^4.0.0",
+    "gulp-gh-pages": "^0.5.4",
     "gulp-htmlbuild": "^0.4.1",
     "gulp-wrapper": "^1.0.0"
   }
