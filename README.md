@@ -12,5 +12,6 @@ The current release version of the game is hosted here: [ericlifka.com/phoenix-a
 
 ## setup
 
-Development time setup is simple, just open `index.html` in a browser
-`gulp` powers the build system, so to push releases simply use `gulp` and `gulp deploy`
+Development time setup is simple, just open `index.html` in a browser.
+
+`gulp` powers the build system, so to push releases simply use `gulp` and `gulp deploy`.
