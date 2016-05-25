@@ -2539,136 +2539,6 @@ DefineModule('components/text-display', function (require) {
     });
 });
 
-DefineModule('controllers/gamepad-input', function (require) {
-    var BUTTON_MAP = {
-        0: 'A',
-        1: 'B',
-        2: 'X',
-        3: 'Y',
-        4: 'left-bumper',
-        5: 'right-bumper',
-        6: 'left-trigger',
-        7: 'right-trigger',
-        8: 'back',
-        9: 'start',
-        10: 'left-stick-press',
-        11: 'right-stick-press',
-        12: 'd-pad-up',
-        13: 'd-pad-down',
-        14: 'd-pad-left',
-        15: 'd-pad-right'
-    };
-
-    function gamepadDescriptor() {
-        var descriptor = { INPUT_TYPE: 'gamepad' };
-
-        Object.keys(BUTTON_MAP).forEach(function (key) {
-            descriptor[ BUTTON_MAP[ key ] ] = false;
-        });
-
-        descriptor[ 'left-stick-x' ] = 0;
-        descriptor[ 'left-stick-y' ] = 0;
-        descriptor[ 'right-stick-x' ] = 0;
-        descriptor[ 'right-stick-y' ] = 0;
-
-        return descriptor;
-    }
-
-    function normalize(axisTilt) {
-        return Math.round(axisTilt * 10) / 10;
-    }
-
-    return DefineClass({
-        constructor: function () {
-            window.addEventListener("gamepadconnected", function (e) {
-                console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
-                    e.gamepad.index, e.gamepad.id,
-                    e.gamepad.buttons.length, e.gamepad.axes.length);
-            });
-            window.addEventListener("gamepaddisconnected", function (e) {
-                console.log("Gamepad disconnected from index %d: %s",
-                    e.gamepad.index, e.gamepad.id);
-            });
-        },
-        getInputState: function () {
-            var gamepad = navigator.getGamepads()[ 0 ];
-            var gamepadState = gamepadDescriptor();
-
-            if (gamepad && gamepad.connected) {
-                gamepad.buttons.forEach(function (button, index) {
-                    gamepadState[ BUTTON_MAP[ index ] ] = button.pressed;
-                });
-
-                gamepadState[ 'left-stick-x' ] = normalize(gamepad.axes[ 0 ]);
-                gamepadState[ 'left-stick-y' ] = normalize(gamepad.axes[ 1 ]);
-                gamepadState[ 'right-stick-x' ] = normalize(gamepad.axes[ 2 ]);
-                gamepadState[ 'right-stick-y' ] = normalize(gamepad.axes[ 3 ]);
-            }
-
-            return gamepadState;
-        },
-        clearState: function () {
-            /* no op for gamepads */
-        }
-    });
-});
-
-DefineModule('controllers/keyboard-input', function (require) {
-    function cloneObj(obj) {
-        var nObj = {};
-        Object.keys(obj).forEach(function (key) {
-            nObj[ key ] = obj[ key ];
-        });
-        return nObj;
-    }
-
-    function newInputDescriptor() {
-        return {
-            W: false, A: false, S: false, D: false,
-            SPACE: false, ENTER: false
-        };
-    }
-
-    var KEYS = {
-        87: 'W', 65: 'A', 83: 'S', 68: 'D',
-        32: 'SPACE', 13: 'ENTER'
-    };
-
-    return DefineClass({
-        constructor: function () {
-            this.clearState();
-
-            document.body.addEventListener('keydown', this.keydown.bind(this));
-            document.body.addEventListener('keyup', this.keyup.bind(this));
-        },
-        getInputState: function () {
-            var state = cloneObj(this.inputState);
-            this.propagateInputClears();
-            return state;
-        },
-        clearState: function () {
-            this.clearAfterNext = newInputDescriptor();
-            this.inputState = newInputDescriptor();
-            this.inputState.INPUT_TYPE = "keyboard";
-        },
-        propagateInputClears: function () {
-            Object.keys(this.clearAfterNext).forEach(function (key) {
-                if (this.clearAfterNext[ key ]) {
-                    this.inputState[ key ] = false;
-                    this.clearAfterNext[ key ] = false;
-                }
-            }.bind(this));
-        },
-        keydown: function (event) {
-            this.inputState[ KEYS[ event.keyCode ] ] = true;
-            this.clearAfterNext[ KEYS[ event.keyCode ] ] = false;
-        },
-        keyup: function (event) {
-            this.clearAfterNext[ KEYS[ event.keyCode ] ] = true;
-        }
-    });
-});
-
 DefineModule('helpers/collect-entities', function () {
     return function visitNode(node, matcherFn, collection) {
         collection = collection || [];
@@ -3019,6 +2889,136 @@ DefineModule('helpers/run-loop', function (require) {
             this.fpsTracker.push(dtime);
 
             updateFPScounter(this.fpsTracker.average());
+        }
+    });
+});
+
+DefineModule('controllers/gamepad-input', function (require) {
+    var BUTTON_MAP = {
+        0: 'A',
+        1: 'B',
+        2: 'X',
+        3: 'Y',
+        4: 'left-bumper',
+        5: 'right-bumper',
+        6: 'left-trigger',
+        7: 'right-trigger',
+        8: 'back',
+        9: 'start',
+        10: 'left-stick-press',
+        11: 'right-stick-press',
+        12: 'd-pad-up',
+        13: 'd-pad-down',
+        14: 'd-pad-left',
+        15: 'd-pad-right'
+    };
+
+    function gamepadDescriptor() {
+        var descriptor = { INPUT_TYPE: 'gamepad' };
+
+        Object.keys(BUTTON_MAP).forEach(function (key) {
+            descriptor[ BUTTON_MAP[ key ] ] = false;
+        });
+
+        descriptor[ 'left-stick-x' ] = 0;
+        descriptor[ 'left-stick-y' ] = 0;
+        descriptor[ 'right-stick-x' ] = 0;
+        descriptor[ 'right-stick-y' ] = 0;
+
+        return descriptor;
+    }
+
+    function normalize(axisTilt) {
+        return Math.round(axisTilt * 10) / 10;
+    }
+
+    return DefineClass({
+        constructor: function () {
+            window.addEventListener("gamepadconnected", function (e) {
+                console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+                    e.gamepad.index, e.gamepad.id,
+                    e.gamepad.buttons.length, e.gamepad.axes.length);
+            });
+            window.addEventListener("gamepaddisconnected", function (e) {
+                console.log("Gamepad disconnected from index %d: %s",
+                    e.gamepad.index, e.gamepad.id);
+            });
+        },
+        getInputState: function () {
+            var gamepad = navigator.getGamepads()[ 0 ];
+            var gamepadState = gamepadDescriptor();
+
+            if (gamepad && gamepad.connected) {
+                gamepad.buttons.forEach(function (button, index) {
+                    gamepadState[ BUTTON_MAP[ index ] ] = button.pressed;
+                });
+
+                gamepadState[ 'left-stick-x' ] = normalize(gamepad.axes[ 0 ]);
+                gamepadState[ 'left-stick-y' ] = normalize(gamepad.axes[ 1 ]);
+                gamepadState[ 'right-stick-x' ] = normalize(gamepad.axes[ 2 ]);
+                gamepadState[ 'right-stick-y' ] = normalize(gamepad.axes[ 3 ]);
+            }
+
+            return gamepadState;
+        },
+        clearState: function () {
+            /* no op for gamepads */
+        }
+    });
+});
+
+DefineModule('controllers/keyboard-input', function (require) {
+    function cloneObj(obj) {
+        var nObj = {};
+        Object.keys(obj).forEach(function (key) {
+            nObj[ key ] = obj[ key ];
+        });
+        return nObj;
+    }
+
+    function newInputDescriptor() {
+        return {
+            W: false, A: false, S: false, D: false,
+            SPACE: false, ENTER: false
+        };
+    }
+
+    var KEYS = {
+        87: 'W', 65: 'A', 83: 'S', 68: 'D',
+        32: 'SPACE', 13: 'ENTER'
+    };
+
+    return DefineClass({
+        constructor: function () {
+            this.clearState();
+
+            document.body.addEventListener('keydown', this.keydown.bind(this));
+            document.body.addEventListener('keyup', this.keyup.bind(this));
+        },
+        getInputState: function () {
+            var state = cloneObj(this.inputState);
+            this.propagateInputClears();
+            return state;
+        },
+        clearState: function () {
+            this.clearAfterNext = newInputDescriptor();
+            this.inputState = newInputDescriptor();
+            this.inputState.INPUT_TYPE = "keyboard";
+        },
+        propagateInputClears: function () {
+            Object.keys(this.clearAfterNext).forEach(function (key) {
+                if (this.clearAfterNext[ key ]) {
+                    this.inputState[ key ] = false;
+                    this.clearAfterNext[ key ] = false;
+                }
+            }.bind(this));
+        },
+        keydown: function (event) {
+            this.inputState[ KEYS[ event.keyCode ] ] = true;
+            this.clearAfterNext[ KEYS[ event.keyCode ] ] = false;
+        },
+        keyup: function (event) {
+            this.clearAfterNext[ KEYS[ event.keyCode ] ] = true;
         }
     });
 });
@@ -4329,6 +4329,220 @@ DefineModule('screens/title-screen', function (require) {
     });
 });
 
+DefineModule('scripts/chain-gun-fire', function (require) {
+    var GameObject = require('models/game-object');
+    var Random = require('helpers/random');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, ship, options) {
+            this.super('constructor', arguments);
+            options = options || {};
+
+            this.ship = ship;
+            this.gunIndex = options.gunIndex || 0;
+            this.fireRate = options.fireRate || 150;
+            this.burstSize = options.burstSize || 5;
+            this.thresholdMin = options.thresholdMin || 2000;
+            this.thresholdMax = options.thresholdMax || 6000;
+        },
+
+        start: function () {
+            this.resetTimer();
+            this.threshold += this.thresholdMax;
+        },
+
+        update: function (dtime) {
+            if (this.ship.destroyed) {
+                this.destroy();
+            }
+
+            this.elapsed += dtime;
+
+            if (this.firing) {
+
+                if (this.elapsed > this.fireRate) {
+                    this.elapsed -= this.fireRate;
+                    this.burstCount++;
+                    this.ship.fire(this.gunIndex);
+
+                    if (this.burstCount > this.burstSize) {
+                        this.firing = false;
+                        this.resetTimer();
+                    }
+                }
+
+            }
+            else {
+
+                if (this.elapsed > this.threshold) {
+                    this.firing = true;
+                    this.elapsed = 0;
+                    this.burstCount = 0;
+                }
+
+            }
+        },
+
+        resetTimer: function () {
+            this.elapsed = 0;
+            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
+        }
+    });
+});
+
+DefineModule('scripts/fire-single-gun-random-rate', function (require) {
+    var GameObject = require('models/game-object');
+    var Random = require('helpers/random');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, ship, options) {
+            this.super('constructor', arguments);
+            options = options || {};
+
+            this.ship = ship;
+            this.gunIndex = options.gunIndex || 0;
+            this.thresholdMin = options.thresholdMin || 1000;
+            this.thresholdMax = options.thresholdMax || 3000;
+        },
+
+        start: function () {
+            this.resetTimer();
+            this.threshold += this.thresholdMax;
+        },
+
+        update: function (dtime) {
+            if (this.ship.destroyed) {
+                this.destroy();
+            }
+
+            this.elapsed += dtime;
+
+            if (this.elapsed > this.threshold) {
+                this.resetTimer();
+                this.ship.fire(this.gunIndex);
+            }
+        },
+
+        resetTimer: function () {
+            this.elapsed = 0;
+            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
+        }
+    });
+});
+
+DefineModule('scripts/fly-player-in-from-bottom', function (require) {
+    var GameObject = require('models/game-object');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, game) {
+            this.super('constructor', arguments);
+
+            this.game = game;
+            this.player = game.player;
+        },
+        start: function () {
+            this.player.preventInputControl = true;
+
+            var position = this.player.position;
+            var velocity = this.player.velocity;
+
+            position.x = Math.floor(this.game.width / 2 - this.player.sprite.width / 2);
+            position.y = this.game.height + 30;
+            velocity.x = 0;
+            velocity.y = -this.player.SPEED / 5;
+
+            return this;
+        },
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            if (this.player.position.y < this.game.height - this.player.sprite.height - 2) {
+                this.player.preventInputControl = false;
+                this.destroy();
+            }
+        }
+    });
+});
+
+DefineModule('scripts/move-object-to-point', function (require) {
+    var GameObject = require('models/game-object');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, object, targetPoint, timeDelta) {
+            this.super('constructor', arguments);
+
+            this.object = object;
+            this.target = targetPoint;
+            this.delta = timeDelta;
+        },
+        start: function () {
+            var current = this.object.position;
+
+            var xDiff = this.target.x - current.x;
+            var yDiff = this.target.y - current.y;
+
+            this.object.velocity.x = xDiff / this.delta;
+            this.object.velocity.y = yDiff / this.delta;
+
+            this.xPositive = xDiff > 0;
+            this.yPositive = yDiff > 0;
+        },
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            if (this.metXThreshold() && this.metYThreshold()) {
+                this.object.velocity.x = 0;
+                this.object.velocity.y = 0;
+
+                this.object.position.x = this.target.x;
+                this.object.position.y = this.target.y;
+
+                this.parent.removeChild(this);
+            }
+        },
+
+        metXThreshold: function () {
+            return (
+                this.xPositive && this.object.position.x >= this.target.x ||
+                !this.xPositive && this.object.position.x <= this.target.x
+            );
+        },
+
+        metYThreshold: function () {
+            return (
+                this.yPositive && this.object.position.y >= this.target.y ||
+                !this.yPositive && this.object.position.y <= this.target.y
+            );
+        }
+    });
+});
+
+DefineModule('scripts/watch-for-death', function (require) {
+    var GameObject = require('models/game-object');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, entity, callback) {
+            this.super('constructor', arguments);
+
+            this.entity = entity;
+            this.callback = callback;
+            this.started = false;
+        },
+
+        update: function () {
+            if (this.entity.destroyed && this.started) {
+                this.started = false;
+                this.callback();
+                this.destroy();
+            }
+        },
+
+        start: function () {
+            this.started = true;
+        }
+    });
+});
+
 DefineModule('ships/arrow-boss', function (require) {
     var GameObject = require('models/game-object');
     var shipSprite = require('sprites/arrow-boss');
@@ -4588,220 +4802,6 @@ DefineModule('ships/player-controlled-ship', function (require) {
             }
 
             this.super('applyDamage', arguments);
-        }
-    });
-});
-
-DefineModule('scripts/chain-gun-fire', function (require) {
-    var GameObject = require('models/game-object');
-    var Random = require('helpers/random');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, ship, options) {
-            this.super('constructor', arguments);
-            options = options || {};
-
-            this.ship = ship;
-            this.gunIndex = options.gunIndex || 0;
-            this.fireRate = options.fireRate || 150;
-            this.burstSize = options.burstSize || 5;
-            this.thresholdMin = options.thresholdMin || 2000;
-            this.thresholdMax = options.thresholdMax || 6000;
-        },
-
-        start: function () {
-            this.resetTimer();
-            this.threshold += this.thresholdMax;
-        },
-
-        update: function (dtime) {
-            if (this.ship.destroyed) {
-                this.destroy();
-            }
-
-            this.elapsed += dtime;
-
-            if (this.firing) {
-
-                if (this.elapsed > this.fireRate) {
-                    this.elapsed -= this.fireRate;
-                    this.burstCount++;
-                    this.ship.fire(this.gunIndex);
-
-                    if (this.burstCount > this.burstSize) {
-                        this.firing = false;
-                        this.resetTimer();
-                    }
-                }
-
-            }
-            else {
-
-                if (this.elapsed > this.threshold) {
-                    this.firing = true;
-                    this.elapsed = 0;
-                    this.burstCount = 0;
-                }
-
-            }
-        },
-
-        resetTimer: function () {
-            this.elapsed = 0;
-            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
-        }
-    });
-});
-
-DefineModule('scripts/fire-single-gun-random-rate', function (require) {
-    var GameObject = require('models/game-object');
-    var Random = require('helpers/random');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, ship, options) {
-            this.super('constructor', arguments);
-            options = options || {};
-
-            this.ship = ship;
-            this.gunIndex = options.gunIndex || 0;
-            this.thresholdMin = options.thresholdMin || 1000;
-            this.thresholdMax = options.thresholdMax || 3000;
-        },
-
-        start: function () {
-            this.resetTimer();
-            this.threshold += this.thresholdMax;
-        },
-
-        update: function (dtime) {
-            if (this.ship.destroyed) {
-                this.destroy();
-            }
-
-            this.elapsed += dtime;
-
-            if (this.elapsed > this.threshold) {
-                this.resetTimer();
-                this.ship.fire(this.gunIndex);
-            }
-        },
-
-        resetTimer: function () {
-            this.elapsed = 0;
-            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
-        }
-    });
-});
-
-DefineModule('scripts/fly-player-in-from-bottom', function (require) {
-    var GameObject = require('models/game-object');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, game) {
-            this.super('constructor', arguments);
-
-            this.game = game;
-            this.player = game.player;
-        },
-        start: function () {
-            this.player.preventInputControl = true;
-
-            var position = this.player.position;
-            var velocity = this.player.velocity;
-
-            position.x = Math.floor(this.game.width / 2 - this.player.sprite.width / 2);
-            position.y = this.game.height + 30;
-            velocity.x = 0;
-            velocity.y = -this.player.SPEED / 5;
-
-            return this;
-        },
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            if (this.player.position.y < this.game.height - this.player.sprite.height - 2) {
-                this.player.preventInputControl = false;
-                this.destroy();
-            }
-        }
-    });
-});
-
-DefineModule('scripts/move-object-to-point', function (require) {
-    var GameObject = require('models/game-object');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, object, targetPoint, timeDelta) {
-            this.super('constructor', arguments);
-
-            this.object = object;
-            this.target = targetPoint;
-            this.delta = timeDelta;
-        },
-        start: function () {
-            var current = this.object.position;
-
-            var xDiff = this.target.x - current.x;
-            var yDiff = this.target.y - current.y;
-
-            this.object.velocity.x = xDiff / this.delta;
-            this.object.velocity.y = yDiff / this.delta;
-
-            this.xPositive = xDiff > 0;
-            this.yPositive = yDiff > 0;
-        },
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            if (this.metXThreshold() && this.metYThreshold()) {
-                this.object.velocity.x = 0;
-                this.object.velocity.y = 0;
-
-                this.object.position.x = this.target.x;
-                this.object.position.y = this.target.y;
-
-                this.parent.removeChild(this);
-            }
-        },
-
-        metXThreshold: function () {
-            return (
-                this.xPositive && this.object.position.x >= this.target.x ||
-                !this.xPositive && this.object.position.x <= this.target.x
-            );
-        },
-
-        metYThreshold: function () {
-            return (
-                this.yPositive && this.object.position.y >= this.target.y ||
-                !this.yPositive && this.object.position.y <= this.target.y
-            );
-        }
-    });
-});
-
-DefineModule('scripts/watch-for-death', function (require) {
-    var GameObject = require('models/game-object');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, entity, callback) {
-            this.super('constructor', arguments);
-
-            this.entity = entity;
-            this.callback = callback;
-            this.started = false;
-        },
-
-        update: function () {
-            if (this.entity.destroyed && this.started) {
-                this.started = false;
-                this.callback();
-                this.destroy();
-            }
-        },
-
-        start: function () {
-            this.started = true;
         }
     });
 });
