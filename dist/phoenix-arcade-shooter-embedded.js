@@ -4329,6 +4329,220 @@ DefineModule('screens/title-screen', function (require) {
     });
 });
 
+DefineModule('scripts/chain-gun-fire', function (require) {
+    var GameObject = require('models/game-object');
+    var Random = require('helpers/random');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, ship, options) {
+            this.super('constructor', arguments);
+            options = options || {};
+
+            this.ship = ship;
+            this.gunIndex = options.gunIndex || 0;
+            this.fireRate = options.fireRate || 150;
+            this.burstSize = options.burstSize || 5;
+            this.thresholdMin = options.thresholdMin || 2000;
+            this.thresholdMax = options.thresholdMax || 6000;
+        },
+
+        start: function () {
+            this.resetTimer();
+            this.threshold += this.thresholdMax;
+        },
+
+        update: function (dtime) {
+            if (this.ship.destroyed) {
+                this.destroy();
+            }
+
+            this.elapsed += dtime;
+
+            if (this.firing) {
+
+                if (this.elapsed > this.fireRate) {
+                    this.elapsed -= this.fireRate;
+                    this.burstCount++;
+                    this.ship.fire(this.gunIndex);
+
+                    if (this.burstCount > this.burstSize) {
+                        this.firing = false;
+                        this.resetTimer();
+                    }
+                }
+
+            }
+            else {
+
+                if (this.elapsed > this.threshold) {
+                    this.firing = true;
+                    this.elapsed = 0;
+                    this.burstCount = 0;
+                }
+
+            }
+        },
+
+        resetTimer: function () {
+            this.elapsed = 0;
+            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
+        }
+    });
+});
+
+DefineModule('scripts/fire-single-gun-random-rate', function (require) {
+    var GameObject = require('models/game-object');
+    var Random = require('helpers/random');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, ship, options) {
+            this.super('constructor', arguments);
+            options = options || {};
+
+            this.ship = ship;
+            this.gunIndex = options.gunIndex || 0;
+            this.thresholdMin = options.thresholdMin || 1000;
+            this.thresholdMax = options.thresholdMax || 3000;
+        },
+
+        start: function () {
+            this.resetTimer();
+            this.threshold += this.thresholdMax;
+        },
+
+        update: function (dtime) {
+            if (this.ship.destroyed) {
+                this.destroy();
+            }
+
+            this.elapsed += dtime;
+
+            if (this.elapsed > this.threshold) {
+                this.resetTimer();
+                this.ship.fire(this.gunIndex);
+            }
+        },
+
+        resetTimer: function () {
+            this.elapsed = 0;
+            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
+        }
+    });
+});
+
+DefineModule('scripts/fly-player-in-from-bottom', function (require) {
+    var GameObject = require('models/game-object');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, game) {
+            this.super('constructor', arguments);
+
+            this.game = game;
+            this.player = game.player;
+        },
+        start: function () {
+            this.player.preventInputControl = true;
+
+            var position = this.player.position;
+            var velocity = this.player.velocity;
+
+            position.x = Math.floor(this.game.width / 2 - this.player.sprite.width / 2);
+            position.y = this.game.height + 30;
+            velocity.x = 0;
+            velocity.y = -this.player.SPEED / 5;
+
+            return this;
+        },
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            if (this.player.position.y < this.game.height - this.player.sprite.height - 2) {
+                this.player.preventInputControl = false;
+                this.destroy();
+            }
+        }
+    });
+});
+
+DefineModule('scripts/move-object-to-point', function (require) {
+    var GameObject = require('models/game-object');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, object, targetPoint, timeDelta) {
+            this.super('constructor', arguments);
+
+            this.object = object;
+            this.target = targetPoint;
+            this.delta = timeDelta;
+        },
+        start: function () {
+            var current = this.object.position;
+
+            var xDiff = this.target.x - current.x;
+            var yDiff = this.target.y - current.y;
+
+            this.object.velocity.x = xDiff / this.delta;
+            this.object.velocity.y = yDiff / this.delta;
+
+            this.xPositive = xDiff > 0;
+            this.yPositive = yDiff > 0;
+        },
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            if (this.metXThreshold() && this.metYThreshold()) {
+                this.object.velocity.x = 0;
+                this.object.velocity.y = 0;
+
+                this.object.position.x = this.target.x;
+                this.object.position.y = this.target.y;
+
+                this.parent.removeChild(this);
+            }
+        },
+
+        metXThreshold: function () {
+            return (
+                this.xPositive && this.object.position.x >= this.target.x ||
+                !this.xPositive && this.object.position.x <= this.target.x
+            );
+        },
+
+        metYThreshold: function () {
+            return (
+                this.yPositive && this.object.position.y >= this.target.y ||
+                !this.yPositive && this.object.position.y <= this.target.y
+            );
+        }
+    });
+});
+
+DefineModule('scripts/watch-for-death', function (require) {
+    var GameObject = require('models/game-object');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, entity, callback) {
+            this.super('constructor', arguments);
+
+            this.entity = entity;
+            this.callback = callback;
+            this.started = false;
+        },
+
+        update: function () {
+            if (this.entity.destroyed && this.started) {
+                this.started = false;
+                this.callback();
+                this.destroy();
+            }
+        },
+
+        start: function () {
+            this.started = true;
+        }
+    });
+});
+
 DefineModule('ships/arrow-boss', function (require) {
     var GameObject = require('models/game-object');
     var shipSprite = require('sprites/arrow-boss');
@@ -4588,220 +4802,6 @@ DefineModule('ships/player-controlled-ship', function (require) {
             }
 
             this.super('applyDamage', arguments);
-        }
-    });
-});
-
-DefineModule('scripts/chain-gun-fire', function (require) {
-    var GameObject = require('models/game-object');
-    var Random = require('helpers/random');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, ship, options) {
-            this.super('constructor', arguments);
-            options = options || {};
-
-            this.ship = ship;
-            this.gunIndex = options.gunIndex || 0;
-            this.fireRate = options.fireRate || 150;
-            this.burstSize = options.burstSize || 5;
-            this.thresholdMin = options.thresholdMin || 2000;
-            this.thresholdMax = options.thresholdMax || 6000;
-        },
-
-        start: function () {
-            this.resetTimer();
-            this.threshold += this.thresholdMax;
-        },
-
-        update: function (dtime) {
-            if (this.ship.destroyed) {
-                this.destroy();
-            }
-
-            this.elapsed += dtime;
-
-            if (this.firing) {
-
-                if (this.elapsed > this.fireRate) {
-                    this.elapsed -= this.fireRate;
-                    this.burstCount++;
-                    this.ship.fire(this.gunIndex);
-
-                    if (this.burstCount > this.burstSize) {
-                        this.firing = false;
-                        this.resetTimer();
-                    }
-                }
-
-            }
-            else {
-
-                if (this.elapsed > this.threshold) {
-                    this.firing = true;
-                    this.elapsed = 0;
-                    this.burstCount = 0;
-                }
-
-            }
-        },
-
-        resetTimer: function () {
-            this.elapsed = 0;
-            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
-        }
-    });
-});
-
-DefineModule('scripts/fire-single-gun-random-rate', function (require) {
-    var GameObject = require('models/game-object');
-    var Random = require('helpers/random');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, ship, options) {
-            this.super('constructor', arguments);
-            options = options || {};
-
-            this.ship = ship;
-            this.gunIndex = options.gunIndex || 0;
-            this.thresholdMin = options.thresholdMin || 1000;
-            this.thresholdMax = options.thresholdMax || 3000;
-        },
-
-        start: function () {
-            this.resetTimer();
-            this.threshold += this.thresholdMax;
-        },
-
-        update: function (dtime) {
-            if (this.ship.destroyed) {
-                this.destroy();
-            }
-
-            this.elapsed += dtime;
-
-            if (this.elapsed > this.threshold) {
-                this.resetTimer();
-                this.ship.fire(this.gunIndex);
-            }
-        },
-
-        resetTimer: function () {
-            this.elapsed = 0;
-            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
-        }
-    });
-});
-
-DefineModule('scripts/fly-player-in-from-bottom', function (require) {
-    var GameObject = require('models/game-object');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, game) {
-            this.super('constructor', arguments);
-
-            this.game = game;
-            this.player = game.player;
-        },
-        start: function () {
-            this.player.preventInputControl = true;
-
-            var position = this.player.position;
-            var velocity = this.player.velocity;
-
-            position.x = Math.floor(this.game.width / 2 - this.player.sprite.width / 2);
-            position.y = this.game.height + 30;
-            velocity.x = 0;
-            velocity.y = -this.player.SPEED / 5;
-
-            return this;
-        },
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            if (this.player.position.y < this.game.height - this.player.sprite.height - 2) {
-                this.player.preventInputControl = false;
-                this.destroy();
-            }
-        }
-    });
-});
-
-DefineModule('scripts/move-object-to-point', function (require) {
-    var GameObject = require('models/game-object');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, object, targetPoint, timeDelta) {
-            this.super('constructor', arguments);
-
-            this.object = object;
-            this.target = targetPoint;
-            this.delta = timeDelta;
-        },
-        start: function () {
-            var current = this.object.position;
-
-            var xDiff = this.target.x - current.x;
-            var yDiff = this.target.y - current.y;
-
-            this.object.velocity.x = xDiff / this.delta;
-            this.object.velocity.y = yDiff / this.delta;
-
-            this.xPositive = xDiff > 0;
-            this.yPositive = yDiff > 0;
-        },
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            if (this.metXThreshold() && this.metYThreshold()) {
-                this.object.velocity.x = 0;
-                this.object.velocity.y = 0;
-
-                this.object.position.x = this.target.x;
-                this.object.position.y = this.target.y;
-
-                this.parent.removeChild(this);
-            }
-        },
-
-        metXThreshold: function () {
-            return (
-                this.xPositive && this.object.position.x >= this.target.x ||
-                !this.xPositive && this.object.position.x <= this.target.x
-            );
-        },
-
-        metYThreshold: function () {
-            return (
-                this.yPositive && this.object.position.y >= this.target.y ||
-                !this.yPositive && this.object.position.y <= this.target.y
-            );
-        }
-    });
-});
-
-DefineModule('scripts/watch-for-death', function (require) {
-    var GameObject = require('models/game-object');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, entity, callback) {
-            this.super('constructor', arguments);
-
-            this.entity = entity;
-            this.callback = callback;
-            this.started = false;
-        },
-
-        update: function () {
-            if (this.entity.destroyed && this.started) {
-                this.started = false;
-                this.callback();
-                this.destroy();
-            }
-        },
-
-        start: function () {
-            this.started = true;
         }
     });
 });
