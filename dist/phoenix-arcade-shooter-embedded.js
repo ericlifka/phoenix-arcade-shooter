@@ -1839,1682 +1839,265 @@ DefineModule('pxlr/fonts/phoenix', function (require) {
 /* end:pxlr-fonts */
 }());
 
-DefineModule('main', function (require) {
-    var CanvasRenderer = require('views/canvas-renderer');
-    var GamepadController = require('controllers/gamepad-input');
-    var KeyboardController = require('controllers/keyboard-input');
-    var Phoenix = require('models/phoenix');
-    var RunLoop = require('helpers/run-loop');
-
-    window.createPhoenixGameInstance = function (targetDiv, gameOverCallback) {
-        var gameDimensions = {
-            width: 200,
-            height: 150,
-            container: targetDiv,
-            embedded: true
-        };
-        var gamepadInput = new GamepadController();
-        var keyboardInput = new KeyboardController();
-
-        var phoenix = new Phoenix(gameDimensions);
-        var renderer = new CanvasRenderer(gameDimensions);
-        var runLoop = new RunLoop();
-
-        phoenix.gameOverCallback = gameOverCallback;
-        renderer.setFillColor(phoenix.FILL_COLOR);
-
-        runLoop.addCallback(function (dtime) {
-            phoenix.processInput([
-                keyboardInput.getInputState(),
-                gamepadInput.getInputState()
-            ]);
-
-            phoenix.update(dtime);
-
-            var frame = renderer.newRenderFrame();
-            frame.clear();
-            phoenix.renderToFrame(frame);
-
-            renderer.renderFrame(frame);
-        });
-
-        document.addEventListener("visibilitychange", function () {
-            if (document.hidden) {
-                phoenix.pause();
-            }
-        });
-
-        window.addEventListener("blur", function () {
-            phoenix.pause();
-        });
-
-        window.addEventListener("focus", function () {
-            keyboardInput.clearState();
-            gamepadInput.clearState();
-        });
-
-        runLoop.start();
-        return phoenix;
-    };
-});
-
-DefineModule('components/bank', function (require) {
+DefineModule('ships/arrow-ship', function (require) {
     var GameObject = require('models/game-object');
-    var TextDisplay = require('components/text-display');
+    var MuzzleFlash = require('components/muzzle-flash');
+    var shipSprite = require('sprites/arrow-ship');
+    var daggerSprite = require('sprites/dagger-ship');
+    var shipExplosion = require('sprites/animations/ship-explosion');
 
     return DefineClass(GameObject, {
-        index: 1,
+        isPhysicalEntity: true,
+        BULLET_SPEED: 100,
+        team: 1,
+        index: 5,
 
-        constructor: function (parent, options) {
-            options = options || { };
-            this.anchorPoint = options.position; // this text expands from the right, so the position has to be dynamic
-            this.position = { x: 0, y: this.anchorPoint.y };
-            this.color = options.color || "#ffffff";
-
-            this.valueDisplay = new TextDisplay(this, {
-                font: "arcade-small",
-                color: this.color,
-                index: 1,
-                position: { x: this.position.x, y: this.position.y }
-            });
-
+        constructor: function (parent, difficultyMultiplier, alternateShip) {
+            this.difficultyMultiplier = difficultyMultiplier;
+            this.alternateShip = alternateShip;
             this.super('constructor', arguments);
         },
         reset: function () {
             this.super('reset');
 
-            this.addChild(this.valueDisplay);
-            this.value = 0;
-            this.updateDisplay();
+            if (this.alternateShip) {
+                this.sprite = daggerSprite().rotateLeft();
+            } else {
+                this.sprite = shipSprite().rotateRight();
+            }
+
+            this.explosion = shipExplosion;
+            this.gun = this.sprite.meta.guns[ 0 ];
+
+            this.position = { x: 0, y: 0 };
+            this.velocity = { x: 0, y: 0 };
+
+            this.damage = 5 * this.difficultyMultiplier;
+            this.maxLife = this.difficultyMultiplier;
+            this.life = this.difficultyMultiplier;
         },
-        addMoney: function (value) {
-            this.value += value;
-            this.updateDisplay();
+        fire: function () {
+
+            var position = {
+                x: this.position.x + this.gun.x,
+                y: this.position.y + this.gun.y
+            };
+            var velocity = { x: 0, y: this.BULLET_SPEED };
+
+            this.triggerEvent('spawnBullet', {
+                team: this.team,
+                position: position,
+                velocity: velocity,
+                damage: this.difficultyMultiplier
+            });
+            this.addChild(new MuzzleFlash(this, this.gun));
         },
-        removeMoney: function (amount) {
-            this.value -= amount;
-            this.updateDisplay();
+        applyDamage: function () {
+            this.triggerEvent('enemyHit');
+            this.super('applyDamage', arguments);
         },
-        updateDisplay: function () {
-            this.valueDisplay.changeMessage("$" + this.value + ".0");
-            var width = this.valueDisplay.width;
-            this.position.x = this.valueDisplay.position.x = this.anchorPoint.x - width;
+        destroy: function () {
+            this.triggerEvent('enemyDestroyed', {
+                shipValue: this.maxLife
+            });
+
+            this.super('destroy', arguments);
         }
     });
 });
 
-DefineModule('components/bullet', function (require) {
+DefineModule('ships/flying-saucer', function (require) {
     var GameObject = require('models/game-object');
-    var bulletSprite = require('sprites/bullet');
-    var smallExplosion = require('sprites/animations/small-explosion');
 
     return DefineClass(GameObject, {
-        type: "bullet",
+        isPhysicalEntity: true,
+        BULLET_SPEED: 100,
+        team: 1,
+        index: 5,
+
+        reset: function () {
+            this.super('reset');
+        }
+    });
+});
+
+DefineModule('ships/player-controlled-ship', function (require) {
+    var GameObject = require('models/game-object');
+    var MuzzleFlash = require('components/muzzle-flash');
+    var playerShipSprite = require('sprites/player-ship');
+    var playerShipSpriteWingGuns = require('sprites/player-ship-wing-guns');
+    var shipExplosion = require('sprites/animations/ship-explosion');
+
+    return DefineClass(GameObject, {
+        type: "player",
         isPhysicalEntity: true,
         index: 5,
 
-        constructor: function (parent, options) {
-            this.super('constructor', arguments);
-
-            options = options || { };
-            this.team = options.team || 0;
-            this.position = options.position || { x: 0, y: 0 };
-            this.velocity = options.velocity || { x: 0, y: 0 };
-            this.acceleration = options.acceleration || { x: 0, y: 0 };
-            this.damage = options.damage || 1;
-            this.life = options.life || 0;
-            this.maxLife = options.maxLife || 1;
-
-            this.sprite = bulletSprite();
-            this.explosion = smallExplosion;
-
-            this.updateBulletDirection();
-            this.updateColor();
-        },
-        checkBoundaries: function () {
-            if (this.position.x < 0
-                || this.position.y < 0
-                || this.position.x > this.parent.width
-                || this.position.y > this.parent.height) {
-
-                this.destroy();
-            }
-        },
-        updateBulletDirection: function () {
-            if (Math.abs(this.velocity.x) > Math.abs(this.velocity.y)) {
-                this.sprite.rotateRight();
-            }
-        },
-        updateColor: function () {
-            switch (this.team) {
-                case 0: this.sprite.applyColor("#B1D8AD"); break;
-                case 1: this.sprite.applyColor("#F7BEBE"); break;
-                default: break;
-            }
-        },
-        applyDamage: function (damage) {
-            this.super('applyDamage', arguments);
-
-            this.position.x -= Math.floor(this.sprite.width / 2);
-            this.position.y -= Math.floor(this.sprite.height / 2);
-        }
-    });
-});
-
-DefineModule('components/combo-gauge', function (require) {
-    var GameObject = require('models/game-object');
-    var Gradients = require('helpers/gradients');
-    var frameSprite = require('sprites/combo-gauge');
-    var padScoreDisplay = require('helpers/pad-score-display');
-    var Sprite = require('models/sprite');
-    var TextDisplay = require('components/text-display');
-
-    return DefineClass(GameObject, {
-        index: 1,
-
-        constructor: function (parent, options) {
-            this.position = options.position;
-            this.color = options.color || "#ffffff";
-            this.sprite = frameSprite().applyColor(this.color);
-
-            this.multiplierDisplay = new TextDisplay(this, {
-                font: "arcade-small",
-                color: this.color,
-                index: 1,
-                position: { x: this.position.x + 7, y: this.position.y + this.sprite.height - 5 }
-            });
-            this.scoreDisplay = new TextDisplay(this, {
-                font: "arcade-small",
-                color: this.color,
-                index: 1,
-                position: { x: this.position.x, y: this.position.y + this.sprite.height + 1 }
-            });
-
-            this.super('constructor', arguments);
-        },
         reset: function () {
             this.super('reset');
 
-            this.comboPoints = 0;
-            this.pointTotal = 0;
+            this.sprite = playerShipSprite().rotateRight();
+            this.explosion = shipExplosion;
 
-            this.updateMultiplier();
-            this.updateGaugeHeight();
-            this.updateScore();
+            this.position = { x: -100, y: -100 };
+            this.velocity = { x: 0, y: 0 };
 
-            this.addChild(this.multiplierDisplay);
-            this.addChild(this.scoreDisplay);
+            this.life = 10;
+            this.maxLife = 10;
+            this.damageUpgrades = 0;
+            this.lifeUpgrades = 0;
+            this.rateUpgrades = 0;
+            this.wingGunsUnlocked = false;
+            this.SPEED = 50;
+            this.BULLET_SPEED = 100;
+            this.FIRE_RATE = 500;
+
+            this.preventInputControl = true;
+            this.exploding = false;
+            this.team = 0;
+            this.damage = 5;
+            this.timeSinceFired = 0;
         },
-
-        renderToFrame: function (frame) {
-            this.fillGaugeSprite.renderToFrame(frame, this.position.x + 1, this.position.y + 1, this.index - 1);
-
-            this.super('renderToFrame', arguments);
+        refillHealth: function () {
+            this.life = this.maxLife;
         },
-
-        addPoints: function (points) {
-            this.pointTotal += this.pointMultiplier * points;
-            this.updateScore();
+        addWingGuns: function () {
+            this.wingGunsUnlocked = true;
+            this.sprite = playerShipSpriteWingGuns().rotateRight();
         },
-
-        getScore: function () {
-            return this.pointTotal;
-        },
-
-        bumpCombo: function () {
-            this.comboPoints++;
-            this.updateMultiplier();
-            this.updateGaugeHeight();
-        },
-
-        clearCombo: function () {
-            this.comboPoints = 0;
-            this.updateMultiplier();
-            this.updateGaugeHeight();
-        },
-
-        updateGaugeHeight: function () {
-            var pixels = [];
-            for (var i = 0; i < 59; i++) {
-                if (i < this.comboPoints) {
-                    pixels.unshift(Gradients.colorAtPercent(Gradients.GreenToRed, 1 - i / 59));
-                }
-                else {
-                    pixels.unshift(null);
-                }
+        processInput: function (input) {
+            this.super('processInput', arguments);
+            if (this.preventInputControl || this.exploding || this.destroyed) {
+                // ship in a state where input isn't appropriate
+                return;
             }
 
-            this.fillGaugeSprite = new Sprite([
-                pixels, pixels, pixels, pixels
-            ]);
+            this.velocity.x = input.movementVector.x * this.SPEED;
+            this.velocity.y = input.movementVector.y * this.SPEED;
+
+            this.firing = input.fire;
         },
-
-        updateMultiplier: function () {
-            if (this.comboPoints >= 59) {
-                this.pointMultiplier = 6;
-            }
-            else if (this.comboPoints >= 48) {
-                this.pointMultiplier = 5;
-            }
-            else if (this.comboPoints >= 36) {
-                this.pointMultiplier = 4;
-            }
-            else if (this.comboPoints >= 24 ) {
-                this.pointMultiplier = 3;
-            }
-            else if (this.comboPoints >= 12) {
-                this.pointMultiplier = 2;
-            }
-            else {
-                this.pointMultiplier = 1;
-            }
-
-            this.multiplierDisplay.changeMessage(this.pointMultiplier + "x");
-        },
-
-        updateScore: function () {
-            this.scoreDisplay.changeMessage(padScoreDisplay(this.pointTotal));
-        }
-    });
-});
-
-DefineModule('components/fadeout-banner', function (require) {
-    var GameObject = require('models/game-object');
-    var TextDisplay = require('components/text-display');
-
-    var colorGradient = [
-        "rgb(255,255,255)",
-        "rgb(226,226,232)",
-        "rgb(171,171,189)",
-        "rgb(142,142,165)",
-        "rgb(114,113,142)",
-        "rgb(85,84,119)",
-        "rgb(58,57,97)",
-        "rgb(29,27,74)",
-        "rgb(1,0,51)"
-    ];
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, text, time) {
-            this.super('constructor', arguments);
-
-            this.text = text;
-            this.interval = time / colorGradient.length;
-        },
-
-        start: function () {
-            this.elapsedTime = 0;
-            this.colorIndex = 0;
-
-            this.textDisplay = new TextDisplay(this, {
-                message: this.text,
-                position: { x: 55, y: 50 },
-                border: true,
-                padding: 15,
-                color: colorGradient[ this.colorIndex ],
-                font: "arcade"
-            });
-            this.addChild(this.textDisplay);
-        },
-
         update: function (dtime) {
-            this.elapsedTime += dtime;
+            this.super('update', arguments);
 
-            if (this.elapsedTime > this.interval) {
-                this.elapsedTime -= this.interval;
-                this.colorIndex++;
+            this.timeSinceFired += dtime;
+            if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
+                this.timeSinceFired = 0;
 
-                if (this.colorIndex > colorGradient.length) {
-                    this.parent.removeChild(this);
-                } else {
-                    this.textDisplay.updateColor(colorGradient[ this.colorIndex ]);
-                }
+                this.fire();
             }
-        }
-    });
-});
-
-DefineModule('components/life-meter', function (require) {
-    var GameObject = require('models/game-object');
-    var Gradients = require('helpers/gradients');
-    var Sprite = require('models/sprite');
-
-    return DefineClass(GameObject, {
-        index: 1,
-
-        constructor: function (boundEntity, options) {
-            this.super('constructor', arguments);
-
-            options = options || {};
-
-            this.entity = boundEntity;
-            this.position = options.position || { x: 0, y: 0 };
-            this.anchor = options.anchor || { };
-            this.horizontal = !!options.horizontal;
-            this.length = options.length || 10;
-            this.width = options.width || 1;
-            this.scale = options.scale;
-            this.showBorder = !!options.showBorder;
-            this.borderColor = options.borderColor || "#ffffff";
         },
+        hideOffscreen: function () {
+            this.preventInputControl = true;
+            this.position.x = -100;
+            this.velocity.x = 0;
+            this.velocity.y = 0;
+        },
+        checkBoundaries: function () {
+            if (this.preventInputControl) {
+                // don't check screen boundaries when an external script is controlling the player
+                return;
+            }
 
-        update: function () {
-            if (this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife) {
-                this.currentLife = this.entity.life;
-                this.maxLife = this.entity.maxLife;
-
-                if (this.scale) {
-                    this.length = this.maxLife * this.scale;
-                    if (this.length > 70) {
-                        // this just applies to the player's health if they get so many upgrades
-                        // it would overflow the screen, manually set lengths will always honor them.
-                        this.length = 70;
+            if (this.position.x < 0) {
+                this.position.x = 0;
+            }
+            if (this.position.y < 0) {
+                this.position.y = 0;
+            }
+            if (this.position.x + this.sprite.width > this.parent.width) {
+                this.position.x = this.parent.width - this.sprite.width;
+            }
+            if (this.position.y + this.sprite.height > this.parent.height) {
+                this.position.y = this.parent.height - this.sprite.height;
+            }
+        },
+        fire: function () {
+            this.sprite.meta.guns.forEach(function (gun, index) {
+                this.triggerEvent('spawnBullet', {
+                    team: this.team,
+                    damage: this.damageUpgrades + 1,
+                    velocity: {
+                        x: this.wingGunsUnlocked ? (index - 1) * 10 : 0,
+                        y: -this.BULLET_SPEED
+                    },
+                    position: {
+                        x: this.position.x + gun.x,
+                        y: this.position.y + gun.y
                     }
-                }
-
-                this.redrawMeter();
-            }
-        },
-
-        redrawMeter: function () {
-            var colors = this.buildSpriteColorArray();
-
-            if (this.showBorder) {
-                this.addBorderToColorArray(colors);
-            }
-
-            this.sprite = new Sprite(colors);
-
-            if (this.horizontal) {
-                this.sprite.rotateRight();
-            }
-
-            this.updatePosition();
-        },
-
-        buildSpriteColorArray: function () {
-            var percentage = this.currentLife / this.maxLife * 100;
-            var meterColor = Gradients.colorAtPercent(Gradients.GreenToRed, this.currentLife / this.maxLife);
-            var colors = this.buildEmptySpriteColorArray();
-
-            for (var i = this.length - 1; i >= 0; i--) {
-                var color = null;
-                if (i / this.length * 100 < percentage) {
-                    color = meterColor;
-                }
-
-                colors.forEach(function (colorArray) {
-                    colorArray.push(color);
                 });
-            }
 
-            return colors;
+                this.addChild(new MuzzleFlash(this, gun));
+            }.bind(this));
         },
 
-        buildEmptySpriteColorArray: function() {
-            var colors = [];
-            for (var j = 0; j < this.width; j++) {
-                colors.push([]);
-            }
-            return colors;
-        },
-
-        addBorderToColorArray: function (colors) {
-            this.addBezelPixelsToBorder(colors);
-            this.addBorderEnds(colors);
-            this.addBorderEdges(colors);
-        },
-
-        addBezelPixelsToBorder: function (colors) {
-            if (this.width > 2) {
-                colors[ 0 ][ 0 ] = this.borderColor;
-                colors[ this.width - 1 ][ 0 ] = this.borderColor;
-                colors[ 0 ][ this.length - 1 ] = this.borderColor;
-                colors[ this.width - 1 ][ this.length - 1 ] = this.borderColor;
-            }
-        },
-
-        addBorderEnds: function (colors) {
-            for (var j = 0; j < this.width; j++) {
-                colors[ j ].push(this.borderColor);
-                colors[ j ].unshift(this.borderColor);
-            }
-        },
-
-        addBorderEdges: function (colors) {
-            var border = [ null ];
-            for (var i = 0; i < this.length; i++) {
-                border.push(this.borderColor);
-            }
-            border.push(null);
-
-            colors.push(border);
-            colors.unshift(border);
-        },
-
-        updatePosition: function () {
-            if (this.anchor.left) {
-                this.position.x = this.anchor.left;
+        applyDamage: function (damage, sourceEntity) {
+            if (damage > 0) {
+                this.triggerEvent('playerHit');
             }
 
-            if (this.anchor.top) {
-                this.position.y = this.anchor.top;
-            }
-
-            if (this.anchor.right) {
-                this.position.x = this.anchor.right - this.sprite.width;
-            }
-
-            if (this.anchor.bottom) {
-                this.position.y = this.anchor.bottom - this.sprite.height;
-            }
+            this.super('applyDamage', arguments);
         }
     });
 });
 
-DefineModule('components/money-drop', function (require) {
+DefineModule('ships/arrow-boss', function (require) {
     var GameObject = require('models/game-object');
-    var ArcadeFont = require('fonts/arcade');
+    var shipSprite = require('sprites/arrow-boss');
+    var shipExplosion = require('sprites/animations/ship-explosion');
+    var MuzzleFlash = require('components/muzzle-flash');
 
     return DefineClass(GameObject, {
         isPhysicalEntity: true,
-        type: "pickup",
+        BULLET_SPEED: 120,
         team: 1,
-        index: 4,
+        index: 5,
 
-        constructor: function (parent, position, velocity) {
-            this.super('constructor', arguments);
-
-            this.value = 10;
-            this.position = position;
-            this.velocity = { x: 0, y: 50 };
-            this.sprite = ArcadeFont[ '$' ];
-        },
-        checkBoundaries: function () {
-            if (this.position.x < 0
-                || this.position.y < 0
-                || this.position.x > this.parent.width
-                || this.position.y > this.parent.height) {
-
-                this.destroy();
-            }
-        },
-        applyDamage: function (damage, sourceEntity) {
-            if (sourceEntity.type === "player") {
-                this.triggerEvent('moneyCollected', this.value);
-                this.destroy();
-            }
-        }
-    });
-});
-
-DefineModule('components/muzzle-flash', function (require) {
-    var Animation = require('models/animation');
-    var GameObject = require('models/game-object');
-    var Sprite = require('models/sprite');
-
-    var shades = [
-        "#ff0000",
-        "#ff3300",
-        "#ff6600",
-        "#ff9933",
-        "#ffcc00",
-        "#ff9900",
-        "#ffcc00",
-        "#ffcc66",
-        "#ffcc99"
-    ];
-
-    var frames = shades.map(function (shade) {
-        return new Sprite([
-            [ shade, shade ]
-        ]);
-    });
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, gunPosition) {
-            this.super('constructor', arguments);
-
-            this.gunPosition = gunPosition;
-            this.sprite = new Animation({
-                frames: frames,
-                millisPerFrame: 25
-            });
-        },
-
-        update: function () {
-            this.super('update', arguments);
-
-            if (this.sprite.finished) {
-                this.destroy();
-            }
-        },
-
-        renderToFrame: function (frame) {
-            this.sprite.renderToFrame(frame,
-                Math.floor(this.parent.position.x + this.gunPosition.x),
-                Math.floor(this.parent.position.y + this.gunPosition.y-1),
-                (this.parent.index || 0) + 1);
-        }
-    })
-});
-
-DefineModule('components/text-display', function (require) {
-    var GameObject = require('models/game-object');
-    var shipExplosion = require('sprites/animations/ship-explosion');
-    var Sprite = require('models/sprite');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, options) {
-            this.rawMessage = options.message || " ";
-            this.font = require("fonts/" + (options.font || "arcade-small"));
-            this.color = options.color || "white";
-            this.position = options.position;
-            this.border = !!options.border;
-            this.padding = options.padding || 0;
-            this.background = options.background || null;
-            this.index = options.index || 10;
-            this.isPhysicalEntity = options.isPhysicalEntity;
-
-            this.super('constructor', arguments);
-        },
-        reset: function () {
-            this.super('reset');
-
-            this.changeMessage(this.rawMessage);
-        },
-
-        changeMessage: function (text) {
-            text = text || " ";
-            this.rawMessage = text;
-
-            if (typeof text === "string") {
-                text = [ text ];
-            }
-            text = text.map(function (str) {
-                return str.split('');
-            });
-            this.message = text;
-
-            this.populateSprites();
-            this.updateColor(this.color);
-        },
-
-        populateSprites: function () {
-            this.children = []; // intentionally clear all previous sprites before adding new ones
-            var self = this;
-
-            var width = 0;
-            var height = 0;
-            var xOffset = this.position.x;
-            var yOffset = this.position.y;
-            var lineWidths = [];
-
-            if (this.padding) {
-                xOffset += this.padding;
-                yOffset += this.padding;
-                width += this.padding * 2;
-                height += this.padding * 2;
-            }
-
-            if (this.border) {
-                xOffset += 1;
-                yOffset += 1;
-                width += 1;
-                height += 1;
-            }
-
-            this.message.forEach(function (line) {
-                var xLineOffset = xOffset;
-                var lineWidth = 0;
-
-                line.forEach(function (char) {
-                    var sprite = self.font[ char ];
-                    if (sprite) {
-                        var entity = new GameObject(self);
-                        entity.sprite = sprite.clone();
-                        entity.index = self.index + 1;
-                        entity.position = {
-                            x: xLineOffset,
-                            y: yOffset
-                        };
-                        self.addChild(entity);
-
-                        lineWidth += sprite.width + self.font.meta.letterSpacing;
-                        xLineOffset += sprite.width + self.font.meta.letterSpacing;
-                    }
-                    else {
-                        console.error("Tried to print an unsupported letter: '" + char + "'");
-                    }
-
-                });
-
-                lineWidths.push(lineWidth);
-                yOffset += self.font.meta.lineHeight;
-                height += self.font.meta.lineHeight;
-            });
-
-            width += Math.max.apply(null, lineWidths);
-            this.width = width;
-            this.height = height;
-
-            this.createBackgroundSprite(width, height);
-        },
-
-        createBackgroundSprite: function (width, height) {
-            var spriteRows = [];
-            for (var x = 0; x < width; x++) {
-                var row = [];
-                for (var y = 0; y < height; y++) {
-                    row.push(this.background);
-                }
-                spriteRows.push(row);
-            }
-            this.sprite = new Sprite(spriteRows);
-        },
-
-        updateColor: function (color) {
-            this.color = color;
-            var width = this.width;
-            var height = this.height;
-
-            this.children.forEach(function (entity) {
-                entity.sprite.applyColor(color);
-            });
-
-            if (this.border) {
-                this.sprite.iterateCells(function (cell, x, y) {
-                    if (x === 0 || y === 0 || x === width - 1 || y === height - 1) {
-                        cell.color = color;
-                    }
-                });
-            }
-        },
-
-        applyDamage: function () {
-            this.children.forEach(function (entity) {
-                entity.sprite = shipExplosion({ x: -2, y: -1 });
-            });
-        }
-    });
-});
-
-DefineModule('controllers/gamepad-input', function (require) {
-    var BUTTON_MAP = {
-        0: 'A',
-        1: 'B',
-        2: 'X',
-        3: 'Y',
-        4: 'left-bumper',
-        5: 'right-bumper',
-        6: 'left-trigger',
-        7: 'right-trigger',
-        8: 'back',
-        9: 'start',
-        10: 'left-stick-press',
-        11: 'right-stick-press',
-        12: 'd-pad-up',
-        13: 'd-pad-down',
-        14: 'd-pad-left',
-        15: 'd-pad-right'
-    };
-
-    function gamepadDescriptor() {
-        var descriptor = { INPUT_TYPE: 'gamepad' };
-
-        Object.keys(BUTTON_MAP).forEach(function (key) {
-            descriptor[ BUTTON_MAP[ key ] ] = false;
-        });
-
-        descriptor[ 'left-stick-x' ] = 0;
-        descriptor[ 'left-stick-y' ] = 0;
-        descriptor[ 'right-stick-x' ] = 0;
-        descriptor[ 'right-stick-y' ] = 0;
-
-        return descriptor;
-    }
-
-    function normalize(axisTilt) {
-        return Math.round(axisTilt * 10) / 10;
-    }
-
-    return DefineClass({
-        constructor: function () {
-            window.addEventListener("gamepadconnected", function (e) {
-                console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
-                    e.gamepad.index, e.gamepad.id,
-                    e.gamepad.buttons.length, e.gamepad.axes.length);
-            });
-            window.addEventListener("gamepaddisconnected", function (e) {
-                console.log("Gamepad disconnected from index %d: %s",
-                    e.gamepad.index, e.gamepad.id);
-            });
-        },
-        getInputState: function () {
-            var gamepad = navigator.getGamepads()[ 0 ];
-            var gamepadState = gamepadDescriptor();
-
-            if (gamepad && gamepad.connected) {
-                gamepad.buttons.forEach(function (button, index) {
-                    gamepadState[ BUTTON_MAP[ index ] ] = button.pressed;
-                });
-
-                gamepadState[ 'left-stick-x' ] = normalize(gamepad.axes[ 0 ]);
-                gamepadState[ 'left-stick-y' ] = normalize(gamepad.axes[ 1 ]);
-                gamepadState[ 'right-stick-x' ] = normalize(gamepad.axes[ 2 ]);
-                gamepadState[ 'right-stick-y' ] = normalize(gamepad.axes[ 3 ]);
-            }
-
-            return gamepadState;
-        },
-        clearState: function () {
-            /* no op for gamepads */
-        }
-    });
-});
-
-DefineModule('controllers/keyboard-input', function (require) {
-    function cloneObj(obj) {
-        var nObj = {};
-        Object.keys(obj).forEach(function (key) {
-            nObj[ key ] = obj[ key ];
-        });
-        return nObj;
-    }
-
-    function newInputDescriptor() {
-        return {
-            W: false, A: false, S: false, D: false,
-            SPACE: false, ENTER: false
-        };
-    }
-
-    var KEYS = {
-        87: 'W', 65: 'A', 83: 'S', 68: 'D',
-        32: 'SPACE', 13: 'ENTER'
-    };
-
-    return DefineClass({
-        constructor: function () {
-            this.clearState();
-
-            document.body.addEventListener('keydown', this.keydown.bind(this));
-            document.body.addEventListener('keyup', this.keyup.bind(this));
-        },
-        getInputState: function () {
-            var state = cloneObj(this.inputState);
-            this.propagateInputClears();
-            return state;
-        },
-        clearState: function () {
-            this.clearAfterNext = newInputDescriptor();
-            this.inputState = newInputDescriptor();
-            this.inputState.INPUT_TYPE = "keyboard";
-        },
-        propagateInputClears: function () {
-            Object.keys(this.clearAfterNext).forEach(function (key) {
-                if (this.clearAfterNext[ key ]) {
-                    this.inputState[ key ] = false;
-                    this.clearAfterNext[ key ] = false;
-                }
-            }.bind(this));
-        },
-        keydown: function (event) {
-            this.inputState[ KEYS[ event.keyCode ] ] = true;
-            this.clearAfterNext[ KEYS[ event.keyCode ] ] = false;
-        },
-        keyup: function (event) {
-            this.clearAfterNext[ KEYS[ event.keyCode ] ] = true;
-        }
-    });
-});
-
-DefineModule('helpers/collect-entities', function () {
-    return function visitNode(node, matcherFn, collection) {
-        collection = collection || [];
-
-        if (node) {
-            if (matcherFn(node)) {
-                collection.push(node);
-            }
-
-            if (node.children && node.children.length) {
-                for (var i = 0; i < node.children.length; i++) {
-                    visitNode(node.children[i], matcherFn, collection);
-                }
-            }
-        }
-
-        return collection;
-    };
-});
-
-DefineModule('helpers/collisions', function (require) {
-    var DUMMY_CELL = { x: -1, y: -1, color: null, index: -1 };
-    var CollisionDetectionFrame = DefineClass({
-        collisionDetected: false,
-
-        constructor: function () {
-            this.cells = [];
-        },
-
-        cellAt: function (x, y) {
-            if (!this.collisionDetected) {
-                if (!this.cells[ x ]) {
-                    this.cells[ x ] = [];
-                }
-
-                if (!this.cells[ x ][ y ]) {
-                    this.cells[ x ][ y ] = true;
-                }
-                else {
-                    this.collisionDetected = true;
-                }
-            }
-
-            return DUMMY_CELL;
-        }
-    });
-
-    function entityToBoundingBox(entity) {
-        return {
-            x1: entity.position.x,
-            x2: entity.position.x + entity.sprite.width,
-            y1: entity.position.y,
-            y2: entity.position.y + entity.sprite.height
-        };
-    }
-
-    return {
-        boxCollision: function (entityA, entityB) {
-            var a = entityToBoundingBox(entityA);
-            var b = entityToBoundingBox(entityB);
-
-            return (
-                a.x1 < b.x2 &&
-                a.x2 > b.x1 &&
-                a.y1 < b.y2 &&
-                a.y2 > b.y1
-            );
-        },
-        spriteCollision: function (entityA, entityB) {
-            var collisionFrame = new CollisionDetectionFrame();
-
-            entityA.renderToFrame(collisionFrame);
-            entityB.renderToFrame(collisionFrame);
-
-            return collisionFrame.collisionDetected;
-        }
-    };
-});
-
-DefineModule('helpers/gradients', function () {
-    return {
-        GreenToRed: {
-            start: 120,
-            end: 0,
-            inverted: true,
-            S: 1,
-            L: .5
-        },
-
-        colorAtPercent: function (gradient, percent) {
-            if (gradient.inverted) {
-                percent = 1 - percent;
-            }
-
-            var H = (gradient.end - gradient.start) * percent + gradient.start;
-            var S = gradient.S * 100;
-            var L = gradient.L * 100;
-
-            H = Math.floor(H);
-            S = Math.floor(S) + "%";
-            L = Math.floor(L) + "%";
-
-            return "hsl(" + H + ", " + S + ", " + L + ")";
-        }
-    };
-});
-
-DefineModule('helpers/input-interpreter', function (require) {
-    function newInputDescriptor() {
-        return {
-            GAME: 'phoenix',
-            movementVector: { x: 0, y: 0 },
-            fire: false
-        };
-    }
-
-    function normalizeVector(vector) {
-        var x = vector.x;
-        var y = vector.y;
-        var length = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-
-        if (length > 1) {
-            vector.x = x / length;
-            vector.y = y / length;
-        }
-    }
-
-    return DefineClass({
-        interpret: function (inputSources) {
-            var gameInput = newInputDescriptor();
-
-            inputSources.forEach(function (inputSource) {
-                switch (inputSource.INPUT_TYPE) {
-                    case 'gamepad':
-                        return this.addGamepadInput(inputSource, gameInput);
-                    case 'keyboard':
-                        return this.addKeyboardInput(inputSource, gameInput);
-                    default:
-                        console.error("Unsupported input type: ", inputSource.INPUT_TYPE);
-                }
-            }.bind(this));
-
-            normalizeVector(gameInput.movementVector);
-
-            return gameInput;
-        },
-
-        addKeyboardInput: function (keyboard, gameInput) {
-            if (keyboard[ 'ENTER' ]) {
-                gameInput.start = true;
-            }
-
-            if (keyboard[ 'SPACE' ]) {
-                gameInput.fire = true;
-            }
-
-            if (keyboard[ 'W' ]) {
-                gameInput.movementVector.y -= 1;
-            }
-
-            if (keyboard[ 'A' ]) {
-                gameInput.movementVector.x -= 1;
-            }
-
-            if (keyboard[ 'S' ]) {
-                gameInput.movementVector.y += 1;
-            }
-
-            if (keyboard[ 'D' ]) {
-                gameInput.movementVector.x += 1;
-            }
-        },
-
-        addGamepadInput: function (gamepad, gameInput) {
-            if (gamepad[ 'start' ]) {
-                gameInput.start = true;
-            }
-
-            if (gamepad[ 'A' ]) {
-                gameInput.fire = true;
-            }
-
-            gameInput.movementVector.x += gamepad[ 'left-stick-x' ];
-            gameInput.movementVector.y += gamepad[ 'left-stick-y' ];
-
-            if (gamepad[ 'd-pad-up' ]) {
-                gameInput.movementVector.y -= 1;
-            }
-            if (gamepad[ 'd-pad-left' ]) {
-                gameInput.movementVector.x -= 1;
-            }
-            if (gamepad[ 'd-pad-down' ]) {
-                gameInput.movementVector.y += 1;
-            }
-            if (gamepad[ 'd-pad-right' ]) {
-                gameInput.movementVector.x += 1;
-            }
-        }
-    });
-});
-
-DefineModule('helpers/pad-score-display', function () {
-    return function (score) {
-        score = score + "";
-        switch (score.length) {
-            case 0: score = "0" + score;
-            case 1: score = "0" + score;
-            case 2: score = "0" + score;
-            case 3: score = "0" + score;
-            case 4: score = "0" + score;
-            case 5: score = "0" + score;
-        }
-
-        return score;
-    };
-});
-
-DefineModule('helpers/random', function (require) {
-    function integer(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    function rangeCap(n, min, max) {
-        if (typeof n !== "number" || n < min) {
-            return min;
-        }
-
-        else if (n > max) {
-            return max;
-        }
-
-        else {
-            return n;
-        }
-    }
-
-    function sample(collection, requestedCount) {
-        requestedCount = rangeCap(requestedCount, 1, collection.length);
-        var range = collection.length - 1;
-        var selected = {};
-        var count = 0;
-        var choice;
-
-        while (count < requestedCount) {
-            choice = integer(0, range);
-            if (!selected[ choice ]) {
-                selected[ choice ] = true;
-                count++;
-            }
-        }
-
-        return Object.keys(selected).map(function (key) {
-            return collection[ key ];
-        });
-    }
-
-    return {
-        integer: integer,
-        rangeCap: rangeCap,
-        sample: sample
-    };
-});
-
-DefineModule('helpers/run-loop', function (require) {
-    var fpsCounterDOM = null;
-
-    function updateFPScounter(dtime) {
-        if (!fpsCounterDOM) {
-            fpsCounterDOM = document.createElement('div');
-            fpsCounterDOM.classList.add('fps-counter');
-            fpsCounterDOM.oldfps = 0;
-            document.body.appendChild(fpsCounterDOM);
-        }
-
-        var fps = Math.floor(1000 / dtime * 10) / 10;
-        if (Math.abs(fps - fpsCounterDOM.oldfps) > .2) {
-            fpsCounterDOM.oldfps = fps;
-            fps = fps + "";
-            fps += (fps.length <= 2 ? ".0" : "") + " fps";
-            fpsCounterDOM.innerHTML = fps;
-        }
-    }
-
-    function now() {
-        return (new Date()).valueOf();
-    }
-
-    function fpsTracker() {
-        var frameTimes = [];
-
-        for (var i = 0; i < 100; i++) {
-            frameTimes.push(20);
-        }
-        frameTimes.totalTime = 20 * 100;
-
-        frameTimes.push = function (ftime) {
-            var overflow = this.shift();
-            this.totalTime += ftime - overflow;
-            return Array.prototype.push.call(this, ftime);
-        };
-        frameTimes.average = function () {
-            return this.totalTime / this.length;
-        };
-
-        return frameTimes;
-    }
-
-    return DefineClass({
-        constructor: function (callback) {
-            this.callback = callback || function () {
-                };
-
-            this.fpsTracker = fpsTracker();
-            this.active = false;
-            this.lastFrameTime = now();
-            this.boundFrameHandler = this.frameHandler.bind(this);
-        },
-        frameHandler: function () {
-            if (!this.active) return;
-
-            var currentTime = now();
-            var dtime = currentTime - this.lastFrameTime;
-
-            this.lastFrameTime = currentTime;
-            this.updateFPScounter(dtime);
-
-            try {
-                this.callback(dtime);
-            } catch (e) {
-                console.error('Error running frame: ', e);
-            }
-
-            window.requestAnimationFrame(this.boundFrameHandler);
-        },
-        start: function () {
-            if (!this.active) {
-                this.active = true;
-                window.requestAnimationFrame(this.boundFrameHandler);
-            }
-        },
-        stop: function () {
-            this.active = false;
-        },
-        addCallback: function (callback) {
-            this.callback = callback;
-        },
-        updateFPScounter: function (dtime) {
-            this.fpsTracker.push(dtime);
-
-            updateFPScounter(this.fpsTracker.average());
-        }
-    });
-});
-
-DefineModule('levels/level-group-01', function (require) {
-    var Banner = require('components/fadeout-banner');
-    var BossShip = require('ships/arrow-boss');
-    var ChainGunFire = require('scripts/chain-gun-fire');
-    var EnemyShip = require('ships/arrow-ship');
-    var FireSingleGunRandomRate = require('scripts/fire-single-gun-random-rate');
-    var GameObject = require('models/game-object');
-    var LifeMeter = require('components/life-meter');
-    var MoneyDrop = require('components/money-drop');
-    var MoveObjectToPoint = require('scripts/move-object-to-point');
-    var ScriptChain = require('models/script-chain');
-    var Random = require('helpers/random');
-    var WatchForDeath = require('scripts/watch-for-death');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, game, difficultyMultiplier, alternateShip, rowCount, levelName) {
-            this.super('constructor', arguments);
-
-            this.alternateShip = alternateShip;
+        constructor: function (parent, difficultyMultiplier) {
             this.difficultyMultiplier = difficultyMultiplier;
-            this.width = this.parent.width;
-            this.height = this.parent.height;
-
-            if (rowCount === "boss") {
-                rowCount = 1;
-                this.boss = true;
-            }
-
-            this.game = game;
-            this.levelName = levelName;
-            this.rowCount = rowCount;
-        },
-        start: function () {
-            this.ships = [];
-            this.scripts = [];
-
-            var start = 4 - this.difficultyMultiplier;
-            start = start < 1 ? 1 : start;
-            var end = 7 + this.difficultyMultiplier;
-            end = end > 10 ? 10 : end;
-
-            for (var i = start; i <= end; i++) {
-                this.newShip(10 * i + 39, -40, 45, 3);
-
-                if (this.rowCount >= 2) {
-                    this.newShip(10 * i + 39, -30, 55, 3);
-                }
-
-                if (this.rowCount >= 3) {
-                    this.newShip(10 * i + 39, -20, 65, 3);
-                }
-
-                if (this.rowCount >= 4) {
-                    this.newShip(10 * i + 39, -10, 75, 3);
-                }
-            }
-
-            this.attachMoneyScripts();
-
-            if (this.boss) {
-                this.newBossShip();
-            }
-
-            if (this.levelName) {
-                this.scripts.push(new Banner(this, this.levelName, 2000));
-            }
-
-            this.ships.forEach(function (ship) {
-                this.addChild(ship);
-            }.bind(this));
-
-            this.scripts.forEach(function (script) {
-                script.start();
-                this.addChild(script);
-            }.bind(this));
-        },
-        checkIfLevelComplete: function () {
-            for (var i = 0; i < this.children.length; i++) {
-                var child = this.children[ i ];
-                if (child && child.position && !child.destroyed) {
-                    return false;
-                }
-            }
-
-            return true;
-        },
-        newShip: function (startX, startY, endY, time) {
-            var ship = new EnemyShip(this, this.difficultyMultiplier, this.alternateShip);
-
-            ship.position.x = startX;
-            ship.position.y = startY;
-
-            this.scripts.push(new FireSingleGunRandomRate(this, ship));
-            this.scripts.push(new ScriptChain(this, false, [
-                new MoveObjectToPoint(null, ship, { x: startX, y: endY }, time * 2),
-                new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time),
-                new ScriptChain(this, true, [
-                    new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY - 30 }, time),
-                    new MoveObjectToPoint(null, ship, { x: startX + 40, y: endY - 30 }, time * 2),
-                    new MoveObjectToPoint(null, ship, { x: startX + 40, y: endY }, time),
-                    new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time * 2)
-                ])
-            ]));
-
-            this.ships.push(ship);
-        },
-        newBossShip: function () {
-            var boss = window.boss = new BossShip(this, this.difficultyMultiplier);
-            var gameWidth = this.game.width;
-            var bossWidth = boss.sprite.width;
-
-            boss.position.x = -this.game.width / 2;
-            boss.position.y = 1;
-
-            boss.addChild(new LifeMeter(boss, {
-                position: { x: 0, y: 0 },
-                length: this.game.width,
-                width: 1,
-                horizontal: true
-            }));
-
-            this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));
-            this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
-            this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
-
-            this.scripts.push(new ScriptChain(this, true, [
-                new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
-                new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
-            ]));
-            this.scripts.push(new WatchForDeath(this, boss, function () {
-                var p = boss.position;
-                this.addChild(new MoneyDrop(this, {
-                    x: p.x,
-                    y: p.y
-                }));
-                this.addChild(new MoneyDrop(this, {
-                    x: p.x + 7,
-                    y: p.y
-                }));
-                this.addChild(new MoneyDrop(this, {
-                    x: p.x + 4,
-                    y: p.y + 8
-                }));
-            }.bind(this)));
-
-            this.ships.push(boss);
-        },
-        attachMoneyScripts: function () {
-            var divisor = this.difficultyMultiplier > 4 ? 2 : 3;
-            var count = Math.floor(this.ships.length / divisor);
-            var selectedShips = Random.sample(this.ships, count);
-
-            selectedShips.forEach(function (ship) {
-                this.scripts.push(new WatchForDeath(this, ship, function () {
-                    this.addChild(new MoneyDrop(this, ship.position));
-                }.bind(this)));
-            }.bind(this));
-        }
-    });
-});
-
-DefineModule('levels/level-group-02', function (require) {
-    var GameObject = require('models/game-object');
-    var FlyingSaucer = require('ships/flying-saucer');
-
-    return DefineClass(GameObject, {
-        constructor: function (parent, game, difficultyMultiplier, shipCount, levelName) {
-            this.super('constructor', arguments);
-
-            if (groupCount === "boss") {
-                groupCount = 1;
-                this.boss = true;
-            }
-
-            this.game = game;
-            this.levelName = levelName;
-            this.rowCount = groupCount;
-        },
-
-        start: function () {
-
-        },
-
-        checkIfLevelComplete: function () {
-
-        }
-    });
-});
-
-DefineModule('levels/level-manager', function (require) {
-    var FlyPlayerInFromBottom = require('scripts/fly-player-in-from-bottom');
-    var GameObject = require('models/game-object');
-    var Level_group_01 = require('levels/level-group-01');
-    var Shop = require('levels/shop');
-
-    return DefineClass(GameObject, {
-        constructor: function (game) {
-            this.game = game;
-            this.width = game.width;
-            this.height = game.height;
-            this.player = game.player;
-
             this.super('constructor', arguments);
         },
-
         reset: function () {
             this.super('reset');
 
-            this.levelNameCounter = 0;
-            this.difficultyMultiplier = 1;
-            this.running = false;
-            this.complete = false;
-            this.currentLevel = null;
-            this.shop = new Shop(this, this.game);
+            this.sprite = shipSprite().rotateRight();
+            this.explosion = shipExplosion;
+            this.guns = this.sprite.meta.guns;
 
-            this.loadLevels();
+            this.position = { x: 0, y: 0 };
+            this.velocity = { x: 0, y: 0 };
+
+            this.damage = 50 * this.difficultyMultiplier;
+            this.life = 20 * this.difficultyMultiplier;
+            this.maxLife = 20 * this.difficultyMultiplier;
         },
-        loadLevels: function () {
-            this.levels = [
-                new Level_group_01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-                new Level_group_01(this, this.game, this.difficultyMultiplier, false, 2),
-                new Level_group_01(this, this.game, this.difficultyMultiplier, false, 3),
-                new Level_group_01(this, this.game, this.difficultyMultiplier, false, 4),
-                new Level_group_01(this, this.game, this.difficultyMultiplier, false, "boss"),
-                this.shop,
-                new Level_group_01(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
-                new Level_group_01(this, this.game, this.difficultyMultiplier, true, 2),
-                new Level_group_01(this, this.game, this.difficultyMultiplier, true, 3),
-                new Level_group_01(this, this.game, this.difficultyMultiplier, true, 4),
-                new Level_group_01(this, this.game, this.difficultyMultiplier, true, "boss"),
-                this.shop
-            ];
-            this.levelIndex = -1;
+        fire: function (gunIndex) {
+            var gun = this.guns[ gunIndex ];
+
+            var position = {
+                x: this.position.x + gun.x,
+                y: this.position.y + gun.y
+            };
+            var velocity = { x: 0, y: this.BULLET_SPEED };
+
+            this.triggerEvent('spawnBullet', {
+                team: this.team,
+                position: position,
+                velocity: velocity,
+                damage: this.difficultyMultiplier
+            });
+            this.addChild(new MuzzleFlash(this, gun));
         },
-        start: function () {
-            this.running = true;
-            this.loadNextLevel();
+        applyDamage: function () {
+            this.triggerEvent('enemyHit');
+            this.super('applyDamage', arguments);
         },
-
-        stop: function () {
-            this.running = false;
-            this.removeChild(this.currentLevel);
-            this.currentLevel = null;
-        },
-
-        loadNextLevel: function () {
-            if (this.levelIndex >= this.levels.length - 1) { // last level was completed
-                this.difficultyMultiplier++;
-                this.loadLevels();
-            }
-
-            this.levelIndex++;
-            this.currentLevel = this.levels[ this.levelIndex ];
-
-            if (this.currentLevel.isShop) {
-                this.game.clearBullets();
-                this.player.hideOffscreen();
-            }
-
-            if (this.currentLevel.levelName) { // kinda derp way of knowing where the level blocks start
-                this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
-                this.player.refillHealth();
-            }
-
-            this.addChild(this.currentLevel);
-            this.currentLevel.start();
-        },
-        update: function () {
-            this.super('update', arguments);
-
-            if (this.currentLevel && this.currentLevel.checkIfLevelComplete()) {
-                if (this.currentLevel.isShop) {
-                    this.removeChild(this.currentLevel);
-                } else {
-                    this.currentLevel.destroy();
-                }
-
-                this.loadNextLevel();
-            }
-        },
-
-        levelName: function () {
-            this.levelNameCounter++;
-            return "LEVEL " + this.pad(this.levelNameCounter);
-        },
-        pad: function (val) {
-            if (val < 10) {
-                return "00" + val;
-            }
-            if (val < 100) {
-                return "0" + val;
-            }
-        }
-    });
-});
-
-DefineModule('levels/shop', function (require) {
-    var ArrowShip = require('sprites/arrow-ship');
-    var Bullet = require('components/bullet');
-    var EventedInput = require('models/evented-input');
-    var GameObject = require('models/game-object');
-    var TextDisplay = require('components/text-display');
-
-    return DefineClass(GameObject, {
-        isShop: true,
-        index: 1,
-        headerDef: { message: "Ship Upgrades", position: { x: 50, y: 10 } },
-        menuItems: {
-            health: { message: "+1 Ship Health", position: { x: 90, y: 50 } },
-            rate: { message: "10% faster Firing Rate", position: { x: 90, y: 65 } },
-            damage: { message: "+1 Bullet Damage", position: { x: 90, y: 80 } },
-            guns: { message: "Install wing guns", position: { x: 90, y: 95 } },
-            leave: { message: "Leave Shop", position: { x: 60, y: 110 } }
-        },
-        menuSelectorPositions: [ 49, 64, 79, 94, 109 ],
-        disabledColor: "#777",
-
-        constructor: function (parent, game) {
-            this.game = game;
-            this.bank = game.bank;
-            this.player = game.player;
-
-            this.input = new EventedInput({
-                onUp: this.onUp.bind(this),
-                onDown: this.onDown.bind(this),
-                onSelect: this.onSelect.bind(this)
+        destroy: function () {
+            this.triggerEvent('enemyDestroyed', {
+                shipValue: this.maxLife
             });
 
-            this.super('constructor', arguments);
-        },
-        reset: function () {
-            this.super('reset', arguments);
-
-            this.input.reset();
-            this.isDoneShopping = false;
-            this.selectedMenuItem = 0;
-            this.createMenuText();
-            this.setCosts();
-            this.createSelectorShip();
-
-            this.addChild(this.input);
-        },
-        start: function () {
-            this.input.reset();
-            this.isDoneShopping = false;
-            this.setCosts();
-        },
-        checkIfLevelComplete: function () {
-            return this.isDoneShopping;
-        },
-        update: function (dtime) {
-            this.super('update', arguments);
-
-            this.timeSinceSelected += dtime;
-            if (this.selecting && this.timeSinceSelected > 595) {
-                this.propagateSelection();
-            }
-        },
-
-        createMenuText: function () {
-            this.titleText = new TextDisplay(this, {
-                font: "arcade",
-                message: this.headerDef.message,
-                position: this.headerDef.position,
-                color: this.game.interfaceColor
-            });
-            this.addChild(this.titleText);
-
-            Object.keys(this.menuItems).forEach(function (key) {
-                var item = this.menuItems[ key ];
-
-                item.description = new TextDisplay(this, {
-                    font: "arcade-small",
-                    message: item.message,
-                    position: item.position,
-                    color: this.game.interfaceColor,
-                    isPhysicalEntity: true
-                });
-                this.addChild(item.description);
-
-                item.costText = new TextDisplay(this, {
-                    font: "arcade-small",
-                    message: '',
-                    position: { x: item.position.x - 30, y: item.position.y },
-                    color: this.game.interfaceColor,
-                    isPhysicalEntity: true
-                });
-                this.addChild(item.costText);
-            }.bind(this));
-        },
-        setCosts: function () {
-            var items = this.menuItems;
-            var player = this.player;
-            var bank = this.bank;
-
-            items.health.cost = 10 + player.lifeUpgrades * 10;
-            items.rate.cost = 50 + player.rateUpgrades * 50;
-            items.damage.cost = 100 + player.damageUpgrades * 100;
-            items.guns.cost = player.wingGunsUnlocked ? -1 : 1000;
-
-            items.damage.costText.changeMessage("$" + items.damage.cost);
-            items.health.costText.changeMessage("$" + items.health.cost);
-            items.rate.costText.changeMessage("$" + items.rate.cost);
-            items.guns.costText.changeMessage(player.wingGunsUnlocked ? "--" : "$" + items.guns.cost);
-            items.leave.description.changeMessage(items.leave.message);
-
-            items.health.costText.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-            items.rate.costText.updateColor(items.rate.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-            items.damage.costText.updateColor(items.damage.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-            items.guns.costText.updateColor(items.guns.cost > bank.value || player.wingGunsUnlocked ? this.disabledColor : this.game.interfaceColor);
-        },
-        createSelectorShip: function () {
-            this.selectorShip = new GameObject();
-            this.selectorShip.sprite = new ArrowShip();
-            this.selectorShip.position = { x: 40, y: 0 };
-            this.addChild(this.selectorShip);
-
-            this.updateSelectorPosition();
-        },
-        updateSelectorPosition: function () {
-            this.selectorShip.position.y = this.menuSelectorPositions[ this.selectedMenuItem ];
-        },
-        onUp: function () {
-            if (!this.selecting && this.selectedMenuItem > 0) {
-                this.selectedMenuItem--;
-                this.updateSelectorPosition();
-            }
-        },
-        onDown: function () {
-            if (!this.selecting && this.selectedMenuItem < this.menuSelectorPositions.length - 1) {
-                this.selectedMenuItem++;
-                this.updateSelectorPosition();
-            }
-        },
-        onSelect: function () {
-            if (!this.selecting) {
-                var selection;
-                switch (this.selectedMenuItem) {
-                    case 0: selection = this.menuItems.health; break;
-                    case 1: selection = this.menuItems.rate; break;
-                    case 2: selection = this.menuItems.damage; break;
-                    case 3: selection = this.menuItems.guns; break;
-                    case 4: this.startGame(); return;
-                    default: return;
-                }
-
-                if (this.bank.value >= selection.cost && selection.cost !== -1) {
-                    this.bank.removeMoney(selection.cost);
-                    this.startGame();
-                }
-            }
-        },
-        startGame: function () {
-            this.selecting = true;
-            this.timeSinceSelected = 0;
-
-            var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
-            var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
-
-            this.addChild(new Bullet(this, {
-                team: 2,
-                position: { x: x1, y: y },
-                velocity: { x: 50, y: 0 }
-            }));
-        },
-        propagateSelection: function () {
-            switch (this.selectedMenuItem) {
-                case 0:
-                    this.player.lifeUpgrades++;
-                    this.player.maxLife++;
-                    break;
-
-                case 1: // rate
-                    this.player.rateUpgrades++;
-                    this.player.FIRE_RATE = Math.ceil(this.player.FIRE_RATE * .9);
-                    break;
-
-                case 2: // damage
-                    this.player.damageUpgrades++;
-                    break;
-
-                case 3: // guns
-                    this.player.addWingGuns();
-                    break;
-
-                case 4: // done shopping
-                    this.isDoneShopping = true;
-                    break;
-            }
-
-            this.setCosts();
-            this.selecting = false;
+            this.super('destroy', arguments);
         }
     });
 });
@@ -3574,114 +2157,45 @@ DefineModule('models/evented-input', function (require) {
     });
 });
 
-DefineModule('models/game-object', function (require) {
-    return DefineClass({
-        damage: 0,
-        constructor: function (parentObj) {
-            this.parent = parentObj;
+DefineModule('models/script-chain', function (require) {
+    var GameObject = require('models/game-object');
+    return DefineClass(GameObject, {
+        constructor: function (parent, repeat, scripts) {
+            this.super('constructor', arguments);
 
-            this.reset();
-        },
-        reset: function () {
-            this.children = [];
-            this.destroyed = false;
-        },
-        triggerEvent: function (event, data) {
-            var entityRef = this.parent;
+            this.repeat = repeat;
+            this.scripts = scripts;
+            this.scriptIndex = 0;
+            this.activeScript = null;
 
-            while (entityRef) {
-                if (typeof entityRef[ event ] === 'function') {
-                    entityRef[ event ](data);
+            var self = this;
+            scripts.forEach(function (script) {
+                script.parent = self;
+            });
+        },
+
+        start: function () {
+            this.activeScript = this.scripts[ this.scriptIndex ];
+            this.activeScript.start();
+        },
+
+        update: function (dtime) {
+            this.activeScript.update(dtime);
+        },
+
+        removeChild: function () {
+            this.scriptIndex++;
+            if (this.scriptIndex >= this.scripts.length) {
+                if (this.repeat) {
+                    this.scriptIndex = 0;
+                } else {
+                    this.parent.removeChild(this);
                     return;
                 }
-
-                entityRef = entityRef.parent;
             }
 
-            console.error("Couldn't find event '" + event + "' in parent chain of ", this);
-        },
-        processInput: function (input) {
-            this.children && this.children.forEach(function (child) {
-                if (typeof child.processInput === "function") {
-                    child.processInput(input);
-                }
-            });
-        },
-        update: function (dtime) {
-            this.children && this.children.forEach(function (child) {
-                if (typeof child.update === "function") {
-                    child.update(dtime);
-                }
-            });
-
-            if (this.sprite) {
-                this.sprite.update(dtime);
-            }
-
-            if (this.position && this.velocity) {
-                this.position.x += this.velocity.x * dtime / 1000;
-                this.position.y += this.velocity.y * dtime / 1000;
-            }
-
-            this.checkBoundaries();
-
-            if (this.exploding && this.sprite.finished) {
-                this.destroy();
-            }
-        },
-        checkBoundaries: function () {
-            /* a place to verify that objects are within the screen constraints */
-        },
-        renderToFrame: function (frame) {
-            this.children && this.children.forEach(function (child) {
-                if (typeof child.renderToFrame === "function") {
-                    child.renderToFrame(frame);
-                }
-            });
-
-            if (this.sprite && this.position) {
-                this.sprite.renderToFrame(frame, Math.floor(this.position.x), Math.floor(this.position.y), this.index || 0);
-            }
-        },
-        addChild: function (child) {
-            if (child) {
-                this.children.push(child);
-            }
-        },
-        removeChild: function (child) {
-            if (child) {
-                var index = this.children.indexOf(child);
-                if (index >= 0) {
-                    this.children.splice(index, 1);
-                }
-            }
-        },
-        destroy: function () {
-            if (this.parent && this.parent.removeChild) {
-                this.parent.removeChild(this);
-            }
-
-            this.children = null; // may need to iterate through children and destroy them too
-            this.destroyed = true;
-        },
-        applyDamage: function (damage, sourceEntity) {
-            if (this.maxLife) {
-                this.life -= damage;
-
-                if (this.life <= 0) {
-                    this.exploding = true;
-                    this.sprite = this.explosion();
-
-                    if (this.velocity) {
-                        this.velocity.x = 0;
-                        this.velocity.y = 0;
-                    }
-                    if (this.acceleration) {
-                        this.acceleration.x = 0;
-                        this.acceleration.y = 0;
-                    }
-                }
-            }
+            this.activeScript = this.scripts[ this.scriptIndex ];
+            this.activeScript.start();
         }
     });
 });
@@ -3905,99 +2419,116 @@ DefineModule('models/phoenix', function (require) {
     });
 });
 
-DefineModule('models/script-chain', function (require) {
-    var GameObject = require('models/game-object');
-    return DefineClass(GameObject, {
-        constructor: function (parent, repeat, scripts) {
-            this.super('constructor', arguments);
+DefineModule('models/game-object', function (require) {
+    return DefineClass({
+        damage: 0,
+        constructor: function (parentObj) {
+            this.parent = parentObj;
 
-            this.repeat = repeat;
-            this.scripts = scripts;
-            this.scriptIndex = 0;
-            this.activeScript = null;
-
-            var self = this;
-            scripts.forEach(function (script) {
-                script.parent = self;
-            });
+            this.reset();
         },
-
-        start: function () {
-            this.activeScript = this.scripts[ this.scriptIndex ];
-            this.activeScript.start();
+        reset: function () {
+            this.children = [];
+            this.destroyed = false;
         },
+        triggerEvent: function (event, data) {
+            var entityRef = this.parent;
 
-        update: function (dtime) {
-            this.activeScript.update(dtime);
-        },
-
-        removeChild: function () {
-            this.scriptIndex++;
-            if (this.scriptIndex >= this.scripts.length) {
-                if (this.repeat) {
-                    this.scriptIndex = 0;
-                } else {
-                    this.parent.removeChild(this);
+            while (entityRef) {
+                if (typeof entityRef[ event ] === 'function') {
+                    entityRef[ event ](data);
                     return;
                 }
+
+                entityRef = entityRef.parent;
             }
 
-            this.activeScript = this.scripts[ this.scriptIndex ];
-            this.activeScript.start();
+            console.error("Couldn't find event '" + event + "' in parent chain of ", this);
+        },
+        processInput: function (input) {
+            this.children && this.children.forEach(function (child) {
+                if (typeof child.processInput === "function") {
+                    child.processInput(input);
+                }
+            });
+        },
+        update: function (dtime) {
+            this.children && this.children.forEach(function (child) {
+                if (typeof child.update === "function") {
+                    child.update(dtime);
+                }
+            });
+
+            if (this.sprite) {
+                this.sprite.update(dtime);
+            }
+
+            if (this.position && this.velocity) {
+                this.position.x += this.velocity.x * dtime / 1000;
+                this.position.y += this.velocity.y * dtime / 1000;
+            }
+
+            this.checkBoundaries();
+
+            if (this.exploding && this.sprite.finished) {
+                this.destroy();
+            }
+        },
+        checkBoundaries: function () {
+            /* a place to verify that objects are within the screen constraints */
+        },
+        renderToFrame: function (frame) {
+            this.children && this.children.forEach(function (child) {
+                if (typeof child.renderToFrame === "function") {
+                    child.renderToFrame(frame);
+                }
+            });
+
+            if (this.sprite && this.position) {
+                this.sprite.renderToFrame(frame, Math.floor(this.position.x), Math.floor(this.position.y), this.index || 0);
+            }
+        },
+        addChild: function (child) {
+            if (child) {
+                this.children.push(child);
+            }
+        },
+        removeChild: function (child) {
+            if (child) {
+                var index = this.children.indexOf(child);
+                if (index >= 0) {
+                    this.children.splice(index, 1);
+                }
+            }
+        },
+        destroy: function () {
+            if (this.parent && this.parent.removeChild) {
+                this.parent.removeChild(this);
+            }
+
+            this.children = null; // may need to iterate through children and destroy them too
+            this.destroyed = true;
+        },
+        applyDamage: function (damage, sourceEntity) {
+            if (this.maxLife) {
+                this.life -= damage;
+
+                if (this.life <= 0) {
+                    this.exploding = true;
+                    this.sprite = this.explosion();
+
+                    if (this.velocity) {
+                        this.velocity.x = 0;
+                        this.velocity.y = 0;
+                    }
+                    if (this.acceleration) {
+                        this.acceleration.x = 0;
+                        this.acceleration.y = 0;
+                    }
+                }
+            }
         }
     });
-});
-
-DefineModule('screens/controls-description', function (require) {
-    var EventedInput = require('models/evented-input');
-    var GameObject = require('models/game-object');
-    var TextDisplay = require('components/text-display');
-
-    return DefineClass(GameObject, {
-        headerDef: {
-            font: "arcade",
-            message: "Controls",
-            color: "white",
-            position: { x: 5, y: 5 }
-        },
-        inputDescriptions: [
-            {
-                message: [ "", "Move", "Fire" ],
-                position: { x: 5, y: 20 }
-            },
-            {
-                message: [ "- Keyboard", "- WASD", "- Space" ],
-                position: { x: 35, y: 20 }
-            },
-            {
-                message: [ "- Controller", "- Left Stick", "- A" ],
-                position: { x: 85, y: 20 }
-            }
-        ],
-
-        reset: function () {
-            this.super('reset');
-
-            this.addChild(new TextDisplay(this, this.headerDef));
-
-            this.inputDescriptions.forEach(function (item) {
-                this.addChild(new TextDisplay(this, {
-                    font: "arcade-small",
-                    color: "#F6EC9A",
-                    message: item.message,
-                    position: item.position
-                }))
-            }.bind(this));
-
-            this.addChild(new EventedInput({
-                onSelect: this.onSelect.bind(this)
-            }));
-        },
-
-        onSelect: function () {
-            this.parent.reset();
-        }
-    })
 });
 
 DefineModule('screens/game-over-screen', function (require) {
@@ -4329,63 +2860,695 @@ DefineModule('screens/title-screen', function (require) {
     });
 });
 
-DefineModule('scripts/chain-gun-fire', function (require) {
+DefineModule('screens/controls-description', function (require) {
+    var EventedInput = require('models/evented-input');
     var GameObject = require('models/game-object');
-    var Random = require('helpers/random');
+    var TextDisplay = require('components/text-display');
 
     return DefineClass(GameObject, {
-        constructor: function (parent, ship, options) {
+        headerDef: {
+            font: "arcade",
+            message: "Controls",
+            color: "white",
+            position: { x: 5, y: 5 }
+        },
+        inputDescriptions: [
+            {
+                message: [ "", "Move", "Fire" ],
+                position: { x: 5, y: 20 }
+            },
+            {
+                message: [ "- Keyboard", "- WASD", "- Space" ],
+                position: { x: 35, y: 20 }
+            },
+            {
+                message: [ "- Controller", "- Left Stick", "- A" ],
+                position: { x: 85, y: 20 }
+            }
+        ],
+
+        reset: function () {
+            this.super('reset');
+
+            this.addChild(new TextDisplay(this, this.headerDef));
+
+            this.inputDescriptions.forEach(function (item) {
+                this.addChild(new TextDisplay(this, {
+                    font: "arcade-small",
+                    color: "#F6EC9A",
+                    message: item.message,
+                    position: item.position
+                }))
+            }.bind(this));
+
+            this.addChild(new EventedInput({
+                onSelect: this.onSelect.bind(this)
+            }));
+        },
+
+        onSelect: function () {
+            this.parent.reset();
+        }
+    })
+});
+
+DefineModule('components/bank', function (require) {
+    var GameObject = require('models/game-object');
+    var TextDisplay = require('components/text-display');
+
+    return DefineClass(GameObject, {
+        index: 1,
+
+        constructor: function (parent, options) {
+            options = options || { };
+            this.anchorPoint = options.position; // this text expands from the right, so the position has to be dynamic
+            this.position = { x: 0, y: this.anchorPoint.y };
+            this.color = options.color || "#ffffff";
+
+            this.valueDisplay = new TextDisplay(this, {
+                font: "arcade-small",
+                color: this.color,
+                index: 1,
+                position: { x: this.position.x, y: this.position.y }
+            });
+
             this.super('constructor', arguments);
-            options = options || {};
+        },
+        reset: function () {
+            this.super('reset');
 
-            this.ship = ship;
-            this.gunIndex = options.gunIndex || 0;
-            this.fireRate = options.fireRate || 150;
-            this.burstSize = options.burstSize || 5;
-            this.thresholdMin = options.thresholdMin || 2000;
-            this.thresholdMax = options.thresholdMax || 6000;
+            this.addChild(this.valueDisplay);
+            this.value = 0;
+            this.updateDisplay();
+        },
+        addMoney: function (value) {
+            this.value += value;
+            this.updateDisplay();
+        },
+        removeMoney: function (amount) {
+            this.value -= amount;
+            this.updateDisplay();
+        },
+        updateDisplay: function () {
+            this.valueDisplay.changeMessage("$" + this.value + ".0");
+            var width = this.valueDisplay.width;
+            this.position.x = this.valueDisplay.position.x = this.anchorPoint.x - width;
+        }
+    });
+});
+
+DefineModule('components/muzzle-flash', function (require) {
+    var Animation = require('models/animation');
+    var GameObject = require('models/game-object');
+    var Sprite = require('models/sprite');
+
+    var shades = [
+        "#ff0000",
+        "#ff3300",
+        "#ff6600",
+        "#ff9933",
+        "#ffcc00",
+        "#ff9900",
+        "#ffcc00",
+        "#ffcc66",
+        "#ffcc99"
+    ];
+
+    var frames = shades.map(function (shade) {
+        return new Sprite([
+            [ shade, shade ]
+        ]);
+    });
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, gunPosition) {
+            this.super('constructor', arguments);
+
+            this.gunPosition = gunPosition;
+            this.sprite = new Animation({
+                frames: frames,
+                millisPerFrame: 25
+            });
         },
 
-        start: function () {
-            this.resetTimer();
-            this.threshold += this.thresholdMax;
-        },
+        update: function () {
+            this.super('update', arguments);
 
-        update: function (dtime) {
-            if (this.ship.destroyed) {
+            if (this.sprite.finished) {
                 this.destroy();
             }
+        },
 
-            this.elapsed += dtime;
+        renderToFrame: function (frame) {
+            this.sprite.renderToFrame(frame,
+                Math.floor(this.parent.position.x + this.gunPosition.x),
+                Math.floor(this.parent.position.y + this.gunPosition.y-1),
+                (this.parent.index || 0) + 1);
+        }
+    })
+});
 
-            if (this.firing) {
+DefineModule('components/combo-gauge', function (require) {
+    var GameObject = require('models/game-object');
+    var Gradients = require('helpers/gradients');
+    var frameSprite = require('sprites/combo-gauge');
+    var padScoreDisplay = require('helpers/pad-score-display');
+    var Sprite = require('models/sprite');
+    var TextDisplay = require('components/text-display');
 
-                if (this.elapsed > this.fireRate) {
-                    this.elapsed -= this.fireRate;
-                    this.burstCount++;
-                    this.ship.fire(this.gunIndex);
+    return DefineClass(GameObject, {
+        index: 1,
 
-                    if (this.burstCount > this.burstSize) {
-                        this.firing = false;
-                        this.resetTimer();
+        constructor: function (parent, options) {
+            this.position = options.position;
+            this.color = options.color || "#ffffff";
+            this.sprite = frameSprite().applyColor(this.color);
+
+            this.multiplierDisplay = new TextDisplay(this, {
+                font: "arcade-small",
+                color: this.color,
+                index: 1,
+                position: { x: this.position.x + 7, y: this.position.y + this.sprite.height - 5 }
+            });
+            this.scoreDisplay = new TextDisplay(this, {
+                font: "arcade-small",
+                color: this.color,
+                index: 1,
+                position: { x: this.position.x, y: this.position.y + this.sprite.height + 1 }
+            });
+
+            this.super('constructor', arguments);
+        },
+        reset: function () {
+            this.super('reset');
+
+            this.comboPoints = 0;
+            this.pointTotal = 0;
+
+            this.updateMultiplier();
+            this.updateGaugeHeight();
+            this.updateScore();
+
+            this.addChild(this.multiplierDisplay);
+            this.addChild(this.scoreDisplay);
+        },
+
+        renderToFrame: function (frame) {
+            this.fillGaugeSprite.renderToFrame(frame, this.position.x + 1, this.position.y + 1, this.index - 1);
+
+            this.super('renderToFrame', arguments);
+        },
+
+        addPoints: function (points) {
+            this.pointTotal += this.pointMultiplier * points;
+            this.updateScore();
+        },
+
+        getScore: function () {
+            return this.pointTotal;
+        },
+
+        bumpCombo: function () {
+            this.comboPoints++;
+            this.updateMultiplier();
+            this.updateGaugeHeight();
+        },
+
+        clearCombo: function () {
+            this.comboPoints = 0;
+            this.updateMultiplier();
+            this.updateGaugeHeight();
+        },
+
+        updateGaugeHeight: function () {
+            var pixels = [];
+            for (var i = 0; i < 59; i++) {
+                if (i < this.comboPoints) {
+                    pixels.unshift(Gradients.colorAtPercent(Gradients.GreenToRed, 1 - i / 59));
+                }
+                else {
+                    pixels.unshift(null);
+                }
+            }
+
+            this.fillGaugeSprite = new Sprite([
+                pixels, pixels, pixels, pixels
+            ]);
+        },
+
+        updateMultiplier: function () {
+            if (this.comboPoints >= 59) {
+                this.pointMultiplier = 6;
+            }
+            else if (this.comboPoints >= 48) {
+                this.pointMultiplier = 5;
+            }
+            else if (this.comboPoints >= 36) {
+                this.pointMultiplier = 4;
+            }
+            else if (this.comboPoints >= 24 ) {
+                this.pointMultiplier = 3;
+            }
+            else if (this.comboPoints >= 12) {
+                this.pointMultiplier = 2;
+            }
+            else {
+                this.pointMultiplier = 1;
+            }
+
+            this.multiplierDisplay.changeMessage(this.pointMultiplier + "x");
+        },
+
+        updateScore: function () {
+            this.scoreDisplay.changeMessage(padScoreDisplay(this.pointTotal));
+        }
+    });
+});
+
+DefineModule('components/bullet', function (require) {
+    var GameObject = require('models/game-object');
+    var bulletSprite = require('sprites/bullet');
+    var smallExplosion = require('sprites/animations/small-explosion');
+
+    return DefineClass(GameObject, {
+        type: "bullet",
+        isPhysicalEntity: true,
+        index: 5,
+
+        constructor: function (parent, options) {
+            this.super('constructor', arguments);
+
+            options = options || { };
+            this.team = options.team || 0;
+            this.position = options.position || { x: 0, y: 0 };
+            this.velocity = options.velocity || { x: 0, y: 0 };
+            this.acceleration = options.acceleration || { x: 0, y: 0 };
+            this.damage = options.damage || 1;
+            this.life = options.life || 0;
+            this.maxLife = options.maxLife || 1;
+
+            this.sprite = bulletSprite();
+            this.explosion = smallExplosion;
+
+            this.updateBulletDirection();
+            this.updateColor();
+        },
+        checkBoundaries: function () {
+            if (this.position.x < 0
+                || this.position.y < 0
+                || this.position.x > this.parent.width
+                || this.position.y > this.parent.height) {
+
+                this.destroy();
+            }
+        },
+        updateBulletDirection: function () {
+            if (Math.abs(this.velocity.x) > Math.abs(this.velocity.y)) {
+                this.sprite.rotateRight();
+            }
+        },
+        updateColor: function () {
+            switch (this.team) {
+                case 0: this.sprite.applyColor("#B1D8AD"); break;
+                case 1: this.sprite.applyColor("#F7BEBE"); break;
+                default: break;
+            }
+        },
+        applyDamage: function (damage) {
+            this.super('applyDamage', arguments);
+
+            this.position.x -= Math.floor(this.sprite.width / 2);
+            this.position.y -= Math.floor(this.sprite.height / 2);
+        }
+    });
+});
+
+DefineModule('components/life-meter', function (require) {
+    var GameObject = require('models/game-object');
+    var Gradients = require('helpers/gradients');
+    var Sprite = require('models/sprite');
+
+    return DefineClass(GameObject, {
+        index: 1,
+
+        constructor: function (boundEntity, options) {
+            this.super('constructor', arguments);
+
+            options = options || {};
+
+            this.entity = boundEntity;
+            this.position = options.position || { x: 0, y: 0 };
+            this.anchor = options.anchor || { };
+            this.horizontal = !!options.horizontal;
+            this.length = options.length || 10;
+            this.width = options.width || 1;
+            this.scale = options.scale;
+            this.showBorder = !!options.showBorder;
+            this.borderColor = options.borderColor || "#ffffff";
+        },
+
+        update: function () {
+            if (this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife) {
+                this.currentLife = this.entity.life;
+                this.maxLife = this.entity.maxLife;
+
+                if (this.scale) {
+                    this.length = this.maxLife * this.scale;
+                    if (this.length > 70) {
+                        // this just applies to the player's health if they get so many upgrades
+                        // it would overflow the screen, manually set lengths will always honor them.
+                        this.length = 70;
                     }
                 }
 
-            }
-            else {
-
-                if (this.elapsed > this.threshold) {
-                    this.firing = true;
-                    this.elapsed = 0;
-                    this.burstCount = 0;
-                }
-
+                this.redrawMeter();
             }
         },
 
-        resetTimer: function () {
-            this.elapsed = 0;
-            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
+        redrawMeter: function () {
+            var colors = this.buildSpriteColorArray();
+
+            if (this.showBorder) {
+                this.addBorderToColorArray(colors);
+            }
+
+            this.sprite = new Sprite(colors);
+
+            if (this.horizontal) {
+                this.sprite.rotateRight();
+            }
+
+            this.updatePosition();
+        },
+
+        buildSpriteColorArray: function () {
+            var percentage = this.currentLife / this.maxLife * 100;
+            var meterColor = Gradients.colorAtPercent(Gradients.GreenToRed, this.currentLife / this.maxLife);
+            var colors = this.buildEmptySpriteColorArray();
+
+            for (var i = this.length - 1; i >= 0; i--) {
+                var color = null;
+                if (i / this.length * 100 < percentage) {
+                    color = meterColor;
+                }
+
+                colors.forEach(function (colorArray) {
+                    colorArray.push(color);
+                });
+            }
+
+            return colors;
+        },
+
+        buildEmptySpriteColorArray: function() {
+            var colors = [];
+            for (var j = 0; j < this.width; j++) {
+                colors.push([]);
+            }
+            return colors;
+        },
+
+        addBorderToColorArray: function (colors) {
+            this.addBezelPixelsToBorder(colors);
+            this.addBorderEnds(colors);
+            this.addBorderEdges(colors);
+        },
+
+        addBezelPixelsToBorder: function (colors) {
+            if (this.width > 2) {
+                colors[ 0 ][ 0 ] = this.borderColor;
+                colors[ this.width - 1 ][ 0 ] = this.borderColor;
+                colors[ 0 ][ this.length - 1 ] = this.borderColor;
+                colors[ this.width - 1 ][ this.length - 1 ] = this.borderColor;
+            }
+        },
+
+        addBorderEnds: function (colors) {
+            for (var j = 0; j < this.width; j++) {
+                colors[ j ].push(this.borderColor);
+                colors[ j ].unshift(this.borderColor);
+            }
+        },
+
+        addBorderEdges: function (colors) {
+            var border = [ null ];
+            for (var i = 0; i < this.length; i++) {
+                border.push(this.borderColor);
+            }
+            border.push(null);
+
+            colors.push(border);
+            colors.unshift(border);
+        },
+
+        updatePosition: function () {
+            if (this.anchor.left) {
+                this.position.x = this.anchor.left;
+            }
+
+            if (this.anchor.top) {
+                this.position.y = this.anchor.top;
+            }
+
+            if (this.anchor.right) {
+                this.position.x = this.anchor.right - this.sprite.width;
+            }
+
+            if (this.anchor.bottom) {
+                this.position.y = this.anchor.bottom - this.sprite.height;
+            }
+        }
+    });
+});
+
+DefineModule('components/fadeout-banner', function (require) {
+    var GameObject = require('models/game-object');
+    var TextDisplay = require('components/text-display');
+
+    var colorGradient = [
+        "rgb(255,255,255)",
+        "rgb(226,226,232)",
+        "rgb(171,171,189)",
+        "rgb(142,142,165)",
+        "rgb(114,113,142)",
+        "rgb(85,84,119)",
+        "rgb(58,57,97)",
+        "rgb(29,27,74)",
+        "rgb(1,0,51)"
+    ];
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, text, time) {
+            this.super('constructor', arguments);
+
+            this.text = text;
+            this.interval = time / colorGradient.length;
+        },
+
+        start: function () {
+            this.elapsedTime = 0;
+            this.colorIndex = 0;
+
+            this.textDisplay = new TextDisplay(this, {
+                message: this.text,
+                position: { x: 55, y: 50 },
+                border: true,
+                padding: 15,
+                color: colorGradient[ this.colorIndex ],
+                font: "arcade"
+            });
+            this.addChild(this.textDisplay);
+        },
+
+        update: function (dtime) {
+            this.elapsedTime += dtime;
+
+            if (this.elapsedTime > this.interval) {
+                this.elapsedTime -= this.interval;
+                this.colorIndex++;
+
+                if (this.colorIndex > colorGradient.length) {
+                    this.parent.removeChild(this);
+                } else {
+                    this.textDisplay.updateColor(colorGradient[ this.colorIndex ]);
+                }
+            }
+        }
+    });
+});
+
+DefineModule('components/money-drop', function (require) {
+    var GameObject = require('models/game-object');
+    var ArcadeFont = require('fonts/arcade');
+
+    return DefineClass(GameObject, {
+        isPhysicalEntity: true,
+        type: "pickup",
+        team: 1,
+        index: 4,
+
+        constructor: function (parent, position, velocity) {
+            this.super('constructor', arguments);
+
+            this.value = 10;
+            this.position = position;
+            this.velocity = { x: 0, y: 50 };
+            this.sprite = ArcadeFont[ '$' ];
+        },
+        checkBoundaries: function () {
+            if (this.position.x < 0
+                || this.position.y < 0
+                || this.position.x > this.parent.width
+                || this.position.y > this.parent.height) {
+
+                this.destroy();
+            }
+        },
+        applyDamage: function (damage, sourceEntity) {
+            if (sourceEntity.type === "player") {
+                this.triggerEvent('moneyCollected', this.value);
+                this.destroy();
+            }
+        }
+    });
+});
+
+DefineModule('components/text-display', function (require) {
+    var GameObject = require('models/game-object');
+    var shipExplosion = require('sprites/animations/ship-explosion');
+    var Sprite = require('models/sprite');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, options) {
+            this.rawMessage = options.message || " ";
+            this.font = require("fonts/" + (options.font || "arcade-small"));
+            this.color = options.color || "white";
+            this.position = options.position;
+            this.border = !!options.border;
+            this.padding = options.padding || 0;
+            this.background = options.background || null;
+            this.index = options.index || 10;
+            this.isPhysicalEntity = options.isPhysicalEntity;
+
+            this.super('constructor', arguments);
+        },
+        reset: function () {
+            this.super('reset');
+
+            this.changeMessage(this.rawMessage);
+        },
+
+        changeMessage: function (text) {
+            text = text || " ";
+            this.rawMessage = text;
+
+            if (typeof text === "string") {
+                text = [ text ];
+            }
+            text = text.map(function (str) {
+                return str.split('');
+            });
+            this.message = text;
+
+            this.populateSprites();
+            this.updateColor(this.color);
+        },
+
+        populateSprites: function () {
+            this.children = []; // intentionally clear all previous sprites before adding new ones
+            var self = this;
+
+            var width = 0;
+            var height = 0;
+            var xOffset = this.position.x;
+            var yOffset = this.position.y;
+            var lineWidths = [];
+
+            if (this.padding) {
+                xOffset += this.padding;
+                yOffset += this.padding;
+                width += this.padding * 2;
+                height += this.padding * 2;
+            }
+
+            if (this.border) {
+                xOffset += 1;
+                yOffset += 1;
+                width += 1;
+                height += 1;
+            }
+
+            this.message.forEach(function (line) {
+                var xLineOffset = xOffset;
+                var lineWidth = 0;
+
+                line.forEach(function (char) {
+                    var sprite = self.font[ char ];
+                    if (sprite) {
+                        var entity = new GameObject(self);
+                        entity.sprite = sprite.clone();
+                        entity.index = self.index + 1;
+                        entity.position = {
+                            x: xLineOffset,
+                            y: yOffset
+                        };
+                        self.addChild(entity);
+
+                        lineWidth += sprite.width + self.font.meta.letterSpacing;
+                        xLineOffset += sprite.width + self.font.meta.letterSpacing;
+                    }
+                    else {
+                        console.error("Tried to print an unsupported letter: '" + char + "'");
+                    }
+
+                });
+
+                lineWidths.push(lineWidth);
+                yOffset += self.font.meta.lineHeight;
+                height += self.font.meta.lineHeight;
+            });
+
+            width += Math.max.apply(null, lineWidths);
+            this.width = width;
+            this.height = height;
+
+            this.createBackgroundSprite(width, height);
+        },
+
+        createBackgroundSprite: function (width, height) {
+            var spriteRows = [];
+            for (var x = 0; x < width; x++) {
+                var row = [];
+                for (var y = 0; y < height; y++) {
+                    row.push(this.background);
+                }
+                spriteRows.push(row);
+            }
+            this.sprite = new Sprite(spriteRows);
+        },
+
+        updateColor: function (color) {
+            this.color = color;
+            var width = this.width;
+            var height = this.height;
+
+            this.children.forEach(function (entity) {
+                entity.sprite.applyColor(color);
+            });
+
+            if (this.border) {
+                this.sprite.iterateCells(function (cell, x, y) {
+                    if (x === 0 || y === 0 || x === width - 1 || y === height - 1) {
+                        cell.color = color;
+                    }
+                });
+            }
+        },
+
+        applyDamage: function () {
+            this.children.forEach(function (entity) {
+                entity.sprite = shipExplosion({ x: -2, y: -1 });
+            });
         }
     });
 });
@@ -4426,6 +3589,32 @@ DefineModule('scripts/fire-single-gun-random-rate', function (require) {
         resetTimer: function () {
             this.elapsed = 0;
             this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
+        }
+    });
+});
+
+DefineModule('scripts/watch-for-death', function (require) {
+    var GameObject = require('models/game-object');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, entity, callback) {
+            this.super('constructor', arguments);
+
+            this.entity = entity;
+            this.callback = callback;
+            this.started = false;
+        },
+
+        update: function () {
+            if (this.entity.destroyed && this.started) {
+                this.started = false;
+                this.callback();
+                this.destroy();
+            }
+        },
+
+        start: function () {
+            this.started = true;
         }
     });
 });
@@ -4517,326 +3706,148 @@ DefineModule('scripts/move-object-to-point', function (require) {
     });
 });
 
-DefineModule('scripts/watch-for-death', function (require) {
+DefineModule('scripts/chain-gun-fire', function (require) {
     var GameObject = require('models/game-object');
+    var Random = require('helpers/random');
 
     return DefineClass(GameObject, {
-        constructor: function (parent, entity, callback) {
+        constructor: function (parent, ship, options) {
             this.super('constructor', arguments);
+            options = options || {};
 
-            this.entity = entity;
-            this.callback = callback;
-            this.started = false;
-        },
-
-        update: function () {
-            if (this.entity.destroyed && this.started) {
-                this.started = false;
-                this.callback();
-                this.destroy();
-            }
+            this.ship = ship;
+            this.gunIndex = options.gunIndex || 0;
+            this.fireRate = options.fireRate || 150;
+            this.burstSize = options.burstSize || 5;
+            this.thresholdMin = options.thresholdMin || 2000;
+            this.thresholdMax = options.thresholdMax || 6000;
         },
 
         start: function () {
-            this.started = true;
-        }
-    });
-});
-
-DefineModule('ships/arrow-boss', function (require) {
-    var GameObject = require('models/game-object');
-    var shipSprite = require('sprites/arrow-boss');
-    var shipExplosion = require('sprites/animations/ship-explosion');
-    var MuzzleFlash = require('components/muzzle-flash');
-
-    return DefineClass(GameObject, {
-        isPhysicalEntity: true,
-        BULLET_SPEED: 120,
-        team: 1,
-        index: 5,
-
-        constructor: function (parent, difficultyMultiplier) {
-            this.difficultyMultiplier = difficultyMultiplier;
-            this.super('constructor', arguments);
+            this.resetTimer();
+            this.threshold += this.thresholdMax;
         },
-        reset: function () {
-            this.super('reset');
 
-            this.sprite = shipSprite().rotateRight();
-            this.explosion = shipExplosion;
-            this.guns = this.sprite.meta.guns;
-
-            this.position = { x: 0, y: 0 };
-            this.velocity = { x: 0, y: 0 };
-
-            this.damage = 50 * this.difficultyMultiplier;
-            this.life = 20 * this.difficultyMultiplier;
-            this.maxLife = 20 * this.difficultyMultiplier;
-        },
-        fire: function (gunIndex) {
-            var gun = this.guns[ gunIndex ];
-
-            var position = {
-                x: this.position.x + gun.x,
-                y: this.position.y + gun.y
-            };
-            var velocity = { x: 0, y: this.BULLET_SPEED };
-
-            this.triggerEvent('spawnBullet', {
-                team: this.team,
-                position: position,
-                velocity: velocity,
-                damage: this.difficultyMultiplier
-            });
-            this.addChild(new MuzzleFlash(this, gun));
-        },
-        applyDamage: function () {
-            this.triggerEvent('enemyHit');
-            this.super('applyDamage', arguments);
-        },
-        destroy: function () {
-            this.triggerEvent('enemyDestroyed', {
-                shipValue: this.maxLife
-            });
-
-            this.super('destroy', arguments);
-        }
-    });
-});
-
-DefineModule('ships/arrow-ship', function (require) {
-    var GameObject = require('models/game-object');
-    var MuzzleFlash = require('components/muzzle-flash');
-    var shipSprite = require('sprites/arrow-ship');
-    var daggerSprite = require('sprites/dagger-ship');
-    var shipExplosion = require('sprites/animations/ship-explosion');
-
-    return DefineClass(GameObject, {
-        isPhysicalEntity: true,
-        BULLET_SPEED: 100,
-        team: 1,
-        index: 5,
-
-        constructor: function (parent, difficultyMultiplier, alternateShip) {
-            this.difficultyMultiplier = difficultyMultiplier;
-            this.alternateShip = alternateShip;
-            this.super('constructor', arguments);
-        },
-        reset: function () {
-            this.super('reset');
-
-            if (this.alternateShip) {
-                this.sprite = daggerSprite().rotateLeft();
-            } else {
-                this.sprite = shipSprite().rotateRight();
-            }
-
-            this.explosion = shipExplosion;
-            this.gun = this.sprite.meta.guns[ 0 ];
-
-            this.position = { x: 0, y: 0 };
-            this.velocity = { x: 0, y: 0 };
-
-            this.damage = 5 * this.difficultyMultiplier;
-            this.maxLife = this.difficultyMultiplier;
-            this.life = this.difficultyMultiplier;
-        },
-        fire: function () {
-
-            var position = {
-                x: this.position.x + this.gun.x,
-                y: this.position.y + this.gun.y
-            };
-            var velocity = { x: 0, y: this.BULLET_SPEED };
-
-            this.triggerEvent('spawnBullet', {
-                team: this.team,
-                position: position,
-                velocity: velocity,
-                damage: this.difficultyMultiplier
-            });
-            this.addChild(new MuzzleFlash(this, this.gun));
-        },
-        applyDamage: function () {
-            this.triggerEvent('enemyHit');
-            this.super('applyDamage', arguments);
-        },
-        destroy: function () {
-            this.triggerEvent('enemyDestroyed', {
-                shipValue: this.maxLife
-            });
-
-            this.super('destroy', arguments);
-        }
-    });
-});
-
-DefineModule('ships/flying-saucer', function (require) {
-    var GameObject = require('models/game-object');
-
-    return DefineClass(GameObject, {
-        isPhysicalEntity: true,
-        BULLET_SPEED: 100,
-        team: 1,
-        index: 5,
-
-        reset: function () {
-            this.super('reset');
-        }
-    });
-});
-
-DefineModule('ships/player-controlled-ship', function (require) {
-    var GameObject = require('models/game-object');
-    var MuzzleFlash = require('components/muzzle-flash');
-    var playerShipSprite = require('sprites/player-ship');
-    var playerShipSpriteWingGuns = require('sprites/player-ship-wing-guns');
-    var shipExplosion = require('sprites/animations/ship-explosion');
-
-    return DefineClass(GameObject, {
-        type: "player",
-        isPhysicalEntity: true,
-        index: 5,
-
-        reset: function () {
-            this.super('reset');
-
-            this.sprite = playerShipSprite().rotateRight();
-            this.explosion = shipExplosion;
-
-            this.position = { x: -100, y: -100 };
-            this.velocity = { x: 0, y: 0 };
-
-            this.life = 10;
-            this.maxLife = 10;
-            this.damageUpgrades = 0;
-            this.lifeUpgrades = 0;
-            this.rateUpgrades = 0;
-            this.wingGunsUnlocked = false;
-            this.SPEED = 50;
-            this.BULLET_SPEED = 100;
-            this.FIRE_RATE = 500;
-
-            this.preventInputControl = true;
-            this.exploding = false;
-            this.team = 0;
-            this.damage = 5;
-            this.timeSinceFired = 0;
-        },
-        refillHealth: function () {
-            this.life = this.maxLife;
-        },
-        addWingGuns: function () {
-            this.wingGunsUnlocked = true;
-            this.sprite = playerShipSpriteWingGuns().rotateRight();
-        },
-        processInput: function (input) {
-            this.super('processInput', arguments);
-            if (this.preventInputControl || this.exploding || this.destroyed) {
-                // ship in a state where input isn't appropriate
-                return;
-            }
-
-            this.velocity.x = input.movementVector.x * this.SPEED;
-            this.velocity.y = input.movementVector.y * this.SPEED;
-
-            this.firing = input.fire;
-        },
         update: function (dtime) {
-            this.super('update', arguments);
-
-            this.timeSinceFired += dtime;
-            if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
-                this.timeSinceFired = 0;
-
-                this.fire();
-            }
-        },
-        hideOffscreen: function () {
-            this.preventInputControl = true;
-            this.position.x = -100;
-            this.velocity.x = 0;
-            this.velocity.y = 0;
-        },
-        checkBoundaries: function () {
-            if (this.preventInputControl) {
-                // don't check screen boundaries when an external script is controlling the player
-                return;
+            if (this.ship.destroyed) {
+                this.destroy();
             }
 
-            if (this.position.x < 0) {
-                this.position.x = 0;
-            }
-            if (this.position.y < 0) {
-                this.position.y = 0;
-            }
-            if (this.position.x + this.sprite.width > this.parent.width) {
-                this.position.x = this.parent.width - this.sprite.width;
-            }
-            if (this.position.y + this.sprite.height > this.parent.height) {
-                this.position.y = this.parent.height - this.sprite.height;
-            }
-        },
-        fire: function () {
-            this.sprite.meta.guns.forEach(function (gun, index) {
-                this.triggerEvent('spawnBullet', {
-                    team: this.team,
-                    damage: this.damageUpgrades + 1,
-                    velocity: {
-                        x: this.wingGunsUnlocked ? (index - 1) * 10 : 0,
-                        y: -this.BULLET_SPEED
-                    },
-                    position: {
-                        x: this.position.x + gun.x,
-                        y: this.position.y + gun.y
+            this.elapsed += dtime;
+
+            if (this.firing) {
+
+                if (this.elapsed > this.fireRate) {
+                    this.elapsed -= this.fireRate;
+                    this.burstCount++;
+                    this.ship.fire(this.gunIndex);
+
+                    if (this.burstCount > this.burstSize) {
+                        this.firing = false;
+                        this.resetTimer();
                     }
-                });
+                }
 
-                this.addChild(new MuzzleFlash(this, gun));
-            }.bind(this));
+            }
+            else {
+
+                if (this.elapsed > this.threshold) {
+                    this.firing = true;
+                    this.elapsed = 0;
+                    this.burstCount = 0;
+                }
+
+            }
         },
 
-        applyDamage: function (damage, sourceEntity) {
-            if (damage > 0) {
-                this.triggerEvent('playerHit');
-            }
-
-            this.super('applyDamage', arguments);
+        resetTimer: function () {
+            this.elapsed = 0;
+            this.threshold = Random.integer(this.thresholdMin, this.thresholdMax);
         }
     });
 });
 
-DefineModule('sprites/arrow-boss', function (require) {
+DefineModule('main', function (require) {
+    var CanvasRenderer = require('views/canvas-renderer');
+    var GamepadController = require('controllers/gamepad-input');
+    var KeyboardController = require('controllers/keyboard-input');
+    var Phoenix = require('models/phoenix');
+    var RunLoop = require('helpers/run-loop');
+
+    window.createPhoenixGameInstance = function (targetDiv, gameOverCallback) {
+        var gameDimensions = {
+            width: 200,
+            height: 150,
+            container: targetDiv,
+            embedded: true
+        };
+        var gamepadInput = new GamepadController();
+        var keyboardInput = new KeyboardController();
+
+        var phoenix = new Phoenix(gameDimensions);
+        var renderer = new CanvasRenderer(gameDimensions);
+        var runLoop = new RunLoop();
+
+        phoenix.gameOverCallback = gameOverCallback;
+        renderer.setFillColor(phoenix.FILL_COLOR);
+
+        runLoop.addCallback(function (dtime) {
+            phoenix.processInput([
+                keyboardInput.getInputState(),
+                gamepadInput.getInputState()
+            ]);
+
+            phoenix.update(dtime);
+
+            var frame = renderer.newRenderFrame();
+            frame.clear();
+            phoenix.renderToFrame(frame);
+
+            renderer.renderFrame(frame);
+        });
+
+        document.addEventListener("visibilitychange", function () {
+            if (document.hidden) {
+                phoenix.pause();
+            }
+        });
+
+        window.addEventListener("blur", function () {
+            phoenix.pause();
+        });
+
+        window.addEventListener("focus", function () {
+            keyboardInput.clearState();
+            gamepadInput.clearState();
+        });
+
+        runLoop.start();
+        return phoenix;
+    };
+});
+
+DefineModule('sprites/player-ship', function (require) {
     var Sprite = require('models/sprite');
 
     return function () {
-        var w1 = "#ffffff";
-        var w2 = "#cccccc";
-        var g1 = "#aaaaaa";
-        var g2 = "#888888";
-        var g3 = "#666666";
-        var g4 = "#222222";
-        var nn = null;
+        var w = "white";
+        var n = null;
         return new Sprite([
-                [ g3, nn, nn, nn, nn, nn, nn, nn, g3, nn, nn, nn, nn, nn, nn, nn, g3 ],
-                [ g2, g2, nn, nn, nn, nn, g2, g2, w2, g2, g2, nn, nn, nn, nn, g2, g2 ],
-                [ nn, g2, g1, nn, g1, g1, w2, w2, w2, w2, w2, g1, g1, nn, g1, g2, nn ],
-                [ nn, g1, g1, g1, g1, w2, w2, w2, g3, w2, w2, w2, g1, g1, g1, g1, nn ],
-                [ nn, nn, w2, g1, w2, w1, w2, g3, g4, g3, w2, w1, w2, g1, w2, nn, nn ],
-                [ nn, nn, w2, w1, w2, w1, w1, w2, g3, w2, w1, w1, w2, w1, w2, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, w1, w1, w2, w1, w1, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, nn, w1, w1, w1, nn, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn ],
-                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ],
-                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ]
-            ],
-            {
-                guns: [
-                    { x: 3, y: 8 },
-                    { x: 8, y: 10 },
-                    { x: 13, y: 8 }
-                ]
-            });
+            [ n, n, n, w, n, n, n ],
+            [ n, n, n, w, n, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, w, w, w, n, n ],
+            [ n, w, w, w, w, w, n ],
+            [ w, w, w, w, w, w, w ],
+            [ n, n, w, w, w, n, n ],
+            [ n, n, n, w, n, n, n ]
+        ],
+        {
+            guns: [
+                { x: 3, y: 1 }
+            ]
+        });
     };
 });
 
@@ -4863,34 +3874,6 @@ DefineModule('sprites/arrow-ship', function (require) {
         ], {
             guns: [ { x: 3, y: 7 } ]
         });
-    };
-});
-
-DefineModule('sprites/bullet', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        return new Sprite([
-            [ "white", "white" ]
-        ]);
-    }
-});
-
-DefineModule('sprites/combo-gauge', function (require) {
-    var Sprite = require('models/sprite');
-
-    return function () {
-        var w = "#fff";
-        var n = null;
-
-        return new Sprite([
-            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n],
-            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
-            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
-            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
-            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
-            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n]
-        ]);
     };
 });
 
@@ -4974,55 +3957,64 @@ DefineModule('sprites/player-ship-wing-guns', function (require) {
     };
 });
 
-DefineModule('sprites/player-ship', function (require) {
+DefineModule('sprites/arrow-boss', function (require) {
     var Sprite = require('models/sprite');
 
     return function () {
-        var w = "white";
-        var n = null;
+        var w1 = "#ffffff";
+        var w2 = "#cccccc";
+        var g1 = "#aaaaaa";
+        var g2 = "#888888";
+        var g3 = "#666666";
+        var g4 = "#222222";
+        var nn = null;
         return new Sprite([
-            [ n, n, n, w, n, n, n ],
-            [ n, n, n, w, n, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, w, w, w, n, n ],
-            [ n, w, w, w, w, w, n ],
-            [ w, w, w, w, w, w, w ],
-            [ n, n, w, w, w, n, n ],
-            [ n, n, n, w, n, n, n ]
-        ],
-        {
-            guns: [
-                { x: 3, y: 1 }
-            ]
-        });
+                [ g3, nn, nn, nn, nn, nn, nn, nn, g3, nn, nn, nn, nn, nn, nn, nn, g3 ],
+                [ g2, g2, nn, nn, nn, nn, g2, g2, w2, g2, g2, nn, nn, nn, nn, g2, g2 ],
+                [ nn, g2, g1, nn, g1, g1, w2, w2, w2, w2, w2, g1, g1, nn, g1, g2, nn ],
+                [ nn, g1, g1, g1, g1, w2, w2, w2, g3, w2, w2, w2, g1, g1, g1, g1, nn ],
+                [ nn, nn, w2, g1, w2, w1, w2, g3, g4, g3, w2, w1, w2, g1, w2, nn, nn ],
+                [ nn, nn, w2, w1, w2, w1, w1, w2, g3, w2, w1, w1, w2, w1, w2, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, w1, w1, w2, w1, w1, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, nn, w1, w1, w1, nn, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn, nn, w1, nn, nn, nn ],
+                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ],
+                [ nn, nn, nn, nn, nn, nn, nn, nn, w1, nn, nn, nn, nn, nn, nn, nn, nn ]
+            ],
+            {
+                guns: [
+                    { x: 3, y: 8 },
+                    { x: 8, y: 10 },
+                    { x: 13, y: 8 }
+                ]
+            });
     };
 });
 
-DefineModule('sprites/animations/ship-explosion', function (require) {
-    var Random = require('helpers/random');
-    var smallExplosion = require('sprites/animations/small-explosion');
-    var SpriteGroup = require('models/sprite-group');
+DefineModule('sprites/combo-gauge', function (require) {
+    var Sprite = require('models/sprite');
 
-    return function (offset) {
-        offset = offset || { x: 0, y: 0 };
+    return function () {
+        var w = "#fff";
+        var n = null;
 
-        return new SpriteGroup([
-            {
-                x: 0 + offset.x,
-                y: Random.integer(0, 3) + offset.y,
-                sprite: smallExplosion()
-            },
-            {
-                x: Random.integer(3, 6) + offset.x,
-                y: 0 + offset.y,
-                sprite: smallExplosion()
-            },
-            {
-                x: Random.integer(2, 4) + offset.x,
-                y: Random.integer(4, 6) + offset.y,
-                sprite: smallExplosion()
-            }
+        return new Sprite([
+            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n],
+            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
+            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
+            [w,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,n,w],
+            [w,w,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,n,w,n,n,n,n,n,n,n,n,n,n,w,w],
+            [n,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,n]
+        ]);
+    };
+});
+
+DefineModule('sprites/bullet', function (require) {
+    var Sprite = require('models/sprite');
+
+    return function () {
+        return new Sprite([
+            [ "white", "white" ]
         ]);
     }
 });
@@ -5093,4 +4085,1013 @@ DefineModule('sprites/animations/small-explosion', function (require) {
         });
     }
 });
+
+DefineModule('sprites/animations/ship-explosion', function (require) {
+    var Random = require('helpers/random');
+    var smallExplosion = require('sprites/animations/small-explosion');
+    var SpriteGroup = require('models/sprite-group');
+
+    return function (offset) {
+        offset = offset || { x: 0, y: 0 };
+
+        return new SpriteGroup([
+            {
+                x: 0 + offset.x,
+                y: Random.integer(0, 3) + offset.y,
+                sprite: smallExplosion()
+            },
+            {
+                x: Random.integer(3, 6) + offset.x,
+                y: 0 + offset.y,
+                sprite: smallExplosion()
+            },
+            {
+                x: Random.integer(2, 4) + offset.x,
+                y: Random.integer(4, 6) + offset.y,
+                sprite: smallExplosion()
+            }
+        ]);
+    }
+});
+
+DefineModule('levels/level-manager', function (require) {
+    var FlyPlayerInFromBottom = require('scripts/fly-player-in-from-bottom');
+    var GameObject = require('models/game-object');
+    var Level_group_01 = require('levels/level-group-01');
+    var Shop = require('levels/shop');
+
+    return DefineClass(GameObject, {
+        constructor: function (game) {
+            this.game = game;
+            this.width = game.width;
+            this.height = game.height;
+            this.player = game.player;
+
+            this.super('constructor', arguments);
+        },
+
+        reset: function () {
+            this.super('reset');
+
+            this.levelNameCounter = 0;
+            this.difficultyMultiplier = 1;
+            this.running = false;
+            this.complete = false;
+            this.currentLevel = null;
+            this.shop = new Shop(this, this.game);
+
+            this.loadLevels();
+        },
+        loadLevels: function () {
+            this.levels = [
+                new Level_group_01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, false, 2),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, false, 3),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, false, 4),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, false, "boss"),
+                this.shop,
+                new Level_group_01(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, true, 2),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, true, 3),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, true, 4),
+                new Level_group_01(this, this.game, this.difficultyMultiplier, true, "boss"),
+                this.shop
+            ];
+            this.levelIndex = -1;
+        },
+        start: function () {
+            this.running = true;
+            this.loadNextLevel();
+        },
+
+        stop: function () {
+            this.running = false;
+            this.removeChild(this.currentLevel);
+            this.currentLevel = null;
+        },
+
+        loadNextLevel: function () {
+            if (this.levelIndex >= this.levels.length - 1) { // last level was completed
+                this.difficultyMultiplier++;
+                this.loadLevels();
+            }
+
+            this.levelIndex++;
+            this.currentLevel = this.levels[ this.levelIndex ];
+
+            if (this.currentLevel.isShop) {
+                this.game.clearBullets();
+                this.player.hideOffscreen();
+            }
+
+            if (this.currentLevel.levelName) { // kinda derp way of knowing where the level blocks start
+                this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
+                this.player.refillHealth();
+            }
+
+            this.addChild(this.currentLevel);
+            this.currentLevel.start();
+        },
+        update: function () {
+            this.super('update', arguments);
+
+            if (this.currentLevel && this.currentLevel.checkIfLevelComplete()) {
+                if (this.currentLevel.isShop) {
+                    this.removeChild(this.currentLevel);
+                } else {
+                    this.currentLevel.destroy();
+                }
+
+                this.loadNextLevel();
+            }
+        },
+
+        levelName: function () {
+            this.levelNameCounter++;
+            return "LEVEL " + this.pad(this.levelNameCounter);
+        },
+        pad: function (val) {
+            if (val < 10) {
+                return "00" + val;
+            }
+            if (val < 100) {
+                return "0" + val;
+            }
+        }
+    });
+});
+
+DefineModule('levels/level-group-02', function (require) {
+    var GameObject = require('models/game-object');
+    var FlyingSaucer = require('ships/flying-saucer');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, game, difficultyMultiplier, shipCount, levelName) {
+            this.super('constructor', arguments);
+
+            if (groupCount === "boss") {
+                groupCount = 1;
+                this.boss = true;
+            }
+
+            this.game = game;
+            this.levelName = levelName;
+            this.rowCount = groupCount;
+        },
+
+        start: function () {
+
+        },
+
+        checkIfLevelComplete: function () {
+
+        }
+    });
+});
+
+DefineModule('levels/shop', function (require) {
+    var ArrowShip = require('sprites/arrow-ship');
+    var Bullet = require('components/bullet');
+    var EventedInput = require('models/evented-input');
+    var GameObject = require('models/game-object');
+    var TextDisplay = require('components/text-display');
+
+    return DefineClass(GameObject, {
+        isShop: true,
+        index: 1,
+        headerDef: { message: "Ship Upgrades", position: { x: 50, y: 10 } },
+        menuItems: {
+            health: { message: "+1 Ship Health", position: { x: 90, y: 50 } },
+            rate: { message: "10% faster Firing Rate", position: { x: 90, y: 65 } },
+            damage: { message: "+1 Bullet Damage", position: { x: 90, y: 80 } },
+            guns: { message: "Install wing guns", position: { x: 90, y: 95 } },
+            leave: { message: "Leave Shop", position: { x: 60, y: 110 } }
+        },
+        menuSelectorPositions: [ 49, 64, 79, 94, 109 ],
+        disabledColor: "#777",
+
+        constructor: function (parent, game) {
+            this.game = game;
+            this.bank = game.bank;
+            this.player = game.player;
+
+            this.input = new EventedInput({
+                onUp: this.onUp.bind(this),
+                onDown: this.onDown.bind(this),
+                onSelect: this.onSelect.bind(this)
+            });
+
+            this.super('constructor', arguments);
+        },
+        reset: function () {
+            this.super('reset', arguments);
+
+            this.input.reset();
+            this.isDoneShopping = false;
+            this.selectedMenuItem = 0;
+            this.createMenuText();
+            this.setCosts();
+            this.createSelectorShip();
+
+            this.addChild(this.input);
+        },
+        start: function () {
+            this.input.reset();
+            this.isDoneShopping = false;
+            this.setCosts();
+        },
+        checkIfLevelComplete: function () {
+            return this.isDoneShopping;
+        },
+        update: function (dtime) {
+            this.super('update', arguments);
+
+            this.timeSinceSelected += dtime;
+            if (this.selecting && this.timeSinceSelected > 595) {
+                this.propagateSelection();
+            }
+        },
+
+        createMenuText: function () {
+            this.titleText = new TextDisplay(this, {
+                font: "arcade",
+                message: this.headerDef.message,
+                position: this.headerDef.position,
+                color: this.game.interfaceColor
+            });
+            this.addChild(this.titleText);
+
+            Object.keys(this.menuItems).forEach(function (key) {
+                var item = this.menuItems[ key ];
+
+                item.description = new TextDisplay(this, {
+                    font: "arcade-small",
+                    message: item.message,
+                    position: item.position,
+                    color: this.game.interfaceColor,
+                    isPhysicalEntity: true
+                });
+                this.addChild(item.description);
+
+                item.costText = new TextDisplay(this, {
+                    font: "arcade-small",
+                    message: '',
+                    position: { x: item.position.x - 30, y: item.position.y },
+                    color: this.game.interfaceColor,
+                    isPhysicalEntity: true
+                });
+                this.addChild(item.costText);
+            }.bind(this));
+        },
+        setCosts: function () {
+            var items = this.menuItems;
+            var player = this.player;
+            var bank = this.bank;
+
+            items.health.cost = 10 + player.lifeUpgrades * 10;
+            items.rate.cost = 50 + player.rateUpgrades * 50;
+            items.damage.cost = 100 + player.damageUpgrades * 100;
+            items.guns.cost = player.wingGunsUnlocked ? -1 : 1000;
+
+            items.damage.costText.changeMessage("$" + items.damage.cost);
+            items.health.costText.changeMessage("$" + items.health.cost);
+            items.rate.costText.changeMessage("$" + items.rate.cost);
+            items.guns.costText.changeMessage(player.wingGunsUnlocked ? "--" : "$" + items.guns.cost);
+            items.leave.description.changeMessage(items.leave.message);
+
+            items.health.costText.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
+            items.rate.costText.updateColor(items.rate.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
+            items.damage.costText.updateColor(items.damage.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
+            items.guns.costText.updateColor(items.guns.cost > bank.value || player.wingGunsUnlocked ? this.disabledColor : this.game.interfaceColor);
+        },
+        createSelectorShip: function () {
+            this.selectorShip = new GameObject();
+            this.selectorShip.sprite = new ArrowShip();
+            this.selectorShip.position = { x: 40, y: 0 };
+            this.addChild(this.selectorShip);
+
+            this.updateSelectorPosition();
+        },
+        updateSelectorPosition: function () {
+            this.selectorShip.position.y = this.menuSelectorPositions[ this.selectedMenuItem ];
+        },
+        onUp: function () {
+            if (!this.selecting && this.selectedMenuItem > 0) {
+                this.selectedMenuItem--;
+                this.updateSelectorPosition();
+            }
+        },
+        onDown: function () {
+            if (!this.selecting && this.selectedMenuItem < this.menuSelectorPositions.length - 1) {
+                this.selectedMenuItem++;
+                this.updateSelectorPosition();
+            }
+        },
+        onSelect: function () {
+            if (!this.selecting) {
+                var selection;
+                switch (this.selectedMenuItem) {
+                    case 0: selection = this.menuItems.health; break;
+                    case 1: selection = this.menuItems.rate; break;
+                    case 2: selection = this.menuItems.damage; break;
+                    case 3: selection = this.menuItems.guns; break;
+                    case 4: this.startGame(); return;
+                    default: return;
+                }
+
+                if (this.bank.value >= selection.cost && selection.cost !== -1) {
+                    this.bank.removeMoney(selection.cost);
+                    this.startGame();
+                }
+            }
+        },
+        startGame: function () {
+            this.selecting = true;
+            this.timeSinceSelected = 0;
+
+            var x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
+            var y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
+
+            this.addChild(new Bullet(this, {
+                team: 2,
+                position: { x: x1, y: y },
+                velocity: { x: 50, y: 0 }
+            }));
+        },
+        propagateSelection: function () {
+            switch (this.selectedMenuItem) {
+                case 0:
+                    this.player.lifeUpgrades++;
+                    this.player.maxLife++;
+                    break;
+
+                case 1: // rate
+                    this.player.rateUpgrades++;
+                    this.player.FIRE_RATE = Math.ceil(this.player.FIRE_RATE * .9);
+                    break;
+
+                case 2: // damage
+                    this.player.damageUpgrades++;
+                    break;
+
+                case 3: // guns
+                    this.player.addWingGuns();
+                    break;
+
+                case 4: // done shopping
+                    this.isDoneShopping = true;
+                    break;
+            }
+
+            this.setCosts();
+            this.selecting = false;
+        }
+    });
+});
+
+DefineModule('levels/level-group-01', function (require) {
+    var Banner = require('components/fadeout-banner');
+    var BossShip = require('ships/arrow-boss');
+    var ChainGunFire = require('scripts/chain-gun-fire');
+    var EnemyShip = require('ships/arrow-ship');
+    var FireSingleGunRandomRate = require('scripts/fire-single-gun-random-rate');
+    var GameObject = require('models/game-object');
+    var LifeMeter = require('components/life-meter');
+    var MoneyDrop = require('components/money-drop');
+    var MoveObjectToPoint = require('scripts/move-object-to-point');
+    var ScriptChain = require('models/script-chain');
+    var Random = require('helpers/random');
+    var WatchForDeath = require('scripts/watch-for-death');
+
+    return DefineClass(GameObject, {
+        constructor: function (parent, game, difficultyMultiplier, alternateShip, rowCount, levelName) {
+            this.super('constructor', arguments);
+
+            this.alternateShip = alternateShip;
+            this.difficultyMultiplier = difficultyMultiplier;
+            this.width = this.parent.width;
+            this.height = this.parent.height;
+
+            if (rowCount === "boss") {
+                rowCount = 1;
+                this.boss = true;
+            }
+
+            this.game = game;
+            this.levelName = levelName;
+            this.rowCount = rowCount;
+        },
+        start: function () {
+            this.ships = [];
+            this.scripts = [];
+
+            var start = 4 - this.difficultyMultiplier;
+            start = start < 1 ? 1 : start;
+            var end = 7 + this.difficultyMultiplier;
+            end = end > 10 ? 10 : end;
+
+            for (var i = start; i <= end; i++) {
+                this.newShip(10 * i + 39, -40, 45, 3);
+
+                if (this.rowCount >= 2) {
+                    this.newShip(10 * i + 39, -30, 55, 3);
+                }
+
+                if (this.rowCount >= 3) {
+                    this.newShip(10 * i + 39, -20, 65, 3);
+                }
+
+                if (this.rowCount >= 4) {
+                    this.newShip(10 * i + 39, -10, 75, 3);
+                }
+            }
+
+            this.attachMoneyScripts();
+
+            if (this.boss) {
+                this.newBossShip();
+            }
+
+            if (this.levelName) {
+                this.scripts.push(new Banner(this, this.levelName, 2000));
+            }
+
+            this.ships.forEach(function (ship) {
+                this.addChild(ship);
+            }.bind(this));
+
+            this.scripts.forEach(function (script) {
+                script.start();
+                this.addChild(script);
+            }.bind(this));
+        },
+        checkIfLevelComplete: function () {
+            for (var i = 0; i < this.children.length; i++) {
+                var child = this.children[ i ];
+                if (child && child.position && !child.destroyed) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+        newShip: function (startX, startY, endY, time) {
+            var ship = new EnemyShip(this, this.difficultyMultiplier, this.alternateShip);
+
+            ship.position.x = startX;
+            ship.position.y = startY;
+
+            this.scripts.push(new FireSingleGunRandomRate(this, ship));
+            this.scripts.push(new ScriptChain(this, false, [
+                new MoveObjectToPoint(null, ship, { x: startX, y: endY }, time * 2),
+                new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time),
+                new ScriptChain(this, true, [
+                    new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY - 30 }, time),
+                    new MoveObjectToPoint(null, ship, { x: startX + 40, y: endY - 30 }, time * 2),
+                    new MoveObjectToPoint(null, ship, { x: startX + 40, y: endY }, time),
+                    new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time * 2)
+                ])
+            ]));
+
+            this.ships.push(ship);
+        },
+        newBossShip: function () {
+            var boss = window.boss = new BossShip(this, this.difficultyMultiplier);
+            var gameWidth = this.game.width;
+            var bossWidth = boss.sprite.width;
+
+            boss.position.x = -this.game.width / 2;
+            boss.position.y = 1;
+
+            boss.addChild(new LifeMeter(boss, {
+                position: { x: 0, y: 0 },
+                length: this.game.width,
+                width: 1,
+                horizontal: true
+            }));
+
+            this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));
+            this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
+            this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
+
+            this.scripts.push(new ScriptChain(this, true, [
+                new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
+                new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
+            ]));
+            this.scripts.push(new WatchForDeath(this, boss, function () {
+                var p = boss.position;
+                this.addChild(new MoneyDrop(this, {
+                    x: p.x,
+                    y: p.y
+                }));
+                this.addChild(new MoneyDrop(this, {
+                    x: p.x + 7,
+                    y: p.y
+                }));
+                this.addChild(new MoneyDrop(this, {
+                    x: p.x + 4,
+                    y: p.y + 8
+                }));
+            }.bind(this)));
+
+            this.ships.push(boss);
+        },
+        attachMoneyScripts: function () {
+            var divisor = this.difficultyMultiplier > 4 ? 2 : 3;
+            var count = Math.floor(this.ships.length / divisor);
+            var selectedShips = Random.sample(this.ships, count);
+
+            selectedShips.forEach(function (ship) {
+                this.scripts.push(new WatchForDeath(this, ship, function () {
+                    this.addChild(new MoneyDrop(this, ship.position));
+                }.bind(this)));
+            }.bind(this));
+        }
+    });
+});
+
+DefineModule('controllers/keyboard-input', function (require) {
+    function cloneObj(obj) {
+        var nObj = {};
+        Object.keys(obj).forEach(function (key) {
+            nObj[ key ] = obj[ key ];
+        });
+        return nObj;
+    }
+
+    function newInputDescriptor() {
+        return {
+            W: false, A: false, S: false, D: false,
+            SPACE: false, ENTER: false
+        };
+    }
+
+    var KEYS = {
+        87: 'W', 65: 'A', 83: 'S', 68: 'D',
+        32: 'SPACE', 13: 'ENTER'
+    };
+
+    return DefineClass({
+        constructor: function () {
+            this.clearState();
+
+            document.body.addEventListener('keydown', this.keydown.bind(this));
+            document.body.addEventListener('keyup', this.keyup.bind(this));
+        },
+        getInputState: function () {
+            var state = cloneObj(this.inputState);
+            this.propagateInputClears();
+            return state;
+        },
+        clearState: function () {
+            this.clearAfterNext = newInputDescriptor();
+            this.inputState = newInputDescriptor();
+            this.inputState.INPUT_TYPE = "keyboard";
+        },
+        propagateInputClears: function () {
+            Object.keys(this.clearAfterNext).forEach(function (key) {
+                if (this.clearAfterNext[ key ]) {
+                    this.inputState[ key ] = false;
+                    this.clearAfterNext[ key ] = false;
+                }
+            }.bind(this));
+        },
+        keydown: function (event) {
+            this.inputState[ KEYS[ event.keyCode ] ] = true;
+            this.clearAfterNext[ KEYS[ event.keyCode ] ] = false;
+        },
+        keyup: function (event) {
+            this.clearAfterNext[ KEYS[ event.keyCode ] ] = true;
+        }
+    });
+});
+
+DefineModule('controllers/gamepad-input', function (require) {
+    var BUTTON_MAP = {
+        0: 'A',
+        1: 'B',
+        2: 'X',
+        3: 'Y',
+        4: 'left-bumper',
+        5: 'right-bumper',
+        6: 'left-trigger',
+        7: 'right-trigger',
+        8: 'back',
+        9: 'start',
+        10: 'left-stick-press',
+        11: 'right-stick-press',
+        12: 'd-pad-up',
+        13: 'd-pad-down',
+        14: 'd-pad-left',
+        15: 'd-pad-right'
+    };
+
+    function gamepadDescriptor() {
+        var descriptor = { INPUT_TYPE: 'gamepad' };
+
+        Object.keys(BUTTON_MAP).forEach(function (key) {
+            descriptor[ BUTTON_MAP[ key ] ] = false;
+        });
+
+        descriptor[ 'left-stick-x' ] = 0;
+        descriptor[ 'left-stick-y' ] = 0;
+        descriptor[ 'right-stick-x' ] = 0;
+        descriptor[ 'right-stick-y' ] = 0;
+
+        return descriptor;
+    }
+
+    function normalize(axisTilt) {
+        return Math.round(axisTilt * 10) / 10;
+    }
+
+    return DefineClass({
+        constructor: function () {
+            window.addEventListener("gamepadconnected", function (e) {
+                console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+                    e.gamepad.index, e.gamepad.id,
+                    e.gamepad.buttons.length, e.gamepad.axes.length);
+            });
+            window.addEventListener("gamepaddisconnected", function (e) {
+                console.log("Gamepad disconnected from index %d: %s",
+                    e.gamepad.index, e.gamepad.id);
+            });
+        },
+        getInputState: function () {
+            var gamepad = navigator.getGamepads()[ 0 ];
+            var gamepadState = gamepadDescriptor();
+
+            if (gamepad && gamepad.connected) {
+                gamepad.buttons.forEach(function (button, index) {
+                    gamepadState[ BUTTON_MAP[ index ] ] = button.pressed;
+                });
+
+                gamepadState[ 'left-stick-x' ] = normalize(gamepad.axes[ 0 ]);
+                gamepadState[ 'left-stick-y' ] = normalize(gamepad.axes[ 1 ]);
+                gamepadState[ 'right-stick-x' ] = normalize(gamepad.axes[ 2 ]);
+                gamepadState[ 'right-stick-y' ] = normalize(gamepad.axes[ 3 ]);
+            }
+
+            return gamepadState;
+        },
+        clearState: function () {
+            /* no op for gamepads */
+        }
+    });
+});
+
+DefineModule('helpers/gradients', function () {
+    return {
+        GreenToRed: {
+            start: 120,
+            end: 0,
+            inverted: true,
+            S: 1,
+            L: .5
+        },
+
+        colorAtPercent: function (gradient, percent) {
+            if (gradient.inverted) {
+                percent = 1 - percent;
+            }
+
+            var H = (gradient.end - gradient.start) * percent + gradient.start;
+            var S = gradient.S * 100;
+            var L = gradient.L * 100;
+
+            H = Math.floor(H);
+            S = Math.floor(S) + "%";
+            L = Math.floor(L) + "%";
+
+            return "hsl(" + H + ", " + S + ", " + L + ")";
+        }
+    };
+});
+
+DefineModule('helpers/input-interpreter', function (require) {
+    function newInputDescriptor() {
+        return {
+            GAME: 'phoenix',
+            movementVector: { x: 0, y: 0 },
+            fire: false
+        };
+    }
+
+    function normalizeVector(vector) {
+        var x = vector.x;
+        var y = vector.y;
+        var length = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+
+        if (length > 1) {
+            vector.x = x / length;
+            vector.y = y / length;
+        }
+    }
+
+    return DefineClass({
+        interpret: function (inputSources) {
+            var gameInput = newInputDescriptor();
+
+            inputSources.forEach(function (inputSource) {
+                switch (inputSource.INPUT_TYPE) {
+                    case 'gamepad':
+                        return this.addGamepadInput(inputSource, gameInput);
+                    case 'keyboard':
+                        return this.addKeyboardInput(inputSource, gameInput);
+                    default:
+                        console.error("Unsupported input type: ", inputSource.INPUT_TYPE);
+                }
+            }.bind(this));
+
+            normalizeVector(gameInput.movementVector);
+
+            return gameInput;
+        },
+
+        addKeyboardInput: function (keyboard, gameInput) {
+            if (keyboard[ 'ENTER' ]) {
+                gameInput.start = true;
+            }
+
+            if (keyboard[ 'SPACE' ]) {
+                gameInput.fire = true;
+            }
+
+            if (keyboard[ 'W' ]) {
+                gameInput.movementVector.y -= 1;
+            }
+
+            if (keyboard[ 'A' ]) {
+                gameInput.movementVector.x -= 1;
+            }
+
+            if (keyboard[ 'S' ]) {
+                gameInput.movementVector.y += 1;
+            }
+
+            if (keyboard[ 'D' ]) {
+                gameInput.movementVector.x += 1;
+            }
+        },
+
+        addGamepadInput: function (gamepad, gameInput) {
+            if (gamepad[ 'start' ]) {
+                gameInput.start = true;
+            }
+
+            if (gamepad[ 'A' ]) {
+                gameInput.fire = true;
+            }
+
+            gameInput.movementVector.x += gamepad[ 'left-stick-x' ];
+            gameInput.movementVector.y += gamepad[ 'left-stick-y' ];
+
+            if (gamepad[ 'd-pad-up' ]) {
+                gameInput.movementVector.y -= 1;
+            }
+            if (gamepad[ 'd-pad-left' ]) {
+                gameInput.movementVector.x -= 1;
+            }
+            if (gamepad[ 'd-pad-down' ]) {
+                gameInput.movementVector.y += 1;
+            }
+            if (gamepad[ 'd-pad-right' ]) {
+                gameInput.movementVector.x += 1;
+            }
+        }
+    });
+});
+
+DefineModule('helpers/random', function (require) {
+    function integer(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function rangeCap(n, min, max) {
+        if (typeof n !== "number" || n < min) {
+            return min;
+        }
+
+        else if (n > max) {
+            return max;
+        }
+
+        else {
+            return n;
+        }
+    }
+
+    function sample(collection, requestedCount) {
+        requestedCount = rangeCap(requestedCount, 1, collection.length);
+        var range = collection.length - 1;
+        var selected = {};
+        var count = 0;
+        var choice;
+
+        while (count < requestedCount) {
+            choice = integer(0, range);
+            if (!selected[ choice ]) {
+                selected[ choice ] = true;
+                count++;
+            }
+        }
+
+        return Object.keys(selected).map(function (key) {
+            return collection[ key ];
+        });
+    }
+
+    return {
+        integer: integer,
+        rangeCap: rangeCap,
+        sample: sample
+    };
+});
+
+DefineModule('helpers/collisions', function (require) {
+    var DUMMY_CELL = { x: -1, y: -1, color: null, index: -1 };
+    var CollisionDetectionFrame = DefineClass({
+        collisionDetected: false,
+
+        constructor: function () {
+            this.cells = [];
+        },
+
+        cellAt: function (x, y) {
+            if (!this.collisionDetected) {
+                if (!this.cells[ x ]) {
+                    this.cells[ x ] = [];
+                }
+
+                if (!this.cells[ x ][ y ]) {
+                    this.cells[ x ][ y ] = true;
+                }
+                else {
+                    this.collisionDetected = true;
+                }
+            }
+
+            return DUMMY_CELL;
+        }
+    });
+
+    function entityToBoundingBox(entity) {
+        return {
+            x1: entity.position.x,
+            x2: entity.position.x + entity.sprite.width,
+            y1: entity.position.y,
+            y2: entity.position.y + entity.sprite.height
+        };
+    }
+
+    return {
+        boxCollision: function (entityA, entityB) {
+            var a = entityToBoundingBox(entityA);
+            var b = entityToBoundingBox(entityB);
+
+            return (
+                a.x1 < b.x2 &&
+                a.x2 > b.x1 &&
+                a.y1 < b.y2 &&
+                a.y2 > b.y1
+            );
+        },
+        spriteCollision: function (entityA, entityB) {
+            var collisionFrame = new CollisionDetectionFrame();
+
+            entityA.renderToFrame(collisionFrame);
+            entityB.renderToFrame(collisionFrame);
+
+            return collisionFrame.collisionDetected;
+        }
+    };
+});
+
+DefineModule('helpers/pad-score-display', function () {
+    return function (score) {
+        score = score + "";
+        switch (score.length) {
+            case 0: score = "0" + score;
+            case 1: score = "0" + score;
+            case 2: score = "0" + score;
+            case 3: score = "0" + score;
+            case 4: score = "0" + score;
+            case 5: score = "0" + score;
+        }
+
+        return score;
+    };
+});
+
+DefineModule('helpers/run-loop', function (require) {
+    var fpsCounterDOM = null;
+
+    function updateFPScounter(dtime) {
+        if (!fpsCounterDOM) {
+            fpsCounterDOM = document.createElement('div');
+            fpsCounterDOM.classList.add('fps-counter');
+            fpsCounterDOM.oldfps = 0;
+            document.body.appendChild(fpsCounterDOM);
+        }
+
+        var fps = Math.floor(1000 / dtime * 10) / 10;
+        if (Math.abs(fps - fpsCounterDOM.oldfps) > .2) {
+            fpsCounterDOM.oldfps = fps;
+            fps = fps + "";
+            fps += (fps.length <= 2 ? ".0" : "") + " fps";
+            fpsCounterDOM.innerHTML = fps;
+        }
+    }
+
+    function now() {
+        return (new Date()).valueOf();
+    }
+
+    function fpsTracker() {
+        var frameTimes = [];
+
+        for (var i = 0; i < 100; i++) {
+            frameTimes.push(20);
+        }
+        frameTimes.totalTime = 20 * 100;
+
+        frameTimes.push = function (ftime) {
+            var overflow = this.shift();
+            this.totalTime += ftime - overflow;
+            return Array.prototype.push.call(this, ftime);
+        };
+        frameTimes.average = function () {
+            return this.totalTime / this.length;
+        };
+
+        return frameTimes;
+    }
+
+    return DefineClass({
+        constructor: function (callback) {
+            this.callback = callback || function () {
+                };
+
+            this.fpsTracker = fpsTracker();
+            this.active = false;
+            this.lastFrameTime = now();
+            this.boundFrameHandler = this.frameHandler.bind(this);
+        },
+        frameHandler: function () {
+            if (!this.active) return;
+
+            var currentTime = now();
+            var dtime = currentTime - this.lastFrameTime;
+
+            this.lastFrameTime = currentTime;
+            this.updateFPScounter(dtime);
+
+            try {
+                this.callback(dtime);
+            } catch (e) {
+                console.error('Error running frame: ', e);
+            }
+
+            window.requestAnimationFrame(this.boundFrameHandler);
+        },
+        start: function () {
+            if (!this.active) {
+                this.active = true;
+                window.requestAnimationFrame(this.boundFrameHandler);
+            }
+        },
+        stop: function () {
+            this.active = false;
+        },
+        addCallback: function (callback) {
+            this.callback = callback;
+        },
+        updateFPScounter: function (dtime) {
+            this.fpsTracker.push(dtime);
+
+            updateFPScounter(this.fpsTracker.average());
+        }
+    });
+});
+
+DefineModule('helpers/collect-entities', function () {
+    return function visitNode(node, matcherFn, collection) {
+        collection = collection || [];
+
+        if (node) {
+            if (matcherFn(node)) {
+                collection.push(node);
+            }
+
+            if (node.children && node.children.length) {
+                for (var i = 0; i < node.children.length; i++) {
+                    visitNode(node.children[i], matcherFn, collection);
+                }
+            }
+        }
+
+        return collection;
+    };
+});
+
 }());
