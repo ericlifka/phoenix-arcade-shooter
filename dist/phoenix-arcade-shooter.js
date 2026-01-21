@@ -344,7 +344,7 @@
     }
   }
 
-  // src/helpers/random.js
+  // src/helpers/random.ts
   function integer(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
@@ -370,8 +370,8 @@
         count++;
       }
     }
-    return Object.keys(selected).map(function(key) {
-      return collection[key];
+    return Object.keys(selected).map((key) => {
+      return collection[parseInt(key)];
     });
   }
 
@@ -1947,7 +1947,7 @@
     }
   }
 
-  // src/helpers/collect-entities.js
+  // src/helpers/collect-entities.ts
   function collectEntities(node, matcherFn, collection) {
     collection = collection || [];
     if (node) {
@@ -2005,7 +2005,7 @@
     return collisionFrame.collisionDetected;
   }
 
-  // src/helpers/gradients.js
+  // src/helpers/gradients.ts
   var GreenToRed = {
     start: 120,
     end: 0,
@@ -2021,9 +2021,9 @@
     let S = gradient.S * 100;
     let L = gradient.L * 100;
     H = Math.floor(H);
-    S = Math.floor(S) + "%";
-    L = Math.floor(L) + "%";
-    return "hsl(" + H + ", " + S + ", " + L + ")";
+    const SStr = Math.floor(S) + "%";
+    const LStr = Math.floor(L) + "%";
+    return "hsl(" + H + ", " + SStr + ", " + LStr + ")";
   }
 
   // src/sprites/combo-gauge.js
@@ -2040,24 +2040,24 @@
     ]);
   }
 
-  // src/helpers/pad-score-display.js
+  // src/helpers/pad-score-display.ts
   function padScoreDisplay(score) {
-    score = score + "";
-    switch (score.length) {
+    let scoreStr = score + "";
+    switch (scoreStr.length) {
       case 0:
-        score = "0" + score;
+        scoreStr = "0" + scoreStr;
       case 1:
-        score = "0" + score;
+        scoreStr = "0" + scoreStr;
       case 2:
-        score = "0" + score;
+        scoreStr = "0" + scoreStr;
       case 3:
-        score = "0" + score;
+        scoreStr = "0" + scoreStr;
       case 4:
-        score = "0" + score;
+        scoreStr = "0" + scoreStr;
       case 5:
-        score = "0" + score;
+        scoreStr = "0" + scoreStr;
     }
-    return score;
+    return scoreStr;
   }
 
   // src/components/combo-gauge.js
