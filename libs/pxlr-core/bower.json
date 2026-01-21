@@ -1,0 +1,22 @@
+{
+  "name": "pxlr-core",
+  "homepage": "https://github.com/ericlifka/pxlr-core",
+  "authors": [
+    "Eric Lifka <eric.lifka@gmail.com>"
+  ],
+  "description": "The backbone of the pxlr game engine",
+  "main": "index.js",
+  "keywords": [
+    "html5",
+    "game",
+    "gamedev"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

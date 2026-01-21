@@ -6,10 +6,10 @@ const htmlbuild = require('gulp-htmlbuild');
 const wrapper = require('gulp-wrapper');
 
 const JsSrc = [
-    'bower_components/simple-web-modules/index.js',
-    'bower_components/pxlr-core/dist/index.js',
-    'bower_components/pxlr-gl/dist/index.js',
-    'bower_components/pxlr-fonts/dist/index.js',
+    'libs/simple-web-modules/index.js',
+    'libs/pxlr-core/dist/index.js',
+    'libs/pxlr-gl/dist/index.js',
+    'libs/pxlr-fonts/dist/index.js',
     'src/**/*.js'
 ];
 

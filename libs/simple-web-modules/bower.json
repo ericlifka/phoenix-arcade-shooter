@@ -1,0 +1,20 @@
+{
+  "name": "simple-web-modules",
+  "homepage": "https://github.com/ericlifka/simple-web-modules",
+  "authors": [
+    "Eric Lifka <eric.lifka@gmail.com>"
+  ],
+  "description": "A simple module system for simple web components",
+  "main": "index.js",
+  "moduleType": [
+    "globals"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

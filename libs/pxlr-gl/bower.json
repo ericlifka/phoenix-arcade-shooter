@@ -1,0 +1,26 @@
+{
+  "name": "pxlr-gl",
+  "homepage": "https://github.com/ericlifka/pxlr-gl",
+  "authors": [
+    "Eric Lifka <eric.lifka@gmail.com>"
+  ],
+  "description": "webgl renderer for the pxlr game platform",
+  "main": "index.js",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "html5",
+    "game",
+    "webgl",
+    "gamedev"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
