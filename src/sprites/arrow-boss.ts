@@ -1,6 +1,9 @@
 import Sprite from '../../libs/pxlr-core/core/sprite.js';
 
-export default function arrowBossSprite() {
+/**
+ * Creates the arrow boss sprite (large enemy boss ship)
+ */
+export default function arrowBossSprite(): any {
     const w1 = "#ffffff";
     const w2 = "#cccccc";
     const g1 = "#aaaaaa";

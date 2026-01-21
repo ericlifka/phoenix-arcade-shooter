@@ -1,6 +1,9 @@
 import Sprite from '../../libs/pxlr-core/core/sprite.js';
 
-export default function playerShipSprite() {
+/**
+ * Creates the player ship sprite (white arrow pointing up)
+ */
+export default function playerShipSprite(): any {
     const w = "white";
     const n = null;
     return new Sprite([

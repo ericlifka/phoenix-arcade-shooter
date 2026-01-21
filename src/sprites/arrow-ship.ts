@@ -1,6 +1,9 @@
 import Sprite from '../../libs/pxlr-core/core/sprite.js';
 
-export default function arrowShipSprite() {
+/**
+ * Creates an enemy arrow ship sprite (grayscale arrow pointing down)
+ */
+export default function arrowShipSprite(): any {
     const w1 = "#ffffff";
     const w2 = "#cccccc";
     const g1 = "#aaaaaa";

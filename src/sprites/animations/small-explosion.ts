@@ -7,7 +7,7 @@ const y = "yellow";
 const o = "orange";
 const r = "red";
 
-function newFrameSet() {
+function newFrameSet(): any[] {
     const frames = [
         new Sprite([
             [ n, n, n, n, n ],
@@ -46,7 +46,7 @@ function newFrameSet() {
         ])
     ];
 
-    frames.forEach(function (frame) {
+    frames.forEach((frame) => {
         for (let i = 0, times = integer(0, 3); i < times; i++) {
             frame.rotateLeft();
         }
@@ -55,7 +55,10 @@ function newFrameSet() {
     return frames;
 }
 
-export default function smallExplosion() {
+/**
+ * Creates a small explosion animation (5 frames of expanding fire)
+ */
+export default function smallExplosion(): any {
     return new Animation({
         frames: newFrameSet(),
         millisPerFrame: 50

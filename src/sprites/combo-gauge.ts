@@ -1,6 +1,9 @@
 import Sprite from '../../libs/pxlr-core/core/sprite.js';
 
-export default function comboGaugeSprite() {
+/**
+ * Creates the combo gauge frame sprite (border for the combo meter)
+ */
+export default function comboGaugeSprite(): any {
     const w = "#fff";
     const n = null;
 

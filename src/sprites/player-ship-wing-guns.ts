@@ -1,6 +1,9 @@
 import Sprite from '../../libs/pxlr-core/core/sprite.js';
 
-export default function playerShipWingGunsSprite() {
+/**
+ * Creates the player ship sprite with wing guns upgrade
+ */
+export default function playerShipWingGunsSprite(): any {
     const w = "white";
     const n = null;
     return new Sprite([

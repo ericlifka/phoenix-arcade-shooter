@@ -1,6 +1,9 @@
 import Sprite from '../../libs/pxlr-core/core/sprite.js';
 
-export default function daggerShipSprite() {
+/**
+ * Creates an alternate enemy dagger ship sprite (grayscale dagger shape pointing down)
+ */
+export default function daggerShipSprite(): any {
     const w1 = "#ffffff";
     const w2 = "#cccccc";
     const g1 = "#aaaaaa";

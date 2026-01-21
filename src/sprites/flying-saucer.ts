@@ -1,6 +1,9 @@
 import Sprite from '../../libs/pxlr-core/core/sprite.js';
 
-export default function flyingSaucerSprite() {
+/**
+ * Creates a flying saucer enemy sprite (circular UFO shape)
+ */
+export default function flyingSaucerSprite(): any {
     const w = "white";
     const n = null;
     return new Sprite([

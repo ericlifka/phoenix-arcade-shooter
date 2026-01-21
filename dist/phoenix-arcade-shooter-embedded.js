@@ -544,7 +544,7 @@
     }
   }
 
-  // src/sprites/animations/small-explosion.js
+  // src/sprites/animations/small-explosion.ts
   var n = null;
   var y = "yellow";
   var o = "orange";
@@ -587,7 +587,7 @@
         [y, n, n, n, y]
       ])
     ];
-    frames.forEach(function(frame) {
+    frames.forEach((frame) => {
       for (let i = 0, times = integer(0, 3);i < times; i++) {
         frame.rotateLeft();
       }
@@ -629,23 +629,23 @@
     }
   }
 
-  // src/sprites/animations/ship-explosion.js
+  // src/sprites/animations/ship-explosion.ts
   function shipExplosion(offset) {
-    offset = offset || { x: 0, y: 0 };
+    const finalOffset = { x: offset?.x || 0, y: offset?.y || 0 };
     return new SpriteGroup([
       {
-        x: 0 + offset.x,
-        y: integer(0, 3) + offset.y,
+        x: 0 + finalOffset.x,
+        y: integer(0, 3) + finalOffset.y,
         sprite: smallExplosion()
       },
       {
-        x: integer(3, 6) + offset.x,
-        y: 0 + offset.y,
+        x: integer(3, 6) + finalOffset.x,
+        y: 0 + finalOffset.y,
         sprite: smallExplosion()
       },
       {
-        x: integer(2, 4) + offset.x,
-        y: integer(4, 6) + offset.y,
+        x: integer(2, 4) + finalOffset.x,
+        y: integer(4, 6) + finalOffset.y,
         sprite: smallExplosion()
       }
     ]);
@@ -1919,7 +1919,7 @@
     }
   }
 
-  // src/sprites/bullet.js
+  // src/sprites/bullet.ts
   function bulletSprite() {
     return new Sprite([
       ["white", "white"]
@@ -2053,7 +2053,7 @@
     return "hsl(" + H + ", " + SStr + ", " + LStr + ")";
   }
 
-  // src/sprites/combo-gauge.js
+  // src/sprites/combo-gauge.ts
   function comboGaugeSprite() {
     const w4 = "#fff";
     const n5 = null;
@@ -2282,7 +2282,7 @@
     }
   }
 
-  // src/sprites/arrow-ship.js
+  // src/sprites/arrow-ship.ts
   function arrowShipSprite() {
     const w1 = "#ffffff";
     const w22 = "#cccccc";
@@ -2613,7 +2613,7 @@
     }
   }
 
-  // src/sprites/arrow-boss.js
+  // src/sprites/arrow-boss.ts
   function arrowBossSprite() {
     const w1 = "#ffffff";
     const w22 = "#cccccc";
@@ -2777,7 +2777,7 @@
     }
   }
 
-  // src/sprites/dagger-ship.js
+  // src/sprites/dagger-ship.ts
   function daggerShipSprite() {
     const w1 = "#ffffff";
     const w22 = "#cccccc";
@@ -3515,7 +3515,7 @@
     }
   }
 
-  // src/sprites/player-ship.js
+  // src/sprites/player-ship.ts
   function playerShipSprite() {
     const w4 = "white";
     const n5 = null;
@@ -3536,7 +3536,7 @@
     });
   }
 
-  // src/sprites/player-ship-wing-guns.js
+  // src/sprites/player-ship-wing-guns.ts
   function playerShipWingGunsSprite() {
     const w4 = "white";
     const n5 = null;
