@@ -126,7 +126,7 @@
     }
   }
 
-  // src/controllers/gamepad-input.js
+  // src/controllers/gamepad-input.ts
   var BUTTON_MAP = {
     0: "A",
     1: "B",
@@ -147,8 +147,8 @@
   };
   function gamepadDescriptor() {
     const descriptor = { INPUT_TYPE: "gamepad" };
-    Object.keys(BUTTON_MAP).forEach(function(key) {
-      descriptor[BUTTON_MAP[key]] = false;
+    Object.keys(BUTTON_MAP).forEach((key) => {
+      descriptor[BUTTON_MAP[parseInt(key)]] = false;
     });
     descriptor["left-stick-x"] = 0;
     descriptor["left-stick-y"] = 0;
@@ -162,19 +162,23 @@
 
   class GamepadInput {
     constructor() {
-      window.addEventListener("gamepadconnected", function(e) {
+      window.addEventListener("gamepadconnected", (e) => {
         console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.", e.gamepad.index, e.gamepad.id, e.gamepad.buttons.length, e.gamepad.axes.length);
       });
-      window.addEventListener("gamepaddisconnected", function(e) {
+      window.addEventListener("gamepaddisconnected", (e) => {
         console.log("Gamepad disconnected from index %d: %s", e.gamepad.index, e.gamepad.id);
       });
     }
     getInputState() {
-      const gamepad = navigator.getGamepads()[0];
+      const gamepads = navigator.getGamepads();
+      const gamepad = gamepads[0];
       const gamepadState = gamepadDescriptor();
       if (gamepad && gamepad.connected) {
-        gamepad.buttons.forEach(function(button, index) {
-          gamepadState[BUTTON_MAP[index]] = button.pressed;
+        gamepad.buttons.forEach((button, index) => {
+          const buttonName = BUTTON_MAP[index];
+          if (buttonName) {
+            gamepadState[buttonName] = button.pressed;
+          }
         });
         gamepadState["left-stick-x"] = normalize(gamepad.axes[0]);
         gamepadState["left-stick-y"] = normalize(gamepad.axes[1]);
@@ -186,10 +190,10 @@
     clearState() {}
   }
 
-  // src/controllers/keyboard-input.js
+  // src/controllers/keyboard-input.ts
   function cloneObj(obj) {
     const nObj = {};
-    Object.keys(obj).forEach(function(key) {
+    Object.keys(obj).forEach((key) => {
       nObj[key] = obj[key];
     });
     return nObj;
@@ -214,7 +218,11 @@
   };
 
   class KeyboardInput {
+    inputState;
+    clearAfterNext;
     constructor() {
+      this.inputState = { INPUT_TYPE: "keyboard", ...newInputDescriptor() };
+      this.clearAfterNext = newInputDescriptor();
       this.clearState();
       document.body.addEventListener("keydown", this.keydown.bind(this));
       document.body.addEventListener("keyup", this.keyup.bind(this));
@@ -226,33 +234,52 @@
     }
     clearState() {
       this.clearAfterNext = newInputDescriptor();
-      this.inputState = newInputDescriptor();
-      this.inputState.INPUT_TYPE = "keyboard";
+      this.inputState = { INPUT_TYPE: "keyboard", ...newInputDescriptor() };
     }
     propagateInputClears() {
-      Object.keys(this.clearAfterNext).forEach(function(key) {
-        if (this.clearAfterNext[key]) {
-          this.inputState[key] = false;
-          this.clearAfterNext[key] = false;
+      Object.keys(this.clearAfterNext).forEach((key) => {
+        const k = key;
+        if (this.clearAfterNext[k]) {
+          this.inputState[k] = false;
+          this.clearAfterNext[k] = false;
         }
-      }.bind(this));
+      });
     }
     keydown(event) {
-      this.inputState[KEYS[event.keyCode]] = true;
-      this.clearAfterNext[KEYS[event.keyCode]] = false;
+      const key = KEYS[event.keyCode];
+      if (key) {
+        this.inputState[key] = true;
+        this.clearAfterNext[key] = false;
+      }
     }
     keyup(event) {
-      this.clearAfterNext[KEYS[event.keyCode]] = true;
+      const key = KEYS[event.keyCode];
+      if (key) {
+        this.clearAfterNext[key] = true;
+      }
     }
   }
 
-  // src/models/game-object.js
+  // src/models/game-object.ts
   class GameObject {
-    damage = 0;
+    parent;
+    children;
+    destroyed;
+    damage;
+    life;
+    maxLife;
+    position;
+    velocity;
+    acceleration;
+    sprite;
+    index;
+    exploding;
+    explosion;
     constructor(parentObj) {
       this.parent = parentObj;
       this.children = [];
       this.destroyed = false;
+      this.damage = 0;
     }
     reset() {
       this.children = [];
@@ -270,14 +297,14 @@
       console.error("Couldn't find event '" + event + "' in parent chain of ", this);
     }
     processInput(input) {
-      this.children && this.children.forEach(function(child) {
+      this.children && this.children.forEach((child) => {
         if (typeof child.processInput === "function") {
           child.processInput(input);
         }
       });
     }
     update(dtime) {
-      this.children && this.children.forEach(function(child) {
+      this.children && this.children.forEach((child) => {
         if (typeof child.update === "function") {
           child.update(dtime);
         }
@@ -290,13 +317,13 @@
         this.position.y += this.velocity.y * dtime / 1000;
       }
       this.checkBoundaries();
-      if (this.exploding && this.sprite.finished) {
+      if (this.exploding && this.sprite && this.sprite.finished) {
         this.destroy();
       }
     }
     checkBoundaries() {}
     renderToFrame(frame) {
-      this.children && this.children.forEach(function(child) {
+      this.children && this.children.forEach((child) => {
         if (typeof child.renderToFrame === "function") {
           child.renderToFrame(frame);
         }
@@ -326,11 +353,13 @@
       this.destroyed = true;
     }
     applyDamage(damage, sourceEntity) {
-      if (this.maxLife) {
+      if (this.maxLife && this.life !== undefined) {
         this.life -= damage;
         if (this.life <= 0) {
           this.exploding = true;
-          this.sprite = this.explosion();
+          if (this.explosion) {
+            this.sprite = this.explosion();
+          }
           if (this.velocity) {
             this.velocity.x = 0;
             this.velocity.y = 0;
@@ -1963,14 +1992,12 @@
     return collection;
   }
 
-  // src/helpers/collisions.js
-  var DUMMY_CELL = { x: -1, y: -1, color: null, index: -1 };
+  // src/helpers/collisions.ts
+  var DUMMY_CELL = { x: -1, y: -1, color: "", index: -1 };
 
   class CollisionDetectionFrame {
     collisionDetected = false;
-    constructor() {
-      this.cells = [];
-    }
+    cells = [];
     cellAt(x, y2) {
       if (!this.collisionDetected) {
         if (!this.cells[x]) {
@@ -2150,8 +2177,17 @@
     }
   }
 
-  // src/models/evented-input.js
+  // src/models/evented-input.ts
   class EventedInput {
+    onUp;
+    onDown;
+    onFire;
+    onStart;
+    onSelect;
+    upReleased = false;
+    downReleased = false;
+    fireReleased = false;
+    startReleased = false;
     constructor(options) {
       this.onUp = options.onUp || function() {};
       this.onDown = options.onDown || function() {};
@@ -2425,12 +2461,12 @@
     }
   }
 
-  // src/helpers/input-interpreter.js
+  // src/helpers/input-interpreter.ts
   function newInputDescriptor2() {
     return {
-      GAME: "phoenix",
       movementVector: { x: 0, y: 0 },
-      fire: false
+      fire: false,
+      start: false
     };
   }
   function normalizeVector(vector) {
@@ -3019,8 +3055,12 @@
     }
   }
 
-  // src/models/script-chain.js
+  // src/models/script-chain.ts
   class ScriptChain extends GameObject {
+    repeat;
+    scripts;
+    scriptIndex;
+    activeScript;
     constructor(parent, repeat, scripts) {
       super(parent);
       this.repeat = repeat;
@@ -3038,7 +3078,9 @@
       this.activeScript.start();
     }
     update(dtime) {
-      this.activeScript.update(dtime);
+      if (this.activeScript) {
+        this.activeScript.update(dtime);
+      }
     }
     removeChild() {
       this.scriptIndex++;
@@ -3046,7 +3088,7 @@
         if (this.repeat) {
           this.scriptIndex = 0;
         } else {
-          this.parent.removeChild(this);
+          this.parent?.removeChild(this);
           return;
         }
       }
@@ -3791,7 +3833,7 @@
     }
   }
 
-  // src/helpers/run-loop.js
+  // src/helpers/run-loop.ts
   var fpsCounterDOM = null;
   function updateFPScounter(dtime) {
     if (!fpsCounterDOM) {
@@ -3803,9 +3845,9 @@
     let fps = Math.floor(1000 / dtime * 10) / 10;
     if (Math.abs(fps - fpsCounterDOM.oldfps) > 0.2) {
       fpsCounterDOM.oldfps = fps;
-      fps = fps + "";
-      fps += (fps.length <= 2 ? ".0" : "") + " fps";
-      fpsCounterDOM.innerHTML = fps;
+      let fpsStr = fps + "";
+      fpsStr += (fpsStr.length <= 2 ? ".0" : "") + " fps";
+      fpsCounterDOM.innerHTML = fpsStr;
     }
   }
   function now() {
@@ -3829,6 +3871,11 @@
   }
 
   class RunLoop {
+    callback;
+    fpsTracker;
+    active;
+    lastFrameTime;
+    boundFrameHandler;
     constructor(callback) {
       this.callback = callback || function() {};
       this.fpsTracker = fpsTracker();

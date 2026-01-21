@@ -1,23 +1,50 @@
-export default class GameObject {
-    damage = 0;
+import { Position, Velocity, Acceleration } from '../types/rendering';
+import { InputState } from '../types/game';
 
-    constructor(parentObj) {
+/**
+ * Base class for all game entities
+ * Provides lifecycle methods, parent-child hierarchy, input processing, and rendering
+ */
+export default class GameObject {
+    // Core properties
+    parent?: GameObject | null;
+    children: GameObject[];
+    destroyed: boolean;
+    
+    // Optional properties (not all GameObjects have these)
+    damage?: number;
+    life?: number;
+    maxLife?: number;
+    position?: Position;
+    velocity?: Velocity;
+    acceleration?: Acceleration;
+    sprite?: any; // Complex type, using any for now
+    index?: number;
+    exploding?: boolean;
+    explosion?: () => any;
+
+    constructor(parentObj?: GameObject | null) {
         this.parent = parentObj;
         this.children = [];
         this.destroyed = false;
+        this.damage = 0;
     }
 
-    reset() {
+    reset(): void {
         this.children = [];
         this.destroyed = false;
     }
 
-    triggerEvent(event, data) {
+    /**
+     * Trigger an event by bubbling up the parent chain
+     * Useful for child entities to communicate with parents
+     */
+    triggerEvent(event: string, data?: any): void {
         let entityRef = this.parent;
 
         while (entityRef) {
-            if (typeof entityRef[event] === 'function') {
-                entityRef[event](data);
+            if (typeof (entityRef as any)[event] === 'function') {
+                (entityRef as any)[event](data);
                 return;
             }
 
@@ -27,16 +54,16 @@ export default class GameObject {
         console.error("Couldn't find event '" + event + "' in parent chain of ", this);
     }
 
-    processInput(input) {
-        this.children && this.children.forEach(function (child) {
+    processInput(input: InputState): void {
+        this.children && this.children.forEach((child) => {
             if (typeof child.processInput === "function") {
                 child.processInput(input);
             }
         });
     }
 
-    update(dtime) {
-        this.children && this.children.forEach(function (child) {
+    update(dtime: number): void {
+        this.children && this.children.forEach((child) => {
             if (typeof child.update === "function") {
                 child.update(dtime);
             }
@@ -53,17 +80,20 @@ export default class GameObject {
 
         this.checkBoundaries();
 
-        if (this.exploding && this.sprite.finished) {
+        if (this.exploding && this.sprite && this.sprite.finished) {
             this.destroy();
         }
     }
 
-    checkBoundaries() {
+    /**
+     * Override in subclasses to enforce screen boundaries
+     */
+    checkBoundaries(): void {
         /* a place to verify that objects are within the screen constraints */
     }
 
-    renderToFrame(frame) {
-        this.children && this.children.forEach(function (child) {
+    renderToFrame(frame: any): void {
+        this.children && this.children.forEach((child) => {
             if (typeof child.renderToFrame === "function") {
                 child.renderToFrame(frame);
             }
@@ -74,13 +104,13 @@ export default class GameObject {
         }
     }
 
-    addChild(child) {
+    addChild(child?: GameObject): void {
         if (child) {
             this.children.push(child);
         }
     }
 
-    removeChild(child) {
+    removeChild(child?: GameObject): void {
         if (child) {
             const index = this.children.indexOf(child);
             if (index >= 0) {
@@ -89,22 +119,24 @@ export default class GameObject {
         }
     }
 
-    destroy() {
+    destroy(): void {
         if (this.parent && this.parent.removeChild) {
             this.parent.removeChild(this);
         }
 
-        this.children = null; // may need to iterate through children and destroy them too
+        (this.children as any) = null; // may need to iterate through children and destroy them too
         this.destroyed = true;
     }
 
-    applyDamage(damage, sourceEntity) {
-        if (this.maxLife) {
+    applyDamage(damage: number, sourceEntity?: GameObject): void {
+        if (this.maxLife && this.life !== undefined) {
             this.life -= damage;
 
             if (this.life <= 0) {
                 this.exploding = true;
-                this.sprite = this.explosion();
+                if (this.explosion) {
+                    this.sprite = this.explosion();
+                }
 
                 if (this.velocity) {
                     this.velocity.x = 0;

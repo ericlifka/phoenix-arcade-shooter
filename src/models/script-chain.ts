@@ -1,7 +1,22 @@
 import GameObject from './game-object.js';
 
+interface Script {
+    parent?: ScriptChain;
+    start(): void;
+    update(dtime: number): void;
+}
+
+/**
+ * Executes a sequence of behavior scripts in order
+ * Can optionally loop the script chain
+ */
 export default class ScriptChain extends GameObject {
-    constructor(parent, repeat, scripts) {
+    private repeat: boolean;
+    private scripts: Script[];
+    private scriptIndex: number;
+    private activeScript: Script | null;
+
+    constructor(parent: GameObject | null, repeat: boolean, scripts: Script[]) {
         super(parent);
 
         this.repeat = repeat;
@@ -17,22 +32,24 @@ export default class ScriptChain extends GameObject {
         this.reset();
     }
 
-    start() {
+    start(): void {
         this.activeScript = this.scripts[this.scriptIndex];
         this.activeScript.start();
     }
 
-    update(dtime) {
-        this.activeScript.update(dtime);
+    update(dtime: number): void {
+        if (this.activeScript) {
+            this.activeScript.update(dtime);
+        }
     }
 
-    removeChild() {
+    removeChild(): void {
         this.scriptIndex++;
         if (this.scriptIndex >= this.scripts.length) {
             if (this.repeat) {
                 this.scriptIndex = 0;
             } else {
-                this.parent.removeChild(this);
+                this.parent?.removeChild(this);
                 return;
             }
         }

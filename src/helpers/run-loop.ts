@@ -1,8 +1,18 @@
-let fpsCounterDOM = null;
+interface FPSCounterElement extends HTMLDivElement {
+    oldfps: number;
+}
 
-function updateFPScounter(dtime) {
+interface FPSTracker extends Array<number> {
+    totalTime: number;
+    push(ftime: number): number;
+    average(): number;
+}
+
+let fpsCounterDOM: FPSCounterElement | null = null;
+
+function updateFPScounter(dtime: number): void {
     if (!fpsCounterDOM) {
-        fpsCounterDOM = document.createElement('div');
+        fpsCounterDOM = document.createElement('div') as FPSCounterElement;
         fpsCounterDOM.classList.add('fps-counter');
         fpsCounterDOM.oldfps = 0;
         document.body.appendChild(fpsCounterDOM);
@@ -11,38 +21,47 @@ function updateFPScounter(dtime) {
     let fps = Math.floor(1000 / dtime * 10) / 10;
     if (Math.abs(fps - fpsCounterDOM.oldfps) > .2) {
         fpsCounterDOM.oldfps = fps;
-        fps = fps + "";
-        fps += (fps.length <= 2 ? ".0" : "") + " fps";
-        fpsCounterDOM.innerHTML = fps;
+        let fpsStr = fps + "";
+        fpsStr += (fpsStr.length <= 2 ? ".0" : "") + " fps";
+        fpsCounterDOM.innerHTML = fpsStr;
     }
 }
 
-function now() {
+function now(): number {
     return (new Date()).valueOf();
 }
 
-function fpsTracker() {
-    const frameTimes = [];
+function fpsTracker(): FPSTracker {
+    const frameTimes: any[] = [];
 
     for (let i = 0; i < 100; i++) {
         frameTimes.push(20);
     }
-    frameTimes.totalTime = 20 * 100;
+    (frameTimes as FPSTracker).totalTime = 20 * 100;
 
-    frameTimes.push = function (ftime) {
+    (frameTimes as FPSTracker).push = function (ftime: number): number {
         const overflow = this.shift();
         this.totalTime += ftime - overflow;
         return Array.prototype.push.call(this, ftime);
     };
-    frameTimes.average = function () {
+    (frameTimes as FPSTracker).average = function (): number {
         return this.totalTime / this.length;
     };
 
-    return frameTimes;
+    return frameTimes as FPSTracker;
 }
 
+/**
+ * Main game loop using requestAnimationFrame
+ */
 export default class RunLoop {
-    constructor(callback) {
+    private callback: (dtime: number) => void;
+    private fpsTracker: FPSTracker;
+    private active: boolean;
+    private lastFrameTime: number;
+    private boundFrameHandler: () => void;
+
+    constructor(callback?: (dtime: number) => void) {
         this.callback = callback || function () {};
 
         this.fpsTracker = fpsTracker();
@@ -51,7 +70,7 @@ export default class RunLoop {
         this.boundFrameHandler = this.frameHandler.bind(this);
     }
 
-    frameHandler() {
+    private frameHandler(): void {
         if (!this.active) return;
 
         const currentTime = now();
@@ -69,22 +88,22 @@ export default class RunLoop {
         window.requestAnimationFrame(this.boundFrameHandler);
     }
 
-    start() {
+    start(): void {
         if (!this.active) {
             this.active = true;
             window.requestAnimationFrame(this.boundFrameHandler);
         }
     }
 
-    stop() {
+    stop(): void {
         this.active = false;
     }
 
-    addCallback(callback) {
+    addCallback(callback: (dtime: number) => void): void {
         this.callback = callback;
     }
 
-    updateFPScounter(dtime) {
+    private updateFPScounter(dtime: number): void {
         this.fpsTracker.push(dtime);
 
         updateFPScounter(this.fpsTracker.average());

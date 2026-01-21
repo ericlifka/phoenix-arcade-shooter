@@ -1,12 +1,19 @@
-function newInputDescriptor() {
+import { InputState, Position } from '../types/game';
+
+interface RawInputSource {
+    INPUT_TYPE: 'keyboard' | 'gamepad';
+    [key: string]: any;
+}
+
+function newInputDescriptor(): InputState {
     return {
-        GAME: 'phoenix',
         movementVector: { x: 0, y: 0 },
-        fire: false
+        fire: false,
+        start: false
     };
 }
 
-function normalizeVector(vector) {
+function normalizeVector(vector: Position): void {
     const x = vector.x;
     const y = vector.y;
     const length = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
@@ -17,8 +24,12 @@ function normalizeVector(vector) {
     }
 }
 
+/**
+ * Interprets raw input from multiple sources (keyboard, gamepad) and combines them
+ * into a single normalized game input state
+ */
 export default class InputInterpreter {
-    interpret(inputSources) {
+    interpret(inputSources: RawInputSource[]): InputState {
         const gameInput = newInputDescriptor();
 
         inputSources.forEach(function (inputSource) {
@@ -37,7 +48,7 @@ export default class InputInterpreter {
         return gameInput;
     }
 
-    addKeyboardInput(keyboard, gameInput) {
+    addKeyboardInput(keyboard: RawInputSource, gameInput: InputState): void {
         if (keyboard['ENTER']) {
             gameInput.start = true;
         }
@@ -63,7 +74,7 @@ export default class InputInterpreter {
         }
     }
 
-    addGamepadInput(gamepad, gameInput) {
+    addGamepadInput(gamepad: RawInputSource, gameInput: InputState): void {
         if (gamepad['start']) {
             gameInput.start = true;
         }
