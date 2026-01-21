@@ -1,25 +1,23 @@
-DefineModule('scripts/watch-for-death', function (require) {
-    var GameObject = require('models/game-object');
+import GameObject from '../models/game-object.js';
 
-    return DefineClass(GameObject, {
-        constructor: function (parent, entity, callback) {
-            this.super('constructor', arguments);
+export default class WatchForDeath extends GameObject {
+    constructor(parent, entity, callback) {
+        super(parent);
 
-            this.entity = entity;
-            this.callback = callback;
+        this.entity = entity;
+        this.callback = callback;
+        this.started = false;
+    }
+
+    update() {
+        if (this.entity.destroyed && this.started) {
             this.started = false;
-        },
-
-        update: function () {
-            if (this.entity.destroyed && this.started) {
-                this.started = false;
-                this.callback();
-                this.destroy();
-            }
-        },
-
-        start: function () {
-            this.started = true;
+            this.callback();
+            this.destroy();
         }
-    });
-});
+    }
+
+    start() {
+        this.started = true;
+    }
+}

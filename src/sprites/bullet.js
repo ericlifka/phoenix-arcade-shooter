@@ -1,9 +1,7 @@
-DefineModule('sprites/bullet', function (require) {
-    var Sprite = require('models/sprite');
+import Sprite from '../../libs/pxlr-core/core/sprite.js';
 
-    return function () {
-        return new Sprite([
-            [ "white", "white" ]
-        ]);
-    }
-});
+export default function bulletSprite() {
+    return new Sprite([
+        ["white", "white"]
+    ]);
+}

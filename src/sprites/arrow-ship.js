@@ -1,25 +1,23 @@
-DefineModule('sprites/arrow-ship', function (require) {
-    var Sprite = require('models/sprite');
+import Sprite from '../../libs/pxlr-core/core/sprite.js';
 
-    return function () {
-        var w1 = "#ffffff";
-        var w2 = "#cccccc";
-        var g1 = "#aaaaaa";
-        var g2 = "#888888";
-        var g3 = "#666666";
-        var g4 = "#222222";
-        var nn = null;
-        return new Sprite([
-            [ g3, nn, nn, nn, nn, nn, g3 ],
-            [ g2, g2, nn, nn, nn, g2, g2 ],
-            [ nn, g2, g1, nn, g1, g2, nn ],
-            [ nn, g1, g1, w1, g1, g1, nn ],
-            [ nn, nn, w2, g4, w2, nn, nn ],
-            [ nn, nn, w2, w1, w2, nn, nn ],
-            [ nn, nn, nn, w1, nn, nn, nn ],
-            [ nn, nn, nn, w1, nn, nn, nn ]
-        ], {
-            guns: [ { x: 3, y: 7 } ]
-        });
-    };
-});
+export default function arrowShipSprite() {
+    const w1 = "#ffffff";
+    const w2 = "#cccccc";
+    const g1 = "#aaaaaa";
+    const g2 = "#888888";
+    const g3 = "#666666";
+    const g4 = "#222222";
+    const nn = null;
+    return new Sprite([
+        [ g3, nn, nn, nn, nn, nn, g3 ],
+        [ g2, g2, nn, nn, nn, g2, g2 ],
+        [ nn, g2, g1, nn, g1, g2, nn ],
+        [ nn, g1, g1, w1, g1, g1, nn ],
+        [ nn, nn, w2, g4, w2, nn, nn ],
+        [ nn, nn, w2, w1, w2, nn, nn ],
+        [ nn, nn, nn, w1, nn, nn, nn ],
+        [ nn, nn, nn, w1, nn, nn, nn ]
+    ], {
+        guns: [ { x: 3, y: 7 } ]
+    });
+}

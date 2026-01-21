@@ -1,14 +1,12 @@
-DefineModule('ships/flying-saucer', function (require) {
-    var GameObject = require('models/game-object');
+import GameObject from '../models/game-object.js';
 
-    return DefineClass(GameObject, {
-        isPhysicalEntity: true,
-        BULLET_SPEED: 100,
-        team: 1,
-        index: 5,
+export default class FlyingSaucer extends GameObject {
+    isPhysicalEntity = true;
+    BULLET_SPEED = 100;
+    team = 1;
+    index = 5;
 
-        reset: function () {
-            this.super('reset');
-        }
-    });
-});
+    reset() {
+        super.reset();
+    }
+}

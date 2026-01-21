@@ -1,10 +1,9 @@
-DefineModule('pxlr/fonts/arcade-small', function (require) {
-    var Sprite = require('models/sprite');
+import Sprite from '../../pxlr-core/core/sprite.js';
 
-    var w = "white";
-    var n = null;
+const w = "white";
+const n = null;
 
-    return {
+export default {
         meta: {
             width: 3,
             height: 5,
@@ -388,4 +387,3 @@ DefineModule('pxlr/fonts/arcade-small', function (require) {
             [ n, n, n, n, n ]
         ])
     };
-});

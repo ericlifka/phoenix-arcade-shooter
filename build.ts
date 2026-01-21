@@ -1,14 +1,14 @@
 /**
- * Build script for Phoenix Arcade Shooter
- * Uses Bun to bundle the game and copy static assets
+ * Build script for Phoenix Arcade Shooter v2
+ * Uses Bun's bundler to create ES module bundles
  * 
  * Creates two bundles:
  * - phoenix-arcade-shooter.js (main game with auto-start)
  * - phoenix-arcade-shooter-embedded.js (for embedding in other pages)
  */
 
-import { copyFileSync, mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'fs';
-import { join, extname } from 'path';
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
 const DIST_DIR = './dist';
 
@@ -17,7 +17,7 @@ if (!existsSync(DIST_DIR)) {
   mkdirSync(DIST_DIR, { recursive: true });
 }
 
-console.log('🎮 Building Phoenix Arcade Shooter...\n');
+console.log('🎮 Building Phoenix Arcade Shooter v2...\n');
 
 // Copy static assets
 console.log('📦 Copying static assets...');
@@ -26,51 +26,42 @@ copyFileSync('./styles/game.css', join(DIST_DIR, 'game.css'));
 console.log('   ✓ favicon.ico');
 console.log('   ✓ game.css\n');
 
-// Get all JS files in order
-function getAllJsFiles(dir: string, fileList: string[] = []): string[] {
-  const files = readdirSync(dir);
-  
-  files.forEach(file => {
-    const filePath = join(dir, file);
-    if (statSync(filePath).isDirectory()) {
-      getAllJsFiles(filePath, fileList);
-    } else if (extname(file) === '.js') {
-      fileList.push(filePath);
-    }
-  });
-  
-  return fileList;
+// Build main bundle using Bun's bundler
+console.log('🔨 Building main bundle with Bun...');
+const mainResult = await Bun.build({
+  entrypoints: ['./src/main.js'],
+  outdir: DIST_DIR,
+  naming: 'phoenix-arcade-shooter.js',
+  target: 'browser',
+  format: 'iife',
+  minify: false,
+  sourcemap: 'none',
+});
+
+if (!mainResult.success) {
+  console.error('❌ Main bundle build failed:');
+  mainResult.logs.forEach(log => console.error(log));
+  process.exit(1);
 }
-
-// Build file list in the correct order (matching gulpfile.js)
-const jsFiles = [
-  './libs/simple-web-modules/index.js',
-  './libs/pxlr-core/dist/index.js',
-  './libs/pxlr-gl/dist/index.js',
-  './libs/pxlr-fonts/dist/index.js',
-  ...getAllJsFiles('./src')
-];
-
-// Function to concatenate files
-function concatenateFiles(files: string[], excludePattern?: RegExp): string {
-  return files
-    .filter(file => !excludePattern || !excludePattern.test(file))
-    .map(file => readFileSync(file, 'utf-8'))
-    .join('\n');
-}
-
-// Build main bundle (excludes embedded.js)
-console.log('🔨 Building main bundle...');
-const mainBundle = concatenateFiles(jsFiles, /embedded/);
-const wrappedMainBundle = `(function () {\n${mainBundle}\n}());\n`;
-writeFileSync(join(DIST_DIR, 'phoenix-arcade-shooter.js'), wrappedMainBundle);
 console.log('   ✓ phoenix-arcade-shooter.js\n');
 
-// Build embedded bundle (excludes main.js)
-console.log('🔨 Building embedded bundle...');
-const embeddedBundle = concatenateFiles(jsFiles, /main\.js$/);
-const wrappedEmbeddedBundle = `(function () {\n${embeddedBundle}\n}());\n`;
-writeFileSync(join(DIST_DIR, 'phoenix-arcade-shooter-embedded.js'), wrappedEmbeddedBundle);
+// Build embedded bundle
+console.log('🔨 Building embedded bundle with Bun...');
+const embeddedResult = await Bun.build({
+  entrypoints: ['./src/embedded.js'],
+  outdir: DIST_DIR,
+  naming: 'phoenix-arcade-shooter-embedded.js',
+  target: 'browser',
+  format: 'iife',
+  minify: false,
+  sourcemap: 'none',
+});
+
+if (!embeddedResult.success) {
+  console.error('❌ Embedded bundle build failed:');
+  embeddedResult.logs.forEach(log => console.error(log));
+  process.exit(1);
+}
 console.log('   ✓ phoenix-arcade-shooter-embedded.js\n');
 
 // Process HTML
@@ -87,5 +78,10 @@ console.log('   ✓ index.html\n');
 
 console.log('✅ Build complete!');
 console.log(`   Output directory: ${DIST_DIR}`);
-console.log(`   Main bundle: ${(wrappedMainBundle.length / 1024).toFixed(2)} KB`);
-console.log(`   Embedded bundle: ${(wrappedEmbeddedBundle.length / 1024).toFixed(2)} KB`);
+
+// Get file sizes
+const mainSize = Bun.file(join(DIST_DIR, 'phoenix-arcade-shooter.js')).size;
+const embeddedSize = Bun.file(join(DIST_DIR, 'phoenix-arcade-shooter-embedded.js')).size;
+
+console.log(`   Main bundle: ${(mainSize / 1024).toFixed(2)} KB`);
+console.log(`   Embedded bundle: ${(embeddedSize / 1024).toFixed(2)} KB`);

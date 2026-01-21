@@ -1,42 +1,41 @@
-DefineModule('models/script-chain', function (require) {
-    var GameObject = require('models/game-object');
-    return DefineClass(GameObject, {
-        constructor: function (parent, repeat, scripts) {
-            this.super('constructor', arguments);
+import GameObject from './game-object.js';
 
-            this.repeat = repeat;
-            this.scripts = scripts;
-            this.scriptIndex = 0;
-            this.activeScript = null;
+export default class ScriptChain extends GameObject {
+    constructor(parent, repeat, scripts) {
+        super(parent);
 
-            var self = this;
-            scripts.forEach(function (script) {
-                script.parent = self;
-            });
-        },
+        this.repeat = repeat;
+        this.scripts = scripts;
+        this.scriptIndex = 0;
+        this.activeScript = null;
 
-        start: function () {
-            this.activeScript = this.scripts[ this.scriptIndex ];
-            this.activeScript.start();
-        },
+        const self = this;
+        scripts.forEach(function (script) {
+            script.parent = self;
+        });
+    }
 
-        update: function (dtime) {
-            this.activeScript.update(dtime);
-        },
+    start() {
+        this.activeScript = this.scripts[this.scriptIndex];
+        this.activeScript.start();
+    }
 
-        removeChild: function () {
-            this.scriptIndex++;
-            if (this.scriptIndex >= this.scripts.length) {
-                if (this.repeat) {
-                    this.scriptIndex = 0;
-                } else {
-                    this.parent.removeChild(this);
-                    return;
-                }
+    update(dtime) {
+        this.activeScript.update(dtime);
+    }
+
+    removeChild() {
+        this.scriptIndex++;
+        if (this.scriptIndex >= this.scripts.length) {
+            if (this.repeat) {
+                this.scriptIndex = 0;
+            } else {
+                this.parent.removeChild(this);
+                return;
             }
-
-            this.activeScript = this.scripts[ this.scriptIndex ];
-            this.activeScript.start();
         }
-    });
-});
+
+        this.activeScript = this.scripts[this.scriptIndex];
+        this.activeScript.start();
+    }
+}

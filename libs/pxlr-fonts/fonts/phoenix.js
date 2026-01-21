@@ -1,10 +1,9 @@
-DefineModule('pxlr/fonts/phoenix', function (require) {
-    var Sprite = require('models/sprite');
+import Sprite from '../../pxlr-core/core/sprite.js';
 
-    var w = "white";
-    var n = null;
+const w = "white";
+const n = null;
 
-    return {
+export default {
         meta: {
             width: 15,
             height: 15,
@@ -131,4 +130,3 @@ DefineModule('pxlr/fonts/phoenix', function (require) {
             [ w, w, w, w, w, w, n, n, w, w, w, w, w, w, n, n, n ]
         ]).invertY().rotateRight()
     };
-});

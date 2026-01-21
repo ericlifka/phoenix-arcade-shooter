@@ -1,33 +1,33 @@
-DefineModule('scripts/fly-player-in-from-bottom', function (require) {
-    var GameObject = require('models/game-object');
+import GameObject from '../models/game-object.js';
 
-    return DefineClass(GameObject, {
-        constructor: function (parent, game) {
-            this.super('constructor', arguments);
+export default class FlyPlayerInFromBottom extends GameObject {
+    constructor(parent, game) {
+        super(parent);
 
-            this.game = game;
-            this.player = game.player;
-        },
-        start: function () {
-            this.player.preventInputControl = true;
+        this.game = game;
+        this.player = game.player;
+    }
 
-            var position = this.player.position;
-            var velocity = this.player.velocity;
+    start() {
+        this.player.preventInputControl = true;
 
-            position.x = Math.floor(this.game.width / 2 - this.player.sprite.width / 2);
-            position.y = this.game.height + 30;
-            velocity.x = 0;
-            velocity.y = -this.player.SPEED / 5;
+        const position = this.player.position;
+        const velocity = this.player.velocity;
 
-            return this;
-        },
-        update: function (dtime) {
-            this.super('update', arguments);
+        position.x = Math.floor(this.game.width / 2 - this.player.sprite.width / 2);
+        position.y = this.game.height + 30;
+        velocity.x = 0;
+        velocity.y = -this.player.SPEED / 5;
 
-            if (this.player.position.y < this.game.height - this.player.sprite.height - 2) {
-                this.player.preventInputControl = false;
-                this.destroy();
-            }
+        return this;
+    }
+
+    update(dtime) {
+        super.update(dtime);
+
+        if (this.player.position.y < this.game.height - this.player.sprite.height - 2) {
+            this.player.preventInputControl = false;
+            this.destroy();
         }
-    });
-});
+    }
+}

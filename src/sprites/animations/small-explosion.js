@@ -1,66 +1,63 @@
-DefineModule('sprites/animations/small-explosion', function (require) {
-    var Animation = require('models/animation');
-    var Random = require('helpers/random');
-    var Sprite = require('models/sprite');
+import Animation from '../../../libs/pxlr-core/core/animation.js';
+import { integer } from '../../helpers/random.js';
+import Sprite from '../../../libs/pxlr-core/core/sprite.js';
 
-    var n = null;
-    var y = "yellow";
-    var o = "orange";
-    var r = "red";
+const n = null;
+const y = "yellow";
+const o = "orange";
+const r = "red";
 
-    function newFrameSet() {
-        var frames = [
-            new Sprite([
-                [ n, n, n, n, n ],
-                [ n, n, n, n, n ],
-                [ n, n, r, n, n ],
-                [ n, n, n, n, n ],
-                [ n, n, n, n, n ]
-            ]),
-            new Sprite([
-                [ n, n, n, n, n ],
-                [ n, n, r, n, n ],
-                [ n, y, y, o, n ],
-                [ n, n, o, n, n ],
-                [ n, n, n, n, n ]
-            ]),
-            new Sprite([
-                [ y, n, r, n, n ],
-                [ n, y, y, y, n ],
-                [ o, y, n, y, o ],
-                [ n, o, r, n, n ],
-                [ n, n, y, y, n ]
-            ]),
-            new Sprite([
-                [ y, n, y, n, n ],
-                [ n, n, n, n, y ],
-                [ n, n, n, n, y ],
-                [ n, y, n, n, n ],
-                [ n, n, y, y, n ]
-            ]),
-            new Sprite([
-                [ n, n, n, y, n ],
-                [ n, y, n, n, n ],
-                [ n, n, n, n, n ],
-                [ n, n, n, n, n ],
-                [ y, n, n, n, y ]
-            ])
-        ];
+function newFrameSet() {
+    const frames = [
+        new Sprite([
+            [ n, n, n, n, n ],
+            [ n, n, n, n, n ],
+            [ n, n, r, n, n ],
+            [ n, n, n, n, n ],
+            [ n, n, n, n, n ]
+        ]),
+        new Sprite([
+            [ n, n, n, n, n ],
+            [ n, n, r, n, n ],
+            [ n, y, y, o, n ],
+            [ n, n, o, n, n ],
+            [ n, n, n, n, n ]
+        ]),
+        new Sprite([
+            [ y, n, r, n, n ],
+            [ n, y, y, y, n ],
+            [ o, y, n, y, o ],
+            [ n, o, r, n, n ],
+            [ n, n, y, y, n ]
+        ]),
+        new Sprite([
+            [ y, n, y, n, n ],
+            [ n, n, n, n, y ],
+            [ n, n, n, n, y ],
+            [ n, y, n, n, n ],
+            [ n, n, y, y, n ]
+        ]),
+        new Sprite([
+            [ n, n, n, y, n ],
+            [ n, y, n, n, n ],
+            [ n, n, n, n, n ],
+            [ n, n, n, n, n ],
+            [ y, n, n, n, y ]
+        ])
+    ];
 
-        frames.forEach(function (frame) {
-            for (var i = 0, times = Random.integer(0, 3); i < times; i++) {
-                frame.rotateLeft();
-            }
-        });
+    frames.forEach(function (frame) {
+        for (let i = 0, times = integer(0, 3); i < times; i++) {
+            frame.rotateLeft();
+        }
+    });
 
-        return frames;
-    }
+    return frames;
+}
 
-
-    return function () {
-        return new Animation({
-            frames: newFrameSet(),
-            millisPerFrame: 50
-        });
-    }
-});
+export default function smallExplosion() {
+    return new Animation({
+        frames: newFrameSet(),
+        millisPerFrame: 50
+    });
+}

@@ -1,10 +1,9 @@
-DefineModule('pxlr/fonts/arcade', function (require) {
-    var Sprite = require('models/sprite');
+import Sprite from '../../pxlr-core/core/sprite.js';
 
-    var w = "white";
-    var n = null;
+const w = "white";
+const n = null;
 
-    return {
+export default {
         meta: {
             width: 7,
             height: 7,
@@ -593,4 +592,3 @@ DefineModule('pxlr/fonts/arcade', function (require) {
             [ n, n, w, n, n ]
         ]).invertY().rotateRight()
     };
-});

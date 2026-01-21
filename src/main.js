@@ -1,51 +1,48 @@
-DefineModule('main', function (require) {
-    var CanvasRenderer = require('views/canvas-renderer');
-    var GamepadController = require('controllers/gamepad-input');
-    var KeyboardController = require('controllers/keyboard-input');
-    var Phoenix = require('models/phoenix');
-    var RunLoop = require('helpers/run-loop');
-    //var WebGLRenderer = require('views/webgl-renderer');
+import CanvasRenderer from '../libs/pxlr-gl/gl/canvas.js';
+import GamepadController from './controllers/gamepad-input.js';
+import KeyboardController from './controllers/keyboard-input.js';
+import Phoenix from './models/phoenix.js';
+import RunLoop from './helpers/run-loop.js';
 
-    var gameDimensions = { width: 200, height: 150 };
-    var gamepadInput = new GamepadController();
-    var keyboardInput = new KeyboardController();
+const gameDimensions = { width: 200, height: 150 };
+const gamepadInput = new GamepadController();
+const keyboardInput = new KeyboardController();
 
-    var phoenix = new Phoenix(gameDimensions);
-    var renderer = new CanvasRenderer(gameDimensions);
-    var runLoop = new RunLoop();
+const phoenix = new Phoenix(gameDimensions);
+const renderer = new CanvasRenderer(gameDimensions);
+const runLoop = new RunLoop();
 
-    renderer.setFillColor(phoenix.FILL_COLOR);
+renderer.setFillColor(phoenix.FILL_COLOR);
 
-    runLoop.addCallback(function (dtime) {
-        phoenix.processInput([
-            keyboardInput.getInputState(),
-            gamepadInput.getInputState()
-        ]);
+runLoop.addCallback(function (dtime) {
+    phoenix.processInput([
+        keyboardInput.getInputState(),
+        gamepadInput.getInputState()
+    ]);
 
-        phoenix.update(dtime);
+    phoenix.update(dtime);
 
-        var frame = renderer.newRenderFrame();
-        frame.clear();
-        phoenix.renderToFrame(frame);
+    const frame = renderer.newRenderFrame();
+    frame.clear();
+    phoenix.renderToFrame(frame);
 
-        renderer.renderFrame(frame);
-    });
-
-    document.addEventListener("visibilitychange", function () {
-        if (document.hidden) {
-            phoenix.pause();
-        }
-    });
-
-    window.addEventListener("blur", function () {
-        phoenix.pause();
-    });
-
-    window.addEventListener("focus", function () {
-        keyboardInput.clearState();
-        gamepadInput.clearState();
-    });
-
-    runLoop.start();
-    window.activeGame = phoenix;
+    renderer.renderFrame(frame);
 });
+
+document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+        phoenix.pause();
+    }
+});
+
+window.addEventListener("blur", function () {
+    phoenix.pause();
+});
+
+window.addEventListener("focus", function () {
+    keyboardInput.clearState();
+    gamepadInput.clearState();
+});
+
+runLoop.start();
+window.activeGame = phoenix;

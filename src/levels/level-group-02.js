@@ -1,27 +1,25 @@
-DefineModule('levels/level-group-02', function (require) {
-    var GameObject = require('models/game-object');
-    var FlyingSaucer = require('ships/flying-saucer');
+import GameObject from '../models/game-object.js';
+import FlyingSaucer from '../ships/flying-saucer.js';
 
-    return DefineClass(GameObject, {
-        constructor: function (parent, game, difficultyMultiplier, shipCount, levelName) {
-            this.super('constructor', arguments);
+export default class LevelGroup02 extends GameObject {
+    constructor(parent, game, difficultyMultiplier, shipCount, levelName) {
+        super(parent);
 
-            if (groupCount === "boss") {
-                groupCount = 1;
-                this.boss = true;
-            }
-
-            this.game = game;
-            this.levelName = levelName;
-            this.rowCount = groupCount;
-        },
-
-        start: function () {
-
-        },
-
-        checkIfLevelComplete: function () {
-
+        if (shipCount === "boss") {
+            shipCount = 1;
+            this.boss = true;
         }
-    });
-});
+
+        this.game = game;
+        this.levelName = levelName;
+        this.rowCount = shipCount;
+    }
+
+    start() {
+
+    }
+
+    checkIfLevelComplete() {
+
+    }
+}
