@@ -13,8 +13,17 @@ const colorGradient = [
     "rgb(1,0,51)"
 ];
 
+/**
+ * Banner text that fades out over time (used for level names)
+ */
 export default class FadeoutBanner extends GameObject {
-    constructor(parent, text, time) {
+    private text: string;
+    private interval: number;
+    private elapsedTime: number = 0;
+    private colorIndex: number = 0;
+    private textDisplay!: TextDisplay;
+
+    constructor(parent: GameObject, text: string, time: number) {
         super(parent);
 
         this.text = text;
@@ -23,7 +32,7 @@ export default class FadeoutBanner extends GameObject {
         this.reset();
     }
 
-    start() {
+    start(): void {
         this.elapsedTime = 0;
         this.colorIndex = 0;
 
@@ -38,7 +47,7 @@ export default class FadeoutBanner extends GameObject {
         this.addChild(this.textDisplay);
     }
 
-    update(dtime) {
+    update(dtime: number): void {
         this.elapsedTime += dtime;
 
         if (this.elapsedTime > this.interval) {
@@ -46,8 +55,8 @@ export default class FadeoutBanner extends GameObject {
             this.colorIndex++;
 
             if (this.colorIndex > colorGradient.length) {
-                this.parent.removeChild(this);
-            } else {
+                this.parent?.removeChild(this);
+            } else if (this.textDisplay) {
                 this.textDisplay.updateColor(colorGradient[ this.colorIndex ]);
             }
         }

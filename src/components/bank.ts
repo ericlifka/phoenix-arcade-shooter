@@ -1,16 +1,26 @@
 import GameObject from '../models/game-object.js';
 import TextDisplay from './text-display.js';
+import { BankOptions } from '../types/game';
+import { Position } from '../types/rendering';
 
+/**
+ * Bank component that displays and manages the player's money
+ */
 export default class Bank extends GameObject {
     index = 1;
+    private anchorPoint: Position;
+    private color: string;
+    private valueDisplay: TextDisplay;
+    value: number = 0;
+    width?: number;
 
-    constructor(parent, options) {
+    constructor(parent: GameObject, options?: BankOptions) {
         super(parent);
         
-        options = options || {};
-        this.anchorPoint = options.position; // this text expands from the right, so the position has to be dynamic
+        const opts = options || {};
+        this.anchorPoint = opts.position || { x: 0, y: 0 };
         this.position = { x: 0, y: this.anchorPoint.y };
-        this.color = options.color || "#ffffff";
+        this.color = opts.color || "#ffffff";
 
         this.valueDisplay = new TextDisplay(this, {
             font: "arcade-small",
@@ -22,7 +32,7 @@ export default class Bank extends GameObject {
         this.reset();
     }
 
-    reset() {
+    reset(): void {
         super.reset();
 
         this.addChild(this.valueDisplay);
@@ -30,19 +40,21 @@ export default class Bank extends GameObject {
         this.updateDisplay();
     }
 
-    addMoney(value) {
+    addMoney(value: number): void {
         this.value += value;
         this.updateDisplay();
     }
 
-    removeMoney(amount) {
+    removeMoney(amount: number): void {
         this.value -= amount;
         this.updateDisplay();
     }
 
-    updateDisplay() {
+    private updateDisplay(): void {
         this.valueDisplay.changeMessage("$" + this.value + ".0");
         const width = this.valueDisplay.width;
-        this.position.x = this.valueDisplay.position.x = this.anchorPoint.x - width;
+        if (width && this.position && this.valueDisplay.position) {
+            this.position.x = this.valueDisplay.position.x = this.anchorPoint.x - width;
+        }
     }
 }

@@ -4,15 +4,32 @@ import Sprite from '../../libs/pxlr-core/core/sprite.js';
 import arcadeFont from '../../libs/pxlr-fonts/fonts/arcade.js';
 import arcadeSmallFont from '../../libs/pxlr-fonts/fonts/arcade-small.js';
 import phoenixFont from '../../libs/pxlr-fonts/fonts/phoenix.js';
+import { TextDisplayOptions } from '../types/game';
+import { Font } from '../types/rendering';
 
-const fonts = {
+const fonts: Record<string, Font> = {
     'arcade': arcadeFont,
     'arcade-small': arcadeSmallFont,
     'phoenix': phoenixFont
 };
 
+/**
+ * Displays pixel text using custom fonts
+ * Can be single or multi-line, with optional border and background
+ */
 export default class TextDisplay extends GameObject {
-    constructor(parent, options) {
+    rawMessage: string | string[];
+    font: Font;
+    color: string;
+    border: boolean;
+    padding: number;
+    background: string | null;
+    isPhysicalEntity?: boolean;
+    message?: string[][];
+    width?: number;
+    height?: number;
+
+    constructor(parent: GameObject, options: TextDisplayOptions) {
         super(parent);
         
         this.rawMessage = options.message || " ";
@@ -28,36 +45,36 @@ export default class TextDisplay extends GameObject {
         this.reset();
     }
 
-    reset() {
+    reset(): void {
         super.reset();
         this.changeMessage(this.rawMessage);
     }
 
-    changeMessage(text) {
-        text = text || " ";
-        this.rawMessage = text;
+    changeMessage(text: string | string[]): void {
+        let processedText: string | string[] = text || " ";
+        this.rawMessage = processedText;
 
-        if (typeof text === "string") {
-            text = [ text ];
+        if (typeof processedText === "string") {
+            processedText = [ processedText ];
         }
-        text = text.map(function (str) {
-            return str.split('');
-        });
-        this.message = text;
+        const charArrays = processedText.map((str) => str.split(''));
+        this.message = charArrays;
 
         this.populateSprites();
         this.updateColor(this.color);
     }
 
-    populateSprites() {
+    private populateSprites(): void {
         this.children = []; // intentionally clear all previous sprites before adding new ones
         const self = this;
+
+        if (!this.position || !this.message) return;
 
         let width = 0;
         let height = 0;
         let xOffset = this.position.x;
         let yOffset = this.position.y;
-        const lineWidths = [];
+        const lineWidths: number[] = [];
 
         if (this.padding) {
             xOffset += this.padding;
@@ -73,16 +90,16 @@ export default class TextDisplay extends GameObject {
             height += 1;
         }
 
-        this.message.forEach(function (line) {
+        this.message.forEach((line) => {
             let xLineOffset = xOffset;
             let lineWidth = 0;
 
-            line.forEach(function (char) {
+            line.forEach((char) => {
                 const sprite = self.font[ char ];
                 if (sprite) {
                     const entity = new GameObject(self);
                     entity.sprite = sprite.clone();
-                    entity.index = self.index + 1;
+                    entity.index = self.index! + 1;
                     entity.position = {
                         x: xLineOffset,
                         y: yOffset
@@ -110,10 +127,10 @@ export default class TextDisplay extends GameObject {
         this.createBackgroundSprite(width, height);
     }
 
-    createBackgroundSprite(width, height) {
-        const spriteRows = [];
+    private createBackgroundSprite(width: number, height: number): void {
+        const spriteRows: (string | null)[][] = [];
         for (let x = 0; x < width; x++) {
-            const row = [];
+            const row: (string | null)[] = [];
             for (let y = 0; y < height; y++) {
                 row.push(this.background);
             }
@@ -122,17 +139,19 @@ export default class TextDisplay extends GameObject {
         this.sprite = new Sprite(spriteRows);
     }
 
-    updateColor(color) {
+    updateColor(color: string): void {
         this.color = color;
         const width = this.width;
         const height = this.height;
 
-        this.children.forEach(function (entity) {
-            entity.sprite.applyColor(color);
+        this.children.forEach((entity) => {
+            if (entity.sprite) {
+                entity.sprite.applyColor(color);
+            }
         });
 
-        if (this.border) {
-            this.sprite.iterateCells(function (cell, x, y) {
+        if (this.border && this.sprite && width && height) {
+            this.sprite.iterateCells((cell: any, x: number, y: number) => {
                 if (x === 0 || y === 0 || x === width - 1 || y === height - 1) {
                     cell.color = color;
                 }
@@ -140,9 +159,11 @@ export default class TextDisplay extends GameObject {
         }
     }
 
-    applyDamage() {
-        this.children.forEach(function (entity) {
-            entity.sprite = shipExplosion({ x: -2, y: -1 });
+    applyDamage(): void {
+        this.children.forEach((entity) => {
+            if (entity) {
+                entity.sprite = shipExplosion({ x: -2, y: -1 });
+            }
         });
     }
 }

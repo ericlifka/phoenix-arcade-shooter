@@ -353,8 +353,8 @@
       this.destroyed = true;
     }
     applyDamage(damage, sourceEntity) {
-      if (this.maxLife && this.life !== undefined) {
-        this.life -= damage;
+      if (this.maxLife) {
+        this.life = (this.life || 0) - damage;
         if (this.life <= 0) {
           this.exploding = true;
           if (this.explosion) {
@@ -1761,7 +1761,7 @@
     ]).invertY().rotateRight()
   };
 
-  // src/components/text-display.js
+  // src/components/text-display.ts
   var fonts = {
     arcade: arcade_default,
     "arcade-small": arcade_small_default,
@@ -1769,6 +1769,16 @@
   };
 
   class TextDisplay extends GameObject {
+    rawMessage;
+    font;
+    color;
+    border;
+    padding;
+    background;
+    isPhysicalEntity;
+    message;
+    width;
+    height;
     constructor(parent, options) {
       super(parent);
       this.rawMessage = options.message || " ";
@@ -1787,21 +1797,21 @@
       this.changeMessage(this.rawMessage);
     }
     changeMessage(text) {
-      text = text || " ";
-      this.rawMessage = text;
-      if (typeof text === "string") {
-        text = [text];
+      let processedText = text || " ";
+      this.rawMessage = processedText;
+      if (typeof processedText === "string") {
+        processedText = [processedText];
       }
-      text = text.map(function(str) {
-        return str.split("");
-      });
-      this.message = text;
+      const charArrays = processedText.map((str) => str.split(""));
+      this.message = charArrays;
       this.populateSprites();
       this.updateColor(this.color);
     }
     populateSprites() {
       this.children = [];
       const self = this;
+      if (!this.position || !this.message)
+        return;
       let width = 0;
       let height = 0;
       let xOffset = this.position.x;
@@ -1819,10 +1829,10 @@
         width += 1;
         height += 1;
       }
-      this.message.forEach(function(line) {
+      this.message.forEach((line) => {
         let xLineOffset = xOffset;
         let lineWidth = 0;
-        line.forEach(function(char) {
+        line.forEach((char) => {
           const sprite = self.font[char];
           if (sprite) {
             const entity = new GameObject(self);
@@ -1863,11 +1873,13 @@
       this.color = color;
       const width = this.width;
       const height = this.height;
-      this.children.forEach(function(entity) {
-        entity.sprite.applyColor(color);
+      this.children.forEach((entity) => {
+        if (entity.sprite) {
+          entity.sprite.applyColor(color);
+        }
       });
-      if (this.border) {
-        this.sprite.iterateCells(function(cell, x, y2) {
+      if (this.border && this.sprite && width && height) {
+        this.sprite.iterateCells((cell, x, y2) => {
           if (x === 0 || y2 === 0 || x === width - 1 || y2 === height - 1) {
             cell.color = color;
           }
@@ -1875,21 +1887,28 @@
       }
     }
     applyDamage() {
-      this.children.forEach(function(entity) {
-        entity.sprite = shipExplosion({ x: -2, y: -1 });
+      this.children.forEach((entity) => {
+        if (entity) {
+          entity.sprite = shipExplosion({ x: -2, y: -1 });
+        }
       });
     }
   }
 
-  // src/components/bank.js
+  // src/components/bank.ts
   class Bank extends GameObject {
     index = 1;
+    anchorPoint;
+    color;
+    valueDisplay;
+    value = 0;
+    width;
     constructor(parent, options) {
       super(parent);
-      options = options || {};
-      this.anchorPoint = options.position;
+      const opts = options || {};
+      this.anchorPoint = opts.position || { x: 0, y: 0 };
       this.position = { x: 0, y: this.anchorPoint.y };
-      this.color = options.color || "#ffffff";
+      this.color = opts.color || "#ffffff";
       this.valueDisplay = new TextDisplay(this, {
         font: "arcade-small",
         color: this.color,
@@ -1915,7 +1934,9 @@
     updateDisplay() {
       this.valueDisplay.changeMessage("$" + this.value + ".0");
       const width = this.valueDisplay.width;
-      this.position.x = this.valueDisplay.position.x = this.anchorPoint.x - width;
+      if (width && this.position && this.valueDisplay.position) {
+        this.position.x = this.valueDisplay.position.x = this.anchorPoint.x - width;
+      }
     }
   }
 
@@ -1926,21 +1947,23 @@
     ]);
   }
 
-  // src/components/bullet.js
+  // src/components/bullet.ts
   class Bullet extends GameObject {
     type = "bullet";
     isPhysicalEntity = true;
     index = 5;
+    team;
+    value;
     constructor(parent, options) {
       super(parent);
-      options = options || {};
-      this.team = options.team || 0;
-      this.position = options.position || { x: 0, y: 0 };
-      this.velocity = options.velocity || { x: 0, y: 0 };
-      this.acceleration = options.acceleration || { x: 0, y: 0 };
-      this.damage = options.damage || 1;
-      this.life = options.life || 0;
-      this.maxLife = options.maxLife || 1;
+      const opts = options || {};
+      this.team = opts.team || 0;
+      this.position = opts.position || { x: 0, y: 0 };
+      this.velocity = opts.velocity || { x: 0, y: 0 };
+      this.acceleration = opts.acceleration || { x: 0, y: 0 };
+      this.damage = opts.damage || 1;
+      this.life = opts.life || 0;
+      this.maxLife = opts.maxLife || 1;
       this.sprite = bulletSprite();
       this.explosion = smallExplosion;
       this.updateBulletDirection();
@@ -1948,31 +1971,41 @@
       this.reset();
     }
     checkBoundaries() {
-      if (this.position.x < 0 || this.position.y < 0 || this.position.x > this.parent.width || this.position.y > this.parent.height) {
-        this.destroy();
+      if (this.position && this.parent) {
+        const parentWidth = this.parent.width;
+        const parentHeight = this.parent.height;
+        if (this.position.x < 0 || this.position.y < 0 || this.position.x > parentWidth || this.position.y > parentHeight) {
+          this.destroy();
+        }
       }
     }
     updateBulletDirection() {
-      if (Math.abs(this.velocity.x) > Math.abs(this.velocity.y)) {
-        this.sprite.rotateRight();
+      if (this.velocity && this.sprite) {
+        if (Math.abs(this.velocity.x) > Math.abs(this.velocity.y)) {
+          this.sprite.rotateRight();
+        }
       }
     }
     updateColor() {
-      switch (this.team) {
-        case 0:
-          this.sprite.applyColor("#B1D8AD");
-          break;
-        case 1:
-          this.sprite.applyColor("#F7BEBE");
-          break;
-        default:
-          break;
+      if (this.sprite) {
+        switch (this.team) {
+          case 0:
+            this.sprite.applyColor("#B1D8AD");
+            break;
+          case 1:
+            this.sprite.applyColor("#F7BEBE");
+            break;
+          default:
+            break;
+        }
       }
     }
-    applyDamage(damage) {
-      super.applyDamage(damage);
-      this.position.x -= Math.floor(this.sprite.width / 2);
-      this.position.y -= Math.floor(this.sprite.height / 2);
+    applyDamage(damage, sourceEntity) {
+      super.applyDamage(damage, sourceEntity);
+      if (this.position && this.sprite) {
+        this.position.x -= Math.floor(this.sprite.width / 2);
+        this.position.y -= Math.floor(this.sprite.height / 2);
+      }
     }
   }
 
@@ -2087,9 +2120,16 @@
     return scoreStr;
   }
 
-  // src/components/combo-gauge.js
+  // src/components/combo-gauge.ts
   class ComboGauge extends GameObject {
     index = 1;
+    color;
+    multiplierDisplay;
+    scoreDisplay;
+    comboPoints = 0;
+    pointTotal = 0;
+    pointMultiplier = 1;
+    fillGaugeSprite;
     constructor(parent, options) {
       super(parent);
       this.position = options.position;
@@ -2120,7 +2160,9 @@
       this.addChild(this.scoreDisplay);
     }
     renderToFrame(frame) {
-      this.fillGaugeSprite.renderToFrame(frame, this.position.x + 1, this.position.y + 1, this.index - 1);
+      if (this.fillGaugeSprite && this.position) {
+        this.fillGaugeSprite.renderToFrame(frame, this.position.x + 1, this.position.y + 1, this.index - 1);
+      }
       super.renderToFrame(frame);
     }
     addPoints(points) {
@@ -2140,21 +2182,8 @@
       this.updateMultiplier();
       this.updateGaugeHeight();
     }
-    updateGaugeHeight() {
-      const pixels = [];
-      for (let i = 0;i < 59; i++) {
-        if (i < this.comboPoints) {
-          pixels.unshift(colorAtPercent(GreenToRed, 1 - i / 59));
-        } else {
-          pixels.unshift(null);
-        }
-      }
-      this.fillGaugeSprite = new Sprite([
-        pixels,
-        pixels,
-        pixels,
-        pixels
-      ]);
+    updateScore() {
+      this.scoreDisplay.changeMessage(padScoreDisplay(this.pointTotal));
     }
     updateMultiplier() {
       if (this.comboPoints >= 59) {
@@ -2172,8 +2201,21 @@
       }
       this.multiplierDisplay.changeMessage(this.pointMultiplier + "x");
     }
-    updateScore() {
-      this.scoreDisplay.changeMessage(padScoreDisplay(this.pointTotal));
+    updateGaugeHeight() {
+      const pixels = [];
+      for (let i = 0;i < 59; i++) {
+        if (i < this.comboPoints) {
+          pixels.unshift(colorAtPercent(GreenToRed, 1 - i / 59));
+        } else {
+          pixels.unshift(null);
+        }
+      }
+      this.fillGaugeSprite = new Sprite([
+        pixels,
+        pixels,
+        pixels,
+        pixels
+      ]);
     }
   }
 
@@ -2566,7 +2608,7 @@
     }
   }
 
-  // src/components/fadeout-banner.js
+  // src/components/fadeout-banner.ts
   var colorGradient = [
     "rgb(255,255,255)",
     "rgb(226,226,232)",
@@ -2580,6 +2622,11 @@
   ];
 
   class FadeoutBanner extends GameObject {
+    text;
+    interval;
+    elapsedTime = 0;
+    colorIndex = 0;
+    textDisplay;
     constructor(parent, text, time) {
       super(parent);
       this.text = text;
@@ -2605,8 +2652,8 @@
         this.elapsedTime -= this.interval;
         this.colorIndex++;
         if (this.colorIndex > colorGradient.length) {
-          this.parent.removeChild(this);
-        } else {
+          this.parent?.removeChild(this);
+        } else if (this.textDisplay) {
           this.textDisplay.updateColor(colorGradient[this.colorIndex]);
         }
       }
@@ -2643,7 +2690,7 @@
     });
   }
 
-  // src/components/muzzle-flash.js
+  // src/components/muzzle-flash.ts
   var shades = [
     "#ff0000",
     "#ff3300",
@@ -2655,13 +2702,14 @@
     "#ffcc66",
     "#ffcc99"
   ];
-  var frames = shades.map(function(shade) {
+  var frames = shades.map((shade) => {
     return new Sprite([
       [shade, shade]
     ]);
   });
 
   class MuzzleFlash extends GameObject {
+    gunPosition;
     constructor(parent, gunPosition) {
       super(parent);
       this.gunPosition = gunPosition;
@@ -2673,12 +2721,14 @@
     }
     update(dtime) {
       super.update(dtime);
-      if (this.sprite.finished) {
+      if (this.sprite && this.sprite.finished) {
         this.destroy();
       }
     }
     renderToFrame(frame) {
-      this.sprite.renderToFrame(frame, Math.floor(this.parent.position.x + this.gunPosition.x), Math.floor(this.parent.position.y + this.gunPosition.y - 1), (this.parent.index || 0) + 1);
+      if (this.sprite && this.parent && this.parent.position) {
+        this.sprite.renderToFrame(frame, Math.floor(this.parent.position.x + this.gunPosition.x), Math.floor(this.parent.position.y + this.gunPosition.y - 1), (this.parent.index || 0) + 1);
+      }
     }
   }
 
@@ -2885,28 +2935,38 @@
     }
   }
 
-  // src/components/life-meter.js
+  // src/components/life-meter.ts
   class LifeMeter extends GameObject {
     index = 1;
+    entity;
+    anchor;
+    horizontal;
+    length;
+    width;
+    scale;
+    showBorder;
+    borderColor;
+    currentLife;
+    maxLife;
     constructor(boundEntity, options) {
       super(boundEntity);
-      options = options || {};
+      const opts = options || {};
       this.entity = boundEntity;
-      this.position = options.position || { x: 0, y: 0 };
-      this.anchor = options.anchor || {};
-      this.horizontal = !!options.horizontal;
-      this.length = options.length || 10;
-      this.width = options.width || 1;
-      this.scale = options.scale;
-      this.showBorder = !!options.showBorder;
-      this.borderColor = options.borderColor || "#ffffff";
+      this.position = opts.position || { x: 0, y: 0 };
+      this.anchor = opts.anchor || {};
+      this.horizontal = !!opts.horizontal;
+      this.length = opts.length || 10;
+      this.width = opts.width || 1;
+      this.scale = opts.scale;
+      this.showBorder = !!opts.showBorder;
+      this.borderColor = opts.borderColor || "#ffffff";
       this.reset();
     }
     update() {
       if (this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife) {
         this.currentLife = this.entity.life;
         this.maxLife = this.entity.maxLife;
-        if (this.scale) {
+        if (this.scale && this.maxLife) {
           this.length = this.maxLife * this.scale;
           if (this.length > 70) {
             this.length = 70;
@@ -2921,21 +2981,21 @@
         this.addBorderToColorArray(colors);
       }
       this.sprite = new Sprite(colors);
-      if (this.horizontal) {
+      if (this.horizontal && this.sprite) {
         this.sprite.rotateRight();
       }
       this.updatePosition();
     }
     buildSpriteColorArray() {
-      const percentage = this.currentLife / this.maxLife * 100;
-      const meterColor = colorAtPercent(GreenToRed, this.currentLife / this.maxLife);
+      const percentage = (this.currentLife || 0) / (this.maxLife || 1) * 100;
+      const meterColor = colorAtPercent(GreenToRed, (this.currentLife || 0) / (this.maxLife || 1));
       const colors = this.buildEmptySpriteColorArray();
       for (let i = this.length - 1;i >= 0; i--) {
         let color = null;
         if (i / this.length * 100 < percentage) {
           color = meterColor;
         }
-        colors.forEach(function(colorArray) {
+        colors.forEach((colorArray) => {
           colorArray.push(color);
         });
       }
@@ -2977,27 +3037,30 @@
       colors.unshift(border);
     }
     updatePosition() {
-      if (this.anchor.left) {
+      if (!this.position || !this.sprite)
+        return;
+      if (this.anchor.left !== undefined) {
         this.position.x = this.anchor.left;
       }
-      if (this.anchor.top) {
+      if (this.anchor.top !== undefined) {
         this.position.y = this.anchor.top;
       }
-      if (this.anchor.right) {
+      if (this.anchor.right !== undefined) {
         this.position.x = this.anchor.right - this.sprite.width;
       }
-      if (this.anchor.bottom) {
+      if (this.anchor.bottom !== undefined) {
         this.position.y = this.anchor.bottom - this.sprite.height;
       }
     }
   }
 
-  // src/components/money-drop.js
+  // src/components/money-drop.ts
   class MoneyDrop extends GameObject {
     isPhysicalEntity = true;
     type = "pickup";
     team = 1;
     index = 4;
+    value;
     constructor(parent, position, velocity) {
       super(parent);
       this.value = 10;
@@ -3007,12 +3070,16 @@
       this.reset();
     }
     checkBoundaries() {
-      if (this.position.x < 0 || this.position.y < 0 || this.position.x > this.parent.width || this.position.y > this.parent.height) {
-        this.destroy();
+      if (this.position && this.parent) {
+        const parentWidth = this.parent.width;
+        const parentHeight = this.parent.height;
+        if (this.position.x < 0 || this.position.y < 0 || this.position.x > parentWidth || this.position.y > parentHeight) {
+          this.destroy();
+        }
       }
     }
     applyDamage(damage, sourceEntity) {
-      if (sourceEntity.type === "player") {
+      if (sourceEntity && sourceEntity.type === "player") {
         this.triggerEvent("moneyCollected", this.value);
         this.destroy();
       }

@@ -129,8 +129,8 @@ export default class GameObject {
     }
 
     applyDamage(damage: number, sourceEntity?: GameObject): void {
-        if (this.maxLife && this.life !== undefined) {
-            this.life -= damage;
+        if (this.maxLife) {
+            this.life = (this.life || 0) - damage;
 
             if (this.life <= 0) {
                 this.exploding = true;

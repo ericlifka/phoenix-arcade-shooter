@@ -4,11 +4,23 @@ import frameSprite from '../sprites/combo-gauge.js';
 import padScoreDisplay from '../helpers/pad-score-display.js';
 import Sprite from '../../libs/pxlr-core/core/sprite.js';
 import TextDisplay from './text-display.js';
+import { ComboGaugeOptions } from '../types/game';
 
+/**
+ * Combo gauge that displays multiplier and score
+ * Fills up as player hits enemies, increases multiplier
+ */
 export default class ComboGauge extends GameObject {
     index = 1;
+    private color: string;
+    private multiplierDisplay: TextDisplay;
+    private scoreDisplay: TextDisplay;
+    private comboPoints: number = 0;
+    private pointTotal: number = 0;
+    private pointMultiplier: number = 1;
+    private fillGaugeSprite!: any;
 
-    constructor(parent, options) {
+    constructor(parent: GameObject, options: ComboGaugeOptions) {
         super(parent);
         
         this.position = options.position;
@@ -31,7 +43,7 @@ export default class ComboGauge extends GameObject {
         this.reset();
     }
 
-    reset() {
+    reset(): void {
         super.reset();
 
         this.comboPoints = 0;
@@ -45,50 +57,40 @@ export default class ComboGauge extends GameObject {
         this.addChild(this.scoreDisplay);
     }
 
-    renderToFrame(frame) {
-        this.fillGaugeSprite.renderToFrame(frame, this.position.x + 1, this.position.y + 1, this.index - 1);
+    renderToFrame(frame: any): void {
+        if (this.fillGaugeSprite && this.position) {
+            this.fillGaugeSprite.renderToFrame(frame, this.position.x + 1, this.position.y + 1, this.index - 1);
+        }
 
         super.renderToFrame(frame);
     }
 
-    addPoints(points) {
+    addPoints(points: number): void {
         this.pointTotal += this.pointMultiplier * points;
         this.updateScore();
     }
 
-    getScore() {
+    getScore(): number {
         return this.pointTotal;
     }
 
-    bumpCombo() {
+    bumpCombo(): void {
         this.comboPoints++;
         this.updateMultiplier();
         this.updateGaugeHeight();
     }
 
-    clearCombo() {
+    clearCombo(): void {
         this.comboPoints = 0;
         this.updateMultiplier();
         this.updateGaugeHeight();
     }
 
-    updateGaugeHeight() {
-        const pixels = [];
-        for (let i = 0; i < 59; i++) {
-            if (i < this.comboPoints) {
-                pixels.unshift(colorAtPercent(GreenToRed, 1 - i / 59));
-            }
-            else {
-                pixels.unshift(null);
-            }
-        }
-
-        this.fillGaugeSprite = new Sprite([
-            pixels, pixels, pixels, pixels
-        ]);
+    private updateScore(): void {
+        this.scoreDisplay.changeMessage(padScoreDisplay(this.pointTotal));
     }
 
-    updateMultiplier() {
+    private updateMultiplier(): void {
         if (this.comboPoints >= 59) {
             this.pointMultiplier = 6;
         }
@@ -98,7 +100,7 @@ export default class ComboGauge extends GameObject {
         else if (this.comboPoints >= 36) {
             this.pointMultiplier = 4;
         }
-        else if (this.comboPoints >= 24 ) {
+        else if (this.comboPoints >= 24) {
             this.pointMultiplier = 3;
         }
         else if (this.comboPoints >= 12) {
@@ -111,7 +113,25 @@ export default class ComboGauge extends GameObject {
         this.multiplierDisplay.changeMessage(this.pointMultiplier + "x");
     }
 
-    updateScore() {
-        this.scoreDisplay.changeMessage(padScoreDisplay(this.pointTotal));
+    private updateGaugeHeight(): void {
+        // Create a full vertical array of pixels (59 high)
+        // Pixels below comboPoints are colored, pixels above are transparent
+        const pixels: (string | null)[] = [];
+        
+        for (let i = 0; i < 59; i++) {
+            if (i < this.comboPoints) {
+                // Filled portion - use gradient color
+                pixels.unshift(colorAtPercent(GreenToRed, 1 - i / 59));
+            }
+            else {
+                // Empty portion - transparent
+                pixels.unshift(null);
+            }
+        }
+
+        // Create sprite with 4 columns of the same pixel data
+        this.fillGaugeSprite = new Sprite([
+            pixels, pixels, pixels, pixels
+        ]);
     }
 }

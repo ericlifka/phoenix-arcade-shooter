@@ -1,34 +1,49 @@
 import GameObject from '../models/game-object.js';
 import { GreenToRed, colorAtPercent } from '../helpers/gradients.js';
 import Sprite from '../../libs/pxlr-core/core/sprite.js';
+import { LifeMeterOptions } from '../types/game';
+import { Anchor } from '../types/rendering';
 
+/**
+ * Visual health/life meter that displays entity health with color gradient
+ */
 export default class LifeMeter extends GameObject {
     index = 1;
+    private entity: GameObject;
+    private anchor: Anchor;
+    private horizontal: boolean;
+    private length: number;
+    width: number; // Not private because parent uses it
+    private scale?: number;
+    private showBorder: boolean;
+    private borderColor: string;
+    private currentLife?: number;
+    private maxLife?: number;
 
-    constructor(boundEntity, options) {
+    constructor(boundEntity: GameObject, options?: LifeMeterOptions) {
         super(boundEntity);
 
-        options = options || {};
+        const opts = options || {};
 
         this.entity = boundEntity;
-        this.position = options.position || { x: 0, y: 0 };
-        this.anchor = options.anchor || {};
-        this.horizontal = !!options.horizontal;
-        this.length = options.length || 10;
-        this.width = options.width || 1;
-        this.scale = options.scale;
-        this.showBorder = !!options.showBorder;
-        this.borderColor = options.borderColor || "#ffffff";
+        this.position = opts.position || { x: 0, y: 0 };
+        this.anchor = opts.anchor || {};
+        this.horizontal = !!opts.horizontal;
+        this.length = opts.length || 10;
+        this.width = opts.width || 1;
+        this.scale = opts.scale;
+        this.showBorder = !!opts.showBorder;
+        this.borderColor = opts.borderColor || "#ffffff";
         
         this.reset();
     }
 
-    update() {
+    update(): void {
         if (this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife) {
             this.currentLife = this.entity.life;
             this.maxLife = this.entity.maxLife;
 
-            if (this.scale) {
+            if (this.scale && this.maxLife) {
                 this.length = this.maxLife * this.scale;
                 if (this.length > 70) {
                     // this just applies to the player's health if they get so many upgrades
@@ -41,7 +56,7 @@ export default class LifeMeter extends GameObject {
         }
     }
 
-    redrawMeter() {
+    private redrawMeter(): void {
         const colors = this.buildSpriteColorArray();
 
         if (this.showBorder) {
@@ -50,25 +65,25 @@ export default class LifeMeter extends GameObject {
 
         this.sprite = new Sprite(colors);
 
-        if (this.horizontal) {
+        if (this.horizontal && this.sprite) {
             this.sprite.rotateRight();
         }
 
         this.updatePosition();
     }
 
-    buildSpriteColorArray() {
-        const percentage = this.currentLife / this.maxLife * 100;
-        const meterColor = colorAtPercent(GreenToRed, this.currentLife / this.maxLife);
+    private buildSpriteColorArray(): (string | null)[][] {
+        const percentage = (this.currentLife || 0) / (this.maxLife || 1) * 100;
+        const meterColor = colorAtPercent(GreenToRed, (this.currentLife || 0) / (this.maxLife || 1));
         const colors = this.buildEmptySpriteColorArray();
 
         for (let i = this.length - 1; i >= 0; i--) {
-            let color = null;
+            let color: string | null = null;
             if (i / this.length * 100 < percentage) {
                 color = meterColor;
             }
 
-            colors.forEach(function (colorArray) {
+            colors.forEach((colorArray) => {
                 colorArray.push(color);
             });
         }
@@ -76,21 +91,21 @@ export default class LifeMeter extends GameObject {
         return colors;
     }
 
-    buildEmptySpriteColorArray() {
-        const colors = [];
+    private buildEmptySpriteColorArray(): (string | null)[][] {
+        const colors: (string | null)[][] = [];
         for (let j = 0; j < this.width; j++) {
             colors.push([]);
         }
         return colors;
     }
 
-    addBorderToColorArray(colors) {
+    private addBorderToColorArray(colors: (string | null)[][]): void {
         this.addBezelPixelsToBorder(colors);
         this.addBorderEnds(colors);
         this.addBorderEdges(colors);
     }
 
-    addBezelPixelsToBorder(colors) {
+    private addBezelPixelsToBorder(colors: (string | null)[][]): void {
         if (this.width > 2) {
             colors[ 0 ][ 0 ] = this.borderColor;
             colors[ this.width - 1 ][ 0 ] = this.borderColor;
@@ -99,15 +114,15 @@ export default class LifeMeter extends GameObject {
         }
     }
 
-    addBorderEnds(colors) {
+    private addBorderEnds(colors: (string | null)[][]): void {
         for (let j = 0; j < this.width; j++) {
             colors[ j ].push(this.borderColor);
             colors[ j ].unshift(this.borderColor);
         }
     }
 
-    addBorderEdges(colors) {
-        const border = [ null ];
+    private addBorderEdges(colors: (string | null)[][]): void {
+        const border: (string | null)[] = [ null ];
         for (let i = 0; i < this.length; i++) {
             border.push(this.borderColor);
         }
@@ -117,20 +132,22 @@ export default class LifeMeter extends GameObject {
         colors.unshift(border);
     }
 
-    updatePosition() {
-        if (this.anchor.left) {
+    private updatePosition(): void {
+        if (!this.position || !this.sprite) return;
+
+        if (this.anchor.left !== undefined) {
             this.position.x = this.anchor.left;
         }
 
-        if (this.anchor.top) {
+        if (this.anchor.top !== undefined) {
             this.position.y = this.anchor.top;
         }
 
-        if (this.anchor.right) {
+        if (this.anchor.right !== undefined) {
             this.position.x = this.anchor.right - this.sprite.width;
         }
 
-        if (this.anchor.bottom) {
+        if (this.anchor.bottom !== undefined) {
             this.position.y = this.anchor.bottom - this.sprite.height;
         }
     }

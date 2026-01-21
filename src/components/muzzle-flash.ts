@@ -1,6 +1,7 @@
 import Animation from '../../libs/pxlr-core/core/animation.js';
 import GameObject from '../models/game-object.js';
 import Sprite from '../../libs/pxlr-core/core/sprite.js';
+import { Position } from '../types/rendering';
 
 const shades = [
     "#ff0000",
@@ -14,14 +15,19 @@ const shades = [
     "#ffcc99"
 ];
 
-const frames = shades.map(function (shade) {
+const frames = shades.map((shade) => {
     return new Sprite([
         [ shade, shade ]
     ]);
 });
 
+/**
+ * Visual effect for gun muzzle flash when firing
+ */
 export default class MuzzleFlash extends GameObject {
-    constructor(parent, gunPosition) {
+    private gunPosition: Position;
+
+    constructor(parent: GameObject, gunPosition: Position) {
         super(parent);
 
         this.gunPosition = gunPosition;
@@ -33,18 +39,20 @@ export default class MuzzleFlash extends GameObject {
         this.reset();
     }
 
-    update(dtime) {
+    update(dtime: number): void {
         super.update(dtime);
 
-        if (this.sprite.finished) {
+        if (this.sprite && this.sprite.finished) {
             this.destroy();
         }
     }
 
-    renderToFrame(frame) {
-        this.sprite.renderToFrame(frame,
-            Math.floor(this.parent.position.x + this.gunPosition.x),
-            Math.floor(this.parent.position.y + this.gunPosition.y-1),
-            (this.parent.index || 0) + 1);
+    renderToFrame(frame: any): void {
+        if (this.sprite && this.parent && this.parent.position) {
+            this.sprite.renderToFrame(frame,
+                Math.floor(this.parent.position.x + this.gunPosition.x),
+                Math.floor(this.parent.position.y + this.gunPosition.y - 1),
+                (this.parent.index || 0) + 1);
+        }
     }
 }
