@@ -12,6 +12,8 @@ export default class ChainGunFire extends GameObject {
         this.burstSize = options.burstSize || 5;
         this.thresholdMin = options.thresholdMin || 2000;
         this.thresholdMax = options.thresholdMax || 6000;
+        
+        this.reset();
     }
 
     start() {

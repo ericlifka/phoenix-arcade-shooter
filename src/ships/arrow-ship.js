@@ -14,6 +14,7 @@ export default class ArrowShip extends GameObject {
         super(parent);
         this.difficultyMultiplier = difficultyMultiplier;
         this.alternateShip = alternateShip;
+        this.reset();
     }
 
     reset() {

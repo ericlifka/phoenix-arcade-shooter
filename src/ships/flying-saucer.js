@@ -6,6 +6,11 @@ export default class FlyingSaucer extends GameObject {
     team = 1;
     index = 5;
 
+    constructor(parent) {
+        super(parent);
+        this.reset();
+    }
+
     reset() {
         super.reset();
     }

@@ -9,6 +9,11 @@ export default class PlayerControlledShip extends GameObject {
     isPhysicalEntity = true;
     index = 5;
 
+    constructor(parent) {
+        super(parent);
+        this.reset();
+    }
+
     reset() {
         super.reset();
 

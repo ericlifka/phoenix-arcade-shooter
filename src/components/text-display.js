@@ -24,6 +24,8 @@ export default class TextDisplay extends GameObject {
         this.background = options.background || null;
         this.index = options.index || 10;
         this.isPhysicalEntity = options.isPhysicalEntity;
+        
+        this.reset();
     }
 
     reset() {

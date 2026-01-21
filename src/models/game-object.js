@@ -3,7 +3,8 @@ export default class GameObject {
 
     constructor(parentObj) {
         this.parent = parentObj;
-        this.reset();
+        this.children = [];
+        this.destroyed = false;
     }
 
     reset() {

@@ -65,6 +65,8 @@ export default class Phoenix extends GameObject {
 
         // the level manager reaches into all sorts of places, so it needs to be created last
         this.levelManager = new LevelManager(this, this);
+
+        this.reset();
     }
 
     reset() {

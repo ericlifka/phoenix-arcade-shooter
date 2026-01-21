@@ -18,6 +18,8 @@ export default class Bank extends GameObject {
             index: 1,
             position: { x: this.position.x, y: this.position.y }
         });
+        
+        this.reset();
     }
 
     reset() {

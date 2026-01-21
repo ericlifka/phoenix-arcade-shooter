@@ -28,6 +28,8 @@ export default class LevelGroup01 extends GameObject {
         this.game = game;
         this.levelName = levelName;
         this.rowCount = rowCount;
+        
+        this.reset();
     }
 
     start() {

@@ -19,6 +19,8 @@ export default class FadeoutBanner extends GameObject {
 
         this.text = text;
         this.interval = time / colorGradient.length;
+        
+        this.reset();
     }
 
     start() {

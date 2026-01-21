@@ -7,6 +7,8 @@ export default class WatchForDeath extends GameObject {
         this.entity = entity;
         this.callback = callback;
         this.started = false;
+        
+        this.reset();
     }
 
     update() {

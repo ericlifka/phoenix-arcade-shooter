@@ -19,6 +19,8 @@ export default class LifeMeter extends GameObject {
         this.scale = options.scale;
         this.showBorder = !!options.showBorder;
         this.borderColor = options.borderColor || "#ffffff";
+        
+        this.reset();
     }
 
     update() {

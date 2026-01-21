@@ -13,6 +13,8 @@ export default class ScriptChain extends GameObject {
         scripts.forEach(function (script) {
             script.parent = self;
         });
+        
+        this.reset();
     }
 
     start() {

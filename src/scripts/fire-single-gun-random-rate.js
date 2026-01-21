@@ -10,6 +10,8 @@ export default class FireSingleGunRandomRate extends GameObject {
         this.gunIndex = options.gunIndex || 0;
         this.thresholdMin = options.thresholdMin || 1000;
         this.thresholdMax = options.thresholdMax || 3000;
+        
+        this.reset();
     }
 
     start() {

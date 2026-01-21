@@ -30,6 +30,8 @@ export default class Shop extends GameObject {
             onDown: this.onDown.bind(this),
             onSelect: this.onSelect.bind(this)
         });
+        
+        this.reset();
     }
 
     reset() {

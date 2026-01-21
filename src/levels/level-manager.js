@@ -11,6 +11,8 @@ export default class LevelManager extends GameObject {
         this.width = game.width;
         this.height = game.height;
         this.player = game.player;
+        
+        this.reset();
     }
 
     reset() {
@@ -78,8 +80,8 @@ export default class LevelManager extends GameObject {
         this.currentLevel.start();
     }
 
-    update() {
-        super.update();
+    update(dtime) {
+        super.update(dtime);
 
         if (this.currentLevel && this.currentLevel.checkIfLevelComplete()) {
             if (this.currentLevel.isShop) {

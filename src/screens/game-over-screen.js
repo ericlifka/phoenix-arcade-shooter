@@ -39,6 +39,8 @@ export default class GameOverScreen extends GameObject {
         this.inputEvents = new EventedInput({
             onStart: this.onStart.bind(this)
         });
+
+        this.reset();
     }
 
     reset() {

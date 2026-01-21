@@ -12,6 +12,7 @@ export default class ArrowBoss extends GameObject {
     constructor(parent, difficultyMultiplier) {
         super(parent);
         this.difficultyMultiplier = difficultyMultiplier;
+        this.reset();
     }
 
     reset() {

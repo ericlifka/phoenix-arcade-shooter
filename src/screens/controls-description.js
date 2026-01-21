@@ -25,6 +25,11 @@ export default class ControlsDescription extends GameObject {
         }
     ];
 
+    constructor(parent) {
+        super(parent);
+        this.reset();
+    }
+
     reset() {
         super.reset();
 

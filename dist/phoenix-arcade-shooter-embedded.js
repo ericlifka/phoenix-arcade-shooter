@@ -251,7 +251,8 @@
     damage = 0;
     constructor(parentObj) {
       this.parent = parentObj;
-      this.reset();
+      this.children = [];
+      this.destroyed = false;
     }
     reset() {
       this.children = [];
@@ -1750,6 +1751,7 @@
       this.background = options.background || null;
       this.index = options.index || 10;
       this.isPhysicalEntity = options.isPhysicalEntity;
+      this.reset();
     }
     reset() {
       super.reset();
@@ -1865,6 +1867,7 @@
         index: 1,
         position: { x: this.position.x, y: this.position.y }
       });
+      this.reset();
     }
     reset() {
       super.reset();
@@ -1913,6 +1916,7 @@
       this.explosion = smallExplosion;
       this.updateBulletDirection();
       this.updateColor();
+      this.reset();
     }
     checkBoundaries() {
       if (this.position.x < 0 || this.position.y < 0 || this.position.x > this.parent.width || this.position.y > this.parent.height) {
@@ -2076,6 +2080,7 @@
         index: 1,
         position: { x: this.position.x, y: this.position.y + this.sprite.height + 1 }
       });
+      this.reset();
     }
     reset() {
       super.reset();
@@ -2217,6 +2222,10 @@
         position: { x: 85, y: 20 }
       }
     ];
+    constructor(parent) {
+      super(parent);
+      this.reset();
+    }
     reset() {
       super.reset();
       this.addChild(new TextDisplay(this, this.headerDef));
@@ -2262,6 +2271,10 @@
 
   // src/screens/slim-title-screen.js
   class SlimTitleScreen extends GameObject {
+    constructor(parent) {
+      super(parent);
+      this.reset();
+    }
     reset() {
       super.reset();
       this.selectedMenuItem = 0;
@@ -2380,6 +2393,7 @@
       this.inputEvents = new EventedInput({
         onStart: this.onStart.bind(this)
       });
+      this.reset();
     }
     reset() {
       super.reset();
@@ -2495,6 +2509,7 @@
       super(parent);
       this.game = game;
       this.player = game.player;
+      this.reset();
     }
     start() {
       this.player.preventInputControl = true;
@@ -2533,6 +2548,7 @@
       super(parent);
       this.text = text;
       this.interval = time / colorGradient.length;
+      this.reset();
     }
     start() {
       this.elapsedTime = 0;
@@ -2617,6 +2633,7 @@
         frames,
         millisPerFrame: 25
       });
+      this.reset();
     }
     update(dtime) {
       super.update(dtime);
@@ -2638,6 +2655,7 @@
     constructor(parent, difficultyMultiplier) {
       super(parent);
       this.difficultyMultiplier = difficultyMultiplier;
+      this.reset();
     }
     reset() {
       super.reset();
@@ -2688,6 +2706,7 @@
       this.burstSize = options.burstSize || 5;
       this.thresholdMin = options.thresholdMin || 2000;
       this.thresholdMax = options.thresholdMax || 6000;
+      this.reset();
     }
     start() {
       this.resetTimer();
@@ -2756,6 +2775,7 @@
       super(parent);
       this.difficultyMultiplier = difficultyMultiplier;
       this.alternateShip = alternateShip;
+      this.reset();
     }
     reset() {
       super.reset();
@@ -2807,6 +2827,7 @@
       this.gunIndex = options.gunIndex || 0;
       this.thresholdMin = options.thresholdMin || 1000;
       this.thresholdMax = options.thresholdMax || 3000;
+      this.reset();
     }
     start() {
       this.resetTimer();
@@ -2843,6 +2864,7 @@
       this.scale = options.scale;
       this.showBorder = !!options.showBorder;
       this.borderColor = options.borderColor || "#ffffff";
+      this.reset();
     }
     update() {
       if (this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife) {
@@ -2946,6 +2968,7 @@
       this.position = position;
       this.velocity = { x: 0, y: 50 };
       this.sprite = arcade_default["$"];
+      this.reset();
     }
     checkBoundaries() {
       if (this.position.x < 0 || this.position.y < 0 || this.position.x > this.parent.width || this.position.y > this.parent.height) {
@@ -2967,6 +2990,7 @@
       this.object = object;
       this.target = targetPoint;
       this.delta = timeDelta;
+      this.reset();
     }
     start() {
       const current = this.object.position;
@@ -3007,6 +3031,7 @@
       scripts.forEach(function(script) {
         script.parent = self;
       });
+      this.reset();
     }
     start() {
       this.activeScript = this.scripts[this.scriptIndex];
@@ -3037,6 +3062,7 @@
       this.entity = entity;
       this.callback = callback;
       this.started = false;
+      this.reset();
     }
     update() {
       if (this.entity.destroyed && this.started) {
@@ -3065,6 +3091,7 @@
       this.game = game;
       this.levelName = levelName;
       this.rowCount = rowCount;
+      this.reset();
     }
     start() {
       this.ships = [];
@@ -3198,6 +3225,7 @@
         onDown: this.onDown.bind(this),
         onSelect: this.onSelect.bind(this)
       });
+      this.reset();
     }
     reset() {
       super.reset();
@@ -3364,6 +3392,7 @@
       this.width = game.width;
       this.height = game.height;
       this.player = game.player;
+      this.reset();
     }
     reset() {
       super.reset();
@@ -3419,8 +3448,8 @@
       this.addChild(this.currentLevel);
       this.currentLevel.start();
     }
-    update() {
-      super.update();
+    update(dtime) {
+      super.update(dtime);
       if (this.currentLevel && this.currentLevel.checkIfLevelComplete()) {
         if (this.currentLevel.isShop) {
           this.removeChild(this.currentLevel);
@@ -3493,6 +3522,10 @@
     type = "player";
     isPhysicalEntity = true;
     index = 5;
+    constructor(parent) {
+      super(parent);
+      this.reset();
+    }
     reset() {
       super.reset();
       this.sprite = playerShipSprite().rotateRight();
@@ -3625,6 +3658,7 @@
         color: this.interfaceColor
       });
       this.levelManager = new LevelManager(this, this);
+      this.reset();
     }
     reset() {
       super.reset();

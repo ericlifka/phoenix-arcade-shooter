@@ -24,6 +24,8 @@ export default class Bullet extends GameObject {
 
         this.updateBulletDirection();
         this.updateColor();
+        
+        this.reset();
     }
 
     checkBoundaries() {

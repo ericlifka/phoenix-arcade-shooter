@@ -7,6 +7,8 @@ export default class MoveObjectToPoint extends GameObject {
         this.object = object;
         this.target = targetPoint;
         this.delta = timeDelta;
+        
+        this.reset();
     }
 
     start() {

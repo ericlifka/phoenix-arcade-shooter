@@ -12,6 +12,11 @@ export default class TitleScreen extends GameObject {
         { message: "controls", position: { x: 84, y: 120 } }
     ];
 
+    constructor(parent) {
+        super(parent);
+        this.reset();
+    }
+
     reset() {
         super.reset();
 

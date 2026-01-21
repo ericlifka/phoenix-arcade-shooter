@@ -6,6 +6,8 @@ export default class FlyPlayerInFromBottom extends GameObject {
 
         this.game = game;
         this.player = game.player;
+        
+        this.reset();
     }
 
     start() {

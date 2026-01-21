@@ -13,6 +13,8 @@ export default class LevelGroup02 extends GameObject {
         this.game = game;
         this.levelName = levelName;
         this.rowCount = shipCount;
+        
+        this.reset();
     }
 
     start() {

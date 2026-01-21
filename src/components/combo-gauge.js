@@ -27,6 +27,8 @@ export default class ComboGauge extends GameObject {
             index: 1,
             position: { x: this.position.x, y: this.position.y + this.sprite.height + 1 }
         });
+        
+        this.reset();
     }
 
     reset() {

@@ -29,6 +29,8 @@ export default class MuzzleFlash extends GameObject {
             frames: frames,
             millisPerFrame: 25
         });
+        
+        this.reset();
     }
 
     update(dtime) {

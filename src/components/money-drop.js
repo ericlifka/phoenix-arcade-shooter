@@ -14,6 +14,8 @@ export default class MoneyDrop extends GameObject {
         this.position = position;
         this.velocity = { x: 0, y: 50 };
         this.sprite = ArcadeFont[ '$' ];
+        
+        this.reset();
     }
 
     checkBoundaries() {

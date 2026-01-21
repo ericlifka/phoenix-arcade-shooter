@@ -5,6 +5,11 @@ import TextDisplay from '../components/text-display.js';
 import ArrowShip from '../sprites/arrow-ship.js';
 
 export default class SlimTitleScreen extends GameObject {
+    constructor(parent) {
+        super(parent);
+        this.reset();
+    }
+
     reset() {
         super.reset();
 
