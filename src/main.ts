@@ -3,8 +3,15 @@ import GamepadController from './controllers/gamepad-input.js';
 import KeyboardController from './controllers/keyboard-input.js';
 import Phoenix from './models/phoenix.js';
 import RunLoop from './helpers/run-loop.js';
+import { Dimensions } from './types/rendering';
 
-const gameDimensions = { width: 200, height: 150 };
+declare global {
+    interface Window {
+        activeGame?: Phoenix;
+    }
+}
+
+const gameDimensions: Dimensions = { width: 200, height: 150 };
 const gamepadInput = new GamepadController();
 const keyboardInput = new KeyboardController();
 
@@ -14,7 +21,7 @@ const runLoop = new RunLoop();
 
 renderer.setFillColor(phoenix.FILL_COLOR);
 
-runLoop.addCallback(function (dtime) {
+runLoop.addCallback(function (dtime: number) {
     phoenix.processInput([
         keyboardInput.getInputState(),
         gamepadInput.getInputState()
@@ -29,20 +36,22 @@ runLoop.addCallback(function (dtime) {
     renderer.renderFrame(frame);
 });
 
-document.addEventListener("visibilitychange", function () {
+document.addEventListener('visibilitychange', function () {
     if (document.hidden) {
         phoenix.pause();
     }
 });
 
-window.addEventListener("blur", function () {
+window.addEventListener('blur', function () {
     phoenix.pause();
 });
 
-window.addEventListener("focus", function () {
+window.addEventListener('focus', function () {
     keyboardInput.clearState();
     gamepadInput.clearState();
 });
 
 runLoop.start();
 window.activeGame = phoenix;
+
+export {};

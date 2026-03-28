@@ -29,7 +29,7 @@ console.log('   ✓ game.css\n');
 // Build main bundle using Bun's bundler
 console.log('🔨 Building main bundle with Bun...');
 const mainResult = await Bun.build({
-  entrypoints: ['./src/main.js'],
+  entrypoints: ['./src/main.ts'],
   outdir: DIST_DIR,
   naming: 'phoenix-arcade-shooter.js',
   target: 'browser',
@@ -48,7 +48,7 @@ console.log('   ✓ phoenix-arcade-shooter.js\n');
 // Build embedded bundle
 console.log('🔨 Building embedded bundle with Bun...');
 const embeddedResult = await Bun.build({
-  entrypoints: ['./src/embedded.js'],
+  entrypoints: ['./src/embedded.ts'],
   outdir: DIST_DIR,
   naming: 'phoenix-arcade-shooter-embedded.js',
   target: 'browser',

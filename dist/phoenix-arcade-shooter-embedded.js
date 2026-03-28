@@ -1,4 +1,26 @@
 (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __moduleCache = /* @__PURE__ */ new WeakMap;
+  var __toCommonJS = (from) => {
+    var entry = __moduleCache.get(from), desc;
+    if (entry)
+      return entry;
+    entry = __defProp({}, "__esModule", { value: true });
+    if (from && typeof from === "object" || typeof from === "function")
+      __getOwnPropNames(from).map((key) => !__hasOwnProp.call(entry, key) && __defProp(entry, key, {
+        get: () => from[key],
+        enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
+      }));
+    __moduleCache.set(from, entry);
+    return entry;
+  };
+
+  // src/embedded.ts
+  var exports_embedded = {};
+
   // libs/pxlr-core/core/cell-grid.js
   class CellGrid {
     iterateCells(handler) {
@@ -4102,7 +4124,7 @@
     }
   }
 
-  // src/embedded.js
+  // src/embedded.ts
   window.createPhoenixGameInstance = function(targetDiv, gameOverCallback) {
     const gameDimensions = {
       width: 200,

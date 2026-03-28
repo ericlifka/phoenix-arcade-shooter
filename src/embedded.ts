@@ -3,9 +3,23 @@ import GamepadController from './controllers/gamepad-input.js';
 import KeyboardController from './controllers/keyboard-input.js';
 import Phoenix from './models/phoenix.js';
 import RunLoop from './helpers/run-loop.js';
+import { GameOverResult } from './types/game';
+import type { PhoenixOptions } from './models/phoenix.js';
 
-window.createPhoenixGameInstance = function (targetDiv, gameOverCallback) {
-    const gameDimensions = {
+declare global {
+    interface Window {
+        createPhoenixGameInstance: (
+            targetDiv: HTMLElement,
+            gameOverCallback?: (result: GameOverResult) => void
+        ) => Phoenix;
+    }
+}
+
+window.createPhoenixGameInstance = function (
+    targetDiv: HTMLElement,
+    gameOverCallback?: (result: GameOverResult) => void
+) {
+    const gameDimensions: PhoenixOptions = {
         width: 200,
         height: 150,
         container: targetDiv,
@@ -21,7 +35,7 @@ window.createPhoenixGameInstance = function (targetDiv, gameOverCallback) {
     phoenix.gameOverCallback = gameOverCallback;
     renderer.setFillColor(phoenix.FILL_COLOR);
 
-    runLoop.addCallback(function (dtime) {
+    runLoop.addCallback(function (dtime: number) {
         phoenix.processInput([
             keyboardInput.getInputState(),
             gamepadInput.getInputState()
@@ -36,17 +50,17 @@ window.createPhoenixGameInstance = function (targetDiv, gameOverCallback) {
         renderer.renderFrame(frame);
     });
 
-    document.addEventListener("visibilitychange", function () {
+    document.addEventListener('visibilitychange', function () {
         if (document.hidden) {
             phoenix.pause();
         }
     });
 
-    window.addEventListener("blur", function () {
+    window.addEventListener('blur', function () {
         phoenix.pause();
     });
 
-    window.addEventListener("focus", function () {
+    window.addEventListener('focus', function () {
         keyboardInput.clearState();
         gamepadInput.clearState();
     });
@@ -54,3 +68,5 @@ window.createPhoenixGameInstance = function (targetDiv, gameOverCallback) {
     runLoop.start();
     return phoenix;
 };
+
+export {};
