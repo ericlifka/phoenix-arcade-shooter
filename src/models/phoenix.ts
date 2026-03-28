@@ -13,24 +13,48 @@ import LevelManager from '../levels/level-manager.js';
 import LifeMeter from '../components/life-meter.js';
 import PlayerShip from '../ships/player-controlled-ship.js';
 import TextDisplay from '../components/text-display.js';
-import TitleScreen from '../screens/title-screen.js';
+import { BulletOptions, GameOverResult, PhysicalEntity } from '../types/game';
+import type { GameForLevels, GameForShop } from '../types/levels.js';
 
-export default class Phoenix extends GameObject {
-    FILL_COLOR = "#000031";
-    interfaceColor = "#ffd";
+export interface PhoenixOptions {
+    width: number;
+    height: number;
+    embedded?: boolean;
+    container?: HTMLElement;
+}
 
-    constructor(options) {
+export default class Phoenix extends GameObject implements GameForLevels, GameForShop {
+    FILL_COLOR = '#000031';
+    interfaceColor = '#ffd';
+
+    embedded: boolean;
+    width: number;
+    height: number;
+
+    titleScreen: EmbeddedTitleScreen;
+    controlsScreen: ControlsScreen;
+    gameOverScreen: GameOverScreen;
+    player: PlayerShip;
+    inputInterpreter: InputInterpreter;
+    pauseInputTracker: EventedInput;
+    pausedText: TextDisplay;
+    comboGauge: ComboGauge;
+    lifeMeter: LifeMeter;
+    bank: Bank;
+    levelManager: LevelManager;
+
+    gameOver = false;
+    paused = false;
+    gameOverCallback?: (result: GameOverResult) => void;
+
+    constructor(options: PhoenixOptions) {
         super(null);
-        
+
         this.embedded = !!options.embedded;
         this.width = options.width;
         this.height = options.height;
 
-        //this.titleScreen = this.embedded ?
-        //    new EmbeddedTitleScreen(this) :
-        //    new TitleScreen(this);
         this.titleScreen = new EmbeddedTitleScreen(this);
-
         this.controlsScreen = new ControlsScreen(this);
         this.gameOverScreen = new GameOverScreen(this);
         this.player = new PlayerShip(this);
@@ -41,9 +65,9 @@ export default class Phoenix extends GameObject {
         });
 
         this.pausedText = new TextDisplay(this, {
-            font: "arcade",
-            message: "PAUSE",
-            color: "yellow",
+            font: 'arcade',
+            message: 'PAUSE',
+            color: 'yellow',
             position: { x: 82, y: 70 }
         });
 
@@ -63,13 +87,12 @@ export default class Phoenix extends GameObject {
             color: this.interfaceColor
         });
 
-        // the level manager reaches into all sorts of places, so it needs to be created last
         this.levelManager = new LevelManager(this, this);
 
         this.reset();
     }
 
-    reset() {
+    reset(): void {
         super.reset();
 
         this.gameOver = false;
@@ -86,16 +109,22 @@ export default class Phoenix extends GameObject {
         this.addChild(this.player);
         this.addChild(this.levelManager);
         this.addChild(this.titleScreen);
-        this.addChild(this.pauseInputTracker);
+        this.addChild(this.pauseInputTracker as unknown as GameObject);
     }
 
-    clearBullets() {
+    clearBullets(): void {
         this.children
-            .filter(function (entity) { return entity.type === "bullet" })
-            .forEach(function (bullet) { this.removeChild(bullet) }.bind(this));
+            .filter(function (entity) {
+                return entity.type === 'bullet';
+            })
+            .forEach(
+                function (this: Phoenix, bullet: GameObject) {
+                    this.removeChild(bullet);
+                }.bind(this)
+            );
     }
 
-    startNewGame() {
+    startNewGame(): void {
         this.addChild(this.bank);
         this.addChild(this.comboGauge);
         this.addChild(this.lifeMeter);
@@ -103,7 +132,7 @@ export default class Phoenix extends GameObject {
         this.levelManager.start();
     }
 
-    finishGame() {
+    finishGame(): void {
         if (this.gameOverCallback) {
             this.gameOverCallback({
                 score: this.comboGauge.getScore(),
@@ -116,15 +145,15 @@ export default class Phoenix extends GameObject {
         }
     }
 
-    showControlsScreen() {
+    showControlsScreen(): void {
         this.addChild(this.controlsScreen);
     }
 
-    processInput(rawInput) {
+    processInput(rawInput: Parameters<InputInterpreter['interpret']>[0]): void {
         super.processInput(this.inputInterpreter.interpret(rawInput));
     }
 
-    update(dtime) {
+    update(dtime: number): void {
         if (!this.paused) {
             super.update(dtime);
 
@@ -133,7 +162,7 @@ export default class Phoenix extends GameObject {
         }
     }
 
-    togglePause() {
+    togglePause(): void {
         if (this.paused) {
             this.unpause();
         }
@@ -142,46 +171,51 @@ export default class Phoenix extends GameObject {
         }
     }
 
-    pause() {
-        if (this.levelManager.running && !this.paused && !this.gameOver && !this.levelManager.currentLevel.isShop) {
+    pause(): void {
+        if (
+            this.levelManager.running &&
+            !this.paused &&
+            !this.gameOver &&
+            !this.levelManager.currentLevel!.isShop
+        ) {
             this.paused = true;
             this.addChild(this.pausedText);
         }
     }
 
-    unpause() {
+    unpause(): void {
         this.paused = false;
         this.removeChild(this.pausedText);
     }
 
-    checkCollisions() {
+    checkCollisions(): void {
         const physicalEntities = collectEntities(this, this.physicalEntityMatcher);
         const collisionPairs = this.findBoxCollisions(physicalEntities);
         this.checkPairsForCollision(collisionPairs);
     }
 
-    physicalEntityMatcher(entity) {
-        return entity.isPhysicalEntity && !entity.exploding;
+    physicalEntityMatcher(entity: PhysicalEntity): boolean {
+        return !!(entity.isPhysicalEntity && !entity.exploding);
     }
 
-    findBoxCollisions(entities) {
-        const collisionPairs = [];
+    findBoxCollisions(entities: PhysicalEntity[]): PhysicalEntity[][] {
+        const collisionPairs: PhysicalEntity[][] = [];
 
         for (let i = 0; i < entities.length - 1; i++) {
-            const outer = entities[ i ];
+            const outer = entities[i];
 
             for (let j = i + 1; j < entities.length; j++) {
-                const inner = entities[ j ];
+                const inner = entities[j];
 
-                if ((outer.type === "pickup" || inner.type === "pickup") &&
-                    !(outer.type === "player" || inner.type === "player")) {
-                    // When one of the entities is a pickup item such as money then the only collide-able targets
-                    // are player entities, so all other collisions get eliminated.
+                if (
+                    (outer.type === 'pickup' || inner.type === 'pickup') &&
+                    !(outer.type === 'player' || inner.type === 'player')
+                ) {
                     continue;
                 }
 
                 if (outer.team !== inner.team && boxCollision(outer, inner)) {
-                    collisionPairs.push([ outer, inner ]);
+                    collisionPairs.push([outer, inner]);
                 }
             }
         }
@@ -189,10 +223,10 @@ export default class Phoenix extends GameObject {
         return collisionPairs;
     }
 
-    checkPairsForCollision(pairs) {
+    checkPairsForCollision(pairs: PhysicalEntity[][]): void {
         pairs.forEach(function (pair) {
-            const a = pair[ 0 ];
-            const b = pair[ 1 ];
+            const a = pair[0];
+            const b = pair[1];
 
             if (spriteCollision(a, b)) {
                 a.applyDamage(b.damage, b);
@@ -201,10 +235,12 @@ export default class Phoenix extends GameObject {
         });
     }
 
-    checkGameOver() {
-        const gameResult = this.player.destroyed ? "loss" :
-            this.levelManager.complete ? "win" :
-                null;
+    checkGameOver(): void {
+        const gameResult = this.player.destroyed
+            ? 'loss'
+            : this.levelManager.complete
+              ? 'win'
+              : null;
 
         if (gameResult && !this.gameOver) {
             this.gameOver = true;
@@ -216,23 +252,23 @@ export default class Phoenix extends GameObject {
         }
     }
 
-    spawnBullet(data) {
+    spawnBullet(data: BulletOptions): void {
         this.addChild(new Bullet(this, data));
     }
 
-    enemyDestroyed(data) {
+    enemyDestroyed(data: { shipValue: number }): void {
         this.comboGauge.addPoints(data.shipValue);
     }
 
-    enemyHit() {
+    enemyHit(): void {
         this.comboGauge.bumpCombo();
     }
 
-    playerHit() {
+    playerHit(): void {
         this.comboGauge.clearCombo();
     }
 
-    moneyCollected(value) {
+    moneyCollected(value: number): void {
         this.bank.addMoney(value);
     }
 }

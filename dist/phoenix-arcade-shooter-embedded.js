@@ -3831,10 +3831,27 @@
     }
   }
 
-  // src/models/phoenix.js
+  // src/models/phoenix.ts
   class Phoenix extends GameObject {
     FILL_COLOR = "#000031";
     interfaceColor = "#ffd";
+    embedded;
+    width;
+    height;
+    titleScreen;
+    controlsScreen;
+    gameOverScreen;
+    player;
+    inputInterpreter;
+    pauseInputTracker;
+    pausedText;
+    comboGauge;
+    lifeMeter;
+    bank;
+    levelManager;
+    gameOver = false;
+    paused = false;
+    gameOverCallback;
     constructor(options) {
       super(null);
       this.embedded = !!options.embedded;
@@ -3948,7 +3965,7 @@
       this.checkPairsForCollision(collisionPairs);
     }
     physicalEntityMatcher(entity) {
-      return entity.isPhysicalEntity && !entity.exploding;
+      return !!(entity.isPhysicalEntity && !entity.exploding);
     }
     findBoxCollisions(entities) {
       const collisionPairs = [];
