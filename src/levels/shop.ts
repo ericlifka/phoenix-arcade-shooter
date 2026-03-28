@@ -3,24 +3,51 @@ import Bullet from '../components/bullet.js';
 import EventedInput from '../models/evented-input.js';
 import GameObject from '../models/game-object.js';
 import TextDisplay from '../components/text-display.js';
+import { Position } from '../types/rendering';
+import type { GameForShop } from '../types/levels.js';
+
+interface ShopMenuLine {
+    message: string;
+    position: Position;
+    description?: TextDisplay;
+    costText?: TextDisplay;
+    cost?: number;
+}
 
 export default class Shop extends GameObject {
     isShop = true;
     index = 1;
-    headerDef = { message: "Ship Upgrades", position: { x: 50, y: 10 } };
-    menuItems = {
-        health: { message: "+1 Ship Health", position: { x: 90, y: 50 } },
-        rate: { message: "10% faster Firing Rate", position: { x: 90, y: 65 } },
-        damage: { message: "+1 Bullet Damage", position: { x: 90, y: 80 } },
-        guns: { message: "Install wing guns", position: { x: 90, y: 95 } },
-        leave: { message: "Leave Shop", position: { x: 60, y: 110 } }
+    headerDef = { message: 'Ship Upgrades', position: { x: 50, y: 10 } };
+    menuItems: {
+        health: ShopMenuLine;
+        rate: ShopMenuLine;
+        damage: ShopMenuLine;
+        guns: ShopMenuLine;
+        leave: ShopMenuLine;
+    } = {
+        health: { message: '+1 Ship Health', position: { x: 90, y: 50 } },
+        rate: { message: '10% faster Firing Rate', position: { x: 90, y: 65 } },
+        damage: { message: '+1 Bullet Damage', position: { x: 90, y: 80 } },
+        guns: { message: 'Install wing guns', position: { x: 90, y: 95 } },
+        leave: { message: 'Leave Shop', position: { x: 60, y: 110 } }
     };
-    menuSelectorPositions = [ 49, 64, 79, 94, 109 ];
-    disabledColor = "#777";
+    menuSelectorPositions = [49, 64, 79, 94, 109];
+    disabledColor = '#777';
 
-    constructor(parent, game) {
+    game: GameForShop;
+    bank: GameForShop['bank'];
+    player: GameForShop['player'];
+    input: EventedInput;
+    titleText!: TextDisplay;
+    selectorShip!: GameObject;
+    selectedMenuItem!: number;
+    timeSinceSelected!: number;
+    selecting?: boolean;
+    isDoneShopping!: boolean;
+
+    constructor(parent: GameObject | null | undefined, game: GameForShop) {
         super(parent);
-        
+
         this.game = game;
         this.bank = game.bank;
         this.player = game.player;
@@ -30,11 +57,11 @@ export default class Shop extends GameObject {
             onDown: this.onDown.bind(this),
             onSelect: this.onSelect.bind(this)
         });
-        
+
         this.reset();
     }
 
-    reset() {
+    reset(): void {
         super.reset();
 
         this.input.reset();
@@ -44,20 +71,20 @@ export default class Shop extends GameObject {
         this.setCosts();
         this.createSelectorShip();
 
-        this.addChild(this.input);
+        this.addChild(this.input as unknown as GameObject);
     }
 
-    start() {
+    start(): void {
         this.input.reset();
         this.isDoneShopping = false;
         this.setCosts();
     }
 
-    checkIfLevelComplete() {
+    checkIfLevelComplete(): boolean {
         return this.isDoneShopping;
     }
 
-    update(dtime) {
+    update(dtime: number): void {
         super.update(dtime);
 
         this.timeSinceSelected += dtime;
@@ -66,20 +93,20 @@ export default class Shop extends GameObject {
         }
     }
 
-    createMenuText() {
+    createMenuText(): void {
         this.titleText = new TextDisplay(this, {
-            font: "arcade",
+            font: 'arcade',
             message: this.headerDef.message,
             position: this.headerDef.position,
             color: this.game.interfaceColor
         });
         this.addChild(this.titleText);
 
-        Object.keys(this.menuItems).forEach(function (key) {
-            const item = this.menuItems[ key ];
+        Object.keys(this.menuItems).forEach(function (this: Shop, key: string) {
+            const item = this.menuItems[key as keyof Shop['menuItems']];
 
             item.description = new TextDisplay(this, {
-                font: "arcade-small",
+                font: 'arcade-small',
                 message: item.message,
                 position: item.position,
                 color: this.game.interfaceColor,
@@ -88,7 +115,7 @@ export default class Shop extends GameObject {
             this.addChild(item.description);
 
             item.costText = new TextDisplay(this, {
-                font: "arcade-small",
+                font: 'arcade-small',
                 message: '',
                 position: { x: item.position.x - 30, y: item.position.y },
                 color: this.game.interfaceColor,
@@ -98,7 +125,7 @@ export default class Shop extends GameObject {
         }.bind(this));
     }
 
-    setCosts() {
+    setCosts(): void {
         const items = this.menuItems;
         const player = this.player;
         const bank = this.bank;
@@ -108,19 +135,19 @@ export default class Shop extends GameObject {
         items.damage.cost = 100 + player.damageUpgrades * 100;
         items.guns.cost = player.wingGunsUnlocked ? -1 : 1000;
 
-        items.damage.costText.changeMessage("$" + items.damage.cost);
-        items.health.costText.changeMessage("$" + items.health.cost);
-        items.rate.costText.changeMessage("$" + items.rate.cost);
-        items.guns.costText.changeMessage(player.wingGunsUnlocked ? "--" : "$" + items.guns.cost);
-        items.leave.description.changeMessage(items.leave.message);
+        items.damage.costText!.changeMessage('$' + items.damage.cost);
+        items.health.costText!.changeMessage('$' + items.health.cost);
+        items.rate.costText!.changeMessage('$' + items.rate.cost);
+        items.guns.costText!.changeMessage(player.wingGunsUnlocked ? '--' : '$' + items.guns.cost);
+        items.leave.description!.changeMessage(items.leave.message);
 
-        items.health.costText.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-        items.rate.costText.updateColor(items.rate.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-        items.damage.costText.updateColor(items.damage.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-        items.guns.costText.updateColor(items.guns.cost > bank.value || player.wingGunsUnlocked ? this.disabledColor : this.game.interfaceColor);
+        items.health.costText!.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
+        items.rate.costText!.updateColor(items.rate.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
+        items.damage.costText!.updateColor(items.damage.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
+        items.guns.costText!.updateColor(items.guns.cost > bank.value || player.wingGunsUnlocked ? this.disabledColor : this.game.interfaceColor);
     }
 
-    createSelectorShip() {
+    createSelectorShip(): void {
         this.selectorShip = new GameObject();
         this.selectorShip.sprite = new ArrowShip();
         this.selectorShip.position = { x: 40, y: 0 };
@@ -129,27 +156,27 @@ export default class Shop extends GameObject {
         this.updateSelectorPosition();
     }
 
-    updateSelectorPosition() {
-        this.selectorShip.position.y = this.menuSelectorPositions[ this.selectedMenuItem ];
+    updateSelectorPosition(): void {
+        this.selectorShip.position!.y = this.menuSelectorPositions[this.selectedMenuItem];
     }
 
-    onUp() {
+    onUp(): void {
         if (!this.selecting && this.selectedMenuItem > 0) {
             this.selectedMenuItem--;
             this.updateSelectorPosition();
         }
     }
 
-    onDown() {
+    onDown(): void {
         if (!this.selecting && this.selectedMenuItem < this.menuSelectorPositions.length - 1) {
             this.selectedMenuItem++;
             this.updateSelectorPosition();
         }
     }
 
-    onSelect() {
+    onSelect(): void {
         if (!this.selecting) {
-            let selection;
+            let selection: ShopMenuLine | undefined;
             switch (this.selectedMenuItem) {
                 case 0: selection = this.menuItems.health; break;
                 case 1: selection = this.menuItems.rate; break;
@@ -159,19 +186,19 @@ export default class Shop extends GameObject {
                 default: return;
             }
 
-            if (this.bank.value >= selection.cost && selection.cost !== -1) {
-                this.bank.removeMoney(selection.cost);
+            if (this.bank.value >= selection.cost! && selection.cost !== -1) {
+                this.bank.removeMoney(selection.cost!);
                 this.startGame();
             }
         }
     }
 
-    startGame() {
+    startGame(): void {
         this.selecting = true;
         this.timeSinceSelected = 0;
 
-        const x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
-        const y = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
+        const x1 = this.selectorShip.position!.x + this.selectorShip.sprite.width;
+        const y = this.selectorShip.position!.y + Math.floor(this.selectorShip.sprite.height / 2);
 
         this.addChild(new Bullet(this, {
             team: 2,
@@ -180,7 +207,7 @@ export default class Shop extends GameObject {
         }));
     }
 
-    propagateSelection() {
+    propagateSelection(): void {
         switch (this.selectedMenuItem) {
             case 0:
                 this.player.lifeUpgrades++;
@@ -189,7 +216,7 @@ export default class Shop extends GameObject {
 
             case 1: // rate
                 this.player.rateUpgrades++;
-                this.player.FIRE_RATE = Math.ceil(this.player.FIRE_RATE * .9);
+                this.player.FIRE_RATE = Math.ceil(this.player.FIRE_RATE * 0.9);
                 break;
 
             case 2: // damage

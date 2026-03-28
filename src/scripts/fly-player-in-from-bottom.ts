@@ -1,17 +1,11 @@
 import GameObject from '../models/game-object.js';
-import type PlayerControlledShip from '../ships/player-controlled-ship.js';
-
-interface GameWithPlayer {
-    width: number;
-    height: number;
-    player: PlayerControlledShip;
-}
+import type { GameForLevels } from '../types/levels.js';
 
 export default class FlyPlayerInFromBottom extends GameObject {
-    game: GameWithPlayer;
-    player: PlayerControlledShip;
+    game: GameForLevels;
+    player: GameForLevels['player'];
 
-    constructor(parent: GameObject | null | undefined, game: GameWithPlayer) {
+    constructor(parent: GameObject | null | undefined, game: GameForLevels) {
         super(parent);
 
         this.game = game;

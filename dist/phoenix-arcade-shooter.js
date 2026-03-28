@@ -3233,8 +3233,18 @@
     }
   }
 
-  // src/levels/level-group-01.js
+  // src/levels/level-group-01.ts
   class LevelGroup01 extends GameObject {
+    alternateShip;
+    difficultyMultiplier;
+    width;
+    height;
+    boss;
+    game;
+    levelName;
+    rowCount;
+    ships;
+    scripts;
     constructor(parent, game, difficultyMultiplier, alternateShip, rowCount, levelName) {
       super(parent);
       this.alternateShip = alternateShip;
@@ -3311,7 +3321,8 @@
       this.ships.push(ship);
     }
     newBossShip() {
-      const boss = window.boss = new ArrowBoss(this, this.difficultyMultiplier);
+      const boss = new ArrowBoss(this, this.difficultyMultiplier);
+      window.boss = boss;
       const gameWidth = this.game.width;
       const bossWidth = boss.sprite.width;
       boss.position.x = -this.game.width / 2;
@@ -3358,7 +3369,7 @@
     }
   }
 
-  // src/levels/shop.js
+  // src/levels/shop.ts
   class Shop extends GameObject {
     isShop = true;
     index = 1;
@@ -3372,6 +3383,16 @@
     };
     menuSelectorPositions = [49, 64, 79, 94, 109];
     disabledColor = "#777";
+    game;
+    bank;
+    player;
+    input;
+    titleText;
+    selectorShip;
+    selectedMenuItem;
+    timeSinceSelected;
+    selecting;
+    isDoneShopping;
     constructor(parent, game) {
       super(parent);
       this.game = game;
@@ -3541,8 +3562,20 @@
     }
   }
 
-  // src/levels/level-manager.js
+  // src/levels/level-manager.ts
   class LevelManager extends GameObject {
+    game;
+    width;
+    height;
+    player;
+    levelNameCounter;
+    difficultyMultiplier;
+    running;
+    complete;
+    currentLevel = null;
+    shop;
+    levels;
+    levelIndex;
     constructor(parent, game) {
       super(parent);
       this.game = game;
@@ -3584,7 +3617,9 @@
     }
     stop() {
       this.running = false;
-      this.removeChild(this.currentLevel);
+      if (this.currentLevel) {
+        this.removeChild(this.currentLevel);
+      }
       this.currentLevel = null;
     }
     loadNextLevel() {
