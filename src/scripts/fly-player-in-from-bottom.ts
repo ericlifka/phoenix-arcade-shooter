@@ -1,16 +1,26 @@
 import GameObject from '../models/game-object.js';
+import type PlayerControlledShip from '../ships/player-controlled-ship.js';
+
+interface GameWithPlayer {
+    width: number;
+    height: number;
+    player: PlayerControlledShip;
+}
 
 export default class FlyPlayerInFromBottom extends GameObject {
-    constructor(parent, game) {
+    game: GameWithPlayer;
+    player: PlayerControlledShip;
+
+    constructor(parent: GameObject | null | undefined, game: GameWithPlayer) {
         super(parent);
 
         this.game = game;
         this.player = game.player;
-        
+
         this.reset();
     }
 
-    start() {
+    start(): this {
         this.player.preventInputControl = true;
 
         const position = this.player.position;
@@ -24,7 +34,7 @@ export default class FlyPlayerInFromBottom extends GameObject {
         return this;
     }
 
-    update(dtime) {
+    update(dtime: number): void {
         super.update(dtime);
 
         if (this.player.position.y < this.game.height - this.player.sprite.height - 2) {

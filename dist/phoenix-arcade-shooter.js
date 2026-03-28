@@ -2581,8 +2581,10 @@
     }
   }
 
-  // src/scripts/fly-player-in-from-bottom.js
+  // src/scripts/fly-player-in-from-bottom.ts
   class FlyPlayerInFromBottom extends GameObject {
+    game;
+    player;
     constructor(parent, game) {
       super(parent);
       this.game = game;
@@ -2787,17 +2789,27 @@
     }
   }
 
-  // src/scripts/chain-gun-fire.js
+  // src/scripts/chain-gun-fire.ts
   class ChainGunFire extends GameObject {
+    ship;
+    gunIndex;
+    fireRate;
+    burstSize;
+    thresholdMin;
+    thresholdMax;
+    elapsed;
+    threshold;
+    firing;
+    burstCount;
     constructor(parent, ship, options) {
       super(parent);
-      options = options || {};
+      const opts = options || {};
       this.ship = ship;
-      this.gunIndex = options.gunIndex || 0;
-      this.fireRate = options.fireRate || 150;
-      this.burstSize = options.burstSize || 5;
-      this.thresholdMin = options.thresholdMin || 2000;
-      this.thresholdMax = options.thresholdMax || 6000;
+      this.gunIndex = opts.gunIndex ?? 0;
+      this.fireRate = opts.fireRate ?? 150;
+      this.burstSize = opts.burstSize ?? 5;
+      this.thresholdMin = opts.thresholdMin ?? 2000;
+      this.thresholdMax = opts.thresholdMax ?? 6000;
       this.reset();
     }
     start() {
@@ -2917,15 +2929,21 @@
     }
   }
 
-  // src/scripts/fire-single-gun-random-rate.js
+  // src/scripts/fire-single-gun-random-rate.ts
   class FireSingleGunRandomRate extends GameObject {
+    ship;
+    gunIndex;
+    thresholdMin;
+    thresholdMax;
+    elapsed;
+    threshold;
     constructor(parent, ship, options) {
       super(parent);
-      options = options || {};
+      const opts = options || {};
       this.ship = ship;
-      this.gunIndex = options.gunIndex || 0;
-      this.thresholdMin = options.thresholdMin || 1000;
-      this.thresholdMax = options.thresholdMax || 3000;
+      this.gunIndex = opts.gunIndex ?? 0;
+      this.thresholdMin = opts.thresholdMin ?? 1000;
+      this.thresholdMax = opts.thresholdMax ?? 3000;
       this.reset();
     }
     start() {
@@ -3099,8 +3117,13 @@
     }
   }
 
-  // src/scripts/move-object-to-point.js
+  // src/scripts/move-object-to-point.ts
   class MoveObjectToPoint extends GameObject {
+    object;
+    target;
+    delta;
+    xPositive;
+    yPositive;
     constructor(parent, object, targetPoint, timeDelta) {
       super(parent);
       this.object = object;
@@ -3177,16 +3200,18 @@
     }
   }
 
-  // src/scripts/watch-for-death.js
+  // src/scripts/watch-for-death.ts
   class WatchForDeath extends GameObject {
+    entity;
+    callback;
+    started = false;
     constructor(parent, entity, callback) {
       super(parent);
       this.entity = entity;
       this.callback = callback;
-      this.started = false;
       this.reset();
     }
-    update() {
+    update(_dtime) {
       if (this.entity.destroyed && this.started) {
         this.started = false;
         this.callback();

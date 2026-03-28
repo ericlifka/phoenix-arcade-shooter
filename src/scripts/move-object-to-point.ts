@@ -1,17 +1,34 @@
 import GameObject from '../models/game-object.js';
+import { Position } from '../types/rendering';
+
+type MovableObject = GameObject & {
+    position: Position;
+    velocity: { x: number; y: number };
+};
 
 export default class MoveObjectToPoint extends GameObject {
-    constructor(parent, object, targetPoint, timeDelta) {
+    object: MovableObject;
+    target: Position;
+    delta: number;
+    xPositive!: boolean;
+    yPositive!: boolean;
+
+    constructor(
+        parent: GameObject | null | undefined,
+        object: MovableObject,
+        targetPoint: Position,
+        timeDelta: number
+    ) {
         super(parent);
 
         this.object = object;
         this.target = targetPoint;
         this.delta = timeDelta;
-        
+
         this.reset();
     }
 
-    start() {
+    start(): void {
         const current = this.object.position;
 
         const xDiff = this.target.x - current.x;
@@ -24,7 +41,7 @@ export default class MoveObjectToPoint extends GameObject {
         this.yPositive = yDiff > 0;
     }
 
-    update(dtime) {
+    update(dtime: number): void {
         super.update(dtime);
 
         if (this.metXThreshold() && this.metYThreshold()) {
@@ -34,21 +51,21 @@ export default class MoveObjectToPoint extends GameObject {
             this.object.position.x = this.target.x;
             this.object.position.y = this.target.y;
 
-            this.parent.removeChild(this);
+            this.parent!.removeChild(this);
         }
     }
 
-    metXThreshold() {
+    metXThreshold(): boolean {
         return (
-            this.xPositive && this.object.position.x >= this.target.x ||
-            !this.xPositive && this.object.position.x <= this.target.x
+            (this.xPositive && this.object.position.x >= this.target.x) ||
+            (!this.xPositive && this.object.position.x <= this.target.x)
         );
     }
 
-    metYThreshold() {
+    metYThreshold(): boolean {
         return (
-            this.yPositive && this.object.position.y >= this.target.y ||
-            !this.yPositive && this.object.position.y <= this.target.y
+            (this.yPositive && this.object.position.y >= this.target.y) ||
+            (!this.yPositive && this.object.position.y <= this.target.y)
         );
     }
 }
