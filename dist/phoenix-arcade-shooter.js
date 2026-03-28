@@ -2278,7 +2278,7 @@
     }
   }
 
-  // src/screens/controls-description.js
+  // src/screens/controls-description.ts
   class ControlsDescription extends GameObject {
     headerDef = {
       font: "arcade",
@@ -2347,8 +2347,13 @@
     });
   }
 
-  // src/screens/slim-title-screen.js
+  // src/screens/slim-title-screen.ts
   class SlimTitleScreen extends GameObject {
+    selectedMenuItem;
+    timeSinceSelected;
+    selecting;
+    selectorShip;
+    selectorRight;
     constructor(parent) {
       super(parent);
       this.reset();
@@ -2437,7 +2442,7 @@
     }
   }
 
-  // src/screens/game-over-screen.js
+  // src/screens/game-over-screen.ts
   class GameOverScreen extends GameObject {
     resultMessage = {
       font: "arcade",
@@ -2446,7 +2451,7 @@
     };
     headerDef = {
       font: "arcade-small",
-      border: 1,
+      border: true,
       padding: 20,
       message: "< hit enter >",
       position: { x: 55, y: 45 }
@@ -2462,6 +2467,11 @@
       color: "yellow",
       position: { x: 111, y: 77 }
     };
+    result;
+    header;
+    subHeader;
+    scoreDisplay;
+    inputEvents;
     constructor(parent) {
       super(parent);
       this.result = new TextDisplay(this, this.resultMessage);
