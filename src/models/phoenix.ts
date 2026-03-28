@@ -19,15 +19,12 @@ import type { GameForLevels, GameForShop } from '../types/levels.js';
 export interface PhoenixOptions {
     width: number;
     height: number;
-    embedded?: boolean;
-    container?: HTMLElement;
 }
 
 export default class Phoenix extends GameObject implements GameForLevels, GameForShop {
     FILL_COLOR = '#000031';
     interfaceColor = '#ffd';
 
-    embedded: boolean;
     width: number;
     height: number;
 
@@ -50,7 +47,6 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
     constructor(options: PhoenixOptions) {
         super(null);
 
-        this.embedded = !!options.embedded;
         this.width = options.width;
         this.height = options.height;
 

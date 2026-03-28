@@ -45,10 +45,9 @@ export interface Dimensions {
     height: number;
 }
 
-// Game dimensions with optional container and embedded flag
+// Renderer / canvas dimensions (optional container for mounting the canvas)
 export interface GameDimensions extends Dimensions {
     container?: HTMLElement;
-    embedded?: boolean;
 }
 
 // Animation options

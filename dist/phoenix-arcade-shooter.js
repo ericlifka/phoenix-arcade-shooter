@@ -3880,7 +3880,6 @@
   class Phoenix extends GameObject {
     FILL_COLOR = "#000031";
     interfaceColor = "#ffd";
-    embedded;
     width;
     height;
     titleScreen;
@@ -3899,7 +3898,6 @@
     gameOverCallback;
     constructor(options) {
       super(null);
-      this.embedded = !!options.embedded;
       this.width = options.width;
       this.height = options.height;
       this.titleScreen = new SlimTitleScreen(this);

@@ -1,10 +1,8 @@
 /**
  * Build script for Phoenix Arcade Shooter v2
- * Uses Bun's bundler to create ES module bundles
- * 
- * Creates two bundles:
- * - phoenix-arcade-shooter.js (main game with auto-start)
- * - phoenix-arcade-shooter-embedded.js (for embedding in other pages)
+ * Uses Bun's bundler to create the browser bundle.
+ *
+ * Output: dist/phoenix-arcade-shooter.js (IIFE, auto-starts from main.ts)
  */
 
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
@@ -27,7 +25,7 @@ console.log('   ✓ favicon.ico');
 console.log('   ✓ game.css\n');
 
 // Build main bundle using Bun's bundler
-console.log('🔨 Building main bundle with Bun...');
+console.log('🔨 Building bundle with Bun...');
 const mainResult = await Bun.build({
   entrypoints: ['./src/main.ts'],
   outdir: DIST_DIR,
@@ -39,30 +37,11 @@ const mainResult = await Bun.build({
 });
 
 if (!mainResult.success) {
-  console.error('❌ Main bundle build failed:');
+  console.error('❌ Bundle build failed:');
   mainResult.logs.forEach(log => console.error(log));
   process.exit(1);
 }
 console.log('   ✓ phoenix-arcade-shooter.js\n');
-
-// Build embedded bundle
-console.log('🔨 Building embedded bundle with Bun...');
-const embeddedResult = await Bun.build({
-  entrypoints: ['./src/embedded.ts'],
-  outdir: DIST_DIR,
-  naming: 'phoenix-arcade-shooter-embedded.js',
-  target: 'browser',
-  format: 'iife',
-  minify: false,
-  sourcemap: 'none',
-});
-
-if (!embeddedResult.success) {
-  console.error('❌ Embedded bundle build failed:');
-  embeddedResult.logs.forEach(log => console.error(log));
-  process.exit(1);
-}
-console.log('   ✓ phoenix-arcade-shooter-embedded.js\n');
 
 // Process HTML
 console.log('📝 Processing HTML...');
@@ -79,9 +58,5 @@ console.log('   ✓ index.html\n');
 console.log('✅ Build complete!');
 console.log(`   Output directory: ${DIST_DIR}`);
 
-// Get file sizes
 const mainSize = Bun.file(join(DIST_DIR, 'phoenix-arcade-shooter.js')).size;
-const embeddedSize = Bun.file(join(DIST_DIR, 'phoenix-arcade-shooter-embedded.js')).size;
-
-console.log(`   Main bundle: ${(mainSize / 1024).toFixed(2)} KB`);
-console.log(`   Embedded bundle: ${(embeddedSize / 1024).toFixed(2)} KB`);
+console.log(`   Bundle: ${(mainSize / 1024).toFixed(2)} KB`);
