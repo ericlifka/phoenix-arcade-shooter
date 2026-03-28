@@ -3,6 +3,7 @@ import MuzzleFlash from '../components/muzzle-flash.js';
 import shipSprite from '../sprites/arrow-ship.js';
 import daggerSprite from '../sprites/dagger-ship.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
+import { Position } from '../types/rendering';
 
 export default class ArrowShip extends GameObject {
     isPhysicalEntity = true;
@@ -10,14 +11,22 @@ export default class ArrowShip extends GameObject {
     team = 1;
     index = 5;
 
-    constructor(parent, difficultyMultiplier, alternateShip) {
+    difficultyMultiplier!: number;
+    alternateShip!: boolean;
+    explosion!: () => unknown;
+    sprite!: any;
+    gun!: Position;
+    position!: Position;
+    velocity!: { x: number; y: number };
+
+    constructor(parent: GameObject | null | undefined, difficultyMultiplier: number, alternateShip: boolean) {
         super(parent);
         this.difficultyMultiplier = difficultyMultiplier;
         this.alternateShip = alternateShip;
         this.reset();
     }
 
-    reset() {
+    reset(): void {
         super.reset();
 
         if (this.alternateShip) {
@@ -27,7 +36,7 @@ export default class ArrowShip extends GameObject {
         }
 
         this.explosion = shipExplosion;
-        this.gun = this.sprite.meta.guns[ 0 ];
+        this.gun = this.sprite.meta.guns[0];
 
         this.position = { x: 0, y: 0 };
         this.velocity = { x: 0, y: 0 };
@@ -37,7 +46,7 @@ export default class ArrowShip extends GameObject {
         this.life = this.difficultyMultiplier;
     }
 
-    fire() {
+    fire(): void {
         const position = {
             x: this.position.x + this.gun.x,
             y: this.position.y + this.gun.y
@@ -53,12 +62,12 @@ export default class ArrowShip extends GameObject {
         this.addChild(new MuzzleFlash(this, this.gun));
     }
 
-    applyDamage(damage, sourceEntity) {
+    applyDamage(damage: number, sourceEntity?: GameObject): void {
         this.triggerEvent('enemyHit');
         super.applyDamage(damage, sourceEntity);
     }
 
-    destroy() {
+    destroy(): void {
         this.triggerEvent('enemyDestroyed', {
             shipValue: this.maxLife
         });

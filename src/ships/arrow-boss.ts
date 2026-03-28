@@ -2,6 +2,7 @@ import GameObject from '../models/game-object.js';
 import shipSprite from '../sprites/arrow-boss.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
 import MuzzleFlash from '../components/muzzle-flash.js';
+import { Position } from '../types/rendering';
 
 export default class ArrowBoss extends GameObject {
     isPhysicalEntity = true;
@@ -9,13 +10,20 @@ export default class ArrowBoss extends GameObject {
     team = 1;
     index = 5;
 
-    constructor(parent, difficultyMultiplier) {
+    difficultyMultiplier!: number;
+    explosion!: () => unknown;
+    sprite!: any;
+    guns!: Position[];
+    position!: Position;
+    velocity!: { x: number; y: number };
+
+    constructor(parent: GameObject | null | undefined, difficultyMultiplier: number) {
         super(parent);
         this.difficultyMultiplier = difficultyMultiplier;
         this.reset();
     }
 
-    reset() {
+    reset(): void {
         super.reset();
 
         this.sprite = shipSprite().rotateRight();
@@ -30,8 +38,8 @@ export default class ArrowBoss extends GameObject {
         this.maxLife = 20 * this.difficultyMultiplier;
     }
 
-    fire(gunIndex) {
-        const gun = this.guns[ gunIndex ];
+    fire(gunIndex: number): void {
+        const gun = this.guns[gunIndex];
 
         const position = {
             x: this.position.x + gun.x,
@@ -48,12 +56,12 @@ export default class ArrowBoss extends GameObject {
         this.addChild(new MuzzleFlash(this, gun));
     }
 
-    applyDamage(damage, sourceEntity) {
+    applyDamage(damage: number, sourceEntity?: GameObject): void {
         this.triggerEvent('enemyHit');
         super.applyDamage(damage, sourceEntity);
     }
 
-    destroy() {
+    destroy(): void {
         this.triggerEvent('enemyDestroyed', {
             shipValue: this.maxLife
         });

@@ -2732,12 +2732,18 @@
     }
   }
 
-  // src/ships/arrow-boss.js
+  // src/ships/arrow-boss.ts
   class ArrowBoss extends GameObject {
     isPhysicalEntity = true;
     BULLET_SPEED = 120;
     team = 1;
     index = 5;
+    difficultyMultiplier;
+    explosion;
+    sprite;
+    guns;
+    position;
+    velocity;
     constructor(parent, difficultyMultiplier) {
       super(parent);
       this.difficultyMultiplier = difficultyMultiplier;
@@ -2851,12 +2857,19 @@
     });
   }
 
-  // src/ships/arrow-ship.js
+  // src/ships/arrow-ship.ts
   class ArrowShip extends GameObject {
     isPhysicalEntity = true;
     BULLET_SPEED = 100;
     team = 1;
     index = 5;
+    difficultyMultiplier;
+    alternateShip;
+    explosion;
+    sprite;
+    gun;
+    position;
+    velocity;
     constructor(parent, difficultyMultiplier, alternateShip) {
       super(parent);
       this.difficultyMultiplier = difficultyMultiplier;
@@ -3626,11 +3639,28 @@
     });
   }
 
-  // src/ships/player-controlled-ship.js
+  // src/ships/player-controlled-ship.ts
   class PlayerControlledShip extends GameObject {
     type = "player";
     isPhysicalEntity = true;
     index = 5;
+    explosion;
+    sprite;
+    position;
+    velocity;
+    damageUpgrades = 0;
+    lifeUpgrades = 0;
+    rateUpgrades = 0;
+    wingGunsUnlocked = false;
+    SPEED = 50;
+    BULLET_SPEED = 100;
+    FIRE_RATE = 500;
+    preventInputControl = true;
+    exploding = false;
+    team = 0;
+    damage = 5;
+    timeSinceFired = 0;
+    firing;
     constructor(parent) {
       super(parent);
       this.reset();
@@ -3696,11 +3726,14 @@
       if (this.position.y < 0) {
         this.position.y = 0;
       }
-      if (this.position.x + this.sprite.width > this.parent.width) {
-        this.position.x = this.parent.width - this.sprite.width;
-      }
-      if (this.position.y + this.sprite.height > this.parent.height) {
-        this.position.y = this.parent.height - this.sprite.height;
+      const parent = this.parent;
+      if (parent && this.sprite) {
+        if (this.position.x + this.sprite.width > parent.width) {
+          this.position.x = parent.width - this.sprite.width;
+        }
+        if (this.position.y + this.sprite.height > parent.height) {
+          this.position.y = parent.height - this.sprite.height;
+        }
       }
     }
     fire() {
