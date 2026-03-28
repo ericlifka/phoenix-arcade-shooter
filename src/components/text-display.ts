@@ -1,9 +1,9 @@
 import GameObject from '../models/game-object.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
-import Sprite from '../../libs/pxlr-core/core/sprite.js';
-import arcadeFont from '../../libs/pxlr-fonts/fonts/arcade.js';
-import arcadeSmallFont from '../../libs/pxlr-fonts/fonts/arcade-small.js';
-import phoenixFont from '../../libs/pxlr-fonts/fonts/phoenix.js';
+import Sprite from '../rendering/core/sprite.js';
+import arcadeFont from '../rendering/fonts/arcade.js';
+import arcadeSmallFont from '../rendering/fonts/arcade-small.js';
+import phoenixFont from '../rendering/fonts/phoenix.js';
 import { TextDisplayOptions } from '../types/game';
 import { Font } from '../types/rendering';
 

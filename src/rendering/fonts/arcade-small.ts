@@ -1,4 +1,4 @@
-import Sprite from '../../pxlr-core/core/sprite.js';
+import Sprite from '../core/sprite.js';
 
 const w = "white";
 const n = null;

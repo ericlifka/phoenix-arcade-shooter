@@ -1,4 +1,4 @@
-import Sprite from '../../libs/pxlr-core/core/sprite.js';
+import Sprite from '../rendering/core/sprite.js';
 
 /**
  * Creates an alternate enemy dagger ship sprite (grayscale dagger shape pointing down)

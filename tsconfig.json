@@ -37,7 +37,6 @@
   },
   "include": [
     "src/**/*",
-    "libs/**/*",
     "build.ts",
     "dev-server.ts"
   ],

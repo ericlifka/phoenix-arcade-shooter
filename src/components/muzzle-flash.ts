@@ -1,6 +1,6 @@
-import Animation from '../../libs/pxlr-core/core/animation.js';
+import Animation from '../rendering/core/animation.js';
 import GameObject from '../models/game-object.js';
-import Sprite from '../../libs/pxlr-core/core/sprite.js';
+import Sprite from '../rendering/core/sprite.js';
 import { Position } from '../types/rendering';
 
 const shades = [

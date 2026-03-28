@@ -2,8 +2,10 @@ import CellGrid from './cell-grid.js';
 
 export default class Sprite extends CellGrid {
     finished = true;
+    meta: Record<string, unknown>;
+    offsetAdjustment: { x: number; y: number };
 
-    constructor(pixels, meta) {
+    constructor(pixels: (string | null)[][], meta?: Record<string, unknown>) {
         super();
         this.meta = meta || {};
         this.width = pixels.length;
@@ -23,7 +25,7 @@ export default class Sprite extends CellGrid {
         }
     }
 
-    setPermanentOffset(offset) {
+    setPermanentOffset(offset?: { x?: number; y?: number }): this {
         offset = offset || {};
         this.offsetAdjustment.x = offset.x || 0;
         this.offsetAdjustment.y = offset.y || 0;
@@ -31,7 +33,7 @@ export default class Sprite extends CellGrid {
         return this;
     }
 
-    applyColor(color) {
+    applyColor(color: string): this {
         this.iterateCells(function (cell) {
             if (cell.color) {
                 cell.color = color;
@@ -41,14 +43,14 @@ export default class Sprite extends CellGrid {
         return this;
     }
 
-    update(dtime) {
+    update(_dtime: number): void {
         /*
          sprites ignore updates by default, but accept the event
          so that the api signature of sprites and animations matches
          */
     }
 
-    renderToFrame(frame, x, y, index) {
+    renderToFrame(frame: any, x: number, y: number, index: number): void {
         index = index || 0;
         const offset_x = this.offsetAdjustment.x;
         const offset_y = this.offsetAdjustment.y;
@@ -63,8 +65,8 @@ export default class Sprite extends CellGrid {
         });
     }
 
-    clone() {
-        const colorGrid = [];
+    clone(): Sprite {
+        const colorGrid: (string | null)[][] = [];
         for (let x = 0; x < this.width; x++) {
             colorGrid[x] = [];
             for (let y = 0; y < this.height; y++) {
@@ -78,12 +80,13 @@ export default class Sprite extends CellGrid {
         return sprite;
     }
 
-    rotateLeft() {
+    rotateLeft(): this {
         const width = this.width;
         const height = this.height;
         const oldCells = this.cells;
-        const newCells = [];
-        let x, y;
+        const newCells: typeof this.cells = [];
+        let x: number;
+        let y: number;
 
         for (x = 0; x < height; x++) {
             newCells[x] = [];
@@ -105,14 +108,14 @@ export default class Sprite extends CellGrid {
         return this;
     }
 
-    rotateRight() {
+    rotateRight(): this {
         return this
             .rotateLeft()
             .rotateLeft()
             .rotateLeft();
     }
 
-    invertX() {
+    invertX(): this {
         for (let x = 0; x < this.width / 2; x++) {
             const left = this.cells[x];
             const right = this.cells[this.width - x - 1];
@@ -122,7 +125,7 @@ export default class Sprite extends CellGrid {
         return this;
     }
 
-    invertY() {
+    invertY(): this {
         for (let x = 0; x < this.width; x++) {
             this.cells[x].reverse();
         }

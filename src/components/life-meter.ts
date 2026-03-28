@@ -1,6 +1,6 @@
 import GameObject from '../models/game-object.js';
 import { GreenToRed, colorAtPercent } from '../helpers/gradients.js';
-import Sprite from '../../libs/pxlr-core/core/sprite.js';
+import Sprite from '../rendering/core/sprite.js';
 import { LifeMeterOptions } from '../types/game';
 import { Anchor } from '../types/rendering';
 

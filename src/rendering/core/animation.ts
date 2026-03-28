@@ -1,7 +1,21 @@
+import Sprite from './sprite.js';
+
 export default class Animation {
     finished = false;
-    
-    constructor(options) {
+    frames: Sprite[];
+    millisPerFrame: number;
+    currentFrame: number;
+    loop?: boolean;
+    width: number;
+    height: number;
+    millisEllapsedOnFrame = 0;
+
+    constructor(options: {
+        frames: Sprite[];
+        millisPerFrame?: number;
+        offsetIndex?: number;
+        loop?: boolean;
+    }) {
         this.frames = options.frames;
         this.millisPerFrame = options.millisPerFrame || 100;
         this.currentFrame = options.offsetIndex || 0;
@@ -9,10 +23,9 @@ export default class Animation {
 
         this.width = this.frames[0].width;
         this.height = this.frames[0].height;
-        this.millisEllapsedOnFrame = 0;
     }
 
-    update(dtime) {
+    update(dtime: number): void {
         if (this.finished) return;
 
         this.millisEllapsedOnFrame += dtime;
@@ -32,7 +45,7 @@ export default class Animation {
         }
     }
 
-    renderToFrame(frame, x, y, index) {
+    renderToFrame(frame: any, x: number, y: number, index: number): void {
         if (this.finished) return;
 
         this.frames[this.currentFrame].renderToFrame(frame, x, y, index);

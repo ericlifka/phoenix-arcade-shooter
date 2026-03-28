@@ -1,4 +1,4 @@
-import Sprite from '../../libs/pxlr-core/core/sprite.js';
+import Sprite from '../rendering/core/sprite.js';
 
 /**
  * Creates the arrow boss sprite (large enemy boss ship)

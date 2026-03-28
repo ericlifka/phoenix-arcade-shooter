@@ -21,8 +21,11 @@
   // src/embedded.ts
   var exports_embedded = {};
 
-  // libs/pxlr-core/core/cell-grid.js
+  // src/rendering/core/cell-grid.ts
   class CellGrid {
+    width;
+    height;
+    cells;
     iterateCells(handler) {
       for (let x = 0;x < this.width; x++) {
         for (let y = 0;y < this.height; y++) {
@@ -39,8 +42,9 @@
     }
   }
 
-  // libs/pxlr-gl/gl/frame.js
+  // src/rendering/gl/frame.ts
   class Frame extends CellGrid {
+    fillColor;
     constructor(dimensions) {
       super();
       this.width = dimensions.width;
@@ -74,7 +78,7 @@
     }
   }
 
-  // libs/pxlr-gl/gl/canvas.js
+  // src/rendering/gl/canvas.ts
   function maximumPixelSize(width, height) {
     const maxWidth = window.innerWidth;
     const maxHeight = window.innerHeight;
@@ -105,7 +109,13 @@
     width = 80;
     height = 50;
     pixelSize = 1;
+    fullWidth;
+    fullHeight;
     nextFrame = 0;
+    container;
+    canvas;
+    canvasDrawContext;
+    frames;
     constructor(options) {
       options = options || {};
       this.width = options.width || this.width;
@@ -426,9 +436,16 @@
     });
   }
 
-  // libs/pxlr-core/core/animation.js
+  // src/rendering/core/animation.ts
   class Animation {
     finished = false;
+    frames;
+    millisPerFrame;
+    currentFrame;
+    loop;
+    width;
+    height;
+    millisEllapsedOnFrame = 0;
     constructor(options) {
       this.frames = options.frames;
       this.millisPerFrame = options.millisPerFrame || 100;
@@ -436,7 +453,6 @@
       this.loop = options.loop;
       this.width = this.frames[0].width;
       this.height = this.frames[0].height;
-      this.millisEllapsedOnFrame = 0;
     }
     update(dtime) {
       if (this.finished)
@@ -461,9 +477,11 @@
     }
   }
 
-  // libs/pxlr-core/core/sprite.js
+  // src/rendering/core/sprite.ts
   class Sprite extends CellGrid {
     finished = true;
+    meta;
+    offsetAdjustment;
     constructor(pixels, meta) {
       super();
       this.meta = meta || {};
@@ -496,7 +514,7 @@
       });
       return this;
     }
-    update(dtime) {}
+    update(_dtime) {}
     renderToFrame(frame, x, y, index) {
       index = index || 0;
       const offset_x = this.offsetAdjustment.x;
@@ -528,7 +546,8 @@
       const height = this.height;
       const oldCells = this.cells;
       const newCells = [];
-      let x, y;
+      let x;
+      let y;
       for (x = 0;x < height; x++) {
         newCells[x] = [];
       }
@@ -623,8 +642,12 @@
     });
   }
 
-  // libs/pxlr-core/core/sprite-group.js
+  // src/rendering/core/sprite-group.ts
   class SpriteGroup {
+    spriteDescriptors;
+    width;
+    height;
+    finished = false;
     constructor(sprites) {
       this.spriteDescriptors = sprites || [];
       this.width = Math.max.apply(null, this.spriteDescriptors.map(function(descriptor) {
@@ -673,7 +696,7 @@
     ]);
   }
 
-  // libs/pxlr-fonts/fonts/arcade.js
+  // src/rendering/fonts/arcade.ts
   var w = "white";
   var n2 = null;
   var arcade_default = {
@@ -1265,7 +1288,7 @@
     ]).invertY().rotateRight()
   };
 
-  // libs/pxlr-fonts/fonts/arcade-small.js
+  // src/rendering/fonts/arcade-small.ts
   var w2 = "white";
   var n3 = null;
   var arcade_small_default = {
@@ -1652,7 +1675,7 @@
     ])
   };
 
-  // libs/pxlr-fonts/fonts/phoenix.js
+  // src/rendering/fonts/phoenix.ts
   var w3 = "white";
   var n4 = null;
   var phoenix_default = {

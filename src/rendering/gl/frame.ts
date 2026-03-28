@@ -1,7 +1,9 @@
-import CellGrid from '../../pxlr-core/core/cell-grid.js';
+import CellGrid from '../core/cell-grid.js';
 
 export default class Frame extends CellGrid {
-    constructor(dimensions) {
+    fillColor?: string;
+
+    constructor(dimensions: { width: number; height: number; pixelSize: number }) {
         super();
         this.width = dimensions.width;
         this.height = dimensions.height;
@@ -16,14 +18,14 @@ export default class Frame extends CellGrid {
                     y: y,
                     render_x: x * dimensions.pixelSize,
                     render_y: y * dimensions.pixelSize,
-                    color: "#000000",
+                    color: '#000000',
                     index: -1
                 };
             }
         }
     }
 
-    clear() {
+    clear(): void {
         const color = this.fillColor;
         if (color) {
             this.iterateCells(function (cell) {
@@ -33,7 +35,7 @@ export default class Frame extends CellGrid {
         }
     }
 
-    setFillColor(fillColor) {
+    setFillColor(fillColor: string): void {
         this.fillColor = fillColor;
     }
 }

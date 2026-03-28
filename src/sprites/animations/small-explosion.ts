@@ -1,6 +1,6 @@
-import Animation from '../../../libs/pxlr-core/core/animation.js';
+import Animation from '../../rendering/core/animation.js';
 import { integer } from '../../helpers/random.js';
-import Sprite from '../../../libs/pxlr-core/core/sprite.js';
+import Sprite from '../../rendering/core/sprite.js';
 
 const n = null;
 const y = "yellow";

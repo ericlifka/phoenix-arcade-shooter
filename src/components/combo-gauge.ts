@@ -2,7 +2,7 @@ import GameObject from '../models/game-object.js';
 import { GreenToRed, colorAtPercent } from '../helpers/gradients.js';
 import frameSprite from '../sprites/combo-gauge.js';
 import padScoreDisplay from '../helpers/pad-score-display.js';
-import Sprite from '../../libs/pxlr-core/core/sprite.js';
+import Sprite from '../rendering/core/sprite.js';
 import TextDisplay from './text-display.js';
 import { ComboGaugeOptions } from '../types/game';
 

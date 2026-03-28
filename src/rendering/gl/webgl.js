@@ -1,3 +1,7 @@
+/**
+ * Legacy WebGL renderer experiment (DefineModule / DefineClass). Not imported by the game bundle.
+ * Kept as JavaScript for a future ES-module port. Depends on simple-web-modules-style loaders + `require`.
+ */
 DefineModule('pxlr/gl/webgl', function (require) {
   var Frame = require('pxlr/gl/frame');
 

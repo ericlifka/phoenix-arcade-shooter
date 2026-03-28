@@ -1,6 +1,6 @@
 import { integer } from '../../helpers/random.js';
 import smallExplosion from './small-explosion.js';
-import SpriteGroup from '../../../libs/pxlr-core/core/sprite-group.js';
+import SpriteGroup from '../../rendering/core/sprite-group.js';
 import { Position } from '../../types/rendering';
 
 /**

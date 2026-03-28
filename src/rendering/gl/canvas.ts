@@ -1,6 +1,6 @@
 import Frame from './frame.js';
 
-function maximumPixelSize(width, height) {
+function maximumPixelSize(width: number, height: number): number {
     const maxWidth = window.innerWidth;
     const maxHeight = window.innerHeight;
     let pixelSize = 1;
@@ -22,7 +22,7 @@ function maximumPixelSize(width, height) {
     return pixelSize;
 }
 
-function createCanvasEl(dimensions) {
+function createCanvasEl(dimensions: CanvasRenderer): HTMLCanvasElement {
     dimensions.fullWidth = dimensions.width * dimensions.pixelSize;
     dimensions.fullHeight = dimensions.height * dimensions.pixelSize;
 
@@ -38,9 +38,15 @@ export default class CanvasRenderer {
     width = 80;
     height = 50;
     pixelSize = 1;
+    fullWidth!: number;
+    fullHeight!: number;
     nextFrame = 0;
+    container!: HTMLElement;
+    canvas!: HTMLCanvasElement;
+    canvasDrawContext!: CanvasRenderingContext2D;
+    frames!: Frame[];
 
-    constructor(options) {
+    constructor(options?: { width?: number; height?: number; container?: HTMLElement }) {
         options = options || {};
 
         this.width = options.width || this.width;
@@ -51,18 +57,18 @@ export default class CanvasRenderer {
         this.canvas = createCanvasEl(this);
         this.container.appendChild(this.canvas);
 
-        this.canvasDrawContext = this.canvas.getContext("2d", { alpha: false });
+        this.canvasDrawContext = this.canvas.getContext('2d', { alpha: false })!;
         this.frames = [
             new Frame(this),
             new Frame(this)
         ];
     }
 
-    newRenderFrame() {
+    newRenderFrame(): Frame {
         return this.frames[this.nextFrame];
     }
 
-    renderFrame() {
+    renderFrame(): void {
         const frame = this.frames[this.nextFrame];
         const pixelSize = this.pixelSize;
         const ctx = this.canvasDrawContext;
@@ -84,7 +90,7 @@ export default class CanvasRenderer {
         this.nextFrame = +!this.nextFrame; // switch the frames
     }
 
-    setFillColor(fillColor) {
+    setFillColor(fillColor: string): void {
         this.frames.forEach(function (frame) {
             frame.setFillColor(fillColor);
         });

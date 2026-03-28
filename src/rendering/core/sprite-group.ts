@@ -1,5 +1,12 @@
+import Sprite from './sprite.js';
+
 export default class SpriteGroup {
-    constructor(sprites) {
+    spriteDescriptors: { x: number; y: number; sprite: Sprite }[];
+    width: number;
+    height: number;
+    finished = false;
+
+    constructor(sprites: { x: number; y: number; sprite: Sprite }[]) {
         this.spriteDescriptors = sprites || [];
 
         this.width = Math.max.apply(null, this.spriteDescriptors.map(function (descriptor) {
@@ -11,7 +18,7 @@ export default class SpriteGroup {
         }));
     }
 
-    update(dtime) {
+    update(dtime: number): void {
         let finished = true;
 
         this.spriteDescriptors.forEach(function (descriptor) {
@@ -25,7 +32,7 @@ export default class SpriteGroup {
         this.finished = finished;
     }
 
-    renderToFrame(frame, x, y, index) {
+    renderToFrame(frame: any, x: number, y: number, index: number): void {
         this.spriteDescriptors.forEach(function (descriptor) {
             descriptor.sprite.renderToFrame(
                 frame,

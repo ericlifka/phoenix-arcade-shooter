@@ -1,5 +1,5 @@
 import GameObject from '../models/game-object.js';
-import ArcadeFont from '../../libs/pxlr-fonts/fonts/arcade.js';
+import ArcadeFont from '../rendering/fonts/arcade.js';
 import { Position, Velocity } from '../types/rendering';
 
 /**

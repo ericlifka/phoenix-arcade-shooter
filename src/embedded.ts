@@ -1,4 +1,4 @@
-import CanvasRenderer from '../libs/pxlr-gl/gl/canvas.js';
+import CanvasRenderer from './rendering/gl/canvas.js';
 import GamepadController from './controllers/gamepad-input.js';
 import KeyboardController from './controllers/keyboard-input.js';
 import Phoenix from './models/phoenix.js';
