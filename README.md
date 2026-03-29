@@ -1,17 +1,56 @@
-# Phoenix - Pixel Rendered Arcade Shooter
+# Phoenix — Pixel-Rendered Arcade Shooter
 
-This project started out as an experiment in creating a rendering pipeline in javascript that would render pixels to a canvas element, like the old school consoles of yore.
+A Phoenix / Galaga–style space shooter built around a custom pixel pipeline: logical sprites are grids of colored cells drawn to a 2D canvas, closer to old console frame buffers than texture sprites.
 
-It's morphed into a Phoenix / Galaga style space shooter done in an old school pixel rendered style.
+## Requirements
 
-While silly it is fun to explore manual rendering over modern techniques such as sprites and direct gif rendering.
+- [Bun](https://bun.sh) (v1.x) — install and build tooling
 
-## Play
+## Development
 
-The current release version of the game is hosted here: [ericlifka.com/phoenix-arcade-shooter](http://www.ericlifka.com/phoenix-arcade-shooter/)
+From the repository root:
 
-## setup
+```bash
+bun install
+bun run dev
+```
 
-Development time setup is simple, just open `index.html` in a browser.
+This runs `build.ts` (bundles the game) and serves **`dist/`** at **http://localhost:3000**. Use that URL to play locally; opening the repo’s root **`index.html`** directly is not supported (it is only a template processed by the build into **`dist/index.html`**).
 
-`gulp` powers the build system, so to push releases simply use `gulp` and `gulp deploy`.
+### Scripts
+
+| Command | Purpose |
+|--------|---------|
+| `bun run dev` | Production build + static server on port 3000 |
+| `bun run build` | Emit **`dist/phoenix-arcade-shooter.js`**, **`dist/index.html`**, CSS, and favicon |
+| `bun run clean` | Remove the **`dist/`** directory |
+
+## Build output
+
+After **`bun run build`**, **`dist/`** contains the playable app:
+
+- **`index.html`** — loads **`phoenix-arcade-shooter.js`** (IIFE bundle from **`src/main.ts`**) and **`game.css`**
+- **`phoenix-arcade-shooter.js`** — full game bundle
+
+You can open **`dist/index.html`** in a browser or deploy the contents of **`dist/`** to any static host.
+
+## GitHub Pages
+
+The site is published with **GitHub Pages** using the **`/dist`** folder on the **`master`** branch (the repo serves the built assets from that path, not the repo root).
+
+To update the live game: run **`bun run build`**, commit the changes under **`dist/`**, and push to **`master`**.
+
+## Project layout (high level)
+
+- **`src/`** — game logic, UI, and assets in TypeScript
+- **`src/rendering/`** — low-level pixel engine (sprites, frame buffer, canvas renderer, bitmap fonts)
+- **`build.ts`** / **`dev-server.ts`** — Bun-based build and dev server
+- **`styles/`** — source CSS copied into **`dist/`** as **`game.css`**
+
+## Play (hosted)
+
+A build is also hosted here: [ericlifka.com/phoenix-arcade-shooter](http://www.ericlifka.com/phoenix-arcade-shooter/)
+
+## License
+
+MIT — see **`package.json`**.
