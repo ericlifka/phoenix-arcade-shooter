@@ -18,18 +18,18 @@ export default class EventedInput {
     private onFire: () => void;
     private onStart: () => void;
     private onSelect: () => void;
-    
+
     private upReleased: boolean = false;
     private downReleased: boolean = false;
     private fireReleased: boolean = false;
     private startReleased: boolean = false;
 
     constructor(options: EventedInputOptions) {
-        this.onUp = options.onUp || function () {};
-        this.onDown = options.onDown || function () {};
-        this.onFire = options.onFire || function () {};
-        this.onStart = options.onStart || function () {};
-        this.onSelect = options.onSelect || function () {};
+        this.onUp = options.onUp || function () { };
+        this.onDown = options.onDown || function () { };
+        this.onFire = options.onFire || function () { };
+        this.onStart = options.onStart || function () { };
+        this.onSelect = options.onSelect || function () { };
 
         this.reset();
     }

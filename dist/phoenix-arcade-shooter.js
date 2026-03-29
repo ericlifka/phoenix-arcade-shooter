@@ -2445,8 +2445,8 @@
     createShipSelectors() {
       this.selectorShip = new GameObject;
       this.selectorRight = new GameObject;
-      this.selectorShip.sprite = new arrowShipSprite;
-      this.selectorRight.sprite = new arrowShipSprite().invertX();
+      this.selectorShip.sprite = arrowShipSprite();
+      this.selectorRight.sprite = arrowShipSprite().invertX();
       this.selectorShip.position = { x: 70, y: 80 };
       this.selectorRight.position = { x: 120, y: 80 };
       this.addChild(this.selectorShip);

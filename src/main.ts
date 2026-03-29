@@ -54,4 +54,4 @@ window.addEventListener('focus', function () {
 runLoop.start();
 window.activeGame = phoenix;
 
-export {};
+export { };

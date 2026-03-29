@@ -12,7 +12,7 @@ const DIST_DIR = './dist';
 
 // Ensure dist directory exists
 if (!existsSync(DIST_DIR)) {
-  mkdirSync(DIST_DIR, { recursive: true });
+    mkdirSync(DIST_DIR, { recursive: true });
 }
 
 console.log('🎮 Building Phoenix Arcade Shooter v2...\n');
@@ -27,19 +27,19 @@ console.log('   ✓ game.css\n');
 // Build main bundle using Bun's bundler
 console.log('🔨 Building bundle with Bun...');
 const mainResult = await Bun.build({
-  entrypoints: ['./src/main.ts'],
-  outdir: DIST_DIR,
-  naming: 'phoenix-arcade-shooter.js',
-  target: 'browser',
-  format: 'iife',
-  minify: false,
-  sourcemap: 'none',
+    entrypoints: ['./src/main.ts'],
+    outdir: DIST_DIR,
+    naming: 'phoenix-arcade-shooter.js',
+    target: 'browser',
+    format: 'iife',
+    minify: false,
+    sourcemap: 'none',
 });
 
 if (!mainResult.success) {
-  console.error('❌ Bundle build failed:');
-  mainResult.logs.forEach(log => console.error(log));
-  process.exit(1);
+    console.error('❌ Bundle build failed:');
+    mainResult.logs.forEach(log => console.error(log));
+    process.exit(1);
 }
 console.log('   ✓ phoenix-arcade-shooter.js\n');
 
@@ -47,10 +47,10 @@ console.log('   ✓ phoenix-arcade-shooter.js\n');
 console.log('📝 Processing HTML...');
 const htmlTemplate = readFileSync('./index.html', 'utf-8');
 const processedHtml = htmlTemplate
-  .replace(/<!-- htmlbuild:js -->[\s\S]*?<!-- endbuild -->/, 
-    '<script src="phoenix-arcade-shooter.js"></script>')
-  .replace(/<!-- htmlbuild:css -->[\s\S]*?<!-- endbuild -->/, 
-    '<link rel="stylesheet" type="text/css" href="game.css"/>');
+    .replace(/<!-- htmlbuild:js -->[\s\S]*?<!-- endbuild -->/,
+        '<script src="phoenix-arcade-shooter.js"></script>')
+    .replace(/<!-- htmlbuild:css -->[\s\S]*?<!-- endbuild -->/,
+        '<link rel="stylesheet" type="text/css" href="game.css"/>');
 
 writeFileSync(join(DIST_DIR, 'index.html'), processedHtml);
 console.log('   ✓ index.html\n');

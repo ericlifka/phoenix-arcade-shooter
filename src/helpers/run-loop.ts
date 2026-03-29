@@ -62,7 +62,7 @@ export default class RunLoop {
     private boundFrameHandler: () => void;
 
     constructor(callback?: (dtime: number) => void) {
-        this.callback = callback || function () {};
+        this.callback = callback || function () { };
 
         this.fpsTracker = fpsTracker();
         this.active = false;

@@ -12,16 +12,16 @@ export default function daggerShipSprite(): any {
     const g4 = "#222222";
     const nn = null;
     return new Sprite([
-        [ nn, nn, w1, nn, nn ],
-        [ nn, nn, w1, nn, nn ],
-        [ nn, nn, w1, nn, nn ],
-        [ nn, w2, w1, w2, nn ],
-        [ nn, w2, g4, w2, nn ],
-        [ nn, w2, w1, w2, nn ],
-        [ nn, g2, g1, g2, nn ],
-        [ g2, g2, nn, g2, g2 ],
-        [ g3, nn, nn, nn, g3 ]
+        [nn, nn, w1, nn, nn],
+        [nn, nn, w1, nn, nn],
+        [nn, nn, w1, nn, nn],
+        [nn, w2, w1, w2, nn],
+        [nn, w2, g4, w2, nn],
+        [nn, w2, w1, w2, nn],
+        [nn, g2, g1, g2, nn],
+        [g2, g2, nn, g2, g2],
+        [g3, nn, nn, nn, g3]
     ], {
-        guns: [ { x: 2, y: 8 } ]
+        guns: [{ x: 2, y: 8 }]
     });
 }

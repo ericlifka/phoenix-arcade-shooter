@@ -235,8 +235,8 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         const gameResult = this.player.destroyed
             ? 'loss'
             : this.levelManager.complete
-              ? 'win'
-              : null;
+                ? 'win'
+                : null;
 
         if (gameResult && !this.gameOver) {
             this.gameOver = true;

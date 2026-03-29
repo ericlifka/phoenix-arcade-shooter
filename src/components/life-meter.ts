@@ -34,7 +34,7 @@ export default class LifeMeter extends GameObject {
         this.scale = opts.scale;
         this.showBorder = !!opts.showBorder;
         this.borderColor = opts.borderColor || "#ffffff";
-        
+
         this.reset();
     }
 
@@ -107,22 +107,22 @@ export default class LifeMeter extends GameObject {
 
     private addBezelPixelsToBorder(colors: (string | null)[][]): void {
         if (this.width > 2) {
-            colors[ 0 ][ 0 ] = this.borderColor;
-            colors[ this.width - 1 ][ 0 ] = this.borderColor;
-            colors[ 0 ][ this.length - 1 ] = this.borderColor;
-            colors[ this.width - 1 ][ this.length - 1 ] = this.borderColor;
+            colors[0][0] = this.borderColor;
+            colors[this.width - 1][0] = this.borderColor;
+            colors[0][this.length - 1] = this.borderColor;
+            colors[this.width - 1][this.length - 1] = this.borderColor;
         }
     }
 
     private addBorderEnds(colors: (string | null)[][]): void {
         for (let j = 0; j < this.width; j++) {
-            colors[ j ].push(this.borderColor);
-            colors[ j ].unshift(this.borderColor);
+            colors[j].push(this.borderColor);
+            colors[j].unshift(this.borderColor);
         }
     }
 
     private addBorderEdges(colors: (string | null)[][]): void {
-        const border: (string | null)[] = [ null ];
+        const border: (string | null)[] = [null];
         for (let i = 0; i < this.length; i++) {
             border.push(this.borderColor);
         }

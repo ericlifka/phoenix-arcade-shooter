@@ -1,48 +1,46 @@
 {
-  "compilerOptions": {
-    /* Language and Environment */
-    "target": "ES2020",
-    "lib": ["ES2020", "DOM"],
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    
-    /* Type Checking */
-    "strict": false,                          // Start lenient, will enable gradually
-    "noImplicitAny": false,                   // Will enable after initial conversion
-    "strictNullChecks": false,                // Will enable after initial conversion
-    "strictFunctionTypes": true,              // Safe to enable
-    "strictBindCallApply": true,              // Safe to enable
-    "strictPropertyInitialization": false,    // Game objects have complex init patterns
-    "noImplicitThis": true,                   // Catch 'this' issues
-    "alwaysStrict": true,                     // Use strict mode
-    
-    /* Modules */
-    "allowImportingTsExtensions": true,       // Allow .ts in imports (Bun handles this)
-    "resolveJsonModule": true,
-    "allowJs": true,                          // Allow .js files during gradual migration
-    "checkJs": false,                         // Don't type-check .js files yet
-    
-    /* Emit */
-    "noEmit": true,                           // Bun handles compilation
-    "sourceMap": true,
-    "removeComments": false,
-    
-    /* Interop Constraints */
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    
-    /* Skip Lib Check */
-    "skipLibCheck": true
-  },
-  "include": [
-    "src/**/*",
-    "build.ts",
-    "dev-server.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "bower_components"
-  ]
+    "compilerOptions": {
+        /* Language and Environment */
+        "target": "ES2020",
+        "lib": [
+            "ES2020",
+            "DOM"
+        ],
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        /* Type Checking */
+        "strict": false, // Start lenient, will enable gradually
+        "noImplicitAny": false, // Will enable after initial conversion
+        "strictNullChecks": false, // Will enable after initial conversion
+        "strictFunctionTypes": true, // Safe to enable
+        "strictBindCallApply": true, // Safe to enable
+        "strictPropertyInitialization": false, // Game objects have complex init patterns
+        "noImplicitThis": true, // Catch 'this' issues
+        "alwaysStrict": true, // Use strict mode
+        /* Modules */
+        "allowImportingTsExtensions": true, // Allow .ts in imports (Bun handles this)
+        "resolveJsonModule": true,
+        "allowJs": true, // Allow .js files during gradual migration
+        "checkJs": false, // Don't type-check .js files yet
+        /* Emit */
+        "noEmit": true, // Bun handles compilation
+        "sourceMap": true,
+        "removeComments": false,
+        /* Interop Constraints */
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        /* Skip Lib Check */
+        "skipLibCheck": true
+    },
+    "include": [
+        "src/**/*",
+        "build.ts",
+        "dev-server.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "bower_components"
+    ]
 }

@@ -22,7 +22,7 @@ export default class ComboGauge extends GameObject {
 
     constructor(parent: GameObject, options: ComboGaugeOptions) {
         super(parent);
-        
+
         this.position = options.position;
         this.color = options.color || "#ffffff";
         this.sprite = frameSprite().applyColor(this.color);
@@ -39,7 +39,7 @@ export default class ComboGauge extends GameObject {
             index: 1,
             position: { x: this.position.x, y: this.position.y + this.sprite.height + 1 }
         });
-        
+
         this.reset();
     }
 
@@ -117,7 +117,7 @@ export default class ComboGauge extends GameObject {
         // Create a full vertical array of pixels (59 high)
         // Pixels below comboPoints are colored, pixels above are transparent
         const pixels: (string | null)[] = [];
-        
+
         for (let i = 0; i < 59; i++) {
             if (i < this.comboPoints) {
                 // Filled portion - use gradient color

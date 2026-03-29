@@ -31,7 +31,7 @@ export default class Bullet extends GameObject {
 
         this.updateBulletDirection();
         this.updateColor();
-        
+
         this.reset();
     }
 
@@ -39,7 +39,7 @@ export default class Bullet extends GameObject {
         if (this.position && this.parent) {
             const parentWidth = (this.parent as any).width;
             const parentHeight = (this.parent as any).height;
-            
+
             if (this.position.x < 0
                 || this.position.y < 0
                 || this.position.x > parentWidth

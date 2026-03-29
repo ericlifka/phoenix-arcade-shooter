@@ -31,7 +31,7 @@ export default class TextDisplay extends GameObject {
 
     constructor(parent: GameObject, options: TextDisplayOptions) {
         super(parent);
-        
+
         this.rawMessage = options.message || " ";
         this.font = fonts[options.font || "arcade-small"];
         this.color = options.color || "white";
@@ -41,7 +41,7 @@ export default class TextDisplay extends GameObject {
         this.background = options.background || null;
         this.index = options.index || 10;
         this.isPhysicalEntity = options.isPhysicalEntity;
-        
+
         this.reset();
     }
 
@@ -55,7 +55,7 @@ export default class TextDisplay extends GameObject {
         this.rawMessage = processedText;
 
         if (typeof processedText === "string") {
-            processedText = [ processedText ];
+            processedText = [processedText];
         }
         const charArrays = processedText.map((str) => str.split(''));
         this.message = charArrays;
@@ -95,7 +95,7 @@ export default class TextDisplay extends GameObject {
             let lineWidth = 0;
 
             line.forEach((char) => {
-                const sprite = self.font[ char ];
+                const sprite = self.font[char];
                 if (sprite) {
                     const entity = new GameObject(self);
                     entity.sprite = sprite.clone();

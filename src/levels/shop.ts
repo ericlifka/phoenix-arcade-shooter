@@ -25,12 +25,12 @@ export default class Shop extends GameObject {
         guns: ShopMenuLine;
         leave: ShopMenuLine;
     } = {
-        health: { message: '+1 Ship Health', position: { x: 90, y: 50 } },
-        rate: { message: '10% faster Firing Rate', position: { x: 90, y: 65 } },
-        damage: { message: '+1 Bullet Damage', position: { x: 90, y: 80 } },
-        guns: { message: 'Install wing guns', position: { x: 90, y: 95 } },
-        leave: { message: 'Leave Shop', position: { x: 60, y: 110 } }
-    };
+            health: { message: '+1 Ship Health', position: { x: 90, y: 50 } },
+            rate: { message: '10% faster Firing Rate', position: { x: 90, y: 65 } },
+            damage: { message: '+1 Bullet Damage', position: { x: 90, y: 80 } },
+            guns: { message: 'Install wing guns', position: { x: 90, y: 95 } },
+            leave: { message: 'Leave Shop', position: { x: 60, y: 110 } }
+        };
     menuSelectorPositions = [49, 64, 79, 94, 109];
     disabledColor = '#777';
 
@@ -149,7 +149,7 @@ export default class Shop extends GameObject {
 
     createSelectorShip(): void {
         this.selectorShip = new GameObject();
-        this.selectorShip.sprite = new ArrowShip();
+        this.selectorShip.sprite = ArrowShip();
         this.selectorShip.position = { x: 40, y: 0 };
         this.addChild(this.selectorShip);
 

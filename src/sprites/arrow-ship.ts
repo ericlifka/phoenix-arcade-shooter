@@ -12,15 +12,15 @@ export default function arrowShipSprite(): any {
     const g4 = "#222222";
     const nn = null;
     return new Sprite([
-        [ g3, nn, nn, nn, nn, nn, g3 ],
-        [ g2, g2, nn, nn, nn, g2, g2 ],
-        [ nn, g2, g1, nn, g1, g2, nn ],
-        [ nn, g1, g1, w1, g1, g1, nn ],
-        [ nn, nn, w2, g4, w2, nn, nn ],
-        [ nn, nn, w2, w1, w2, nn, nn ],
-        [ nn, nn, nn, w1, nn, nn, nn ],
-        [ nn, nn, nn, w1, nn, nn, nn ]
+        [g3, nn, nn, nn, nn, nn, g3],
+        [g2, g2, nn, nn, nn, g2, g2],
+        [nn, g2, g1, nn, g1, g2, nn],
+        [nn, g1, g1, w1, g1, g1, nn],
+        [nn, nn, w2, g4, w2, nn, nn],
+        [nn, nn, w2, w1, w2, nn, nn],
+        [nn, nn, nn, w1, nn, nn, nn],
+        [nn, nn, nn, w1, nn, nn, nn]
     ], {
-        guns: [ { x: 3, y: 7 } ]
+        guns: [{ x: 3, y: 7 }]
     });
 }

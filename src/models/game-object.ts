@@ -10,7 +10,7 @@ export default class GameObject {
     parent?: GameObject | null;
     children: GameObject[];
     destroyed: boolean;
-    
+
     // Optional properties (not all GameObjects have these)
     damage?: number;
     life?: number;

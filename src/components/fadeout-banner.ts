@@ -28,7 +28,7 @@ export default class FadeoutBanner extends GameObject {
 
         this.text = text;
         this.interval = time / colorGradient.length;
-        
+
         this.reset();
     }
 
@@ -41,7 +41,7 @@ export default class FadeoutBanner extends GameObject {
             position: { x: 55, y: 50 },
             border: true,
             padding: 15,
-            color: colorGradient[ this.colorIndex ],
+            color: colorGradient[this.colorIndex],
             font: "arcade"
         });
         this.addChild(this.textDisplay);
@@ -57,7 +57,7 @@ export default class FadeoutBanner extends GameObject {
             if (this.colorIndex > colorGradient.length) {
                 this.parent?.removeChild(this);
             } else if (this.textDisplay) {
-                this.textDisplay.updateColor(colorGradient[ this.colorIndex ]);
+                this.textDisplay.updateColor(colorGradient[this.colorIndex]);
             }
         }
     }

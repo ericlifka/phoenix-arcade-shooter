@@ -72,8 +72,8 @@ export default class TitleScreen extends GameObject {
         this.selectorShip = new GameObject();
         this.selectorRight = new GameObject();
 
-        this.selectorShip.sprite = new ArrowShip();
-        this.selectorRight.sprite = new ArrowShip().invertX();
+        this.selectorShip.sprite = ArrowShip();
+        this.selectorRight.sprite = ArrowShip().invertX();
 
         this.selectorShip.position = { x: 70, y: 0 };
         this.selectorRight.position = { x: 115, y: 0 };

@@ -19,7 +19,7 @@ export default class MoneyDrop extends GameObject {
         this.position = position;
         this.velocity = { x: 0, y: 50 };
         this.sprite = ArcadeFont['$'];
-        
+
         this.reset();
     }
 
@@ -27,7 +27,7 @@ export default class MoneyDrop extends GameObject {
         if (this.position && this.parent) {
             const parentWidth = (this.parent as any).width;
             const parentHeight = (this.parent as any).height;
-            
+
             if (this.position.x < 0
                 || this.position.y < 0
                 || this.position.x > parentWidth

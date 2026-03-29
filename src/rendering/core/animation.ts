@@ -1,4 +1,4 @@
-import Sprite from './sprite.js';
+import Sprite from './sprite';
 
 export default class Animation {
     finished = false;

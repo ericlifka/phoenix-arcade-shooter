@@ -16,7 +16,7 @@ export default class Bank extends GameObject {
 
     constructor(parent: GameObject, options?: BankOptions) {
         super(parent);
-        
+
         const opts = options || {};
         this.anchorPoint = opts.position || { x: 0, y: 0 };
         this.position = { x: 0, y: this.anchorPoint.y };
@@ -28,7 +28,7 @@ export default class Bank extends GameObject {
             index: 1,
             position: { x: this.position.x, y: this.position.y }
         });
-        
+
         this.reset();
     }
 

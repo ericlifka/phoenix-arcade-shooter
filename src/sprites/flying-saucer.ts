@@ -7,19 +7,18 @@ export default function flyingSaucerSprite(): any {
     const w = "white";
     const n = null;
     return new Sprite([
-            [ n, n, n, w, w, w, w, w, n, n, n ],
-            [ n, n, w, n, n, n, n, n, w, n, n ],
-            [ n, w, n, n, n, n, n, n, n, w, n ],
-            [ w, n, n, n, n, n, n, n, n, n, w ],
-            [ w, n, n, n, n, n, n, n, n, n, w ],
-            [ w, n, n, n, n, w, n, n, n, n, w ],
-            [ w, n, n, n, n, n, n, n, n, n, w ],
-            [ w, n, n, n, n, n, n, n, n, n, w ],
-            [ n, w, n, n, n, n, n, n, n, w, n ],
-            [ n, n, w, n, n, n, n, n, w, n, n ],
-            [ n, n, n, w, w, w, w, w, n, n, n ]
-        ],
-        {
-            guns: []
-        });
+        [n, n, n, w, w, w, w, w, n, n, n],
+        [n, n, w, n, n, n, n, n, w, n, n],
+        [n, w, n, n, n, n, n, n, n, w, n],
+        [w, n, n, n, n, n, n, n, n, n, w],
+        [w, n, n, n, n, n, n, n, n, n, w],
+        [w, n, n, n, n, w, n, n, n, n, w],
+        [w, n, n, n, n, n, n, n, n, n, w],
+        [w, n, n, n, n, n, n, n, n, n, w],
+        [n, w, n, n, n, n, n, n, n, w, n],
+        [n, n, w, n, n, n, n, n, w, n, n],
+        [n, n, n, w, w, w, w, w, n, n, n]
+    ], {
+        guns: []
+    });
 }

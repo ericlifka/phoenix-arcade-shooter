@@ -32,7 +32,7 @@ export default class InputInterpreter {
     interpret(inputSources: RawInputSource[]): InputState {
         const gameInput = newInputDescriptor();
 
-        inputSources.forEach(function (inputSource) {
+        inputSources.forEach((inputSource) => {
             switch (inputSource.INPUT_TYPE) {
                 case 'gamepad':
                     return this.addGamepadInput(inputSource, gameInput);
@@ -41,7 +41,7 @@ export default class InputInterpreter {
                 default:
                     console.error("Unsupported input type: ", inputSource.INPUT_TYPE);
             }
-        }.bind(this));
+        });
 
         normalizeVector(gameInput.movementVector);
 

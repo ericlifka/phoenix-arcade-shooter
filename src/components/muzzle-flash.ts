@@ -17,7 +17,7 @@ const shades = [
 
 const frames = shades.map((shade) => {
     return new Sprite([
-        [ shade, shade ]
+        [shade, shade]
     ]);
 });
 
@@ -35,7 +35,7 @@ export default class MuzzleFlash extends GameObject {
             frames: frames,
             millisPerFrame: 25
         });
-        
+
         this.reset();
     }
 
