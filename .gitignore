@@ -1,2 +1,4 @@
 .publish/
-
+.planning/
+bower_components/
+node_modules/
