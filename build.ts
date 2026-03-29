@@ -5,7 +5,15 @@
  * Output: dist/phoenix-arcade-shooter.js (IIFE, auto-starts from main.ts)
  */
 
-import { copyFileSync, mkdirSync, readFileSync, writeFileSync, existsSync } from 'fs';
+import {
+    copyFileSync,
+    cpSync,
+    existsSync,
+    mkdirSync,
+    readdirSync,
+    readFileSync,
+    writeFileSync,
+} from 'fs';
 import { join } from 'path';
 
 const DIST_DIR = './dist';
@@ -22,7 +30,31 @@ console.log('📦 Copying static assets...');
 copyFileSync('./favicon.ico', join(DIST_DIR, 'favicon.ico'));
 copyFileSync('./styles/game.css', join(DIST_DIR, 'game.css'));
 console.log('   ✓ favicon.ico');
-console.log('   ✓ game.css\n');
+console.log('   ✓ game.css');
+
+// Copy legacy builds (e.g. old-versions/v1 → dist/v1 for <base>/v1/ on GitHub Pages)
+const LEGACY_DIR = './old-versions';
+if (existsSync(LEGACY_DIR)) {
+    const entries = readdirSync(LEGACY_DIR, { withFileTypes: true });
+    const copied: string[] = [];
+    for (const ent of entries) {
+        const src = join(LEGACY_DIR, ent.name);
+        const dest = join(DIST_DIR, ent.name);
+        if (ent.isDirectory()) {
+            cpSync(src, dest, { recursive: true });
+            copied.push(`${ent.name}/`);
+        } else {
+            copyFileSync(src, dest);
+            copied.push(ent.name);
+        }
+    }
+    if (copied.length > 0) {
+        for (const label of copied) {
+            console.log(`   ✓ ${label} (legacy)`);
+        }
+    }
+}
+console.log('');
 
 // Build main bundle using Bun's bundler
 console.log('🔨 Building bundle with Bun...');

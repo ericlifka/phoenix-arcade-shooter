@@ -2579,7 +2579,7 @@
   class InputInterpreter {
     interpret(inputSources) {
       const gameInput = newInputDescriptor2();
-      inputSources.forEach(function(inputSource) {
+      inputSources.forEach((inputSource) => {
         switch (inputSource.INPUT_TYPE) {
           case "gamepad":
             return this.addGamepadInput(inputSource, gameInput);
@@ -2588,7 +2588,7 @@
           default:
             console.error("Unsupported input type: ", inputSource.INPUT_TYPE);
         }
-      }.bind(this));
+      });
       normalizeVector(gameInput.movementVector);
       return gameInput;
     }
@@ -3523,7 +3523,7 @@
     }
     createSelectorShip() {
       this.selectorShip = new GameObject;
-      this.selectorShip.sprite = new arrowShipSprite;
+      this.selectorShip.sprite = arrowShipSprite();
       this.selectorShip.position = { x: 40, y: 0 };
       this.addChild(this.selectorShip);
       this.updateSelectorPosition();
