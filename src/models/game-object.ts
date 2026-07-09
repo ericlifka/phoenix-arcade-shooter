@@ -105,13 +105,13 @@ export default class GameObject {
     }
 
     addChild(child?: GameObject): void {
-        if (child) {
+        if (child && this.children) {
             this.children.push(child);
         }
     }
 
     removeChild(child?: GameObject): void {
-        if (child) {
+        if (child && this.children) {
             const index = this.children.indexOf(child);
             if (index >= 0) {
                 this.children.splice(index, 1);

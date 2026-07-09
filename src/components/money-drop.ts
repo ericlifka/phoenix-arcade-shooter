@@ -15,7 +15,7 @@ export default class MoneyDrop extends GameObject {
     constructor(parent: GameObject, position: Position, velocity?: Velocity) {
         super(parent);
 
-        this.value = 10;
+        this.value = 15;
         this.position = position;
         this.velocity = { x: 0, y: 50 };
         this.sprite = ArcadeFont['$'];

@@ -1,5 +1,6 @@
 import GameObject from '../models/game-object.js';
 import TextDisplay from './text-display.js';
+import formatMoneyDisplay from '../helpers/format-money-display.js';
 import { BankOptions } from '../types/game';
 import { Position } from '../types/rendering';
 
@@ -51,7 +52,7 @@ export default class Bank extends GameObject {
     }
 
     private updateDisplay(): void {
-        this.valueDisplay.changeMessage("$" + this.value + ".0");
+        this.valueDisplay.changeMessage(`$${this.value.toFixed(2)}`);
         const width = this.valueDisplay.width;
         if (width && this.position && this.valueDisplay.position) {
             this.position.x = this.valueDisplay.position.x = this.anchorPoint.x - width;

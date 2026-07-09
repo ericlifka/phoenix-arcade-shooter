@@ -23,15 +23,17 @@ export default class Shop extends GameObject {
         rate: ShopMenuLine;
         damage: ShopMenuLine;
         guns: ShopMenuLine;
+        armor: ShopMenuLine;
         leave: ShopMenuLine;
     } = {
             health: { message: '+1 Ship Health', position: { x: 90, y: 50 } },
             rate: { message: '10% faster Firing Rate', position: { x: 90, y: 65 } },
             damage: { message: '+1 Bullet Damage', position: { x: 90, y: 80 } },
             guns: { message: 'Install wing guns', position: { x: 90, y: 95 } },
-            leave: { message: 'Leave Shop', position: { x: 60, y: 110 } }
+            armor: { message: '+1 Armor', position: { x: 90, y: 110 } },
+            leave: { message: 'Leave Shop', position: { x: 60, y: 125 } }
         };
-    menuSelectorPositions = [49, 64, 79, 94, 109];
+    menuSelectorPositions = [49, 64, 79, 94, 109, 124];
     disabledColor = '#777';
 
     game: GameForShop;
@@ -134,17 +136,20 @@ export default class Shop extends GameObject {
         items.rate.cost = 50 + player.rateUpgrades * 50;
         items.damage.cost = 100 + player.damageUpgrades * 100;
         items.guns.cost = player.wingGunsUnlocked ? -1 : 1000;
+        items.armor.cost = 75 + player.armorUpgrades * 75;
 
         items.damage.costText!.changeMessage('$' + items.damage.cost);
         items.health.costText!.changeMessage('$' + items.health.cost);
         items.rate.costText!.changeMessage('$' + items.rate.cost);
         items.guns.costText!.changeMessage(player.wingGunsUnlocked ? '--' : '$' + items.guns.cost);
+        items.armor.costText!.changeMessage('$' + items.armor.cost);
         items.leave.description!.changeMessage(items.leave.message);
 
         items.health.costText!.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
         items.rate.costText!.updateColor(items.rate.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
         items.damage.costText!.updateColor(items.damage.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
         items.guns.costText!.updateColor(items.guns.cost > bank.value || player.wingGunsUnlocked ? this.disabledColor : this.game.interfaceColor);
+        items.armor.costText!.updateColor(items.armor.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
     }
 
     createSelectorShip(): void {
@@ -182,7 +187,8 @@ export default class Shop extends GameObject {
                 case 1: selection = this.menuItems.rate; break;
                 case 2: selection = this.menuItems.damage; break;
                 case 3: selection = this.menuItems.guns; break;
-                case 4: this.startGame(); return;
+                case 4: selection = this.menuItems.armor; break;
+                case 5: this.startGame(); return;
                 default: return;
             }
 
@@ -227,7 +233,12 @@ export default class Shop extends GameObject {
                 this.player.addWingGuns();
                 break;
 
-            case 4: // done shopping
+            case 4: // armor
+                this.player.armorUpgrades++;
+                this.player.armor++;
+                break;
+
+            case 5: // done shopping
                 this.isDoneShopping = true;
                 break;
         }

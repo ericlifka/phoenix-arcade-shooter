@@ -540,12 +540,12 @@ void main() {
       }
     }
     addChild(child) {
-      if (child) {
+      if (child && this.children) {
         this.children.push(child);
       }
     }
     removeChild(child) {
-      if (child) {
+      if (child && this.children) {
         const index = this.children.indexOf(child);
         if (index >= 0) {
           this.children.splice(index, 1);
@@ -2152,7 +2152,7 @@ void main() {
       this.updateDisplay();
     }
     updateDisplay() {
-      this.valueDisplay.changeMessage("$" + this.value + ".0");
+      this.valueDisplay.changeMessage(`$${this.value.toFixed(2)}`);
       const width = this.valueDisplay.width;
       if (width && this.position && this.valueDisplay.position) {
         this.position.x = this.valueDisplay.position.x = this.anchorPoint.x - width;
@@ -2391,6 +2391,9 @@ void main() {
     }
     getScore() {
       return this.pointTotal;
+    }
+    getMultiplier() {
+      return this.pointMultiplier;
     }
     bumpCombo() {
       this.comboPoints++;
@@ -3324,7 +3327,7 @@ void main() {
     value;
     constructor(parent, position, velocity) {
       super(parent);
-      this.value = 10;
+      this.value = 15;
       this.position = position;
       this.velocity = { x: 0, y: 50 };
       this.sprite = arcade_default["$"];
@@ -3599,9 +3602,10 @@ void main() {
       rate: { message: "10% faster Firing Rate", position: { x: 90, y: 65 } },
       damage: { message: "+1 Bullet Damage", position: { x: 90, y: 80 } },
       guns: { message: "Install wing guns", position: { x: 90, y: 95 } },
-      leave: { message: "Leave Shop", position: { x: 60, y: 110 } }
+      armor: { message: "+1 Armor", position: { x: 90, y: 110 } },
+      leave: { message: "Leave Shop", position: { x: 60, y: 125 } }
     };
-    menuSelectorPositions = [49, 64, 79, 94, 109];
+    menuSelectorPositions = [49, 64, 79, 94, 109, 124];
     disabledColor = "#777";
     game;
     bank;
@@ -3686,15 +3690,18 @@ void main() {
       items.rate.cost = 50 + player.rateUpgrades * 50;
       items.damage.cost = 100 + player.damageUpgrades * 100;
       items.guns.cost = player.wingGunsUnlocked ? -1 : 1000;
+      items.armor.cost = 75 + player.armorUpgrades * 75;
       items.damage.costText.changeMessage("$" + items.damage.cost);
       items.health.costText.changeMessage("$" + items.health.cost);
       items.rate.costText.changeMessage("$" + items.rate.cost);
       items.guns.costText.changeMessage(player.wingGunsUnlocked ? "--" : "$" + items.guns.cost);
+      items.armor.costText.changeMessage("$" + items.armor.cost);
       items.leave.description.changeMessage(items.leave.message);
       items.health.costText.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
       items.rate.costText.updateColor(items.rate.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
       items.damage.costText.updateColor(items.damage.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
       items.guns.costText.updateColor(items.guns.cost > bank.value || player.wingGunsUnlocked ? this.disabledColor : this.game.interfaceColor);
+      items.armor.costText.updateColor(items.armor.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
     }
     createSelectorShip() {
       this.selectorShip = new GameObject;
@@ -3735,6 +3742,9 @@ void main() {
             selection = this.menuItems.guns;
             break;
           case 4:
+            selection = this.menuItems.armor;
+            break;
+          case 5:
             this.startGame();
             return;
           default:
@@ -3774,6 +3784,10 @@ void main() {
           this.player.addWingGuns();
           break;
         case 4:
+          this.player.armorUpgrades++;
+          this.player.armor++;
+          break;
+        case 5:
           this.isDoneShopping = true;
           break;
       }
@@ -3817,15 +3831,23 @@ void main() {
     loadLevels() {
       this.levels = [
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
+        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
+        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 4),
+        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, "boss"),
         this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
+        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 2),
+        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 3),
+        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 4),
+        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, "boss"),
         this.shop
       ];
@@ -3849,13 +3871,17 @@ void main() {
       }
       this.levelIndex++;
       this.currentLevel = this.levels[this.levelIndex];
+      const previousLevel = this.levelIndex > 0 ? this.levels[this.levelIndex - 1] : null;
+      const cameFromShop = !!previousLevel?.isShop;
       if (this.currentLevel.isShop) {
         this.game.clearBullets();
         this.player.hideOffscreen();
       }
-      if (this.currentLevel.levelName) {
+      if (this.currentLevel.levelName || cameFromShop) {
         this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
-        this.player.refillHealth();
+        if (this.currentLevel.levelName) {
+          this.player.refillHealth();
+        }
       }
       this.addChild(this.currentLevel);
       this.currentLevel.start();
@@ -3941,6 +3967,8 @@ void main() {
     damageUpgrades = 0;
     lifeUpgrades = 0;
     rateUpgrades = 0;
+    armorUpgrades = 0;
+    armor = 0;
     wingGunsUnlocked = false;
     SPEED = 50;
     BULLET_SPEED = 100;
@@ -3966,6 +3994,8 @@ void main() {
       this.damageUpgrades = 0;
       this.lifeUpgrades = 0;
       this.rateUpgrades = 0;
+      this.armorUpgrades = 0;
+      this.armor = 0;
       this.wingGunsUnlocked = false;
       this.SPEED = 50;
       this.BULLET_SPEED = 100;
@@ -4044,10 +4074,13 @@ void main() {
       }.bind(this));
     }
     applyDamage(damage, sourceEntity) {
-      if (damage > 0) {
-        this.triggerEvent("playerHit");
+      if (damage <= 0) {
+        super.applyDamage(damage, sourceEntity);
+        return;
       }
-      super.applyDamage(damage, sourceEntity);
+      this.triggerEvent("playerHit");
+      const effectiveDamage = Math.max(1, damage - this.armor);
+      super.applyDamage(effectiveDamage, sourceEntity);
     }
   }
 
@@ -4234,7 +4267,9 @@ void main() {
       this.comboGauge.clearCombo();
     }
     moneyCollected(value) {
-      this.bank.addMoney(value);
+      const comboMultiplier = this.comboGauge.getMultiplier();
+      const moneyMultiplier = 1 + (comboMultiplier - 1) * 0.25;
+      this.bank.addMoney(value * moneyMultiplier);
     }
   }
 

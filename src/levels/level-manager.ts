@@ -52,17 +52,26 @@ export default class LevelManager extends GameObject {
     }
 
     loadLevels(): void {
+        // TODO: revert — shop after every level for testing shop items; normally only after each level set (boss)
         this.levels = [
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
+            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
+            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 4),
+            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 'boss'),
             this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
+            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 2),
+            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 3),
+            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 4),
+            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 'boss'),
             this.shop
         ];
@@ -92,15 +101,20 @@ export default class LevelManager extends GameObject {
         this.levelIndex++;
         this.currentLevel = this.levels[this.levelIndex];
 
+        const previousLevel = this.levelIndex > 0 ? this.levels[this.levelIndex - 1] : null;
+        const cameFromShop = !!previousLevel?.isShop;
+
         if (this.currentLevel.isShop) {
             this.game.clearBullets();
             this.player.hideOffscreen();
         }
 
-        if (this.currentLevel.levelName) {
-            // kinda derp way of knowing where the level blocks start
+        if (this.currentLevel.levelName || cameFromShop) {
+            // Fly in at the start of each level set, or after any shop visit
             this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
-            this.player.refillHealth();
+            if (this.currentLevel.levelName) {
+                this.player.refillHealth();
+            }
         }
 
         this.addChild(this.currentLevel);

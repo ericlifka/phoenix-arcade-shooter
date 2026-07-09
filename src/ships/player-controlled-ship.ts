@@ -20,6 +20,8 @@ export default class PlayerControlledShip extends GameObject {
     damageUpgrades = 0;
     lifeUpgrades = 0;
     rateUpgrades = 0;
+    armorUpgrades = 0;
+    armor = 0;
     wingGunsUnlocked = false;
     SPEED = 50;
     BULLET_SPEED = 100;
@@ -50,6 +52,8 @@ export default class PlayerControlledShip extends GameObject {
         this.damageUpgrades = 0;
         this.lifeUpgrades = 0;
         this.rateUpgrades = 0;
+        this.armorUpgrades = 0;
+        this.armor = 0;
         this.wingGunsUnlocked = false;
         this.SPEED = 50;
         this.BULLET_SPEED = 100;
@@ -147,10 +151,14 @@ export default class PlayerControlledShip extends GameObject {
     }
 
     applyDamage(damage: number, sourceEntity?: GameObject): void {
-        if (damage > 0) {
-            this.triggerEvent('playerHit');
+        if (damage <= 0) {
+            super.applyDamage(damage, sourceEntity);
+            return;
         }
 
-        super.applyDamage(damage, sourceEntity);
+        this.triggerEvent('playerHit');
+
+        const effectiveDamage = Math.max(1, damage - this.armor);
+        super.applyDamage(effectiveDamage, sourceEntity);
     }
 }

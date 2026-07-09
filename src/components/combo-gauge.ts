@@ -74,6 +74,10 @@ export default class ComboGauge extends GameObject {
         return this.pointTotal;
     }
 
+    getMultiplier(): number {
+        return this.pointMultiplier;
+    }
+
     bumpCombo(): void {
         this.comboPoints++;
         this.updateMultiplier();
