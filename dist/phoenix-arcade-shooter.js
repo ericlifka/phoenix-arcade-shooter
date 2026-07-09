@@ -3601,8 +3601,8 @@ void main() {
       health: { message: "+1 Ship Health", position: { x: 90, y: 50 } },
       rate: { message: "10% faster Firing Rate", position: { x: 90, y: 65 } },
       damage: { message: "+1 Bullet Damage", position: { x: 90, y: 80 } },
-      guns: { message: "Install wing guns", position: { x: 90, y: 95 } },
-      armor: { message: "+1 Armor", position: { x: 90, y: 110 } },
+      armor: { message: "+1 Armor", position: { x: 90, y: 95 } },
+      guns: { message: "Install wing guns", position: { x: 90, y: 110 } },
       leave: { message: "Leave Shop", position: { x: 60, y: 125 } }
     };
     menuSelectorPositions = [49, 64, 79, 94, 109, 124];
@@ -3739,10 +3739,10 @@ void main() {
             selection = this.menuItems.damage;
             break;
           case 3:
-            selection = this.menuItems.guns;
+            selection = this.menuItems.armor;
             break;
           case 4:
-            selection = this.menuItems.armor;
+            selection = this.menuItems.guns;
             break;
           case 5:
             this.startGame();
@@ -3782,11 +3782,11 @@ void main() {
           this.player.damageUpgrades++;
           break;
         case 3:
-          this.player.addWingGuns();
-          break;
-        case 4:
           this.player.armorUpgrades++;
           this.player.armor++;
+          break;
+        case 4:
+          this.player.addWingGuns();
           break;
         case 5:
           this.isDoneShopping = true;
