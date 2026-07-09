@@ -45,10 +45,10 @@ export default class LifeMeter extends GameObject {
 
             if (this.scale && this.maxLife) {
                 this.length = this.maxLife * this.scale;
-                if (this.length > 70) {
+                if (this.length > 140) {
                     // this just applies to the player's health if they get so many upgrades
                     // it would overflow the screen, manually set lengths will always honor them.
-                    this.length = 70;
+                    this.length = 140;
                 }
             }
 

@@ -132,7 +132,7 @@ export default class Shop extends GameObject {
         const player = this.player;
         const bank = this.bank;
 
-        items.health.cost = 10 + player.lifeUpgrades * 10;
+        items.health.cost = 5 + player.lifeUpgrades * 5;
         items.rate.cost = 50 + player.rateUpgrades * 50;
         items.damage.cost = 100 + player.damageUpgrades * 100;
         items.guns.cost = player.wingGunsUnlocked ? -1 : 1000;
@@ -218,6 +218,7 @@ export default class Shop extends GameObject {
             case 0:
                 this.player.lifeUpgrades++;
                 this.player.maxLife++;
+                this.player.life++;
                 break;
 
             case 1: // rate

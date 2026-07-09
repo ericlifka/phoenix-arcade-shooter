@@ -41,7 +41,7 @@ export default class ArrowShip extends GameObject {
         this.position = { x: 0, y: 0 };
         this.velocity = { x: 0, y: 0 };
 
-        this.damage = 5 * this.difficultyMultiplier;
+        this.damage = 4 + this.difficultyMultiplier;
         this.maxLife = this.difficultyMultiplier;
         this.life = this.difficultyMultiplier;
     }
@@ -57,7 +57,7 @@ export default class ArrowShip extends GameObject {
             team: this.team,
             position: position,
             velocity: velocity,
-            damage: this.difficultyMultiplier
+            damage: 4 + this.difficultyMultiplier
         });
         this.addChild(new MuzzleFlash(this, this.gun));
     }

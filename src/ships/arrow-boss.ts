@@ -51,7 +51,7 @@ export default class ArrowBoss extends GameObject {
             team: this.team,
             position: position,
             velocity: velocity,
-            damage: this.difficultyMultiplier
+            damage: 4 + this.difficultyMultiplier
         });
         this.addChild(new MuzzleFlash(this, gun));
     }

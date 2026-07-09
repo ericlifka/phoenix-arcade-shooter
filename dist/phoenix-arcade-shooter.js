@@ -3006,7 +3006,7 @@ void main() {
         team: this.team,
         position,
         velocity,
-        damage: this.difficultyMultiplier
+        damage: 4 + this.difficultyMultiplier
       });
       this.addChild(new MuzzleFlash(this, gun));
     }
@@ -3132,7 +3132,7 @@ void main() {
       this.gun = this.sprite.meta.guns[0];
       this.position = { x: 0, y: 0 };
       this.velocity = { x: 0, y: 0 };
-      this.damage = 5 * this.difficultyMultiplier;
+      this.damage = 4 + this.difficultyMultiplier;
       this.maxLife = this.difficultyMultiplier;
       this.life = this.difficultyMultiplier;
     }
@@ -3146,7 +3146,7 @@ void main() {
         team: this.team,
         position,
         velocity,
-        damage: this.difficultyMultiplier
+        damage: 4 + this.difficultyMultiplier
       });
       this.addChild(new MuzzleFlash(this, this.gun));
     }
@@ -3232,8 +3232,8 @@ void main() {
         this.maxLife = this.entity.maxLife;
         if (this.scale && this.maxLife) {
           this.length = this.maxLife * this.scale;
-          if (this.length > 70) {
-            this.length = 70;
+          if (this.length > 140) {
+            this.length = 140;
           }
         }
         this.redrawMeter();
@@ -3686,7 +3686,7 @@ void main() {
       const items = this.menuItems;
       const player = this.player;
       const bank = this.bank;
-      items.health.cost = 10 + player.lifeUpgrades * 10;
+      items.health.cost = 5 + player.lifeUpgrades * 5;
       items.rate.cost = 50 + player.rateUpgrades * 50;
       items.damage.cost = 100 + player.damageUpgrades * 100;
       items.guns.cost = player.wingGunsUnlocked ? -1 : 1000;
@@ -3772,6 +3772,7 @@ void main() {
         case 0:
           this.player.lifeUpgrades++;
           this.player.maxLife++;
+          this.player.life++;
           break;
         case 1:
           this.player.rateUpgrades++;
@@ -3989,8 +3990,8 @@ void main() {
       this.explosion = shipExplosion;
       this.position = { x: -100, y: -100 };
       this.velocity = { x: 0, y: 0 };
-      this.life = 10;
-      this.maxLife = 10;
+      this.life = 20;
+      this.maxLife = 20;
       this.damageUpgrades = 0;
       this.lifeUpgrades = 0;
       this.rateUpgrades = 0;
@@ -4127,7 +4128,7 @@ void main() {
         color: this.interfaceColor
       });
       this.lifeMeter = new LifeMeter(this.player, {
-        scale: 2,
+        scale: 1,
         width: 4,
         anchor: { right: this.width - 1, bottom: this.height - 7 },
         showBorder: true,

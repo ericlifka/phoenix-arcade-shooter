@@ -72,7 +72,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
             color: this.interfaceColor
         });
         this.lifeMeter = new LifeMeter(this.player, {
-            scale: 2,
+            scale: 1,
             width: 4,
             anchor: { right: this.width - 1, bottom: this.height - 7 },
             showBorder: true,

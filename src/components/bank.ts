@@ -1,6 +1,5 @@
 import GameObject from '../models/game-object.js';
 import TextDisplay from './text-display.js';
-import formatMoneyDisplay from '../helpers/format-money-display.js';
 import { BankOptions } from '../types/game';
 import { Position } from '../types/rendering';
 

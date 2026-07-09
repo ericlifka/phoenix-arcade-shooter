@@ -47,8 +47,8 @@ export default class PlayerControlledShip extends GameObject {
         this.position = { x: -100, y: -100 };
         this.velocity = { x: 0, y: 0 };
 
-        this.life = 10;
-        this.maxLife = 10;
+        this.life = 20;
+        this.maxLife = 20;
         this.damageUpgrades = 0;
         this.lifeUpgrades = 0;
         this.rateUpgrades = 0;
