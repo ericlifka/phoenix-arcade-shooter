@@ -36,7 +36,7 @@ export default class Bank extends GameObject {
         super.reset();
 
         this.addChild(this.valueDisplay);
-        this.value = 0;
+        this.value = 5000;
         this.updateDisplay();
     }
 

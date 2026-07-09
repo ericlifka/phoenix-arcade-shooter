@@ -5,6 +5,10 @@ import GameObject from '../models/game-object.js';
 import TextDisplay from '../components/text-display.js';
 import { Position } from '../types/rendering';
 import type { GameForShop } from '../types/levels.js';
+import { MAX_GUN_TIER } from '../ships/player-controlled-ship.js';
+
+const GUN_UPGRADE_NAMES = ['Double Guns', 'Triple Guns', 'Radial Guns'];
+const GUN_UPGRADE_BASE_COST = 500;
 
 interface ShopMenuLine {
     message: string;
@@ -30,7 +34,7 @@ export default class Shop extends GameObject {
             rate: { message: '10% faster Firing Rate', position: { x: 90, y: 65 } },
             damage: { message: '+1 Bullet Damage', position: { x: 90, y: 80 } },
             armor: { message: '+1 Armor', position: { x: 90, y: 95 } },
-            guns: { message: 'Install wing guns', position: { x: 90, y: 110 } },
+            guns: { message: 'Double Guns', position: { x: 90, y: 110 } },
             leave: { message: 'Leave Shop', position: { x: 60, y: 125 } }
         };
     menuSelectorPositions = [49, 64, 79, 94, 109, 124];
@@ -135,20 +139,33 @@ export default class Shop extends GameObject {
         items.health.cost = 5 + player.lifeUpgrades * 5;
         items.rate.cost = 50 + player.rateUpgrades * 50;
         items.damage.cost = 100 + player.damageUpgrades * 100;
-        items.guns.cost = player.wingGunsUnlocked ? -1 : 1000;
+        items.guns.cost = player.gunTier >= MAX_GUN_TIER
+            ? -1
+            : (player.gunTier + 1) * GUN_UPGRADE_BASE_COST;
         items.armor.cost = 75 + player.armorUpgrades * 75;
 
         items.damage.costText!.changeMessage('$' + items.damage.cost);
         items.health.costText!.changeMessage('$' + items.health.cost);
         items.rate.costText!.changeMessage('$' + items.rate.cost);
-        items.guns.costText!.changeMessage(player.wingGunsUnlocked ? '--' : '$' + items.guns.cost);
+        items.guns.costText!.changeMessage(
+            player.gunTier >= MAX_GUN_TIER ? '--' : '$' + items.guns.cost
+        );
+        items.guns.description!.changeMessage(
+            player.gunTier >= MAX_GUN_TIER
+                ? 'Guns maxed'
+                : GUN_UPGRADE_NAMES[player.gunTier]
+        );
         items.armor.costText!.changeMessage('$' + items.armor.cost);
         items.leave.description!.changeMessage(items.leave.message);
 
         items.health.costText!.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
         items.rate.costText!.updateColor(items.rate.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
         items.damage.costText!.updateColor(items.damage.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-        items.guns.costText!.updateColor(items.guns.cost > bank.value || player.wingGunsUnlocked ? this.disabledColor : this.game.interfaceColor);
+        items.guns.costText!.updateColor(
+            items.guns.cost > bank.value || player.gunTier >= MAX_GUN_TIER
+                ? this.disabledColor
+                : this.game.interfaceColor
+        );
         items.armor.costText!.updateColor(items.armor.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
     }
 
@@ -236,7 +253,7 @@ export default class Shop extends GameObject {
                 break;
 
             case 4: // guns
-                this.player.addWingGuns();
+                this.player.upgradeGunTier();
                 break;
 
             case 5: // done shopping

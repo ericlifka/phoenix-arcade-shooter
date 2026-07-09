@@ -1,10 +1,13 @@
 import GameObject from '../models/game-object.js';
 import MuzzleFlash from '../components/muzzle-flash.js';
 import playerShipSprite from '../sprites/player-ship.js';
+import playerShipDoubleGuns from '../sprites/player-ship-double-guns.js';
 import playerShipSpriteWingGuns from '../sprites/player-ship-wing-guns.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
 import { InputState } from '../types/game';
 import { Position } from '../types/rendering';
+
+export const MAX_GUN_TIER = 3;
 
 type SizedGameParent = GameObject & { width: number; height: number };
 
@@ -22,7 +25,7 @@ export default class PlayerControlledShip extends GameObject {
     rateUpgrades = 0;
     armorUpgrades = 0;
     armor = 0;
-    wingGunsUnlocked = false;
+    gunTier = 0;
     SPEED = 50;
     BULLET_SPEED = 100;
     FIRE_RATE = 500;
@@ -54,7 +57,7 @@ export default class PlayerControlledShip extends GameObject {
         this.rateUpgrades = 0;
         this.armorUpgrades = 0;
         this.armor = 0;
-        this.wingGunsUnlocked = false;
+        this.gunTier = 0;
         this.SPEED = 50;
         this.BULLET_SPEED = 100;
         this.FIRE_RATE = 500;
@@ -70,9 +73,36 @@ export default class PlayerControlledShip extends GameObject {
         this.life = this.maxLife;
     }
 
-    addWingGuns(): void {
-        this.wingGunsUnlocked = true;
-        this.sprite = playerShipSpriteWingGuns().rotateRight();
+    upgradeGunTier(): void {
+        if (this.gunTier >= MAX_GUN_TIER) {
+            return;
+        }
+
+        this.gunTier++;
+        this.applyGunTier();
+    }
+
+    applyGunTier(): void {
+        switch (this.gunTier) {
+            case 0:
+                this.sprite = playerShipSprite().rotateRight();
+                break;
+            case 1:
+                this.sprite = playerShipDoubleGuns().rotateRight();
+                break;
+            case 2:
+            case 3:
+                this.sprite = playerShipSpriteWingGuns().rotateRight();
+                break;
+        }
+    }
+
+    private bulletSpreadX(gunIndex: number, gunCount: number): number {
+        if (this.gunTier >= 3 && gunCount === 3) {
+            return (gunIndex - 1) * 10;
+        }
+
+        return 0;
     }
 
     processInput(input: InputState): void {
@@ -130,13 +160,15 @@ export default class PlayerControlledShip extends GameObject {
     }
 
     fire(): void {
-        this.sprite.meta.guns.forEach(
+        const guns = this.sprite.meta.guns;
+
+        guns.forEach(
             function (this: PlayerControlledShip, gun: Position, index: number) {
                 this.triggerEvent('spawnBullet', {
                     team: this.team,
                     damage: this.damageUpgrades + 1,
                     velocity: {
-                        x: this.wingGunsUnlocked ? (index - 1) * 10 : 0,
+                        x: this.bulletSpreadX(index, guns.length),
                         y: -this.BULLET_SPEED
                     },
                     position: {

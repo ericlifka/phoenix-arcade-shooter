@@ -54,6 +54,7 @@ export default class LevelManager extends GameObject {
     loadLevels(): void {
         // TODO: revert — shop after every level for testing shop items; normally only after each level set (boss)
         this.levels = [
+            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
             this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),

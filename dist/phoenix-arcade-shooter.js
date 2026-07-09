@@ -2140,7 +2140,7 @@ void main() {
     reset() {
       super.reset();
       this.addChild(this.valueDisplay);
-      this.value = 0;
+      this.value = 5000;
       this.updateDisplay();
     }
     addMoney(value) {
@@ -3592,7 +3592,231 @@ void main() {
     }
   }
 
+  // src/sprites/player-ship.ts
+  function playerShipSprite() {
+    const w4 = "white";
+    const n5 = null;
+    return new Sprite([
+      [n5, n5, n5, w4, n5, n5, n5],
+      [n5, n5, n5, w4, n5, n5, n5],
+      [n5, n5, w4, w4, w4, n5, n5],
+      [n5, n5, w4, w4, w4, n5, n5],
+      [n5, n5, w4, w4, w4, n5, n5],
+      [n5, w4, w4, w4, w4, w4, n5],
+      [w4, w4, w4, w4, w4, w4, w4],
+      [n5, n5, w4, w4, w4, n5, n5],
+      [n5, n5, n5, w4, n5, n5, n5]
+    ], {
+      guns: [
+        { x: 3, y: 1 }
+      ]
+    });
+  }
+
+  // src/sprites/player-ship-double-guns.ts
+  function playerShipDoubleGunsSprite() {
+    const w4 = "white";
+    const n5 = null;
+    return new Sprite([
+      [n5, n5, n5, n5, n5, n5, n5, n5, n5],
+      [n5, n5, n5, n5, w4, n5, n5, n5, n5],
+      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
+      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
+      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
+      [w4, n5, w4, w4, w4, w4, w4, n5, w4],
+      [w4, w4, w4, w4, w4, w4, w4, w4, w4],
+      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
+      [n5, n5, n5, n5, w4, n5, n5, n5, n5]
+    ], {
+      guns: [
+        { x: 0, y: 6 },
+        { x: 8, y: 6 }
+      ]
+    });
+  }
+
+  // src/sprites/player-ship-wing-guns.ts
+  function playerShipWingGunsSprite() {
+    const w4 = "white";
+    const n5 = null;
+    return new Sprite([
+      [n5, n5, n5, n5, w4, n5, n5, n5, n5],
+      [n5, n5, n5, n5, w4, n5, n5, n5, n5],
+      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
+      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
+      [w4, n5, n5, w4, w4, w4, n5, n5, w4],
+      [w4, n5, w4, w4, w4, w4, w4, n5, w4],
+      [w4, w4, w4, w4, w4, w4, w4, w4, w4],
+      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
+      [n5, n5, n5, n5, w4, n5, n5, n5, n5]
+    ], {
+      guns: [
+        { x: 0, y: 5 },
+        { x: 4, y: 1 },
+        { x: 8, y: 5 }
+      ]
+    });
+  }
+
+  // src/ships/player-controlled-ship.ts
+  var MAX_GUN_TIER = 3;
+
+  class PlayerControlledShip extends GameObject {
+    type = "player";
+    isPhysicalEntity = true;
+    index = 5;
+    explosion;
+    sprite;
+    position;
+    velocity;
+    damageUpgrades = 0;
+    lifeUpgrades = 0;
+    rateUpgrades = 0;
+    armorUpgrades = 0;
+    armor = 0;
+    gunTier = 0;
+    SPEED = 50;
+    BULLET_SPEED = 100;
+    FIRE_RATE = 500;
+    preventInputControl = true;
+    exploding = false;
+    team = 0;
+    damage = 5;
+    timeSinceFired = 0;
+    firing;
+    constructor(parent) {
+      super(parent);
+      this.reset();
+    }
+    reset() {
+      super.reset();
+      this.sprite = playerShipSprite().rotateRight();
+      this.explosion = shipExplosion;
+      this.position = { x: -100, y: -100 };
+      this.velocity = { x: 0, y: 0 };
+      this.life = 20;
+      this.maxLife = 20;
+      this.damageUpgrades = 0;
+      this.lifeUpgrades = 0;
+      this.rateUpgrades = 0;
+      this.armorUpgrades = 0;
+      this.armor = 0;
+      this.gunTier = 0;
+      this.SPEED = 50;
+      this.BULLET_SPEED = 100;
+      this.FIRE_RATE = 500;
+      this.preventInputControl = true;
+      this.exploding = false;
+      this.team = 0;
+      this.damage = 5;
+      this.timeSinceFired = 0;
+    }
+    refillHealth() {
+      this.life = this.maxLife;
+    }
+    upgradeGunTier() {
+      if (this.gunTier >= MAX_GUN_TIER) {
+        return;
+      }
+      this.gunTier++;
+      this.applyGunTier();
+    }
+    applyGunTier() {
+      switch (this.gunTier) {
+        case 0:
+          this.sprite = playerShipSprite().rotateRight();
+          break;
+        case 1:
+          this.sprite = playerShipDoubleGunsSprite().rotateRight();
+          break;
+        case 2:
+        case 3:
+          this.sprite = playerShipWingGunsSprite().rotateRight();
+          break;
+      }
+    }
+    bulletSpreadX(gunIndex, gunCount) {
+      if (this.gunTier >= 3 && gunCount === 3) {
+        return (gunIndex - 1) * 10;
+      }
+      return 0;
+    }
+    processInput(input) {
+      super.processInput(input);
+      if (this.preventInputControl || this.exploding || this.destroyed) {
+        return;
+      }
+      this.velocity.x = input.movementVector.x * this.SPEED;
+      this.velocity.y = input.movementVector.y * this.SPEED;
+      this.firing = input.fire;
+    }
+    update(dtime) {
+      super.update(dtime);
+      this.timeSinceFired += dtime;
+      if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
+        this.timeSinceFired = 0;
+        this.fire();
+      }
+    }
+    hideOffscreen() {
+      this.preventInputControl = true;
+      this.position.x = -100;
+      this.velocity.x = 0;
+      this.velocity.y = 0;
+    }
+    checkBoundaries() {
+      if (this.preventInputControl) {
+        return;
+      }
+      if (this.position.x < 0) {
+        this.position.x = 0;
+      }
+      if (this.position.y < 0) {
+        this.position.y = 0;
+      }
+      const parent = this.parent;
+      if (parent && this.sprite) {
+        if (this.position.x + this.sprite.width > parent.width) {
+          this.position.x = parent.width - this.sprite.width;
+        }
+        if (this.position.y + this.sprite.height > parent.height) {
+          this.position.y = parent.height - this.sprite.height;
+        }
+      }
+    }
+    fire() {
+      const guns = this.sprite.meta.guns;
+      guns.forEach(function(gun, index) {
+        this.triggerEvent("spawnBullet", {
+          team: this.team,
+          damage: this.damageUpgrades + 1,
+          velocity: {
+            x: this.bulletSpreadX(index, guns.length),
+            y: -this.BULLET_SPEED
+          },
+          position: {
+            x: this.position.x + gun.x,
+            y: this.position.y + gun.y
+          }
+        });
+        this.addChild(new MuzzleFlash(this, gun));
+      }.bind(this));
+    }
+    applyDamage(damage, sourceEntity) {
+      if (damage <= 0) {
+        super.applyDamage(damage, sourceEntity);
+        return;
+      }
+      this.triggerEvent("playerHit");
+      const effectiveDamage = Math.max(1, damage - this.armor);
+      super.applyDamage(effectiveDamage, sourceEntity);
+    }
+  }
+
   // src/levels/shop.ts
+  var GUN_UPGRADE_NAMES = ["Double Guns", "Triple Guns", "Radial Guns"];
+  var GUN_UPGRADE_BASE_COST = 500;
+
   class Shop extends GameObject {
     isShop = true;
     index = 1;
@@ -3602,7 +3826,7 @@ void main() {
       rate: { message: "10% faster Firing Rate", position: { x: 90, y: 65 } },
       damage: { message: "+1 Bullet Damage", position: { x: 90, y: 80 } },
       armor: { message: "+1 Armor", position: { x: 90, y: 95 } },
-      guns: { message: "Install wing guns", position: { x: 90, y: 110 } },
+      guns: { message: "Double Guns", position: { x: 90, y: 110 } },
       leave: { message: "Leave Shop", position: { x: 60, y: 125 } }
     };
     menuSelectorPositions = [49, 64, 79, 94, 109, 124];
@@ -3689,18 +3913,19 @@ void main() {
       items.health.cost = 5 + player.lifeUpgrades * 5;
       items.rate.cost = 50 + player.rateUpgrades * 50;
       items.damage.cost = 100 + player.damageUpgrades * 100;
-      items.guns.cost = player.wingGunsUnlocked ? -1 : 1000;
+      items.guns.cost = player.gunTier >= MAX_GUN_TIER ? -1 : (player.gunTier + 1) * GUN_UPGRADE_BASE_COST;
       items.armor.cost = 75 + player.armorUpgrades * 75;
       items.damage.costText.changeMessage("$" + items.damage.cost);
       items.health.costText.changeMessage("$" + items.health.cost);
       items.rate.costText.changeMessage("$" + items.rate.cost);
-      items.guns.costText.changeMessage(player.wingGunsUnlocked ? "--" : "$" + items.guns.cost);
+      items.guns.costText.changeMessage(player.gunTier >= MAX_GUN_TIER ? "--" : "$" + items.guns.cost);
+      items.guns.description.changeMessage(player.gunTier >= MAX_GUN_TIER ? "Guns maxed" : GUN_UPGRADE_NAMES[player.gunTier]);
       items.armor.costText.changeMessage("$" + items.armor.cost);
       items.leave.description.changeMessage(items.leave.message);
       items.health.costText.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
       items.rate.costText.updateColor(items.rate.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
       items.damage.costText.updateColor(items.damage.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-      items.guns.costText.updateColor(items.guns.cost > bank.value || player.wingGunsUnlocked ? this.disabledColor : this.game.interfaceColor);
+      items.guns.costText.updateColor(items.guns.cost > bank.value || player.gunTier >= MAX_GUN_TIER ? this.disabledColor : this.game.interfaceColor);
       items.armor.costText.updateColor(items.armor.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
     }
     createSelectorShip() {
@@ -3786,7 +4011,7 @@ void main() {
           this.player.armor++;
           break;
         case 4:
-          this.player.addWingGuns();
+          this.player.upgradeGunTier();
           break;
         case 5:
           this.isDoneShopping = true;
@@ -3831,6 +4056,7 @@ void main() {
     }
     loadLevels() {
       this.levels = [
+        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
         this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
@@ -3909,179 +4135,6 @@ void main() {
       if (val < 100) {
         return "0" + val;
       }
-    }
-  }
-
-  // src/sprites/player-ship.ts
-  function playerShipSprite() {
-    const w4 = "white";
-    const n5 = null;
-    return new Sprite([
-      [n5, n5, n5, w4, n5, n5, n5],
-      [n5, n5, n5, w4, n5, n5, n5],
-      [n5, n5, w4, w4, w4, n5, n5],
-      [n5, n5, w4, w4, w4, n5, n5],
-      [n5, n5, w4, w4, w4, n5, n5],
-      [n5, w4, w4, w4, w4, w4, n5],
-      [w4, w4, w4, w4, w4, w4, w4],
-      [n5, n5, w4, w4, w4, n5, n5],
-      [n5, n5, n5, w4, n5, n5, n5]
-    ], {
-      guns: [
-        { x: 3, y: 1 }
-      ]
-    });
-  }
-
-  // src/sprites/player-ship-wing-guns.ts
-  function playerShipWingGunsSprite() {
-    const w4 = "white";
-    const n5 = null;
-    return new Sprite([
-      [n5, n5, n5, n5, w4, n5, n5, n5, n5],
-      [n5, n5, n5, n5, w4, n5, n5, n5, n5],
-      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
-      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
-      [w4, n5, n5, w4, w4, w4, n5, n5, w4],
-      [w4, n5, w4, w4, w4, w4, w4, n5, w4],
-      [w4, w4, w4, w4, w4, w4, w4, w4, w4],
-      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
-      [n5, n5, n5, n5, w4, n5, n5, n5, n5]
-    ], {
-      guns: [
-        { x: 0, y: 5 },
-        { x: 4, y: 1 },
-        { x: 8, y: 5 }
-      ]
-    });
-  }
-
-  // src/ships/player-controlled-ship.ts
-  class PlayerControlledShip extends GameObject {
-    type = "player";
-    isPhysicalEntity = true;
-    index = 5;
-    explosion;
-    sprite;
-    position;
-    velocity;
-    damageUpgrades = 0;
-    lifeUpgrades = 0;
-    rateUpgrades = 0;
-    armorUpgrades = 0;
-    armor = 0;
-    wingGunsUnlocked = false;
-    SPEED = 50;
-    BULLET_SPEED = 100;
-    FIRE_RATE = 500;
-    preventInputControl = true;
-    exploding = false;
-    team = 0;
-    damage = 5;
-    timeSinceFired = 0;
-    firing;
-    constructor(parent) {
-      super(parent);
-      this.reset();
-    }
-    reset() {
-      super.reset();
-      this.sprite = playerShipSprite().rotateRight();
-      this.explosion = shipExplosion;
-      this.position = { x: -100, y: -100 };
-      this.velocity = { x: 0, y: 0 };
-      this.life = 20;
-      this.maxLife = 20;
-      this.damageUpgrades = 0;
-      this.lifeUpgrades = 0;
-      this.rateUpgrades = 0;
-      this.armorUpgrades = 0;
-      this.armor = 0;
-      this.wingGunsUnlocked = false;
-      this.SPEED = 50;
-      this.BULLET_SPEED = 100;
-      this.FIRE_RATE = 500;
-      this.preventInputControl = true;
-      this.exploding = false;
-      this.team = 0;
-      this.damage = 5;
-      this.timeSinceFired = 0;
-    }
-    refillHealth() {
-      this.life = this.maxLife;
-    }
-    addWingGuns() {
-      this.wingGunsUnlocked = true;
-      this.sprite = playerShipWingGunsSprite().rotateRight();
-    }
-    processInput(input) {
-      super.processInput(input);
-      if (this.preventInputControl || this.exploding || this.destroyed) {
-        return;
-      }
-      this.velocity.x = input.movementVector.x * this.SPEED;
-      this.velocity.y = input.movementVector.y * this.SPEED;
-      this.firing = input.fire;
-    }
-    update(dtime) {
-      super.update(dtime);
-      this.timeSinceFired += dtime;
-      if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
-        this.timeSinceFired = 0;
-        this.fire();
-      }
-    }
-    hideOffscreen() {
-      this.preventInputControl = true;
-      this.position.x = -100;
-      this.velocity.x = 0;
-      this.velocity.y = 0;
-    }
-    checkBoundaries() {
-      if (this.preventInputControl) {
-        return;
-      }
-      if (this.position.x < 0) {
-        this.position.x = 0;
-      }
-      if (this.position.y < 0) {
-        this.position.y = 0;
-      }
-      const parent = this.parent;
-      if (parent && this.sprite) {
-        if (this.position.x + this.sprite.width > parent.width) {
-          this.position.x = parent.width - this.sprite.width;
-        }
-        if (this.position.y + this.sprite.height > parent.height) {
-          this.position.y = parent.height - this.sprite.height;
-        }
-      }
-    }
-    fire() {
-      this.sprite.meta.guns.forEach(function(gun, index) {
-        this.triggerEvent("spawnBullet", {
-          team: this.team,
-          damage: this.damageUpgrades + 1,
-          velocity: {
-            x: this.wingGunsUnlocked ? (index - 1) * 10 : 0,
-            y: -this.BULLET_SPEED
-          },
-          position: {
-            x: this.position.x + gun.x,
-            y: this.position.y + gun.y
-          }
-        });
-        this.addChild(new MuzzleFlash(this, gun));
-      }.bind(this));
-    }
-    applyDamage(damage, sourceEntity) {
-      if (damage <= 0) {
-        super.applyDamage(damage, sourceEntity);
-        return;
-      }
-      this.triggerEvent("playerHit");
-      const effectiveDamage = Math.max(1, damage - this.armor);
-      super.applyDamage(effectiveDamage, sourceEntity);
     }
   }
 
