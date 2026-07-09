@@ -1,4 +1,4 @@
-import CanvasRenderer from './rendering/gl/canvas.js';
+import WebGLRenderer from './rendering/gl/webgl.js';
 import GamepadController from './controllers/gamepad-input.js';
 import KeyboardController from './controllers/keyboard-input.js';
 import Phoenix from './models/phoenix.js';
@@ -16,7 +16,7 @@ const gamepadInput = new GamepadController();
 const keyboardInput = new KeyboardController();
 
 const phoenix = new Phoenix(gameDimensions);
-const renderer = new CanvasRenderer(gameDimensions);
+const renderer = new WebGLRenderer(gameDimensions);
 const runLoop = new RunLoop();
 
 renderer.setFillColor(phoenix.FILL_COLOR);
