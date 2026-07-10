@@ -7,6 +7,7 @@
         "build": "bun run build.ts",
         "dev": "bun run dev-server.ts",
         "preview": "bun run dev-server.ts",
+        "deploy": "./deploy.sh",
         "clean": "rm -rf dist"
     },
     "keywords": [
@@ -25,7 +26,7 @@
     "bugs": {
         "url": "https://github.com/ericlifka/phoenix-arcade-shooter/issues"
     },
-    "homepage": "https://github.com/ericlifka/phoenix-arcade-shooter",
+    "homepage": "https://ericlifka.com/phoenix-arcade-shooter",
     "devDependencies": {
         "@types/bun": "latest"
     }

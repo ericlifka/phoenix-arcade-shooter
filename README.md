@@ -23,6 +23,7 @@ This runs `build.ts` (bundles the game) and serves **`dist/`** at **http://local
 |--------|---------|
 | `bun run dev` | Production build + static server on port 3000 |
 | `bun run build` | Emit **`dist/phoenix-arcade-shooter.js`**, **`dist/index.html`**, CSS, and favicon |
+| `bun run deploy` | Build and commit the output to the **`gh-pages`** branch (see below) |
 | `bun run clean` | Remove the **`dist/`** directory |
 
 ## Build output
@@ -36,9 +37,22 @@ You can open **`dist/index.html`** in a browser or deploy the contents of **`dis
 
 ## GitHub Pages
 
-The site is published with **GitHub Pages** using the **`/dist`** folder on the **`master`** branch (the repo serves the built assets from that path, not the repo root).
+The live site is published from the **`gh-pages`** branch (root of that branch = site root).
 
-To update the live game: run **`bun run build`**, commit the changes under **`dist/`**, and push to **`master`**.
+To deploy:
+
+```bash
+bun run deploy          # build, commit on gh-pages, return to your branch
+bun run deploy -- --push   # same, then push gh-pages to origin
+```
+
+Or run **`./deploy.sh`** directly. The script builds **`dist/`**, copies it to a temp directory, checks out **`gh-pages`**, replaces the branch contents with the build, creates a deployment commit, and checks out your previous branch again.
+
+Publish when ready:
+
+```bash
+git push origin gh-pages
+```
 
 ## Project layout (high level)
 
