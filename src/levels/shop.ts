@@ -169,7 +169,9 @@ export default class Shop extends GameObject {
         items.combo.description!.changeMessage(
             player.comboSegments >= MAX_COMBO_SEGMENTS
                 ? 'Combo maxed'
-                : items.combo.message
+                : player.comboSegments === 0
+                    ? 'Unlock Combo'
+                    : items.combo.message
         );
         items.leave.description!.changeMessage(items.leave.message);
 

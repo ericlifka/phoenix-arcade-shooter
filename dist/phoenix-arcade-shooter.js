@@ -2379,7 +2379,7 @@ void main() {
     player;
     multiplierDisplay;
     scoreDisplay;
-    segmentCount = 1;
+    segmentCount = 0;
     comboPoints = 0;
     pointTotal = 0;
     pointMultiplier = 1;
@@ -2412,24 +2412,31 @@ void main() {
       this.updateMultiplier();
       this.updateGaugeFill();
       this.updateScore();
-      this.addChild(this.multiplierDisplay);
       this.addChild(this.scoreDisplay);
+      this.updateComboVisibility();
     }
     syncFromPlayer() {
       if (this.player) {
         this.segmentCount = this.player.comboSegments;
       }
-      this.sprite = buildFrameSprite(this.segmentCount, this.color);
-      this.updateLayout();
-      const maxPoints = this.activeFillHeight();
-      if (this.comboPoints > maxPoints) {
-        this.comboPoints = maxPoints;
+      if (this.comboActive()) {
+        this.sprite = buildFrameSprite(this.segmentCount, this.color);
+        const maxPoints = this.activeFillHeight();
+        if (this.comboPoints > maxPoints) {
+          this.comboPoints = maxPoints;
+        }
+      } else {
+        this.sprite = undefined;
+        this.fillGaugeSprite = undefined;
+        this.comboPoints = 0;
       }
+      this.updateLayout();
       this.updateMultiplier();
       this.updateGaugeFill();
+      this.updateComboVisibility();
     }
     renderToFrame(frame) {
-      if (this.fillGaugeSprite && this.position) {
+      if (this.comboActive() && this.fillGaugeSprite && this.position) {
         this.fillGaugeSprite.renderToFrame(frame, this.position.x + 1, this.position.y + 1, this.index - 1);
       }
       super.renderToFrame(frame);
@@ -2445,6 +2452,9 @@ void main() {
       return this.pointMultiplier;
     }
     bumpCombo() {
+      if (!this.comboActive()) {
+        return;
+      }
       const maxPoints = this.activeFillHeight();
       if (this.comboPoints < maxPoints) {
         this.comboPoints++;
@@ -2453,31 +2463,59 @@ void main() {
       this.updateGaugeFill();
     }
     clearCombo() {
+      if (!this.comboActive()) {
+        return;
+      }
       this.comboPoints = 0;
       this.updateMultiplier();
       this.updateGaugeFill();
+    }
+    comboActive() {
+      return this.segmentCount > 0;
+    }
+    updateComboVisibility() {
+      if (this.comboActive()) {
+        if (!this.children.includes(this.multiplierDisplay)) {
+          this.addChild(this.multiplierDisplay);
+        }
+      } else {
+        this.removeChild(this.multiplierDisplay);
+      }
     }
     activeFillHeight() {
       return this.segmentCount * COMBO_SEGMENT_HEIGHT;
     }
     updateLayout() {
-      if (!this.sprite || !this.position) {
+      if (!this.position) {
         return;
       }
-      this.position.y = this.anchorBottom - this.sprite.height;
-      this.multiplierDisplay.position = {
-        x: this.position.x + 7,
-        y: this.position.y + this.sprite.height - 5
-      };
+      if (this.comboActive() && this.sprite) {
+        this.position.y = this.anchorBottom - this.sprite.height;
+        this.multiplierDisplay.position = {
+          x: this.position.x + 7,
+          y: this.position.y + this.sprite.height - 5
+        };
+      }
       this.scoreDisplay.position = {
         x: this.position.x,
-        y: this.position.y + this.sprite.height + 1
+        y: this.anchorBottom + 1
       };
+      this.repositionDisplays();
+    }
+    repositionDisplays() {
+      this.scoreDisplay.changeMessage(padScoreDisplay(this.pointTotal));
+      if (this.comboActive()) {
+        this.multiplierDisplay.changeMessage(this.pointMultiplier + "x");
+      }
     }
     updateScore() {
       this.scoreDisplay.changeMessage(padScoreDisplay(this.pointTotal));
     }
     updateMultiplier() {
+      if (!this.comboActive()) {
+        this.pointMultiplier = 1;
+        return;
+      }
       const filledSegments = Math.floor(this.comboPoints / COMBO_SEGMENT_HEIGHT);
       this.pointMultiplier = Math.min(this.segmentCount + 1, 1 + filledSegments, 10);
       this.multiplierDisplay.changeMessage(this.pointMultiplier + "x");
@@ -2494,6 +2532,10 @@ void main() {
       return false;
     }
     updateGaugeFill() {
+      if (!this.comboActive()) {
+        this.fillGaugeSprite = undefined;
+        return;
+      }
       const innerHeight = this.innerFillHeight();
       const pixels = new Array(innerHeight).fill(null);
       let filled = 0;
@@ -3761,7 +3803,7 @@ void main() {
     armorUpgrades = 0;
     armor = 0;
     gunTier = 0;
-    comboSegments = 1;
+    comboSegments = 0;
     comboUpgrades = 0;
     SPEED = 50;
     BULLET_SPEED = 100;
@@ -3790,7 +3832,7 @@ void main() {
       this.armorUpgrades = 0;
       this.armor = 0;
       this.gunTier = 0;
-      this.comboSegments = 1;
+      this.comboSegments = 0;
       this.comboUpgrades = 0;
       this.SPEED = 50;
       this.BULLET_SPEED = 100;
@@ -4022,7 +4064,7 @@ void main() {
       items.guns.description.changeMessage(player.gunTier >= MAX_GUN_TIER ? "Guns maxed" : GUN_UPGRADE_NAMES[player.gunTier]);
       items.armor.costText.changeMessage("$" + items.armor.cost);
       items.combo.costText.changeMessage(player.comboSegments >= MAX_COMBO_SEGMENTS ? "--" : "$" + items.combo.cost);
-      items.combo.description.changeMessage(player.comboSegments >= MAX_COMBO_SEGMENTS ? "Combo maxed" : items.combo.message);
+      items.combo.description.changeMessage(player.comboSegments >= MAX_COMBO_SEGMENTS ? "Combo maxed" : player.comboSegments === 0 ? "Unlock Combo" : items.combo.message);
       items.leave.description.changeMessage(items.leave.message);
       items.health.costText.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
       items.rate.costText.updateColor(items.rate.cost > bank.value ? this.disabledColor : this.game.interfaceColor);

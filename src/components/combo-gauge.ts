@@ -68,8 +68,8 @@ function buildFrameSprite(segmentCount: number, borderColor: string): Sprite {
 }
 
 /**
- * Combo gauge that displays multiplier and score.
- * Segment count is upgradeable via the shop (1–10 segments).
+ * Combo gauge that displays score and, once unlocked via the shop, combo multiplier + fill.
+ * Segment count is upgradeable via the shop (0 = score only, up to 10 segments).
  */
 export default class ComboGauge extends GameObject {
     index = 1;
@@ -78,7 +78,7 @@ export default class ComboGauge extends GameObject {
     private player?: PlayerControlledShip;
     private multiplierDisplay: TextDisplay;
     private scoreDisplay: TextDisplay;
-    private segmentCount = 1;
+    private segmentCount = 0;
     private comboPoints = 0;
     private pointTotal = 0;
     private pointMultiplier = 1;
@@ -119,8 +119,8 @@ export default class ComboGauge extends GameObject {
         this.updateGaugeFill();
         this.updateScore();
 
-        this.addChild(this.multiplierDisplay);
         this.addChild(this.scoreDisplay);
+        this.updateComboVisibility();
     }
 
     syncFromPlayer(): void {
@@ -128,20 +128,27 @@ export default class ComboGauge extends GameObject {
             this.segmentCount = this.player.comboSegments;
         }
 
-        this.sprite = buildFrameSprite(this.segmentCount, this.color);
-        this.updateLayout();
+        if (this.comboActive()) {
+            this.sprite = buildFrameSprite(this.segmentCount, this.color);
 
-        const maxPoints = this.activeFillHeight();
-        if (this.comboPoints > maxPoints) {
-            this.comboPoints = maxPoints;
+            const maxPoints = this.activeFillHeight();
+            if (this.comboPoints > maxPoints) {
+                this.comboPoints = maxPoints;
+            }
+        } else {
+            this.sprite = undefined;
+            this.fillGaugeSprite = undefined;
+            this.comboPoints = 0;
         }
 
+        this.updateLayout();
         this.updateMultiplier();
         this.updateGaugeFill();
+        this.updateComboVisibility();
     }
 
     renderToFrame(frame: any): void {
-        if (this.fillGaugeSprite && this.position) {
+        if (this.comboActive() && this.fillGaugeSprite && this.position) {
             this.fillGaugeSprite.renderToFrame(frame, this.position.x + 1, this.position.y + 1, this.index - 1);
         }
 
@@ -162,6 +169,10 @@ export default class ComboGauge extends GameObject {
     }
 
     bumpCombo(): void {
+        if (!this.comboActive()) {
+            return;
+        }
+
         const maxPoints = this.activeFillHeight();
         if (this.comboPoints < maxPoints) {
             this.comboPoints++;
@@ -172,9 +183,27 @@ export default class ComboGauge extends GameObject {
     }
 
     clearCombo(): void {
+        if (!this.comboActive()) {
+            return;
+        }
+
         this.comboPoints = 0;
         this.updateMultiplier();
         this.updateGaugeFill();
+    }
+
+    private comboActive(): boolean {
+        return this.segmentCount > 0;
+    }
+
+    private updateComboVisibility(): void {
+        if (this.comboActive()) {
+            if (!this.children.includes(this.multiplierDisplay)) {
+                this.addChild(this.multiplierDisplay);
+            }
+        } else {
+            this.removeChild(this.multiplierDisplay);
+        }
     }
 
     private activeFillHeight(): number {
@@ -182,19 +211,31 @@ export default class ComboGauge extends GameObject {
     }
 
     private updateLayout(): void {
-        if (!this.sprite || !this.position) {
+        if (!this.position) {
             return;
         }
 
-        this.position.y = this.anchorBottom - this.sprite.height;
-        this.multiplierDisplay.position = {
-            x: this.position.x + 7,
-            y: this.position.y + this.sprite.height - 5
-        };
+        if (this.comboActive() && this.sprite) {
+            this.position.y = this.anchorBottom - this.sprite.height;
+            this.multiplierDisplay.position = {
+                x: this.position.x + 7,
+                y: this.position.y + this.sprite.height - 5
+            };
+        }
+
         this.scoreDisplay.position = {
             x: this.position.x,
-            y: this.position.y + this.sprite.height + 1
+            y: this.anchorBottom + 1
         };
+
+        this.repositionDisplays();
+    }
+
+    private repositionDisplays(): void {
+        this.scoreDisplay.changeMessage(padScoreDisplay(this.pointTotal));
+        if (this.comboActive()) {
+            this.multiplierDisplay.changeMessage(this.pointMultiplier + 'x');
+        }
     }
 
     private updateScore(): void {
@@ -202,6 +243,11 @@ export default class ComboGauge extends GameObject {
     }
 
     private updateMultiplier(): void {
+        if (!this.comboActive()) {
+            this.pointMultiplier = 1;
+            return;
+        }
+
         const filledSegments = Math.floor(this.comboPoints / COMBO_SEGMENT_HEIGHT);
         this.pointMultiplier = Math.min(this.segmentCount + 1, 1 + filledSegments, 10);
         this.multiplierDisplay.changeMessage(this.pointMultiplier + 'x');
@@ -222,6 +268,11 @@ export default class ComboGauge extends GameObject {
     }
 
     private updateGaugeFill(): void {
+        if (!this.comboActive()) {
+            this.fillGaugeSprite = undefined;
+            return;
+        }
+
         const innerHeight = this.innerFillHeight();
         const pixels: (string | null)[] = new Array(innerHeight).fill(null);
         let filled = 0;

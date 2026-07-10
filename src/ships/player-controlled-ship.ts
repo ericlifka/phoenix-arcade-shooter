@@ -27,7 +27,7 @@ export default class PlayerControlledShip extends GameObject {
     armorUpgrades = 0;
     armor = 0;
     gunTier = 0;
-    comboSegments = 1;
+    comboSegments = 0;
     comboUpgrades = 0;
     SPEED = 50;
     BULLET_SPEED = 100;
@@ -61,7 +61,7 @@ export default class PlayerControlledShip extends GameObject {
         this.armorUpgrades = 0;
         this.armor = 0;
         this.gunTier = 0;
-        this.comboSegments = 1;
+        this.comboSegments = 0;
         this.comboUpgrades = 0;
         this.SPEED = 50;
         this.BULLET_SPEED = 100;
