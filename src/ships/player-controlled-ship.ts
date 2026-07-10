@@ -4,6 +4,7 @@ import playerShipSprite from '../sprites/player-ship.js';
 import playerShipDoubleGuns from '../sprites/player-ship-double-guns.js';
 import playerShipSpriteWingGuns from '../sprites/player-ship-wing-guns.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
+import { MAX_COMBO_SEGMENTS } from '../components/combo-gauge.js';
 import { InputState } from '../types/game';
 import { Position } from '../types/rendering';
 
@@ -26,6 +27,8 @@ export default class PlayerControlledShip extends GameObject {
     armorUpgrades = 0;
     armor = 0;
     gunTier = 0;
+    comboSegments = 1;
+    comboUpgrades = 0;
     SPEED = 50;
     BULLET_SPEED = 100;
     FIRE_RATE = 500;
@@ -58,6 +61,8 @@ export default class PlayerControlledShip extends GameObject {
         this.armorUpgrades = 0;
         this.armor = 0;
         this.gunTier = 0;
+        this.comboSegments = 1;
+        this.comboUpgrades = 0;
         this.SPEED = 50;
         this.BULLET_SPEED = 100;
         this.FIRE_RATE = 500;
@@ -80,6 +85,15 @@ export default class PlayerControlledShip extends GameObject {
 
         this.gunTier++;
         this.applyGunTier();
+    }
+
+    extendCombo(): void {
+        if (this.comboSegments >= MAX_COMBO_SEGMENTS) {
+            return;
+        }
+
+        this.comboSegments++;
+        this.comboUpgrades++;
     }
 
     applyGunTier(): void {

@@ -2306,20 +2306,6 @@ void main() {
     return "hsl(" + H + ", " + SStr + ", " + LStr + ")";
   }
 
-  // src/sprites/combo-gauge.ts
-  function comboGaugeSprite() {
-    const w4 = "#fff";
-    const n5 = null;
-    return new Sprite([
-      [n5, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, n5],
-      [w4, w4, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, w4, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, w4, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, w4, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, w4, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, w4, w4],
-      [w4, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, w4],
-      [w4, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, w4],
-      [w4, w4, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, w4, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, w4, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, w4, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, w4, n5, n5, n5, n5, n5, n5, n5, n5, n5, n5, w4, w4],
-      [n5, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, w4, n5]
-    ]);
-  }
-
   // src/helpers/pad-score-display.ts
   function padScoreDisplay(score) {
     let scoreStr = score + "";
@@ -2341,11 +2327,59 @@ void main() {
   }
 
   // src/components/combo-gauge.ts
+  var MAX_COMBO_SEGMENTS = 10;
+  var COMBO_SEGMENT_HEIGHT = 12;
+  var MAX_COMBO_FILL_HEIGHT = MAX_COMBO_SEGMENTS * COMBO_SEGMENT_HEIGHT;
+  var COMBO_FILL_WIDTH = 4;
+  function buildFrameSprite(segmentCount, borderColor) {
+    const fillHeight = segmentCount * COMBO_SEGMENT_HEIGHT;
+    const dividerCount = segmentCount - 1;
+    const frameWidth = COMBO_FILL_WIDTH + 2;
+    const frameHeight = fillHeight + dividerCount + 2;
+    const pixels = [];
+    for (let x = 0;x < frameWidth; x++) {
+      pixels[x] = [];
+      for (let y2 = 0;y2 < frameHeight; y2++) {
+        pixels[x][y2] = null;
+      }
+    }
+    const left = 0;
+    const right = frameWidth - 1;
+    const barStart = 2;
+    const barEnd = frameWidth - 3;
+    function drawHorizontalBar(y2) {
+      for (let x = barStart;x <= barEnd; x++) {
+        pixels[x][y2] = borderColor;
+      }
+    }
+    for (let y2 = 1;y2 < frameHeight - 1; y2++) {
+      pixels[left][y2] = borderColor;
+      pixels[right][y2] = borderColor;
+    }
+    drawHorizontalBar(0);
+    drawHorizontalBar(frameHeight - 1);
+    for (let seg = 1;seg < segmentCount; seg++) {
+      drawHorizontalBar(seg * (COMBO_SEGMENT_HEIGHT + 1));
+    }
+    pixels[1][1] = borderColor;
+    pixels[1][0] = borderColor;
+    pixels[right - 1][1] = borderColor;
+    pixels[right - 1][0] = borderColor;
+    pixels[1][frameHeight - 2] = borderColor;
+    pixels[1][frameHeight - 1] = borderColor;
+    pixels[right - 1][frameHeight - 2] = borderColor;
+    pixels[right - 1][frameHeight - 1] = borderColor;
+    return new Sprite(pixels);
+  }
+
   class ComboGauge extends GameObject {
     index = 1;
     color;
+    anchorBottom;
+    player;
     multiplierDisplay;
     scoreDisplay;
+    segmentCount = 1;
     comboPoints = 0;
     pointTotal = 0;
     pointMultiplier = 1;
@@ -2354,18 +2388,19 @@ void main() {
       super(parent);
       this.position = options.position;
       this.color = options.color || "#ffffff";
-      this.sprite = comboGaugeSprite().applyColor(this.color);
+      this.anchorBottom = options.anchorBottom ?? options.position.y;
+      this.player = options.player;
       this.multiplierDisplay = new TextDisplay(this, {
         font: "arcade-small",
         color: this.color,
         index: 1,
-        position: { x: this.position.x + 7, y: this.position.y + this.sprite.height - 5 }
+        position: { x: this.position.x, y: this.position.y }
       });
       this.scoreDisplay = new TextDisplay(this, {
         font: "arcade-small",
         color: this.color,
         index: 1,
-        position: { x: this.position.x, y: this.position.y + this.sprite.height + 1 }
+        position: { x: this.position.x, y: this.position.y }
       });
       this.reset();
     }
@@ -2373,11 +2408,25 @@ void main() {
       super.reset();
       this.comboPoints = 0;
       this.pointTotal = 0;
+      this.syncFromPlayer();
       this.updateMultiplier();
-      this.updateGaugeHeight();
+      this.updateGaugeFill();
       this.updateScore();
       this.addChild(this.multiplierDisplay);
       this.addChild(this.scoreDisplay);
+    }
+    syncFromPlayer() {
+      if (this.player) {
+        this.segmentCount = this.player.comboSegments;
+      }
+      this.sprite = buildFrameSprite(this.segmentCount, this.color);
+      this.updateLayout();
+      const maxPoints = this.activeFillHeight();
+      if (this.comboPoints > maxPoints) {
+        this.comboPoints = maxPoints;
+      }
+      this.updateMultiplier();
+      this.updateGaugeFill();
     }
     renderToFrame(frame) {
       if (this.fillGaugeSprite && this.position) {
@@ -2396,48 +2445,85 @@ void main() {
       return this.pointMultiplier;
     }
     bumpCombo() {
-      this.comboPoints++;
+      const maxPoints = this.activeFillHeight();
+      if (this.comboPoints < maxPoints) {
+        this.comboPoints++;
+      }
       this.updateMultiplier();
-      this.updateGaugeHeight();
+      this.updateGaugeFill();
     }
     clearCombo() {
       this.comboPoints = 0;
       this.updateMultiplier();
-      this.updateGaugeHeight();
+      this.updateGaugeFill();
+    }
+    activeFillHeight() {
+      return this.segmentCount * COMBO_SEGMENT_HEIGHT;
+    }
+    updateLayout() {
+      if (!this.sprite || !this.position) {
+        return;
+      }
+      this.position.y = this.anchorBottom - this.sprite.height;
+      this.multiplierDisplay.position = {
+        x: this.position.x + 7,
+        y: this.position.y + this.sprite.height - 5
+      };
+      this.scoreDisplay.position = {
+        x: this.position.x,
+        y: this.position.y + this.sprite.height + 1
+      };
     }
     updateScore() {
       this.scoreDisplay.changeMessage(padScoreDisplay(this.pointTotal));
     }
     updateMultiplier() {
-      if (this.comboPoints >= 59) {
-        this.pointMultiplier = 6;
-      } else if (this.comboPoints >= 48) {
-        this.pointMultiplier = 5;
-      } else if (this.comboPoints >= 36) {
-        this.pointMultiplier = 4;
-      } else if (this.comboPoints >= 24) {
-        this.pointMultiplier = 3;
-      } else if (this.comboPoints >= 12) {
-        this.pointMultiplier = 2;
-      } else {
-        this.pointMultiplier = 1;
-      }
+      const filledSegments = Math.floor(this.comboPoints / COMBO_SEGMENT_HEIGHT);
+      this.pointMultiplier = Math.min(this.segmentCount + 1, 1 + filledSegments, 10);
       this.multiplierDisplay.changeMessage(this.pointMultiplier + "x");
     }
-    updateGaugeHeight() {
-      const pixels = [];
-      for (let i = 0;i < 59; i++) {
-        if (i < this.comboPoints) {
-          pixels.unshift(colorAtPercent(GreenToRed, 1 - i / 59));
-        } else {
-          pixels.unshift(null);
+    innerFillHeight() {
+      return this.segmentCount * COMBO_SEGMENT_HEIGHT + (this.segmentCount - 1);
+    }
+    isDividerRow(frameRow) {
+      for (let seg = 1;seg < this.segmentCount; seg++) {
+        if (frameRow === seg * (COMBO_SEGMENT_HEIGHT + 1)) {
+          return true;
         }
       }
+      return false;
+    }
+    updateGaugeFill() {
+      const innerHeight = this.innerFillHeight();
+      const pixels = new Array(innerHeight).fill(null);
+      let filled = 0;
+      for (let innerY = innerHeight - 1;innerY >= 0; innerY--) {
+        const frameRow = innerY + 1;
+        if (this.isDividerRow(frameRow)) {
+          continue;
+        }
+        if (filled < this.comboPoints) {
+          pixels[innerY] = colorAtPercent(GreenToRed, 1 - filled / MAX_COMBO_FILL_HEIGHT);
+          filled++;
+        }
+      }
+      for (let innerY = 0;innerY < innerHeight; innerY++) {
+        const frameRow = innerY + 1;
+        if (!this.isDividerRow(frameRow)) {
+          continue;
+        }
+        if (pixels[innerY + 1] != null) {
+          pixels[innerY] = pixels[innerY + 1];
+        } else if (innerY > 0 && pixels[innerY - 1] != null) {
+          pixels[innerY] = pixels[innerY - 1];
+        }
+      }
+      const column = pixels;
       this.fillGaugeSprite = new Sprite([
-        pixels,
-        pixels,
-        pixels,
-        pixels
+        column,
+        column,
+        column,
+        column
       ]);
     }
   }
@@ -3675,6 +3761,8 @@ void main() {
     armorUpgrades = 0;
     armor = 0;
     gunTier = 0;
+    comboSegments = 1;
+    comboUpgrades = 0;
     SPEED = 50;
     BULLET_SPEED = 100;
     FIRE_RATE = 500;
@@ -3702,6 +3790,8 @@ void main() {
       this.armorUpgrades = 0;
       this.armor = 0;
       this.gunTier = 0;
+      this.comboSegments = 1;
+      this.comboUpgrades = 0;
       this.SPEED = 50;
       this.BULLET_SPEED = 100;
       this.FIRE_RATE = 500;
@@ -3720,6 +3810,13 @@ void main() {
       }
       this.gunTier++;
       this.applyGunTier();
+    }
+    extendCombo() {
+      if (this.comboSegments >= MAX_COMBO_SEGMENTS) {
+        return;
+      }
+      this.comboSegments++;
+      this.comboUpgrades++;
     }
     applyGunTier() {
       switch (this.gunTier) {
@@ -3816,6 +3913,7 @@ void main() {
   // src/levels/shop.ts
   var GUN_UPGRADE_NAMES = ["Double Guns", "Triple Guns", "Radial Guns"];
   var GUN_UPGRADE_BASE_COST = 500;
+  var COMBO_UPGRADE_BASE_COST = 250;
 
   class Shop extends GameObject {
     isShop = true;
@@ -3827,9 +3925,10 @@ void main() {
       damage: { message: "+1 Bullet Damage", position: { x: 90, y: 80 } },
       armor: { message: "+1 Armor", position: { x: 90, y: 95 } },
       guns: { message: "Double Guns", position: { x: 90, y: 110 } },
-      leave: { message: "Leave Shop", position: { x: 60, y: 125 } }
+      combo: { message: "Extend Combo", position: { x: 90, y: 125 } },
+      leave: { message: "Leave Shop", position: { x: 60, y: 140 } }
     };
-    menuSelectorPositions = [49, 64, 79, 94, 109, 124];
+    menuSelectorPositions = [49, 64, 79, 94, 109, 124, 139];
     disabledColor = "#777";
     game;
     bank;
@@ -3915,18 +4014,22 @@ void main() {
       items.damage.cost = 100 + player.damageUpgrades * 100;
       items.guns.cost = player.gunTier >= MAX_GUN_TIER ? -1 : (player.gunTier + 1) * GUN_UPGRADE_BASE_COST;
       items.armor.cost = 75 + player.armorUpgrades * 75;
+      items.combo.cost = player.comboSegments >= MAX_COMBO_SEGMENTS ? -1 : (player.comboUpgrades + 1) * COMBO_UPGRADE_BASE_COST;
       items.damage.costText.changeMessage("$" + items.damage.cost);
       items.health.costText.changeMessage("$" + items.health.cost);
       items.rate.costText.changeMessage("$" + items.rate.cost);
       items.guns.costText.changeMessage(player.gunTier >= MAX_GUN_TIER ? "--" : "$" + items.guns.cost);
       items.guns.description.changeMessage(player.gunTier >= MAX_GUN_TIER ? "Guns maxed" : GUN_UPGRADE_NAMES[player.gunTier]);
       items.armor.costText.changeMessage("$" + items.armor.cost);
+      items.combo.costText.changeMessage(player.comboSegments >= MAX_COMBO_SEGMENTS ? "--" : "$" + items.combo.cost);
+      items.combo.description.changeMessage(player.comboSegments >= MAX_COMBO_SEGMENTS ? "Combo maxed" : items.combo.message);
       items.leave.description.changeMessage(items.leave.message);
       items.health.costText.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
       items.rate.costText.updateColor(items.rate.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
       items.damage.costText.updateColor(items.damage.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
       items.guns.costText.updateColor(items.guns.cost > bank.value || player.gunTier >= MAX_GUN_TIER ? this.disabledColor : this.game.interfaceColor);
       items.armor.costText.updateColor(items.armor.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
+      items.combo.costText.updateColor(items.combo.cost > bank.value || player.comboSegments >= MAX_COMBO_SEGMENTS ? this.disabledColor : this.game.interfaceColor);
     }
     createSelectorShip() {
       this.selectorShip = new GameObject;
@@ -3970,6 +4073,9 @@ void main() {
             selection = this.menuItems.guns;
             break;
           case 5:
+            selection = this.menuItems.combo;
+            break;
+          case 6:
             this.startGame();
             return;
           default:
@@ -4014,6 +4120,10 @@ void main() {
           this.player.upgradeGunTier();
           break;
         case 5:
+          this.player.extendCombo();
+          this.game.comboGauge.syncFromPlayer();
+          break;
+        case 6:
           this.isDoneShopping = true;
           break;
       }
@@ -4177,8 +4287,10 @@ void main() {
         position: { x: 82, y: 70 }
       });
       this.comboGauge = new ComboGauge(this, {
-        position: { x: 1, y: this.height - 68 },
-        color: this.interfaceColor
+        position: { x: 1, y: 0 },
+        anchorBottom: this.height - 7,
+        color: this.interfaceColor,
+        player: this.player
       });
       this.lifeMeter = new LifeMeter(this.player, {
         scale: 1,

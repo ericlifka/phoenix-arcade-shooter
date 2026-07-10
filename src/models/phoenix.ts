@@ -68,8 +68,10 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         });
 
         this.comboGauge = new ComboGauge(this, {
-            position: { x: 1, y: this.height - 68 },
-            color: this.interfaceColor
+            position: { x: 1, y: 0 },
+            anchorBottom: this.height - 7,
+            color: this.interfaceColor,
+            player: this.player
         });
         this.lifeMeter = new LifeMeter(this.player, {
             scale: 1,

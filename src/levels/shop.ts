@@ -6,9 +6,11 @@ import TextDisplay from '../components/text-display.js';
 import { Position } from '../types/rendering';
 import type { GameForShop } from '../types/levels.js';
 import { MAX_GUN_TIER } from '../ships/player-controlled-ship.js';
+import { MAX_COMBO_SEGMENTS } from '../components/combo-gauge.js';
 
 const GUN_UPGRADE_NAMES = ['Double Guns', 'Triple Guns', 'Radial Guns'];
 const GUN_UPGRADE_BASE_COST = 500;
+const COMBO_UPGRADE_BASE_COST = 250;
 
 interface ShopMenuLine {
     message: string;
@@ -28,6 +30,7 @@ export default class Shop extends GameObject {
         damage: ShopMenuLine;
         guns: ShopMenuLine;
         armor: ShopMenuLine;
+        combo: ShopMenuLine;
         leave: ShopMenuLine;
     } = {
             health: { message: '+1 Ship Health', position: { x: 90, y: 50 } },
@@ -35,9 +38,10 @@ export default class Shop extends GameObject {
             damage: { message: '+1 Bullet Damage', position: { x: 90, y: 80 } },
             armor: { message: '+1 Armor', position: { x: 90, y: 95 } },
             guns: { message: 'Double Guns', position: { x: 90, y: 110 } },
-            leave: { message: 'Leave Shop', position: { x: 60, y: 125 } }
+            combo: { message: 'Extend Combo', position: { x: 90, y: 125 } },
+            leave: { message: 'Leave Shop', position: { x: 60, y: 140 } }
         };
-    menuSelectorPositions = [49, 64, 79, 94, 109, 124];
+    menuSelectorPositions = [49, 64, 79, 94, 109, 124, 139];
     disabledColor = '#777';
 
     game: GameForShop;
@@ -143,6 +147,9 @@ export default class Shop extends GameObject {
             ? -1
             : (player.gunTier + 1) * GUN_UPGRADE_BASE_COST;
         items.armor.cost = 75 + player.armorUpgrades * 75;
+        items.combo.cost = player.comboSegments >= MAX_COMBO_SEGMENTS
+            ? -1
+            : (player.comboUpgrades + 1) * COMBO_UPGRADE_BASE_COST;
 
         items.damage.costText!.changeMessage('$' + items.damage.cost);
         items.health.costText!.changeMessage('$' + items.health.cost);
@@ -156,6 +163,14 @@ export default class Shop extends GameObject {
                 : GUN_UPGRADE_NAMES[player.gunTier]
         );
         items.armor.costText!.changeMessage('$' + items.armor.cost);
+        items.combo.costText!.changeMessage(
+            player.comboSegments >= MAX_COMBO_SEGMENTS ? '--' : '$' + items.combo.cost
+        );
+        items.combo.description!.changeMessage(
+            player.comboSegments >= MAX_COMBO_SEGMENTS
+                ? 'Combo maxed'
+                : items.combo.message
+        );
         items.leave.description!.changeMessage(items.leave.message);
 
         items.health.costText!.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
@@ -167,6 +182,11 @@ export default class Shop extends GameObject {
                 : this.game.interfaceColor
         );
         items.armor.costText!.updateColor(items.armor.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
+        items.combo.costText!.updateColor(
+            items.combo.cost > bank.value || player.comboSegments >= MAX_COMBO_SEGMENTS
+                ? this.disabledColor
+                : this.game.interfaceColor
+        );
     }
 
     createSelectorShip(): void {
@@ -205,7 +225,8 @@ export default class Shop extends GameObject {
                 case 2: selection = this.menuItems.damage; break;
                 case 3: selection = this.menuItems.armor; break;
                 case 4: selection = this.menuItems.guns; break;
-                case 5: this.startGame(); return;
+                case 5: selection = this.menuItems.combo; break;
+                case 6: this.startGame(); return;
                 default: return;
             }
 
@@ -256,7 +277,12 @@ export default class Shop extends GameObject {
                 this.player.upgradeGunTier();
                 break;
 
-            case 5: // done shopping
+            case 5: // combo
+                this.player.extendCombo();
+                this.game.comboGauge.syncFromPlayer();
+                break;
+
+            case 6: // done shopping
                 this.isDoneShopping = true;
                 break;
         }

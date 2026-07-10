@@ -77,7 +77,9 @@ export interface LifeMeterOptions {
 // Combo gauge options
 export interface ComboGaugeOptions {
     position: Position;
+    anchorBottom?: number;
     color?: string;
+    player?: import('../ships/player-controlled-ship.js').default;
 }
 
 // Bank (score/money) options
