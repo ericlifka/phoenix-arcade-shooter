@@ -7,6 +7,7 @@ import { ComboGaugeOptions } from '../types/game';
 import type PlayerControlledShip from '../ships/player-controlled-ship.js';
 
 export const MAX_COMBO_SEGMENTS = 10;
+export const MAX_COMBO_MULTIPLIER = MAX_COMBO_SEGMENTS + 1;
 export const COMBO_SEGMENT_HEIGHT = 12;
 export const MAX_COMBO_FILL_HEIGHT = MAX_COMBO_SEGMENTS * COMBO_SEGMENT_HEIGHT;
 export const COMBO_FILL_WIDTH = 4;
@@ -69,7 +70,7 @@ function buildFrameSprite(segmentCount: number, borderColor: string): Sprite {
 
 /**
  * Combo gauge that displays score and, once unlocked via the shop, combo multiplier + fill.
- * Segment count is upgradeable via the shop (0 = score only, up to 10 segments).
+ * Segment count is upgradeable via the shop (0 = score only, up to 10 segments / 11x).
  */
 export default class ComboGauge extends GameObject {
     index = 1;
@@ -249,7 +250,7 @@ export default class ComboGauge extends GameObject {
         }
 
         const filledSegments = Math.floor(this.comboPoints / COMBO_SEGMENT_HEIGHT);
-        this.pointMultiplier = Math.min(this.segmentCount + 1, 1 + filledSegments, 10);
+        this.pointMultiplier = Math.min(this.segmentCount + 1, 1 + filledSegments, MAX_COMBO_MULTIPLIER);
         this.multiplierDisplay.changeMessage(this.pointMultiplier + 'x');
     }
 

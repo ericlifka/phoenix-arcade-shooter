@@ -10,7 +10,9 @@ import { MAX_COMBO_SEGMENTS } from '../components/combo-gauge.js';
 
 const GUN_UPGRADE_NAMES = ['Double Guns', 'Triple Guns', 'Radial Guns'];
 const GUN_UPGRADE_BASE_COST = 500;
-const COMBO_UPGRADE_BASE_COST = 250;
+const COMBO_UPGRADE_COSTS = [
+    25, 50, 100, 200, 400, 1000, 2000, 3500, 6000, 10000
+];
 
 interface ShopMenuLine {
     message: string;
@@ -149,7 +151,7 @@ export default class Shop extends GameObject {
         items.armor.cost = 75 + player.armorUpgrades * 75;
         items.combo.cost = player.comboSegments >= MAX_COMBO_SEGMENTS
             ? -1
-            : (player.comboUpgrades + 1) * COMBO_UPGRADE_BASE_COST;
+            : COMBO_UPGRADE_COSTS[player.comboUpgrades];
 
         items.damage.costText!.changeMessage('$' + items.damage.cost);
         items.health.costText!.changeMessage('$' + items.health.cost);

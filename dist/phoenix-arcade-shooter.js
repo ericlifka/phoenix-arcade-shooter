@@ -2140,7 +2140,7 @@ void main() {
     reset() {
       super.reset();
       this.addChild(this.valueDisplay);
-      this.value = 5000;
+      this.value = 50000;
       this.updateDisplay();
     }
     addMoney(value) {
@@ -2328,6 +2328,7 @@ void main() {
 
   // src/components/combo-gauge.ts
   var MAX_COMBO_SEGMENTS = 10;
+  var MAX_COMBO_MULTIPLIER = MAX_COMBO_SEGMENTS + 1;
   var COMBO_SEGMENT_HEIGHT = 12;
   var MAX_COMBO_FILL_HEIGHT = MAX_COMBO_SEGMENTS * COMBO_SEGMENT_HEIGHT;
   var COMBO_FILL_WIDTH = 4;
@@ -2517,7 +2518,7 @@ void main() {
         return;
       }
       const filledSegments = Math.floor(this.comboPoints / COMBO_SEGMENT_HEIGHT);
-      this.pointMultiplier = Math.min(this.segmentCount + 1, 1 + filledSegments, 10);
+      this.pointMultiplier = Math.min(this.segmentCount + 1, 1 + filledSegments, MAX_COMBO_MULTIPLIER);
       this.multiplierDisplay.changeMessage(this.pointMultiplier + "x");
     }
     innerFillHeight() {
@@ -3455,7 +3456,7 @@ void main() {
     value;
     constructor(parent, position, velocity) {
       super(parent);
-      this.value = 15;
+      this.value = 5;
       this.position = position;
       this.velocity = { x: 0, y: 50 };
       this.sprite = arcade_default["$"];
@@ -3955,7 +3956,18 @@ void main() {
   // src/levels/shop.ts
   var GUN_UPGRADE_NAMES = ["Double Guns", "Triple Guns", "Radial Guns"];
   var GUN_UPGRADE_BASE_COST = 500;
-  var COMBO_UPGRADE_BASE_COST = 250;
+  var COMBO_UPGRADE_COSTS = [
+    25,
+    50,
+    100,
+    200,
+    400,
+    1000,
+    2000,
+    3500,
+    6000,
+    1e4
+  ];
 
   class Shop extends GameObject {
     isShop = true;
@@ -4056,7 +4068,7 @@ void main() {
       items.damage.cost = 100 + player.damageUpgrades * 100;
       items.guns.cost = player.gunTier >= MAX_GUN_TIER ? -1 : (player.gunTier + 1) * GUN_UPGRADE_BASE_COST;
       items.armor.cost = 75 + player.armorUpgrades * 75;
-      items.combo.cost = player.comboSegments >= MAX_COMBO_SEGMENTS ? -1 : (player.comboUpgrades + 1) * COMBO_UPGRADE_BASE_COST;
+      items.combo.cost = player.comboSegments >= MAX_COMBO_SEGMENTS ? -1 : COMBO_UPGRADE_COSTS[player.comboUpgrades];
       items.damage.costText.changeMessage("$" + items.damage.cost);
       items.health.costText.changeMessage("$" + items.health.cost);
       items.rate.costText.changeMessage("$" + items.rate.cost);
@@ -4475,9 +4487,7 @@ void main() {
       this.comboGauge.clearCombo();
     }
     moneyCollected(value) {
-      const comboMultiplier = this.comboGauge.getMultiplier();
-      const moneyMultiplier = 1 + (comboMultiplier - 1) * 0.25;
-      this.bank.addMoney(value * moneyMultiplier);
+      this.bank.addMoney(value * this.comboGauge.getMultiplier());
     }
   }
 

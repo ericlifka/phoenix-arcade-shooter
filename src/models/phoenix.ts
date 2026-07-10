@@ -267,8 +267,6 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
     }
 
     moneyCollected(value: number): void {
-        const comboMultiplier = this.comboGauge.getMultiplier();
-        const moneyMultiplier = 1 + (comboMultiplier - 1) * .25
-        this.bank.addMoney(value * moneyMultiplier);
+        this.bank.addMoney(value * this.comboGauge.getMultiplier());
     }
 }
