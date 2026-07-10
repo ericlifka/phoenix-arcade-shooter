@@ -12,6 +12,7 @@ import InputInterpreter from '../helpers/input-interpreter.js';
 import LevelManager from '../levels/level-manager.js';
 import LifeMeter from '../components/life-meter.js';
 import PlayerShip from '../ships/player-controlled-ship.js';
+import RunStats from './run-stats.js';
 import TextDisplay from '../components/text-display.js';
 import { BulletOptions, GameOverResult, PhysicalEntity } from '../types/game';
 import type { GameForLevels, GameForShop } from '../types/levels.js';
@@ -39,9 +40,11 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
     lifeMeter: LifeMeter;
     bank: Bank;
     levelManager: LevelManager;
+    runStats: RunStats;
 
     gameOver = false;
     paused = false;
+    runsCompleted = 0;
     gameOverCallback?: (result: GameOverResult) => void;
 
     constructor(options: PhoenixOptions) {
@@ -49,6 +52,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
 
         this.width = options.width;
         this.height = options.height;
+        this.runStats = new RunStats();
 
         this.titleScreen = new EmbeddedTitleScreen(this);
         this.controlsScreen = new ControlsScreen(this);
@@ -96,13 +100,10 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         this.gameOver = false;
         this.paused = false;
 
-        this.bank.reset();
-        this.comboGauge.reset();
-        this.lifeMeter.reset();
-        this.titleScreen.reset();
+        this.player.reset();
+        this.titleScreen.reset(this.runsCompleted);
         this.gameOverScreen.reset();
         this.levelManager.reset();
-        this.player.reset();
 
         this.addChild(this.player);
         this.addChild(this.levelManager);
@@ -123,6 +124,12 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
     }
 
     startNewGame(): void {
+        this.runStats.reset();
+        this.bank.resetForRun();
+        this.comboGauge.reset();
+        this.player.resetForNewRun();
+        this.levelManager.reset();
+
         this.addChild(this.bank);
         this.addChild(this.comboGauge);
         this.addChild(this.lifeMeter);
@@ -131,6 +138,8 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
     }
 
     finishGame(): void {
+        this.runsCompleted++;
+
         if (this.gameOverCallback) {
             this.gameOverCallback({
                 score: this.comboGauge.getScore(),
@@ -139,8 +148,37 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
             this.destroy();
         }
         else {
-            this.reset();
+            this.returnToMenu();
         }
+    }
+
+    returnToMenu(): void {
+        this.gameOver = false;
+        this.paused = false;
+
+        this.removeChild(this.gameOverScreen);
+        this.removeChild(this.bank);
+        this.removeChild(this.comboGauge);
+        this.removeChild(this.lifeMeter);
+        this.levelManager.stop();
+        this.clearBullets();
+
+        this.gameOverScreen.reset();
+        this.titleScreen.reset(this.runsCompleted);
+
+        if (!this.children.includes(this.player)) {
+            this.addChild(this.player);
+        }
+
+        if (!this.children.includes(this.titleScreen)) {
+            this.addChild(this.titleScreen);
+        }
+
+        this.player.resetForNewRun();
+    }
+
+    recordDollarsSpent(amount: number): void {
+        this.runStats.dollarsSpent += amount;
     }
 
     showControlsScreen(): void {
@@ -242,8 +280,9 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
 
         if (gameResult && !this.gameOver) {
             this.gameOver = true;
+            this.runStats.pointsEarned = this.comboGauge.getScore();
             this.gameOverScreen.setResult(gameResult);
-            this.gameOverScreen.setFinalScore(this.comboGauge.getScore());
+            this.gameOverScreen.setRunStats(this.runStats);
 
             this.removeChild(this.player);
             this.addChild(this.gameOverScreen);
@@ -255,6 +294,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
     }
 
     enemyDestroyed(data: { shipValue: number }): void {
+        this.runStats.enemiesDestroyed++;
         this.comboGauge.addPoints(data.shipValue);
     }
 
@@ -267,6 +307,8 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
     }
 
     moneyCollected(value: number): void {
-        this.bank.addMoney(value * this.comboGauge.getMultiplier());
+        const amount = value * this.comboGauge.getMultiplier();
+        this.runStats.dollarsCollected += amount;
+        this.bank.addMoney(amount);
     }
 }

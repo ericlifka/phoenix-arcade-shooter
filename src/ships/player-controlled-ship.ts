@@ -47,31 +47,40 @@ export default class PlayerControlledShip extends GameObject {
     reset(): void {
         super.reset();
 
-        this.sprite = playerShipSprite().rotateRight();
-        this.explosion = shipExplosion;
-
-        this.position = { x: -100, y: -100 };
-        this.velocity = { x: 0, y: 0 };
-
-        this.life = 20;
-        this.maxLife = 20;
         this.damageUpgrades = 0;
         this.lifeUpgrades = 0;
         this.rateUpgrades = 0;
         this.armorUpgrades = 0;
-        this.armor = 0;
         this.gunTier = 0;
         this.comboSegments = 0;
         this.comboUpgrades = 0;
+
+        this.resetForNewRun();
+    }
+
+    resetForNewRun(): void {
+        super.reset();
+
+        this.explosion = shipExplosion;
+        this.position = { x: -100, y: -100 };
+        this.velocity = { x: 0, y: 0 };
         this.SPEED = 50;
         this.BULLET_SPEED = 100;
-        this.FIRE_RATE = 500;
-
         this.preventInputControl = true;
         this.exploding = false;
         this.team = 0;
         this.damage = 5;
         this.timeSinceFired = 0;
+
+        this.applyPersistentUpgrades();
+    }
+
+    applyPersistentUpgrades(): void {
+        this.maxLife = 20 + this.lifeUpgrades;
+        this.life = this.maxLife;
+        this.armor = this.armorUpgrades;
+        this.FIRE_RATE = Math.ceil(500 * Math.pow(0.9, this.rateUpgrades));
+        this.applyGunTier();
     }
 
     refillHealth(): void {

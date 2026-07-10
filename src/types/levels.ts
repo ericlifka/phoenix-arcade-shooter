@@ -16,4 +16,5 @@ export interface GameForShop {
     player: PlayerControlledShip;
     comboGauge: ComboGauge;
     interfaceColor: string;
+    recordDollarsSpent(amount: number): void;
 }

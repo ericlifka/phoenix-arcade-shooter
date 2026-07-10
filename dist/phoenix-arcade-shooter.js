@@ -2140,7 +2140,10 @@ void main() {
     reset() {
       super.reset();
       this.addChild(this.valueDisplay);
-      this.value = 50000;
+      this.resetForRun();
+    }
+    resetForRun() {
+      this.value = 0;
       this.updateDisplay();
     }
     addMoney(value) {
@@ -2708,25 +2711,32 @@ void main() {
     selectorRight;
     constructor(parent) {
       super(parent);
-      this.reset();
+      this.reset(0);
     }
-    reset() {
+    reset(runsCompleted = 0) {
       super.reset();
       this.selectedMenuItem = 0;
       this.timeSinceSelected = 0;
       this.selecting = false;
-      this.addDisplayText();
+      this.addDisplayText(runsCompleted);
       this.createShipSelectors();
       this.addChild(new EventedInput({
         onSelect: this.onSelect.bind(this)
       }));
     }
-    addDisplayText() {
+    addDisplayText(runsCompleted) {
       this.addChild(new TextDisplay(this, {
         font: "phoenix",
         message: "PHOENIX",
         position: { x: 50, y: 30 }
       }));
+      if (runsCompleted > 0) {
+        this.addChild(new TextDisplay(this, {
+          font: "arcade-small",
+          message: "Runs completed: " + runsCompleted,
+          position: { x: 125, y: 140 }
+        }));
+      }
       this.addChild(new TextDisplay(this, {
         font: "arcade-small",
         message: "Start",
@@ -2795,41 +2805,42 @@ void main() {
   }
 
   // src/screens/game-over-screen.ts
+  var STAT_LABELS = ["Score", "Kills", "Earned", "Spent"];
+  var STAT_LINE_Y = [52, 62, 72, 82];
+  var STAT_LABEL_X = 20;
+  var STAT_VALUE_RIGHT = 180;
+
   class GameOverScreen extends GameObject {
     resultMessage = {
       font: "arcade",
       message: "GAME OVER",
-      position: { x: 67, y: 53 }
+      position: { x: 67, y: 18 }
     };
     headerDef = {
       font: "arcade-small",
-      border: true,
-      padding: 20,
       message: "< hit enter >",
-      position: { x: 55, y: 45 }
-    };
-    subHeaderDef = {
-      font: "arcade-small",
-      message: "Final Score:",
-      position: { x: 68, y: 77 }
-    };
-    scoreDisplayDef = {
-      font: "arcade-small",
-      message: "0",
-      color: "yellow",
-      position: { x: 111, y: 77 }
+      position: { x: 75, y: 132 }
     };
     result;
     header;
-    subHeader;
-    scoreDisplay;
+    statLabels;
+    statValues;
     inputEvents;
+    themeColor = "#fff";
     constructor(parent) {
       super(parent);
       this.result = new TextDisplay(this, this.resultMessage);
       this.header = new TextDisplay(this, this.headerDef);
-      this.subHeader = new TextDisplay(this, this.subHeaderDef);
-      this.scoreDisplay = new TextDisplay(this, this.scoreDisplayDef);
+      this.statLabels = STAT_LINE_Y.map((y2, index) => new TextDisplay(this, {
+        font: "arcade-small",
+        message: STAT_LABELS[index],
+        position: { x: STAT_LABEL_X, y: y2 }
+      }));
+      this.statValues = STAT_LINE_Y.map((y2) => new TextDisplay(this, {
+        font: "arcade-small",
+        message: "",
+        position: { x: STAT_VALUE_RIGHT, y: y2 }
+      }));
       this.inputEvents = new EventedInput({
         onStart: this.onStart.bind(this)
       });
@@ -2839,8 +2850,8 @@ void main() {
       super.reset();
       this.addChild(this.result);
       this.addChild(this.header);
-      this.addChild(this.subHeader);
-      this.addChild(this.scoreDisplay);
+      this.statLabels.forEach((line) => this.addChild(line));
+      this.statValues.forEach((line) => this.addChild(line));
       this.addChild(this.inputEvents);
       this.inputEvents.reset();
     }
@@ -2849,19 +2860,35 @@ void main() {
     }
     setResult(result) {
       if (result === "win") {
-        this.header.updateColor("green");
-        this.result.updateColor("green");
-        this.subHeader.updateColor("green");
+        this.themeColor = "green";
         this.result.changeMessage("YOU WIN!");
       } else if (result === "loss") {
-        this.header.updateColor("red");
-        this.result.updateColor("red");
-        this.subHeader.updateColor("red");
+        this.themeColor = "red";
         this.result.changeMessage("GAME OVER");
       }
+      this.applyThemeColor();
     }
-    setFinalScore(score) {
-      this.scoreDisplay.changeMessage(padScoreDisplay(score));
+    setRunStats(stats) {
+      this.setRightAlignedValue(this.statValues[0], padScoreDisplay(stats.pointsEarned), STAT_LINE_Y[0]);
+      this.setRightAlignedValue(this.statValues[1], String(stats.enemiesDestroyed), STAT_LINE_Y[1]);
+      this.setRightAlignedValue(this.statValues[2], "$" + stats.dollarsCollected.toFixed(2), STAT_LINE_Y[2]);
+      this.setRightAlignedValue(this.statValues[3], "$" + stats.dollarsSpent.toFixed(2), STAT_LINE_Y[3]);
+      this.applyThemeColor();
+    }
+    setRightAlignedValue(display, text, y2) {
+      display.position = { x: STAT_VALUE_RIGHT, y: y2 };
+      display.changeMessage(text);
+      const width = display.width;
+      if (width !== undefined && display.position) {
+        display.position.x = STAT_VALUE_RIGHT - width;
+        display.changeMessage(text);
+      }
+    }
+    applyThemeColor() {
+      this.result.updateColor(this.themeColor);
+      this.header.updateColor(this.themeColor);
+      this.statLabels.forEach((line) => line.updateColor(this.themeColor));
+      this.statValues.forEach((line) => line.updateColor(this.themeColor));
     }
   }
 
@@ -3821,28 +3848,35 @@ void main() {
     }
     reset() {
       super.reset();
-      this.sprite = playerShipSprite().rotateRight();
-      this.explosion = shipExplosion;
-      this.position = { x: -100, y: -100 };
-      this.velocity = { x: 0, y: 0 };
-      this.life = 20;
-      this.maxLife = 20;
       this.damageUpgrades = 0;
       this.lifeUpgrades = 0;
       this.rateUpgrades = 0;
       this.armorUpgrades = 0;
-      this.armor = 0;
       this.gunTier = 0;
       this.comboSegments = 0;
       this.comboUpgrades = 0;
+      this.resetForNewRun();
+    }
+    resetForNewRun() {
+      super.reset();
+      this.explosion = shipExplosion;
+      this.position = { x: -100, y: -100 };
+      this.velocity = { x: 0, y: 0 };
       this.SPEED = 50;
       this.BULLET_SPEED = 100;
-      this.FIRE_RATE = 500;
       this.preventInputControl = true;
       this.exploding = false;
       this.team = 0;
       this.damage = 5;
       this.timeSinceFired = 0;
+      this.applyPersistentUpgrades();
+    }
+    applyPersistentUpgrades() {
+      this.maxLife = 20 + this.lifeUpgrades;
+      this.life = this.maxLife;
+      this.armor = this.armorUpgrades;
+      this.FIRE_RATE = Math.ceil(500 * Math.pow(0.9, this.rateUpgrades));
+      this.applyGunTier();
     }
     refillHealth() {
       this.life = this.maxLife;
@@ -4137,6 +4171,7 @@ void main() {
         }
         if (this.bank.value >= selection.cost && selection.cost !== -1) {
           this.bank.removeMoney(selection.cost);
+          this.game.recordDollarsSpent(selection.cost);
           this.startGame();
         }
       }
@@ -4220,25 +4255,16 @@ void main() {
     }
     loadLevels() {
       this.levels = [
-        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
-        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
-        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 4),
-        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, "boss"),
         this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
-        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 2),
-        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 3),
-        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 4),
-        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, "boss"),
         this.shop
       ];
@@ -4270,9 +4296,6 @@ void main() {
       }
       if (this.currentLevel.levelName || cameFromShop) {
         this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
-        if (this.currentLevel.levelName) {
-          this.player.refillHealth();
-        }
       }
       this.addChild(this.currentLevel);
       this.currentLevel.start();
@@ -4302,6 +4325,20 @@ void main() {
     }
   }
 
+  // src/models/run-stats.ts
+  class RunStats {
+    pointsEarned = 0;
+    enemiesDestroyed = 0;
+    dollarsCollected = 0;
+    dollarsSpent = 0;
+    reset() {
+      this.pointsEarned = 0;
+      this.enemiesDestroyed = 0;
+      this.dollarsCollected = 0;
+      this.dollarsSpent = 0;
+    }
+  }
+
   // src/models/phoenix.ts
   class Phoenix extends GameObject {
     FILL_COLOR = "#000031";
@@ -4319,13 +4356,16 @@ void main() {
     lifeMeter;
     bank;
     levelManager;
+    runStats;
     gameOver = false;
     paused = false;
+    runsCompleted = 0;
     gameOverCallback;
     constructor(options) {
       super(null);
       this.width = options.width;
       this.height = options.height;
+      this.runStats = new RunStats;
       this.titleScreen = new SlimTitleScreen(this);
       this.controlsScreen = new ControlsDescription(this);
       this.gameOverScreen = new GameOverScreen(this);
@@ -4364,13 +4404,10 @@ void main() {
       super.reset();
       this.gameOver = false;
       this.paused = false;
-      this.bank.reset();
-      this.comboGauge.reset();
-      this.lifeMeter.reset();
-      this.titleScreen.reset();
+      this.player.reset();
+      this.titleScreen.reset(this.runsCompleted);
       this.gameOverScreen.reset();
       this.levelManager.reset();
-      this.player.reset();
       this.addChild(this.player);
       this.addChild(this.levelManager);
       this.addChild(this.titleScreen);
@@ -4384,12 +4421,18 @@ void main() {
       }.bind(this));
     }
     startNewGame() {
+      this.runStats.reset();
+      this.bank.resetForRun();
+      this.comboGauge.reset();
+      this.player.resetForNewRun();
+      this.levelManager.reset();
       this.addChild(this.bank);
       this.addChild(this.comboGauge);
       this.addChild(this.lifeMeter);
       this.levelManager.start();
     }
     finishGame() {
+      this.runsCompleted++;
       if (this.gameOverCallback) {
         this.gameOverCallback({
           score: this.comboGauge.getScore(),
@@ -4397,8 +4440,30 @@ void main() {
         });
         this.destroy();
       } else {
-        this.reset();
+        this.returnToMenu();
       }
+    }
+    returnToMenu() {
+      this.gameOver = false;
+      this.paused = false;
+      this.removeChild(this.gameOverScreen);
+      this.removeChild(this.bank);
+      this.removeChild(this.comboGauge);
+      this.removeChild(this.lifeMeter);
+      this.levelManager.stop();
+      this.clearBullets();
+      this.gameOverScreen.reset();
+      this.titleScreen.reset(this.runsCompleted);
+      if (!this.children.includes(this.player)) {
+        this.addChild(this.player);
+      }
+      if (!this.children.includes(this.titleScreen)) {
+        this.addChild(this.titleScreen);
+      }
+      this.player.resetForNewRun();
+    }
+    recordDollarsSpent(amount) {
+      this.runStats.dollarsSpent += amount;
     }
     showControlsScreen() {
       this.addChild(this.controlsScreen);
@@ -4468,8 +4533,9 @@ void main() {
       const gameResult = this.player.destroyed ? "loss" : this.levelManager.complete ? "win" : null;
       if (gameResult && !this.gameOver) {
         this.gameOver = true;
+        this.runStats.pointsEarned = this.comboGauge.getScore();
         this.gameOverScreen.setResult(gameResult);
-        this.gameOverScreen.setFinalScore(this.comboGauge.getScore());
+        this.gameOverScreen.setRunStats(this.runStats);
         this.removeChild(this.player);
         this.addChild(this.gameOverScreen);
       }
@@ -4478,6 +4544,7 @@ void main() {
       this.addChild(new Bullet(this, data));
     }
     enemyDestroyed(data) {
+      this.runStats.enemiesDestroyed++;
       this.comboGauge.addPoints(data.shipValue);
     }
     enemyHit() {
@@ -4487,7 +4554,9 @@ void main() {
       this.comboGauge.clearCombo();
     }
     moneyCollected(value) {
-      this.bank.addMoney(value * this.comboGauge.getMultiplier());
+      const amount = value * this.comboGauge.getMultiplier();
+      this.runStats.dollarsCollected += amount;
+      this.bank.addMoney(amount);
     }
   }
 

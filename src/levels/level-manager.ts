@@ -52,27 +52,17 @@ export default class LevelManager extends GameObject {
     }
 
     loadLevels(): void {
-        // TODO: revert — shop after every level for testing shop items; normally only after each level set (boss)
         this.levels = [
-            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
-            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
-            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 4),
-            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 'boss'),
             this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
-            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 2),
-            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 3),
-            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 4),
-            this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 'boss'),
             this.shop
         ];
@@ -113,9 +103,6 @@ export default class LevelManager extends GameObject {
         if (this.currentLevel.levelName || cameFromShop) {
             // Fly in at the start of each level set, or after any shop visit
             this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
-            if (this.currentLevel.levelName) {
-                this.player.refillHealth();
-            }
         }
 
         this.addChild(this.currentLevel);

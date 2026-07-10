@@ -17,17 +17,17 @@ export default class SlimTitleScreen extends GameObject {
 
     constructor(parent?: GameObject | null) {
         super(parent);
-        this.reset();
+        this.reset(0);
     }
 
-    reset(): void {
+    reset(runsCompleted = 0): void {
         super.reset();
 
         this.selectedMenuItem = 0;
         this.timeSinceSelected = 0;
         this.selecting = false;
 
-        this.addDisplayText();
+        this.addDisplayText(runsCompleted);
         this.createShipSelectors();
 
         this.addChild(new EventedInput({
@@ -35,12 +35,20 @@ export default class SlimTitleScreen extends GameObject {
         }) as unknown as GameObject);
     }
 
-    addDisplayText(): void {
+    addDisplayText(runsCompleted: number): void {
         this.addChild(new TextDisplay(this, {
             font: 'phoenix',
             message: 'PHOENIX',
             position: { x: 50, y: 30 }
         }));
+
+        if (runsCompleted > 0) {
+            this.addChild(new TextDisplay(this, {
+                font: 'arcade-small',
+                message: 'Runs completed: ' + runsCompleted,
+                position: { x: 125, y: 140 }
+            }));
+        }
 
         this.addChild(new TextDisplay(this, {
             font: 'arcade-small',

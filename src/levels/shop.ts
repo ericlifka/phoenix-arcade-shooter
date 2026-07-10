@@ -236,6 +236,7 @@ export default class Shop extends GameObject {
 
             if (this.bank.value >= selection.cost! && selection.cost !== -1) {
                 this.bank.removeMoney(selection.cost!);
+                this.game.recordDollarsSpent(selection.cost!);
                 this.startGame();
             }
         }
