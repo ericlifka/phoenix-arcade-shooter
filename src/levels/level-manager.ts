@@ -1,6 +1,7 @@
 import FlyPlayerInFromBottom from '../scripts/fly-player-in-from-bottom.js';
 import GameObject from '../models/game-object.js';
 import LevelGroup01 from './level-group-01.js';
+import LevelGroup02 from './level-group-02.js';
 import LevelGroup03 from './level-group-03.js';
 import Shop from './shop.js';
 import type PlayerControlledShip from '../ships/player-controlled-ship.js';
@@ -54,28 +55,43 @@ export default class LevelManager extends GameObject {
 
     loadLevels(): void {
         this.levels = [
+            // Standard Enemy Ship
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 4),
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 'boss'),
             this.shop,
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 2),
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 3),
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 4),
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 'boss'),
+            new LevelGroup02(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+            new LevelGroup02(this, this.game, this.difficultyMultiplier, false, 2),
+            new LevelGroup02(this, this.game, this.difficultyMultiplier, false, 3),
+            new LevelGroup02(this, this.game, this.difficultyMultiplier, false, 4),
+            new LevelGroup02(this, this.game, this.difficultyMultiplier, false, 'boss'),
             this.shop,
             new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
             new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 2),
             new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 3),
             new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 'boss'),
             this.shop,
+
+            // Slim Enemy Ship
+            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
+            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 2),
+            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 3),
+            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 4),
+            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 'boss'),
+            this.shop,
+            new LevelGroup02(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
+            new LevelGroup02(this, this.game, this.difficultyMultiplier, true, 2),
+            new LevelGroup02(this, this.game, this.difficultyMultiplier, true, 3),
+            new LevelGroup02(this, this.game, this.difficultyMultiplier, true, 4),
+            new LevelGroup02(this, this.game, this.difficultyMultiplier, true, 'boss'),
+            this.shop,
             new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
             new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 2),
             new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 3),
             new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 'boss'),
-            this.shop
+            this.shop,
         ];
         this.levelIndex = -1;
     }
