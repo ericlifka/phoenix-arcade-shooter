@@ -3394,6 +3394,7 @@ void main() {
     scale;
     showBorder;
     borderColor;
+    mirror;
     currentLife;
     maxLife;
     constructor(boundEntity, options) {
@@ -3408,6 +3409,7 @@ void main() {
       this.scale = opts.scale;
       this.showBorder = !!opts.showBorder;
       this.borderColor = opts.borderColor || "#ffffff";
+      this.mirror = !!opts.mirror;
       this.reset();
     }
     update() {
@@ -3450,6 +3452,9 @@ void main() {
         colors.forEach((colorArray) => {
           colorArray.push(color);
         });
+      }
+      if (this.mirror) {
+        colors.forEach((colorArray) => colorArray.reverse());
       }
       return colors;
     }
@@ -3787,6 +3792,198 @@ void main() {
     }
   }
 
+  // src/scripts/wait.ts
+  class Wait extends GameObject {
+    duration;
+    elapsed = 0;
+    constructor(parent, durationSeconds) {
+      super(parent);
+      this.duration = durationSeconds;
+    }
+    start() {
+      this.elapsed = 0;
+    }
+    update(dtime) {
+      this.elapsed += dtime / 1000;
+      if (this.elapsed >= this.duration) {
+        this.parent.removeChild();
+      }
+    }
+  }
+
+  // src/levels/level-group-02.ts
+  var PATH_LEFT = 4;
+  var PATH_INNER = 20;
+  var PATH_RIGHT = 182;
+  var PATH_TOP = 4;
+  var LANE_GAP = 14;
+  var PATH_SPEED = 40;
+  var ENTER_X = -24;
+  var STAGGER_SECONDS = 0.45;
+
+  class LevelGroup02 extends GameObject {
+    alternateShip;
+    difficultyMultiplier;
+    width;
+    height;
+    boss;
+    game;
+    levelName;
+    rowCount;
+    ships;
+    scripts;
+    constructor(parent, game, difficultyMultiplier, alternateShip, rowCount, levelName) {
+      super(parent);
+      this.alternateShip = alternateShip;
+      this.difficultyMultiplier = difficultyMultiplier;
+      this.width = this.parent.width;
+      this.height = this.parent.height;
+      if (rowCount === "boss") {
+        rowCount = 1;
+        this.boss = true;
+      }
+      this.game = game;
+      this.levelName = levelName;
+      this.rowCount = rowCount === "boss" ? 1 : rowCount;
+      this.reset();
+    }
+    start() {
+      this.ships = [];
+      this.scripts = [];
+      const shipCount = this.spawnParade();
+      if (this.boss) {
+        this.spawnBoss(shipCount * STAGGER_SECONDS);
+      }
+      if (this.levelName) {
+        this.scripts.push(new FadeoutBanner(this, this.levelName, 2000));
+      }
+      this.ships.forEach((ship) => this.addChild(ship));
+      this.scripts.forEach((script) => {
+        script.start();
+        this.addChild(script);
+      });
+    }
+    checkIfLevelComplete() {
+      for (let i = 0;i < this.children.length; i++) {
+        const child = this.children[i];
+        if (child && child.position && !child.destroyed) {
+          return false;
+        }
+      }
+      return true;
+    }
+    spawnParade() {
+      const laneYs = this.laneYs();
+      const destinations = serpentineDestinations(laneYs);
+      const shipCount = 8 * (this.rowCount + 1);
+      for (let i = 0;i < shipCount; i++) {
+        this.spawnShip(i * STAGGER_SECONDS, destinations, PATH_SPEED);
+      }
+      this.attachMoneyScripts();
+      return shipCount;
+    }
+    spawnShip(delaySeconds, destinations, speed) {
+      const ship = new ArrowShip(this, this.difficultyMultiplier, this.alternateShip);
+      ship.position.x = ENTER_X;
+      ship.position.y = destinations[0].y;
+      this.scripts.push(new FireSingleGunRandomRate(this, ship, {
+        initialDelayMs: (delaySeconds + 1.5) * 1000
+      }));
+      this.scripts.push(buildSerpentineScripts(this, ship, destinations, speed, delaySeconds));
+      this.ships.push(ship);
+    }
+    spawnBoss(delaySeconds) {
+      const destinations = serpentineDestinations(this.laneYs());
+      const boss = new ArrowBoss(this, this.difficultyMultiplier);
+      boss.position.x = ENTER_X;
+      boss.position.y = destinations[0].y;
+      boss.addChild(new LifeMeter(boss, {
+        position: { x: 0, y: 0 },
+        length: this.game.width,
+        width: 1,
+        horizontal: true
+      }));
+      this.scripts.push(new FireSingleGunRandomRate(this, boss, {
+        gunIndex: 0,
+        initialDelayMs: (delaySeconds + 1.5) * 1000
+      }));
+      this.scripts.push(new FireSingleGunRandomRate(this, boss, {
+        gunIndex: 2,
+        initialDelayMs: (delaySeconds + 1.5) * 1000
+      }));
+      this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
+      this.scripts.push(buildSerpentineScripts(this, boss, destinations, PATH_SPEED, delaySeconds));
+      this.scripts.push(new WatchForDeath(this, boss, () => {
+        const p = boss.position;
+        this.addChild(new MoneyDrop(this, { x: p.x, y: p.y }));
+        this.addChild(new MoneyDrop(this, { x: p.x + 7, y: p.y }));
+        this.addChild(new MoneyDrop(this, { x: p.x + 4, y: p.y + 8 }));
+      }));
+      this.ships.push(boss);
+    }
+    laneYs() {
+      const laneCount = Math.min(2 + this.rowCount * 2, 8);
+      const lanes = [];
+      for (let i = 0;i < laneCount; i++) {
+        lanes.push(PATH_TOP + i * LANE_GAP);
+      }
+      return lanes;
+    }
+    attachMoneyScripts() {
+      const divisor = this.difficultyMultiplier > 4 ? 2 : 3;
+      const count = Math.floor(this.ships.length / divisor);
+      const selectedShips = sample(this.ships, count);
+      selectedShips.forEach((ship) => {
+        this.scripts.push(new WatchForDeath(this, ship, () => {
+          const pos = ship.position;
+          this.addChild(new MoneyDrop(this, { x: pos.x, y: pos.y }));
+        }));
+      });
+    }
+  }
+  function serpentineDestinations(laneYs) {
+    const points = [{ x: PATH_LEFT, y: laneYs[0] }];
+    for (let i = 0;i < laneYs.length; i++) {
+      const y2 = laneYs[i];
+      const goingRight = i % 2 === 0;
+      const isLast = i === laneYs.length - 1;
+      if (goingRight) {
+        points.push({ x: PATH_RIGHT, y: y2 });
+        if (!isLast) {
+          points.push({ x: PATH_RIGHT, y: laneYs[i + 1] });
+        }
+      } else {
+        const leftTarget = isLast ? PATH_LEFT : PATH_INNER;
+        points.push({ x: leftTarget, y: y2 });
+        if (!isLast) {
+          points.push({ x: leftTarget, y: laneYs[i + 1] });
+        }
+      }
+    }
+    points.push({ x: PATH_LEFT, y: laneYs[0] });
+    return points;
+  }
+  function travelTime(from, to, speed) {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    return Math.hypot(dx, dy) / speed;
+  }
+  function buildSerpentineScripts(level, ship, destinations, speed, delaySeconds) {
+    const entry = destinations[0];
+    const enterFrom = { x: ship.position.x, y: ship.position.y };
+    const loopMoves = [];
+    for (let i = 1;i < destinations.length; i++) {
+      const from = destinations[i - 1];
+      const to = destinations[i];
+      loopMoves.push(new MoveObjectToPoint(null, ship, to, travelTime(from, to, speed)));
+    }
+    return new ScriptChain(level, false, [
+      new Wait(null, delaySeconds),
+      new MoveObjectToPoint(null, ship, entry, travelTime(enterFrom, entry, speed)),
+      new ScriptChain(level, true, loopMoves)
+    ]);
+  }
+
   // src/scripts/move-object-in-circle.ts
   function orbitPathOffset(object) {
     return object.orbitPathOffset ?? { x: 0, y: 0 };
@@ -3832,25 +4029,6 @@ void main() {
     }
   }
 
-  // src/scripts/wait.ts
-  class Wait extends GameObject {
-    duration;
-    elapsed = 0;
-    constructor(parent, durationSeconds) {
-      super(parent);
-      this.duration = durationSeconds;
-    }
-    start() {
-      this.elapsed = 0;
-    }
-    update(dtime) {
-      this.elapsed += dtime / 1000;
-      if (this.elapsed >= this.duration) {
-        this.parent.removeChild();
-      }
-    }
-  }
-
   // src/levels/level-group-03.ts
   var CENTER_X = 100;
   var SPLIT_Y = 60;
@@ -3859,7 +4037,7 @@ void main() {
   var ORBIT_RADIUS = 45;
   var INNER_ORBIT_RADIUS = 33;
   var INNERMOST_ORBIT_RADIUS = 21;
-  var STAGGER_SECONDS = 0.5;
+  var STAGGER_SECONDS2 = 0.5;
   var DESCENT_SECONDS = 3;
   var PEEL_SECONDS = 2;
   var ORBIT_PERIOD_SECONDS = 8;
@@ -3954,7 +4132,7 @@ void main() {
     spawnCenterProcessionShip(index, orbit) {
       const orbitCenterPoint = orbitCenter(orbit);
       const entryPoint = centerOrbitEntryPoint(orbit);
-      const staggerSeconds = index * STAGGER_SECONDS;
+      const staggerSeconds = index * STAGGER_SECONDS2;
       const pathSeconds = staggerSeconds + DESCENT_SECONDS;
       const needsPeel = entryPoint.x !== CENTER_X || entryPoint.y !== SPLIT_Y;
       this.spawnProcessionShip({
@@ -3971,7 +4149,7 @@ void main() {
     spawnOuterProcession(orbit) {
       const columnX = outerOrbitEntryPoint(orbit).x;
       for (let i = 0;i < OUTER_PROCESSION_SHIP_COUNT; i++) {
-        const staggerSeconds = i * 2 * STAGGER_SECONDS;
+        const staggerSeconds = i * 2 * STAGGER_SECONDS2;
         const pathSeconds = staggerSeconds + DESCENT_SECONDS + PEEL_SECONDS;
         this.spawnProcessionShip({
           descentX: columnX,
@@ -3989,7 +4167,7 @@ void main() {
       const entryPoint = innermostOrbitEntryPoint(orbit);
       const columnX = entryPoint.x;
       for (let i = 0;i < INNERMOST_PROCESSION_SHIP_COUNT; i++) {
-        const staggerSeconds = i * 2 * STAGGER_SECONDS;
+        const staggerSeconds = i * 2 * STAGGER_SECONDS2;
         const pathSeconds = staggerSeconds + DESCENT_SECONDS;
         this.spawnProcessionShip({
           descentX: columnX,
@@ -4042,13 +4220,14 @@ void main() {
       const offset = boss.orbitPathOffset;
       boss.position.x = startX + offset.x;
       boss.position.y = center.y + offset.y;
-      const lifeBarRow = orbit === "left" ? 0 : 1;
+      const halfWidth = Math.floor(this.game.width / 2);
       boss.addChild(new LifeMeter(boss, {
-        position: { x: 0, y: lifeBarRow },
-        anchor: { left: 0, top: lifeBarRow },
-        length: this.game.width,
+        position: { x: 0, y: 0 },
+        anchor: orbit === "left" ? { left: 0, top: 0 } : { left: halfWidth, top: 0 },
+        length: halfWidth,
         width: 1,
-        horizontal: true
+        horizontal: true,
+        mirror: orbit === "left"
       }));
       this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));
       this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
@@ -4596,16 +4775,28 @@ void main() {
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 4),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, "boss"),
         this.shop,
+        new LevelGroup02(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+        new LevelGroup02(this, this.game, this.difficultyMultiplier, false, 2),
+        new LevelGroup02(this, this.game, this.difficultyMultiplier, false, 3),
+        new LevelGroup02(this, this.game, this.difficultyMultiplier, false, 4),
+        new LevelGroup02(this, this.game, this.difficultyMultiplier, false, "boss"),
+        this.shop,
+        new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+        new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 2),
+        new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 3),
+        new LevelGroup03(this, this.game, this.difficultyMultiplier, false, "boss"),
+        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 2),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 3),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 4),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, "boss"),
         this.shop,
-        new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-        new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 2),
-        new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 3),
-        new LevelGroup03(this, this.game, this.difficultyMultiplier, false, "boss"),
+        new LevelGroup02(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
+        new LevelGroup02(this, this.game, this.difficultyMultiplier, true, 2),
+        new LevelGroup02(this, this.game, this.difficultyMultiplier, true, 3),
+        new LevelGroup02(this, this.game, this.difficultyMultiplier, true, 4),
+        new LevelGroup02(this, this.game, this.difficultyMultiplier, true, "boss"),
         this.shop,
         new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
         new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 2),
