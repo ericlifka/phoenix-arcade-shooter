@@ -3124,6 +3124,9 @@ void main() {
   }
 
   // src/ships/arrow-boss.ts
+  var ENEMY_ORBIT_SPRITE_WIDTH = 8;
+  var ENEMY_ORBIT_SPRITE_HEIGHT = 7;
+
   class ArrowBoss extends GameObject {
     isPhysicalEntity = true;
     BULLET_SPEED = 120;
@@ -3135,6 +3138,7 @@ void main() {
     guns;
     position;
     velocity;
+    orbitPathOffset;
     constructor(parent, difficultyMultiplier) {
       super(parent);
       this.difficultyMultiplier = difficultyMultiplier;
@@ -3143,6 +3147,10 @@ void main() {
     reset() {
       super.reset();
       this.sprite = arrowBossSprite().rotateRight();
+      this.orbitPathOffset = {
+        x: Math.floor((ENEMY_ORBIT_SPRITE_WIDTH - this.sprite.width) / 2),
+        y: Math.floor((ENEMY_ORBIT_SPRITE_HEIGHT - this.sprite.height) / 2)
+      };
       this.explosion = shipExplosion;
       this.guns = this.sprite.meta.guns;
       this.position = { x: 0, y: 0 };
@@ -3403,6 +3411,10 @@ void main() {
       this.reset();
     }
     update() {
+      if (this.entity.destroyed) {
+        this.destroy();
+        return;
+      }
       if (this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife) {
         this.currentLife = this.entity.life;
         this.maxLife = this.entity.maxLife;
@@ -3527,9 +3539,15 @@ void main() {
   }
 
   // src/scripts/move-object-to-point.ts
+  function resolveTarget(object, target) {
+    const offset = object.orbitPathOffset ?? { x: 0, y: 0 };
+    return { x: target.x + offset.x, y: target.y + offset.y };
+  }
+
   class MoveObjectToPoint extends GameObject {
     object;
     target;
+    resolvedTarget;
     delta;
     xPositive;
     yPositive;
@@ -3542,8 +3560,9 @@ void main() {
     }
     start() {
       const current = this.object.position;
-      const xDiff = this.target.x - current.x;
-      const yDiff = this.target.y - current.y;
+      this.resolvedTarget = resolveTarget(this.object, this.target);
+      const xDiff = this.resolvedTarget.x - current.x;
+      const yDiff = this.resolvedTarget.y - current.y;
       this.object.velocity.x = xDiff / this.delta;
       this.object.velocity.y = yDiff / this.delta;
       this.xPositive = xDiff > 0;
@@ -3554,16 +3573,16 @@ void main() {
       if (this.metXThreshold() && this.metYThreshold()) {
         this.object.velocity.x = 0;
         this.object.velocity.y = 0;
-        this.object.position.x = this.target.x;
-        this.object.position.y = this.target.y;
+        this.object.position.x = this.resolvedTarget.x;
+        this.object.position.y = this.resolvedTarget.y;
         this.parent.removeChild(this);
       }
     }
     metXThreshold() {
-      return this.xPositive && this.object.position.x >= this.target.x || !this.xPositive && this.object.position.x <= this.target.x;
+      return this.xPositive && this.object.position.x >= this.resolvedTarget.x || !this.xPositive && this.object.position.x <= this.resolvedTarget.x;
     }
     metYThreshold() {
-      return this.yPositive && this.object.position.y >= this.target.y || !this.yPositive && this.object.position.y <= this.target.y;
+      return this.yPositive && this.object.position.y >= this.resolvedTarget.y || !this.yPositive && this.object.position.y <= this.resolvedTarget.y;
     }
   }
 
@@ -3769,6 +3788,10 @@ void main() {
   }
 
   // src/scripts/move-object-in-circle.ts
+  function orbitPathOffset(object) {
+    return object.orbitPathOffset ?? { x: 0, y: 0 };
+  }
+
   class MoveObjectInCircle extends GameObject {
     object;
     centerX;
@@ -3788,7 +3811,8 @@ void main() {
     }
     start() {
       const pos = this.object.position;
-      this.angle = Math.atan2(pos.y - this.centerY, pos.x - this.centerX);
+      const offset = orbitPathOffset(this.object);
+      this.angle = Math.atan2(pos.y - offset.y - this.centerY, pos.x - offset.x - this.centerX);
       this.object.velocity.x = 0;
       this.object.velocity.y = 0;
       this.applyPosition();
@@ -3802,8 +3826,9 @@ void main() {
       this.applyPosition();
     }
     applyPosition() {
-      this.object.position.x = this.centerX + this.radius * Math.cos(this.angle);
-      this.object.position.y = this.centerY + this.radius * Math.sin(this.angle);
+      const offset = orbitPathOffset(this.object);
+      this.object.position.x = this.centerX + this.radius * Math.cos(this.angle) + offset.x;
+      this.object.position.y = this.centerY + this.radius * Math.sin(this.angle) + offset.y;
     }
   }
 
@@ -3841,6 +3866,9 @@ void main() {
   var CENTER_PROCESSION_SHIP_COUNT = 16;
   var OUTER_PROCESSION_SHIP_COUNT = 8;
   var INNERMOST_PROCESSION_SHIP_COUNT = 8;
+  var BOSS_ORBIT_RADIUS = 26;
+  var BOSS_ENTER_SECONDS = 3;
+  var BOSS_ORBIT_PERIOD_SECONDS = 5;
   function orbitCenter(orbit) {
     return orbit === "left" ? LEFT_ORBIT : RIGHT_ORBIT;
   }
@@ -4003,22 +4031,36 @@ void main() {
       return steps;
     }
     spawnBoss() {
+      this.spawnOrbitingBoss("left");
+      this.spawnOrbitingBoss("right");
+    }
+    spawnOrbitingBoss(orbit) {
+      const center = orbitCenter(orbit);
+      const entryPoint = orbit === "left" ? { x: center.x - BOSS_ORBIT_RADIUS, y: center.y } : { x: center.x + BOSS_ORBIT_RADIUS, y: center.y };
+      const startX = orbit === "left" ? -40 : this.game.width + 20;
       const boss = new ArrowBoss(this, this.difficultyMultiplier);
-      const gameWidth = this.game.width;
-      const bossWidth = boss.sprite.width;
-      boss.position.x = -this.game.width / 2;
-      boss.position.y = 1;
+      const offset = boss.orbitPathOffset;
+      boss.position.x = startX + offset.x;
+      boss.position.y = center.y + offset.y;
+      const lifeBarRow = orbit === "left" ? 0 : 1;
       boss.addChild(new LifeMeter(boss, {
-        position: { x: 0, y: 0 },
+        position: { x: 0, y: lifeBarRow },
+        anchor: { left: 0, top: lifeBarRow },
         length: this.game.width,
         width: 1,
         horizontal: true
       }));
       this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));
       this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
-      this.scripts.push(new ScriptChain(this, true, [
-        new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
-        new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
+      this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
+      this.scripts.push(new ScriptChain(this, false, [
+        new MoveObjectToPoint(null, boss, entryPoint, BOSS_ENTER_SECONDS),
+        new MoveObjectInCircle(null, boss, {
+          center,
+          radius: BOSS_ORBIT_RADIUS,
+          period: BOSS_ORBIT_PERIOD_SECONDS,
+          clockwise: orbit === "right"
+        })
       ]));
       this.scripts.push(new WatchForDeath(this, boss, () => {
         const p = boss.position;

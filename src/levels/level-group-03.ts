@@ -1,5 +1,6 @@
 import Banner from '../components/fadeout-banner.js';
 import BossShip from '../ships/arrow-boss.js';
+import ChainGunFire from '../scripts/chain-gun-fire.js';
 import EnemyShip from '../ships/arrow-ship.js';
 import FireSingleGunRandomRate from '../scripts/fire-single-gun-random-rate.js';
 import GameObject from '../models/game-object.js';
@@ -32,6 +33,9 @@ const ORBIT_PERIOD_SECONDS = 8;
 const CENTER_PROCESSION_SHIP_COUNT = 16;
 const OUTER_PROCESSION_SHIP_COUNT = 8;
 const INNERMOST_PROCESSION_SHIP_COUNT = 8;
+const BOSS_ORBIT_RADIUS = 26;
+const BOSS_ENTER_SECONDS = 3;
+const BOSS_ORBIT_PERIOD_SECONDS = 5;
 
 function orbitCenter(orbit: OrbitSide): { x: number; y: number } {
     return orbit === 'left' ? LEFT_ORBIT : RIGHT_ORBIT;
@@ -287,15 +291,26 @@ export default class LevelGroup03 extends GameObject {
     }
 
     private spawnBoss(): void {
+        this.spawnOrbitingBoss('left');
+        this.spawnOrbitingBoss('right');
+    }
+
+    private spawnOrbitingBoss(orbit: OrbitSide): void {
+        const center = orbitCenter(orbit);
+        const entryPoint = orbit === 'left'
+            ? { x: center.x - BOSS_ORBIT_RADIUS, y: center.y }
+            : { x: center.x + BOSS_ORBIT_RADIUS, y: center.y };
+        const startX = orbit === 'left' ? -40 : this.game.width + 20;
+
         const boss = new BossShip(this, this.difficultyMultiplier);
-        const gameWidth = this.game.width;
-        const bossWidth = boss.sprite.width;
+        const offset = boss.orbitPathOffset;
+        boss.position!.x = startX + offset.x;
+        boss.position!.y = center.y + offset.y;
 
-        boss.position!.x = -this.game.width / 2;
-        boss.position!.y = 1;
-
+        const lifeBarRow = orbit === 'left' ? 0 : 1;
         boss.addChild(new LifeMeter(boss, {
-            position: { x: 0, y: 0 },
+            position: { x: 0, y: lifeBarRow },
+            anchor: { left: 0, top: lifeBarRow },
             length: this.game.width,
             width: 1,
             horizontal: true
@@ -303,10 +318,17 @@ export default class LevelGroup03 extends GameObject {
 
         this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));
         this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
+        this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
 
-        this.scripts.push(new ScriptChain(this, true, [
-            new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
-            new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
+        this.scripts.push(new ScriptChain(this, false, [
+            new MoveObjectToPoint(null, boss, entryPoint, BOSS_ENTER_SECONDS),
+            new MoveObjectInCircle(null, boss, {
+                center,
+                radius: BOSS_ORBIT_RADIUS,
+                period: BOSS_ORBIT_PERIOD_SECONDS,
+                // Opposite direction from the main enemy ring on each side
+                clockwise: orbit === 'right'
+            })
         ]) as any);
 
         this.scripts.push(new WatchForDeath(this, boss, () => {

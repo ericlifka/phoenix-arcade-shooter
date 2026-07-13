@@ -39,6 +39,11 @@ export default class LifeMeter extends GameObject {
     }
 
     update(): void {
+        if (this.entity.destroyed) {
+            this.destroy();
+            return;
+        }
+
         if (this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife) {
             this.currentLife = this.entity.life;
             this.maxLife = this.entity.maxLife;

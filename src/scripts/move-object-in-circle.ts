@@ -4,7 +4,12 @@ import { Position } from '../types/rendering';
 type MovableObject = GameObject & {
     position: Position;
     velocity: { x: number; y: number };
+    orbitPathOffset?: Position;
 };
+
+function orbitPathOffset(object: MovableObject): Position {
+    return object.orbitPathOffset ?? { x: 0, y: 0 };
+}
 
 export interface MoveObjectInCircleOptions {
     center: Position;
@@ -44,7 +49,11 @@ export default class MoveObjectInCircle extends GameObject {
 
     start(): void {
         const pos = this.object.position;
-        this.angle = Math.atan2(pos.y - this.centerY, pos.x - this.centerX);
+        const offset = orbitPathOffset(this.object);
+        this.angle = Math.atan2(
+            pos.y - offset.y - this.centerY,
+            pos.x - offset.x - this.centerX
+        );
         this.object.velocity.x = 0;
         this.object.velocity.y = 0;
         this.applyPosition();
@@ -61,7 +70,8 @@ export default class MoveObjectInCircle extends GameObject {
     }
 
     private applyPosition(): void {
-        this.object.position.x = this.centerX + this.radius * Math.cos(this.angle);
-        this.object.position.y = this.centerY + this.radius * Math.sin(this.angle);
+        const offset = orbitPathOffset(this.object);
+        this.object.position.x = this.centerX + this.radius * Math.cos(this.angle) + offset.x;
+        this.object.position.y = this.centerY + this.radius * Math.sin(this.angle) + offset.y;
     }
 }

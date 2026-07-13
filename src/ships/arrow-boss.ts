@@ -4,6 +4,10 @@ import shipExplosion from '../sprites/animations/ship-explosion.js';
 import MuzzleFlash from '../components/muzzle-flash.js';
 import { Position } from '../types/rendering';
 
+/** Standard arrow-ship footprint after rotateRight(); aligns boss path with enemy orbits. */
+const ENEMY_ORBIT_SPRITE_WIDTH = 8;
+const ENEMY_ORBIT_SPRITE_HEIGHT = 7;
+
 export default class ArrowBoss extends GameObject {
     isPhysicalEntity = true;
     BULLET_SPEED = 120;
@@ -16,6 +20,8 @@ export default class ArrowBoss extends GameObject {
     guns!: Position[];
     position!: Position;
     velocity!: { x: number; y: number };
+    /** Shifts logical position so the boss tracks the same orbit paths as standard enemies. */
+    orbitPathOffset!: Position;
 
     constructor(parent: GameObject | null | undefined, difficultyMultiplier: number) {
         super(parent);
@@ -27,6 +33,10 @@ export default class ArrowBoss extends GameObject {
         super.reset();
 
         this.sprite = shipSprite().rotateRight();
+        this.orbitPathOffset = {
+            x: Math.floor((ENEMY_ORBIT_SPRITE_WIDTH - this.sprite.width) / 2),
+            y: Math.floor((ENEMY_ORBIT_SPRITE_HEIGHT - this.sprite.height) / 2)
+        };
         this.explosion = shipExplosion;
         this.guns = this.sprite.meta.guns;
 
