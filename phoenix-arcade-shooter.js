@@ -3124,6 +3124,9 @@ void main() {
   }
 
   // src/ships/arrow-boss.ts
+  var ENEMY_ORBIT_SPRITE_WIDTH = 8;
+  var ENEMY_ORBIT_SPRITE_HEIGHT = 7;
+
   class ArrowBoss extends GameObject {
     isPhysicalEntity = true;
     BULLET_SPEED = 120;
@@ -3135,6 +3138,7 @@ void main() {
     guns;
     position;
     velocity;
+    orbitPathOffset;
     constructor(parent, difficultyMultiplier) {
       super(parent);
       this.difficultyMultiplier = difficultyMultiplier;
@@ -3143,6 +3147,10 @@ void main() {
     reset() {
       super.reset();
       this.sprite = arrowBossSprite().rotateRight();
+      this.orbitPathOffset = {
+        x: Math.floor((ENEMY_ORBIT_SPRITE_WIDTH - this.sprite.width) / 2),
+        y: Math.floor((ENEMY_ORBIT_SPRITE_HEIGHT - this.sprite.height) / 2)
+      };
       this.explosion = shipExplosion;
       this.guns = this.sprite.meta.guns;
       this.position = { x: 0, y: 0 };
@@ -3324,8 +3332,11 @@ void main() {
     gunIndex;
     thresholdMin;
     thresholdMax;
+    initialDelayMs;
     elapsed;
     threshold;
+    delayElapsed = 0;
+    firing = false;
     constructor(parent, ship, options) {
       super(parent);
       const opts = options || {};
@@ -3333,21 +3344,38 @@ void main() {
       this.gunIndex = opts.gunIndex ?? 0;
       this.thresholdMin = opts.thresholdMin ?? 1000;
       this.thresholdMax = opts.thresholdMax ?? 3000;
+      this.initialDelayMs = opts.initialDelayMs ?? 0;
       this.reset();
     }
     start() {
-      this.resetTimer();
-      this.threshold += this.thresholdMax;
+      this.delayElapsed = 0;
+      this.firing = this.initialDelayMs <= 0;
+      if (this.firing) {
+        this.beginFiring();
+      }
     }
     update(dtime) {
       if (this.ship.destroyed) {
         this.destroy();
+        return;
+      }
+      if (!this.firing) {
+        this.delayElapsed += dtime;
+        if (this.delayElapsed >= this.initialDelayMs) {
+          this.beginFiring();
+        }
+        return;
       }
       this.elapsed += dtime;
       if (this.elapsed > this.threshold) {
         this.resetTimer();
         this.ship.fire(this.gunIndex);
       }
+    }
+    beginFiring() {
+      this.firing = true;
+      this.resetTimer();
+      this.threshold += this.thresholdMax;
     }
     resetTimer() {
       this.elapsed = 0;
@@ -3383,6 +3411,10 @@ void main() {
       this.reset();
     }
     update() {
+      if (this.entity.destroyed) {
+        this.destroy();
+        return;
+      }
       if (this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife) {
         this.currentLife = this.entity.life;
         this.maxLife = this.entity.maxLife;
@@ -3484,8 +3516,8 @@ void main() {
     constructor(parent, position, velocity) {
       super(parent);
       this.value = 5;
-      this.position = position;
-      this.velocity = { x: 0, y: 50 };
+      this.position = { x: position.x, y: position.y };
+      this.velocity = velocity ? { x: velocity.x, y: velocity.y } : { x: 0, y: 50 };
       this.sprite = arcade_default["$"];
       this.reset();
     }
@@ -3507,9 +3539,15 @@ void main() {
   }
 
   // src/scripts/move-object-to-point.ts
+  function resolveTarget(object, target) {
+    const offset = object.orbitPathOffset ?? { x: 0, y: 0 };
+    return { x: target.x + offset.x, y: target.y + offset.y };
+  }
+
   class MoveObjectToPoint extends GameObject {
     object;
     target;
+    resolvedTarget;
     delta;
     xPositive;
     yPositive;
@@ -3522,8 +3560,9 @@ void main() {
     }
     start() {
       const current = this.object.position;
-      const xDiff = this.target.x - current.x;
-      const yDiff = this.target.y - current.y;
+      this.resolvedTarget = resolveTarget(this.object, this.target);
+      const xDiff = this.resolvedTarget.x - current.x;
+      const yDiff = this.resolvedTarget.y - current.y;
       this.object.velocity.x = xDiff / this.delta;
       this.object.velocity.y = yDiff / this.delta;
       this.xPositive = xDiff > 0;
@@ -3534,16 +3573,16 @@ void main() {
       if (this.metXThreshold() && this.metYThreshold()) {
         this.object.velocity.x = 0;
         this.object.velocity.y = 0;
-        this.object.position.x = this.target.x;
-        this.object.position.y = this.target.y;
+        this.object.position.x = this.resolvedTarget.x;
+        this.object.position.y = this.resolvedTarget.y;
         this.parent.removeChild(this);
       }
     }
     metXThreshold() {
-      return this.xPositive && this.object.position.x >= this.target.x || !this.xPositive && this.object.position.x <= this.target.x;
+      return this.xPositive && this.object.position.x >= this.resolvedTarget.x || !this.xPositive && this.object.position.x <= this.resolvedTarget.x;
     }
     metYThreshold() {
-      return this.yPositive && this.object.position.y >= this.target.y || !this.yPositive && this.object.position.y <= this.target.y;
+      return this.yPositive && this.object.position.y >= this.resolvedTarget.y || !this.yPositive && this.object.position.y <= this.resolvedTarget.y;
     }
   }
 
@@ -3745,6 +3784,302 @@ void main() {
           this.addChild(new MoneyDrop(this, ship.position));
         }.bind(this)));
       }.bind(this));
+    }
+  }
+
+  // src/scripts/move-object-in-circle.ts
+  function orbitPathOffset(object) {
+    return object.orbitPathOffset ?? { x: 0, y: 0 };
+  }
+
+  class MoveObjectInCircle extends GameObject {
+    object;
+    centerX;
+    centerY;
+    radius;
+    angularVelocity;
+    angle;
+    constructor(parent, object, options) {
+      super(parent);
+      this.object = object;
+      this.centerX = options.center.x;
+      this.centerY = options.center.y;
+      this.radius = options.radius;
+      const direction = options.clockwise ? 1 : -1;
+      this.angularVelocity = direction * (2 * Math.PI / options.period);
+      this.angle = 0;
+    }
+    start() {
+      const pos = this.object.position;
+      const offset = orbitPathOffset(this.object);
+      this.angle = Math.atan2(pos.y - offset.y - this.centerY, pos.x - offset.x - this.centerX);
+      this.object.velocity.x = 0;
+      this.object.velocity.y = 0;
+      this.applyPosition();
+    }
+    update(dtime) {
+      if (this.object.destroyed) {
+        this.destroy();
+        return;
+      }
+      this.angle += this.angularVelocity * (dtime / 1000);
+      this.applyPosition();
+    }
+    applyPosition() {
+      const offset = orbitPathOffset(this.object);
+      this.object.position.x = this.centerX + this.radius * Math.cos(this.angle) + offset.x;
+      this.object.position.y = this.centerY + this.radius * Math.sin(this.angle) + offset.y;
+    }
+  }
+
+  // src/scripts/wait.ts
+  class Wait extends GameObject {
+    duration;
+    elapsed = 0;
+    constructor(parent, durationSeconds) {
+      super(parent);
+      this.duration = durationSeconds;
+    }
+    start() {
+      this.elapsed = 0;
+    }
+    update(dtime) {
+      this.elapsed += dtime / 1000;
+      if (this.elapsed >= this.duration) {
+        this.parent.removeChild();
+      }
+    }
+  }
+
+  // src/levels/level-group-03.ts
+  var CENTER_X = 100;
+  var SPLIT_Y = 60;
+  var LEFT_ORBIT = { x: 55, y: 60 };
+  var RIGHT_ORBIT = { x: 145, y: 60 };
+  var ORBIT_RADIUS = 45;
+  var INNER_ORBIT_RADIUS = 33;
+  var INNERMOST_ORBIT_RADIUS = 21;
+  var STAGGER_SECONDS = 0.5;
+  var DESCENT_SECONDS = 3;
+  var PEEL_SECONDS = 2;
+  var ORBIT_PERIOD_SECONDS = 8;
+  var CENTER_PROCESSION_SHIP_COUNT = 16;
+  var OUTER_PROCESSION_SHIP_COUNT = 8;
+  var INNERMOST_PROCESSION_SHIP_COUNT = 8;
+  var BOSS_ORBIT_RADIUS = 26;
+  var BOSS_ENTER_SECONDS = 3;
+  var BOSS_ORBIT_PERIOD_SECONDS = 5;
+  function orbitCenter(orbit) {
+    return orbit === "left" ? LEFT_ORBIT : RIGHT_ORBIT;
+  }
+  function centerOrbitEntryPoint(orbit) {
+    const center = orbitCenter(orbit);
+    return orbit === "left" ? { x: center.x + ORBIT_RADIUS, y: center.y } : { x: center.x - ORBIT_RADIUS, y: center.y };
+  }
+  function outerOrbitEntryPoint(orbit) {
+    const center = orbitCenter(orbit);
+    return orbit === "left" ? { x: center.x - INNER_ORBIT_RADIUS, y: center.y } : { x: center.x + INNER_ORBIT_RADIUS, y: center.y };
+  }
+  function innermostOrbitEntryPoint(orbit) {
+    const center = orbitCenter(orbit);
+    return orbit === "left" ? { x: center.x + INNERMOST_ORBIT_RADIUS, y: center.y } : { x: center.x - INNERMOST_ORBIT_RADIUS, y: center.y };
+  }
+
+  class LevelGroup03 extends GameObject {
+    alternateShip;
+    difficultyMultiplier;
+    width;
+    height;
+    boss;
+    game;
+    levelName;
+    rowCount;
+    ships;
+    scripts;
+    constructor(parent, game, difficultyMultiplier, alternateShip, rowCount, levelName) {
+      super(parent);
+      this.alternateShip = alternateShip;
+      this.difficultyMultiplier = difficultyMultiplier;
+      this.width = this.parent.width;
+      this.height = this.parent.height;
+      if (rowCount === "boss") {
+        rowCount = 1;
+        this.boss = true;
+      }
+      this.game = game;
+      this.levelName = levelName;
+      this.rowCount = rowCount === "boss" ? 1 : rowCount;
+      this.reset();
+    }
+    start() {
+      this.ships = [];
+      this.scripts = [];
+      this.spawnWave();
+      if (this.boss) {
+        this.spawnBoss();
+      }
+      if (this.levelName) {
+        this.scripts.push(new FadeoutBanner(this, this.levelName, 2000));
+      }
+      this.ships.forEach((ship) => this.addChild(ship));
+      this.scripts.forEach((script) => {
+        script.start();
+        this.addChild(script);
+      });
+    }
+    checkIfLevelComplete() {
+      for (let i = 0;i < this.children.length; i++) {
+        const child = this.children[i];
+        if (child && child.position && !child.destroyed) {
+          return false;
+        }
+      }
+      return true;
+    }
+    spawnWave() {
+      for (let i = 0;i < CENTER_PROCESSION_SHIP_COUNT; i++) {
+        const orbit = i % 2 === 0 ? "left" : "right";
+        this.spawnCenterProcessionShip(i, orbit);
+      }
+      if (this.rowCount >= 2) {
+        this.spawnOuterProcession("left");
+        this.spawnOuterProcession("right");
+      }
+      if (this.rowCount >= 3) {
+        this.spawnInnermostProcession("left");
+        this.spawnInnermostProcession("right");
+      }
+      this.attachMoneyScripts();
+    }
+    spawnCenterProcessionShip(index, orbit) {
+      const orbitCenterPoint = orbitCenter(orbit);
+      const entryPoint = centerOrbitEntryPoint(orbit);
+      const staggerSeconds = index * STAGGER_SECONDS;
+      const pathSeconds = staggerSeconds + DESCENT_SECONDS;
+      const needsPeel = entryPoint.x !== CENTER_X || entryPoint.y !== SPLIT_Y;
+      this.spawnProcessionShip({
+        descentX: CENTER_X,
+        staggerSeconds,
+        fireDelayMs: (pathSeconds - 2) * 1000,
+        entryPoint,
+        orbitCenter: orbitCenterPoint,
+        orbitRadius: ORBIT_RADIUS,
+        clockwise: orbit === "left",
+        needsPeel
+      });
+    }
+    spawnOuterProcession(orbit) {
+      const columnX = outerOrbitEntryPoint(orbit).x;
+      for (let i = 0;i < OUTER_PROCESSION_SHIP_COUNT; i++) {
+        const staggerSeconds = i * 2 * STAGGER_SECONDS;
+        const pathSeconds = staggerSeconds + DESCENT_SECONDS + PEEL_SECONDS;
+        this.spawnProcessionShip({
+          descentX: columnX,
+          staggerSeconds,
+          fireDelayMs: (pathSeconds - 2) * 1000,
+          entryPoint: outerOrbitEntryPoint(orbit),
+          orbitCenter: orbitCenter(orbit),
+          orbitRadius: INNER_ORBIT_RADIUS,
+          clockwise: orbit === "right",
+          needsPeel: true
+        });
+      }
+    }
+    spawnInnermostProcession(orbit) {
+      const entryPoint = innermostOrbitEntryPoint(orbit);
+      const columnX = entryPoint.x;
+      for (let i = 0;i < INNERMOST_PROCESSION_SHIP_COUNT; i++) {
+        const staggerSeconds = i * 2 * STAGGER_SECONDS;
+        const pathSeconds = staggerSeconds + DESCENT_SECONDS;
+        this.spawnProcessionShip({
+          descentX: columnX,
+          staggerSeconds,
+          fireDelayMs: (pathSeconds - 2) * 1000,
+          entryPoint,
+          orbitCenter: orbitCenter(orbit),
+          orbitRadius: INNERMOST_ORBIT_RADIUS,
+          clockwise: orbit === "left",
+          needsPeel: entryPoint.x !== columnX || entryPoint.y !== SPLIT_Y
+        });
+      }
+    }
+    spawnProcessionShip(options) {
+      const ship = new ArrowShip(this, this.difficultyMultiplier, this.alternateShip);
+      ship.position.x = options.descentX;
+      ship.position.y = -20;
+      this.scripts.push(new FireSingleGunRandomRate(this, ship, {
+        initialDelayMs: options.fireDelayMs
+      }));
+      this.scripts.push(new ScriptChain(this, false, this.buildShipPath(ship, options.staggerSeconds, options.descentX, options.entryPoint, options.orbitCenter, options.orbitRadius, options.clockwise, options.needsPeel)));
+      this.ships.push(ship);
+    }
+    buildShipPath(ship, staggerSeconds, descentX, entryPoint, orbitCenterPoint, orbitRadius, clockwise, needsPeel) {
+      const steps = [];
+      if (staggerSeconds > 0) {
+        steps.push(new Wait(null, staggerSeconds));
+      }
+      steps.push(new MoveObjectToPoint(null, ship, { x: descentX, y: SPLIT_Y }, DESCENT_SECONDS));
+      if (needsPeel) {
+        steps.push(new MoveObjectToPoint(null, ship, entryPoint, PEEL_SECONDS));
+      }
+      steps.push(new MoveObjectInCircle(null, ship, {
+        center: orbitCenterPoint,
+        radius: orbitRadius,
+        period: ORBIT_PERIOD_SECONDS,
+        clockwise
+      }));
+      return steps;
+    }
+    spawnBoss() {
+      this.spawnOrbitingBoss("left");
+      this.spawnOrbitingBoss("right");
+    }
+    spawnOrbitingBoss(orbit) {
+      const center = orbitCenter(orbit);
+      const entryPoint = orbit === "left" ? { x: center.x - BOSS_ORBIT_RADIUS, y: center.y } : { x: center.x + BOSS_ORBIT_RADIUS, y: center.y };
+      const startX = orbit === "left" ? -40 : this.game.width + 20;
+      const boss = new ArrowBoss(this, this.difficultyMultiplier);
+      const offset = boss.orbitPathOffset;
+      boss.position.x = startX + offset.x;
+      boss.position.y = center.y + offset.y;
+      const lifeBarRow = orbit === "left" ? 0 : 1;
+      boss.addChild(new LifeMeter(boss, {
+        position: { x: 0, y: lifeBarRow },
+        anchor: { left: 0, top: lifeBarRow },
+        length: this.game.width,
+        width: 1,
+        horizontal: true
+      }));
+      this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));
+      this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
+      this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
+      this.scripts.push(new ScriptChain(this, false, [
+        new MoveObjectToPoint(null, boss, entryPoint, BOSS_ENTER_SECONDS),
+        new MoveObjectInCircle(null, boss, {
+          center,
+          radius: BOSS_ORBIT_RADIUS,
+          period: BOSS_ORBIT_PERIOD_SECONDS,
+          clockwise: orbit === "right"
+        })
+      ]));
+      this.scripts.push(new WatchForDeath(this, boss, () => {
+        const p = boss.position;
+        this.addChild(new MoneyDrop(this, { x: p.x, y: p.y }));
+        this.addChild(new MoneyDrop(this, { x: p.x + 7, y: p.y }));
+        this.addChild(new MoneyDrop(this, { x: p.x + 4, y: p.y + 8 }));
+      }));
+      this.ships.push(boss);
+    }
+    attachMoneyScripts() {
+      const divisor = this.difficultyMultiplier > 4 ? 2 : 3;
+      const count = Math.floor(this.ships.length / divisor);
+      const selectedShips = sample(this.ships, count);
+      selectedShips.forEach((ship) => {
+        this.scripts.push(new WatchForDeath(this, ship, () => {
+          const pos = ship.position;
+          this.addChild(new MoneyDrop(this, { x: pos.x, y: pos.y }));
+        }));
+      });
     }
   }
 
@@ -4266,6 +4601,11 @@ void main() {
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 3),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 4),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, "boss"),
+        this.shop,
+        new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+        new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 2),
+        new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 3),
+        new LevelGroup03(this, this.game, this.difficultyMultiplier, false, "boss"),
         this.shop
       ];
       this.levelIndex = -1;
