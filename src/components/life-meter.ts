@@ -17,6 +17,7 @@ export default class LifeMeter extends GameObject {
     private scale?: number;
     private showBorder: boolean;
     private borderColor: string;
+    private mirror: boolean;
     private currentLife?: number;
     private maxLife?: number;
 
@@ -34,6 +35,7 @@ export default class LifeMeter extends GameObject {
         this.scale = opts.scale;
         this.showBorder = !!opts.showBorder;
         this.borderColor = opts.borderColor || "#ffffff";
+        this.mirror = !!opts.mirror;
 
         this.reset();
     }
@@ -91,6 +93,10 @@ export default class LifeMeter extends GameObject {
             colors.forEach((colorArray) => {
                 colorArray.push(color);
             });
+        }
+
+        if (this.mirror) {
+            colors.forEach((colorArray) => colorArray.reverse());
         }
 
         return colors;

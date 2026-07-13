@@ -307,13 +307,17 @@ export default class LevelGroup03 extends GameObject {
         boss.position!.x = startX + offset.x;
         boss.position!.y = center.y + offset.y;
 
-        const lifeBarRow = orbit === 'left' ? 0 : 1;
+        const halfWidth = Math.floor(this.game.width / 2);
         boss.addChild(new LifeMeter(boss, {
-            position: { x: 0, y: lifeBarRow },
-            anchor: { left: 0, top: lifeBarRow },
-            length: this.game.width,
+            position: { x: 0, y: 0 },
+            anchor: orbit === 'left'
+                ? { left: 0, top: 0 }
+                : { left: halfWidth, top: 0 },
+            length: halfWidth,
             width: 1,
-            horizontal: true
+            horizontal: true,
+            // Left bar depletes rightward so both bars shrink toward screen center.
+            mirror: orbit === 'left'
         }));
 
         this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));

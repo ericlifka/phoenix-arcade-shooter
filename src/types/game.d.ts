@@ -72,6 +72,8 @@ export interface LifeMeterOptions {
     scale?: number;
     showBorder?: boolean;
     borderColor?: string;
+    /** When true, fill depletes from the opposite end (e.g. shrink toward screen center). */
+    mirror?: boolean;
 }
 
 // Combo gauge options
