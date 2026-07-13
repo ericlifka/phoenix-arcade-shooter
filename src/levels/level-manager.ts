@@ -70,6 +70,11 @@ export default class LevelManager extends GameObject {
             new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 2),
             new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 3),
             new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 'boss'),
+            this.shop,
+            new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
+            new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 2),
+            new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 3),
+            new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 'boss'),
             this.shop
         ];
         this.levelIndex = -1;
