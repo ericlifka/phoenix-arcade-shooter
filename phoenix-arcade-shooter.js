@@ -1851,8 +1851,39 @@ void main() {
   };
 
   // src/rendering/fonts/phoenix.ts
-  var w3 = "white";
   var n4 = null;
+  var w3 = "white";
+  var TIP = "#ffffff";
+  var HIGHLIGHT = "#fff0e0";
+  var BODY = "#ffd0a8";
+  var WING = "#e87848";
+  var EDGE = "#a84028";
+  function shadeGlyph(mask) {
+    const width = mask.length;
+    const height = mask[0].length;
+    const out = mask.map((col) => col.slice());
+    for (let x = 0;x < width; x++) {
+      for (let y2 = 0;y2 < height; y2++) {
+        if (!mask[x][y2])
+          continue;
+        const isEdge = !(mask[x - 1]?.[y2] && mask[x + 1]?.[y2] && mask[x][y2 - 1] && mask[x][y2 + 1]);
+        const t = height <= 1 ? 0 : y2 / (height - 1);
+        if (isEdge) {
+          out[x][y2] = t > 0.65 ? EDGE : WING;
+        } else if (t < 0.3) {
+          out[x][y2] = TIP;
+        } else if (t < 0.6) {
+          out[x][y2] = HIGHLIGHT;
+        } else {
+          out[x][y2] = BODY;
+        }
+      }
+    }
+    return out;
+  }
+  function letter(mask) {
+    return new Sprite(shadeGlyph(mask)).invertY().rotateRight();
+  }
   var phoenix_default = {
     meta: {
       width: 15,
@@ -1860,7 +1891,7 @@ void main() {
       lineHeight: 16,
       letterSpacing: -1
     },
-    P: new Sprite([
+    P: letter([
       [n4, n4, n4, w3, w3, w3, w3, w3, w3, w3, w3, w3, n4, n4],
       [n4, n4, n4, n4, n4, w3, w3, w3, n4, n4, w3, w3, w3, n4],
       [n4, n4, n4, n4, n4, w3, w3, n4, n4, n4, n4, w3, w3, w3],
@@ -1876,8 +1907,8 @@ void main() {
       [n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, n4, n4, n4, n4],
       [n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, n4, n4, n4, n4],
       [w3, w3, w3, w3, w3, w3, n4, n4, n4, n4, n4, n4, n4, n4]
-    ]).invertY().rotateRight(),
-    H: new Sprite([
+    ]),
+    H: letter([
       [n4, n4, n4, w3, w3, w3, w3, w3, w3, n4, n4, w3, w3, w3, w3, w3, w3],
       [n4, n4, n4, n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, w3, w3, n4, n4],
       [n4, n4, n4, n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, w3, w3, n4, n4],
@@ -1893,8 +1924,8 @@ void main() {
       [n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, w3, w3, n4, n4, n4, n4, n4],
       [n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, w3, w3, n4, n4, n4, n4, n4],
       [w3, w3, w3, w3, w3, w3, n4, n4, w3, w3, w3, w3, w3, w3, n4, n4, n4]
-    ]).invertY().rotateRight(),
-    O: new Sprite([
+    ]),
+    O: letter([
       [n4, n4, n4, n4, n4, w3, w3, w3, w3, w3, n4, n4],
       [n4, n4, n4, n4, w3, w3, w3, n4, w3, w3, w3, n4],
       [n4, n4, n4, w3, w3, w3, n4, n4, n4, w3, w3, n4],
@@ -1910,8 +1941,8 @@ void main() {
       [n4, w3, w3, n4, n4, n4, n4, w3, w3, n4, n4, n4],
       [n4, n4, w3, w3, n4, n4, w3, w3, n4, n4, n4, n4],
       [n4, n4, n4, w3, w3, w3, w3, n4, n4, n4, n4, n4]
-    ]).invertY().rotateRight(),
-    E: new Sprite([
+    ]),
+    E: letter([
       [n4, n4, n4, w3, w3, w3, w3, w3, w3, w3, w3, w3, w3, w3],
       [n4, n4, n4, n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, w3],
       [n4, n4, n4, n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, n4],
@@ -1927,8 +1958,8 @@ void main() {
       [n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, n4, n4, n4, n4],
       [n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, n4, w3, n4, n4],
       [w3, w3, w3, w3, w3, w3, w3, w3, w3, w3, w3, w3, n4, n4]
-    ]).invertY().rotateRight(),
-    N: new Sprite([
+    ]),
+    N: letter([
       [n4, n4, n4, w3, w3, w3, w3, n4, n4, n4, n4, w3, w3, w3, w3, w3, w3],
       [n4, n4, n4, n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, w3, w3, n4, n4],
       [n4, n4, n4, n4, n4, w3, w3, w3, n4, n4, n4, n4, n4, w3, w3, n4, n4],
@@ -1944,8 +1975,8 @@ void main() {
       [n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, w3, w3, n4, n4, n4, n4, n4],
       [n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, w3, w3, n4, n4, n4, n4, n4],
       [w3, w3, w3, w3, w3, w3, n4, n4, n4, n4, w3, w3, w3, w3, n4, n4, n4]
-    ]).invertY().rotateRight(),
-    I: new Sprite([
+    ]),
+    I: letter([
       [n4, n4, n4, w3, w3, w3, w3, w3, w3],
       [n4, n4, n4, n4, n4, w3, w3, n4, n4],
       [n4, n4, n4, n4, n4, w3, w3, n4, n4],
@@ -1961,8 +1992,8 @@ void main() {
       [n4, n4, w3, w3, n4, n4, n4, n4, n4],
       [n4, n4, w3, w3, n4, n4, n4, n4, n4],
       [w3, w3, w3, w3, w3, w3, n4, n4, n4]
-    ]).invertY().rotateRight(),
-    X: new Sprite([
+    ]),
+    X: letter([
       [n4, n4, n4, w3, w3, w3, w3, w3, w3, n4, n4, w3, w3, w3, w3, w3, w3],
       [n4, n4, n4, n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, w3, w3, n4, n4],
       [n4, n4, n4, n4, n4, w3, w3, n4, n4, n4, n4, n4, w3, w3, n4, n4, n4],
@@ -1978,7 +2009,7 @@ void main() {
       [n4, n4, n4, w3, w3, n4, n4, n4, n4, n4, w3, w3, n4, n4, n4, n4, n4],
       [n4, n4, w3, w3, n4, n4, n4, n4, n4, n4, w3, w3, n4, n4, n4, n4, n4],
       [w3, w3, w3, w3, w3, w3, n4, n4, w3, w3, w3, w3, w3, w3, n4, n4, n4]
-    ]).invertY().rotateRight()
+    ])
   };
 
   // src/components/text-display.ts
@@ -1996,6 +2027,7 @@ void main() {
     padding;
     background;
     isPhysicalEntity;
+    preserveSpriteColors;
     message;
     width;
     height;
@@ -2004,6 +2036,7 @@ void main() {
       this.rawMessage = options.message || " ";
       this.font = fonts[options.font || "arcade-small"];
       this.color = options.color || "white";
+      this.preserveSpriteColors = !!options.preserveSpriteColors;
       this.position = options.position;
       this.border = !!options.border;
       this.padding = options.padding || 0;
@@ -2025,7 +2058,9 @@ void main() {
       const charArrays = processedText.map((str) => str.split(""));
       this.message = charArrays;
       this.populateSprites();
-      this.updateColor(this.color);
+      if (!this.preserveSpriteColors) {
+        this.updateColor(this.color);
+      }
     }
     populateSprites() {
       this.children = [];
@@ -2728,7 +2763,8 @@ void main() {
       this.addChild(new TextDisplay(this, {
         font: "phoenix",
         message: "PHOENIX",
-        position: { x: 50, y: 30 }
+        position: { x: 50, y: 30 },
+        preserveSpriteColors: true
       }));
       if (runsCompleted > 0) {
         this.addChild(new TextDisplay(this, {
@@ -4262,70 +4298,638 @@ void main() {
     }
   }
 
+  // src/sprites/dash-boss.ts
+  function dashBossSprite() {
+    const c1 = "#88eeff";
+    const c2 = "#44aacc";
+    const c3 = "#226688";
+    const w1 = "#eeeeee";
+    const g1 = "#999999";
+    const g2 = "#555555";
+    const nn = null;
+    return new Sprite([
+      [nn, nn, c3, nn, nn, nn, c2, c1, c2, nn, nn, nn, c3, nn, nn],
+      [nn, c3, c2, c3, nn, c2, w1, w1, w1, c2, nn, c3, c2, c3, nn],
+      [c3, c2, g1, c2, c3, w1, w1, c1, w1, w1, c3, c2, g1, c2, c3],
+      [nn, c3, g2, g1, c2, c1, w1, w1, w1, c1, c2, g1, g2, c3, nn],
+      [nn, nn, c3, nn, c3, c2, c1, w1, c1, c2, c3, nn, c3, nn, nn],
+      [nn, nn, nn, nn, nn, c3, c2, c1, c2, c3, nn, nn, nn, nn, nn],
+      [nn, nn, nn, nn, nn, nn, c3, c2, c3, nn, nn, nn, nn, nn, nn],
+      [nn, nn, nn, nn, nn, nn, nn, c3, nn, nn, nn, nn, nn, nn, nn]
+    ], {
+      guns: [
+        { x: 2, y: 4 },
+        { x: 7, y: 7 },
+        { x: 12, y: 4 }
+      ]
+    }).rotateRight();
+  }
+
+  // src/ships/dash-boss.ts
+  class DashBoss extends GameObject {
+    isPhysicalEntity = true;
+    BULLET_SPEED = 130;
+    team = 1;
+    index = 5;
+    difficultyMultiplier;
+    explosion;
+    sprite;
+    guns;
+    position;
+    velocity;
+    phase = "idle";
+    constructor(parent, difficultyMultiplier) {
+      super(parent);
+      this.difficultyMultiplier = difficultyMultiplier;
+      this.reset();
+    }
+    reset() {
+      super.reset();
+      this.sprite = dashBossSprite();
+      this.explosion = shipExplosion;
+      this.guns = this.sprite.meta.guns;
+      this.phase = "idle";
+      this.position = { x: 0, y: 0 };
+      this.velocity = { x: 0, y: 0 };
+      this.damage = 40 * this.difficultyMultiplier;
+      this.life = 18 * this.difficultyMultiplier;
+      this.maxLife = 18 * this.difficultyMultiplier;
+    }
+    fire(gunIndex = 0) {
+      const gun = this.guns[gunIndex];
+      if (!gun)
+        return;
+      const position = {
+        x: this.position.x + gun.x,
+        y: this.position.y + gun.y
+      };
+      const velocity = { x: 0, y: this.BULLET_SPEED };
+      this.triggerEvent("spawnBullet", {
+        team: this.team,
+        position,
+        velocity,
+        damage: 5 + this.difficultyMultiplier
+      });
+      this.addChild(new MuzzleFlash(this, gun));
+    }
+    spinQuarterLeft() {
+      const sw = this.sprite.width;
+      const sh = this.sprite.height;
+      const cx = this.position.x + sw / 2;
+      const cy = this.position.y + sh / 2;
+      this.guns = this.guns.map((g) => ({ x: g.y, y: sw - 1 - g.x }));
+      this.sprite.meta.guns = this.guns;
+      this.sprite.rotateLeft();
+      this.position.x = cx - this.sprite.width / 2;
+      this.position.y = cy - this.sprite.height / 2;
+    }
+    spinQuarterRight() {
+      const sw = this.sprite.width;
+      const sh = this.sprite.height;
+      const cx = this.position.x + sw / 2;
+      const cy = this.position.y + sh / 2;
+      this.guns = this.guns.map((g) => ({ x: sh - 1 - g.y, y: g.x }));
+      this.sprite.meta.guns = this.guns;
+      this.sprite.rotateRight();
+      this.position.x = cx - this.sprite.width / 2;
+      this.position.y = cy - this.sprite.height / 2;
+    }
+    applyDamage(damage, sourceEntity) {
+      this.triggerEvent("enemyHit");
+      super.applyDamage(damage, sourceEntity);
+    }
+    destroy() {
+      this.triggerEvent("enemyDestroyed", {
+        shipValue: this.maxLife
+      });
+      super.destroy();
+    }
+  }
+
+  // src/sprites/dash-ship.ts
+  function dashShipSprite() {
+    const c1 = "#88eeff";
+    const c2 = "#44aacc";
+    const c3 = "#226688";
+    const w1 = "#eeeeee";
+    const g1 = "#999999";
+    const nn = null;
+    return new Sprite([
+      [nn, nn, c3, c2, c1, c2, c3, nn, nn],
+      [nn, c3, c2, w1, w1, w1, c2, c3, nn],
+      [c3, c2, g1, c1, w1, c1, g1, c2, c3],
+      [nn, c3, nn, c2, c1, c2, nn, c3, nn],
+      [nn, nn, nn, nn, c2, nn, nn, nn, nn],
+      [nn, nn, nn, nn, c3, nn, nn, nn, nn]
+    ], {
+      guns: [{ x: 4, y: 5 }]
+    }).rotateRight();
+  }
+
+  // src/ships/dash-ship.ts
+  class DashShip extends GameObject {
+    isPhysicalEntity = true;
+    BULLET_SPEED = 110;
+    team = 1;
+    index = 5;
+    difficultyMultiplier;
+    explosion;
+    sprite;
+    gun;
+    guns;
+    position;
+    velocity;
+    phase = "idle";
+    constructor(parent, difficultyMultiplier) {
+      super(parent);
+      this.difficultyMultiplier = difficultyMultiplier;
+      this.reset();
+    }
+    reset() {
+      super.reset();
+      this.sprite = dashShipSprite();
+      this.explosion = shipExplosion;
+      this.guns = this.sprite.meta.guns;
+      this.gun = this.guns[0];
+      this.phase = "idle";
+      this.position = { x: 0, y: 0 };
+      this.velocity = { x: 0, y: 0 };
+      this.damage = 5 + this.difficultyMultiplier;
+      this.maxLife = this.difficultyMultiplier;
+      this.life = this.maxLife;
+    }
+    fire(gunIndex = 0) {
+      const gun = this.guns[gunIndex] || this.gun;
+      const position = {
+        x: this.position.x + gun.x,
+        y: this.position.y + gun.y
+      };
+      const velocity = { x: 0, y: this.BULLET_SPEED };
+      this.triggerEvent("spawnBullet", {
+        team: this.team,
+        position,
+        velocity,
+        damage: 4 + this.difficultyMultiplier
+      });
+      this.addChild(new MuzzleFlash(this, gun));
+    }
+    spinQuarterLeft() {
+      const sw = this.sprite.width;
+      const sh = this.sprite.height;
+      const cx = this.position.x + sw / 2;
+      const cy = this.position.y + sh / 2;
+      this.guns = this.guns.map((g) => ({ x: g.y, y: sw - 1 - g.x }));
+      this.gun = this.guns[0];
+      this.sprite.meta.guns = this.guns;
+      this.sprite.rotateLeft();
+      this.position.x = cx - this.sprite.width / 2;
+      this.position.y = cy - this.sprite.height / 2;
+    }
+    spinQuarterRight() {
+      const sw = this.sprite.width;
+      const sh = this.sprite.height;
+      const cx = this.position.x + sw / 2;
+      const cy = this.position.y + sh / 2;
+      this.guns = this.guns.map((g) => ({ x: sh - 1 - g.y, y: g.x }));
+      this.gun = this.guns[0];
+      this.sprite.meta.guns = this.guns;
+      this.sprite.rotateRight();
+      this.position.x = cx - this.sprite.width / 2;
+      this.position.y = cy - this.sprite.height / 2;
+    }
+    applyDamage(damage, sourceEntity) {
+      this.triggerEvent("enemyHit");
+      super.applyDamage(damage, sourceEntity);
+    }
+    destroy() {
+      this.triggerEvent("enemyDestroyed", {
+        shipValue: this.maxLife
+      });
+      super.destroy();
+    }
+  }
+
+  // src/scripts/dash-and-pause.ts
+  var TELEGRAPH_QUARTERS = 4;
+
+  class DashAndPause extends GameObject {
+    ship;
+    bounds;
+    dashSpeed;
+    pauseSecondsMin;
+    pauseSecondsMax;
+    telegraphSeconds;
+    maxDashDistance;
+    minDashDistance;
+    initialWaitSecondsMin;
+    initialWaitSecondsMax;
+    target = null;
+    pauseRemaining = 0;
+    telegraphElapsed = 0;
+    telegraphQuartersDone = 0;
+    initialWaitRemaining = 0;
+    telegraphSpinRight = false;
+    constructor(parent, ship, options) {
+      super(parent);
+      this.ship = ship;
+      this.bounds = options.bounds;
+      this.dashSpeed = options.dashSpeed ?? 120;
+      this.pauseSecondsMin = options.pauseSecondsMin ?? 0.8;
+      this.pauseSecondsMax = options.pauseSecondsMax ?? 1.6;
+      this.telegraphSeconds = options.telegraphSeconds ?? 0.38;
+      this.maxDashDistance = options.maxDashDistance ?? 70;
+      this.minDashDistance = options.minDashDistance ?? 25;
+      this.initialWaitSecondsMin = options.initialWaitSecondsMin ?? 1;
+      this.initialWaitSecondsMax = options.initialWaitSecondsMax ?? 10;
+    }
+    start() {
+      this.ship.phase = "idle";
+      this.ship.velocity.x = 0;
+      this.ship.velocity.y = 0;
+      const minMs = Math.floor(this.initialWaitSecondsMin * 1000);
+      const maxMs = Math.floor(this.initialWaitSecondsMax * 1000);
+      this.initialWaitRemaining = integer(minMs, maxMs) / 1000;
+    }
+    update(dtime) {
+      if (this.ship.destroyed) {
+        this.destroy();
+        return;
+      }
+      const dt = dtime / 1000;
+      if (this.ship.phase === "idle") {
+        this.initialWaitRemaining -= dt;
+        if (this.initialWaitRemaining <= 0) {
+          this.beginDash();
+        }
+        return;
+      }
+      if (this.ship.phase === "telegraph") {
+        this.updateTelegraph(dt);
+        return;
+      }
+      if (this.ship.phase === "pause") {
+        this.pauseRemaining -= dt;
+        if (this.pauseRemaining <= 0) {
+          this.beginDash();
+        }
+        return;
+      }
+      if (this.ship.phase === "dash" && this.target) {
+        const dx = this.target.x - this.ship.position.x;
+        const dy = this.target.y - this.ship.position.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < 1.5 || this.dashSpeed * dt >= dist) {
+          this.ship.position.x = this.target.x;
+          this.ship.position.y = this.target.y;
+          this.ship.velocity.x = 0;
+          this.ship.velocity.y = 0;
+          this.beginTelegraph();
+          return;
+        }
+        this.ship.velocity.x = dx / dist * this.dashSpeed;
+        this.ship.velocity.y = dy / dist * this.dashSpeed;
+      }
+    }
+    updateTelegraph(dt) {
+      this.telegraphElapsed += dt;
+      const step = this.telegraphSeconds / TELEGRAPH_QUARTERS;
+      while (this.telegraphQuartersDone < TELEGRAPH_QUARTERS && this.telegraphElapsed >= (this.telegraphQuartersDone + 1) * step) {
+        if (this.telegraphSpinRight) {
+          this.ship.spinQuarterRight();
+        } else {
+          this.ship.spinQuarterLeft();
+        }
+        this.telegraphQuartersDone++;
+      }
+      if (this.telegraphElapsed >= this.telegraphSeconds) {
+        this.beginPause();
+      }
+    }
+    beginTelegraph() {
+      this.ship.phase = "telegraph";
+      this.ship.velocity.x = 0;
+      this.ship.velocity.y = 0;
+      this.target = null;
+      this.telegraphElapsed = 0;
+      this.telegraphQuartersDone = 0;
+      this.telegraphSpinRight = integer(0, 1) === 1;
+    }
+    beginPause() {
+      this.ship.phase = "pause";
+      this.ship.velocity.x = 0;
+      this.ship.velocity.y = 0;
+      this.target = null;
+      const minMs = Math.floor(this.pauseSecondsMin * 1000);
+      const maxMs = Math.floor(this.pauseSecondsMax * 1000);
+      this.pauseRemaining = integer(minMs, maxMs) / 1000;
+    }
+    beginDash() {
+      this.target = this.pickWaypoint();
+      this.ship.phase = "dash";
+      const dx = this.target.x - this.ship.position.x;
+      const dy = this.target.y - this.ship.position.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      this.ship.velocity.x = dx / dist * this.dashSpeed;
+      this.ship.velocity.y = dy / dist * this.dashSpeed;
+    }
+    pickWaypoint() {
+      const spriteW = this.ship.sprite?.width ?? 8;
+      const spriteH = this.ship.sprite?.height ?? 6;
+      const left = this.bounds.left;
+      const right = Math.max(left, this.bounds.right - spriteW);
+      const top = this.bounds.top;
+      const bottom = Math.max(top, this.bounds.bottom - spriteH);
+      for (let attempt = 0;attempt < 12; attempt++) {
+        const x = integer(left, right);
+        const y2 = integer(top, bottom);
+        const dist = Math.hypot(x - this.ship.position.x, y2 - this.ship.position.y);
+        if (dist >= this.minDashDistance && dist <= this.maxDashDistance) {
+          return { x, y: y2 };
+        }
+      }
+      return {
+        x: integer(left, right),
+        y: integer(top, bottom)
+      };
+    }
+  }
+
+  // src/scripts/fire-burst-on-pause.ts
+  class FireBurstOnPause extends GameObject {
+    ship;
+    gunIndex;
+    burstSize;
+    fireRateMs;
+    windupMs;
+    lastPhase = "idle";
+    shotsRemaining = 0;
+    cooldown = 0;
+    windup = 0;
+    armed = false;
+    constructor(parent, ship, options) {
+      super(parent);
+      const opts = options || {};
+      this.ship = ship;
+      this.gunIndex = opts.gunIndex ?? 0;
+      this.burstSize = opts.burstSize ?? 3;
+      this.fireRateMs = opts.fireRateMs ?? 120;
+      this.windupMs = opts.windupMs ?? 80;
+    }
+    start() {
+      this.lastPhase = this.ship.phase;
+      this.shotsRemaining = 0;
+      this.armed = false;
+    }
+    update(dtime) {
+      if (this.ship.destroyed) {
+        this.destroy();
+        return;
+      }
+      if (this.ship.phase === "pause" && this.lastPhase !== "pause") {
+        this.armBurst();
+      }
+      if (this.ship.phase !== "pause") {
+        this.armed = false;
+        this.shotsRemaining = 0;
+      }
+      this.lastPhase = this.ship.phase;
+      if (!this.armed || this.shotsRemaining <= 0) {
+        return;
+      }
+      if (this.windup > 0) {
+        this.windup -= dtime;
+        return;
+      }
+      this.cooldown -= dtime;
+      if (this.cooldown <= 0) {
+        this.ship.fire(this.gunIndex);
+        this.shotsRemaining--;
+        this.cooldown = this.fireRateMs;
+        if (this.shotsRemaining <= 0) {
+          this.armed = false;
+        }
+      }
+    }
+    armBurst() {
+      this.armed = true;
+      this.shotsRemaining = this.burstSize;
+      this.windup = this.windupMs;
+      this.cooldown = 0;
+    }
+  }
+
+  // src/levels/level-group-04.ts
+  class LevelGroup04 extends GameObject {
+    difficultyMultiplier;
+    width;
+    height;
+    boss;
+    game;
+    levelName;
+    rowCount;
+    ships;
+    scripts;
+    constructor(parent, game, difficultyMultiplier, _unusedAlternate, rowCount, levelName) {
+      super(parent);
+      this.difficultyMultiplier = difficultyMultiplier;
+      this.width = this.parent.width;
+      this.height = this.parent.height;
+      if (rowCount === "boss") {
+        rowCount = 1;
+        this.boss = true;
+      }
+      this.game = game;
+      this.levelName = levelName;
+      this.rowCount = typeof rowCount === "number" ? rowCount : 1;
+      this.reset();
+    }
+    start() {
+      this.ships = [];
+      this.scripts = [];
+      this.spawnWave();
+      if (this.boss) {
+        this.spawnBoss();
+      }
+      if (this.levelName) {
+        this.scripts.push(new FadeoutBanner(this, this.levelName, 2000));
+      }
+      this.ships.forEach((ship) => this.addChild(ship));
+      this.scripts.forEach((script) => {
+        script.start();
+        this.addChild(script);
+      });
+    }
+    checkIfLevelComplete() {
+      for (let i = 0;i < this.children.length; i++) {
+        const child = this.children[i];
+        if (child && child.position && !child.destroyed) {
+          return false;
+        }
+      }
+      return true;
+    }
+    playBounds() {
+      return {
+        left: 8,
+        right: this.game.width - 8,
+        top: 12,
+        bottom: Math.floor(this.game.height * 0.55)
+      };
+    }
+    entryWaitOptions() {
+      if (this.levelName) {
+        return { initialWaitSecondsMin: 1, initialWaitSecondsMax: 10 };
+      }
+      return { initialWaitSecondsMin: 0.5, initialWaitSecondsMax: 5 };
+    }
+    spawnWave() {
+      const count = 4 + this.rowCount * 3;
+      const bounds = this.playBounds();
+      const entryWait = this.entryWaitOptions();
+      for (let i = 0;i < count; i++) {
+        const ship = new DashShip(this, this.difficultyMultiplier);
+        ship.position.x = 20 + i * 37 % Math.max(1, bounds.right - 40);
+        ship.position.y = -20 - i % 5 * 12;
+        this.scripts.push(new DashAndPause(this, ship, {
+          bounds,
+          dashSpeed: 130,
+          pauseSecondsMin: 0.55,
+          pauseSecondsMax: 1.2,
+          minDashDistance: 28,
+          maxDashDistance: 75,
+          ...entryWait
+        }));
+        this.scripts.push(new FireBurstOnPause(this, ship, {
+          burstSize: integer(1, this.rowCount + 3),
+          fireRateMs: 110
+        }));
+        this.ships.push(ship);
+      }
+      this.attachMoneyScripts();
+    }
+    spawnBoss() {
+      const bounds = this.playBounds();
+      const entryWait = this.entryWaitOptions();
+      const boss = new DashBoss(this, this.difficultyMultiplier);
+      boss.position.x = Math.floor(this.game.width / 2) - 7;
+      boss.position.y = -30;
+      boss.addChild(new LifeMeter(boss, {
+        position: { x: 0, y: 0 },
+        length: this.game.width,
+        width: 1,
+        horizontal: true
+      }));
+      this.scripts.push(new DashAndPause(this, boss, {
+        bounds: { ...bounds, bottom: Math.floor(this.game.height * 0.45) },
+        dashSpeed: 95,
+        pauseSecondsMin: 0.8,
+        pauseSecondsMax: 1.6,
+        minDashDistance: 35,
+        maxDashDistance: 90,
+        ...entryWait
+      }));
+      this.scripts.push(new FireBurstOnPause(this, boss, { gunIndex: 0, burstSize: 4, fireRateMs: 90 }));
+      this.scripts.push(new FireBurstOnPause(this, boss, { gunIndex: 1, burstSize: 5, fireRateMs: 70, windupMs: 40 }));
+      this.scripts.push(new FireBurstOnPause(this, boss, { gunIndex: 2, burstSize: 4, fireRateMs: 90 }));
+      this.scripts.push(new WatchForDeath(this, boss, () => {
+        const p = boss.position;
+        this.addChild(new MoneyDrop(this, { x: p.x, y: p.y }));
+        this.addChild(new MoneyDrop(this, { x: p.x + 7, y: p.y }));
+        this.addChild(new MoneyDrop(this, { x: p.x + 4, y: p.y + 8 }));
+      }));
+      this.ships.push(boss);
+    }
+    attachMoneyScripts() {
+      const divisor = this.difficultyMultiplier > 4 ? 2 : 3;
+      const count = Math.floor(this.ships.length / divisor);
+      if (count < 1)
+        return;
+      sample(this.ships, count).forEach((ship) => {
+        this.scripts.push(new WatchForDeath(this, ship, () => {
+          const pos = ship.position;
+          this.addChild(new MoneyDrop(this, { x: pos.x, y: pos.y }));
+        }));
+      });
+    }
+  }
+
   // src/sprites/player-ship.ts
   function playerShipSprite() {
-    const w4 = "white";
     const n5 = null;
+    const t = "#ffffff";
+    const c = "#ffe8c8";
+    const h = "#fff0e0";
+    const m = "#ffd0a8";
+    const w4 = "#e87848";
+    const e = "#a84028";
     return new Sprite([
-      [n5, n5, n5, w4, n5, n5, n5],
-      [n5, n5, n5, w4, n5, n5, n5],
-      [n5, n5, w4, w4, w4, n5, n5],
-      [n5, n5, w4, w4, w4, n5, n5],
-      [n5, n5, w4, w4, w4, n5, n5],
-      [n5, w4, w4, w4, w4, w4, n5],
-      [w4, w4, w4, w4, w4, w4, w4],
-      [n5, n5, w4, w4, w4, n5, n5],
-      [n5, n5, n5, w4, n5, n5, n5]
+      [n5, n5, n5, n5, n5, n5, w4, n5, n5],
+      [n5, n5, n5, n5, n5, w4, m, n5, n5],
+      [n5, n5, m, m, m, m, m, m, n5],
+      [t, t, c, c, c, e, h, e, e],
+      [n5, n5, m, m, m, m, m, m, n5],
+      [n5, n5, n5, n5, n5, w4, m, n5, n5],
+      [n5, n5, n5, n5, n5, n5, w4, n5, n5]
     ], {
       guns: [
         { x: 3, y: 1 }
       ]
-    });
+    }).rotateLeft();
   }
 
   // src/sprites/player-ship-double-guns.ts
   function playerShipDoubleGunsSprite() {
-    const w4 = "white";
     const n5 = null;
+    const t = "#ffffff";
+    const c = "#ffe8c8";
+    const h = "#fff0e0";
+    const m = "#ffd0a8";
+    const w4 = "#e87848";
+    const e = "#a84028";
     return new Sprite([
-      [n5, n5, n5, n5, n5, n5, n5, n5, n5],
-      [n5, n5, n5, n5, w4, n5, n5, n5, n5],
-      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
-      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
-      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
-      [w4, n5, w4, w4, w4, w4, w4, n5, w4],
-      [w4, w4, w4, w4, w4, w4, w4, w4, w4],
-      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
-      [n5, n5, n5, n5, w4, n5, n5, n5, n5]
+      [n5, n5, n5, n5, n5, w4, w4, n5, n5],
+      [n5, n5, n5, n5, n5, n5, m, n5, n5],
+      [n5, n5, n5, n5, n5, m, m, n5, n5],
+      [n5, n5, m, m, m, m, m, m, n5],
+      [n5, t, c, c, c, e, h, e, e],
+      [n5, n5, m, m, m, m, m, m, n5],
+      [n5, n5, n5, n5, n5, m, m, n5, n5],
+      [n5, n5, n5, n5, n5, n5, m, n5, n5],
+      [n5, n5, n5, n5, n5, w4, w4, n5, n5]
     ], {
       guns: [
         { x: 0, y: 6 },
         { x: 8, y: 6 }
       ]
-    });
+    }).rotateLeft();
   }
 
   // src/sprites/player-ship-wing-guns.ts
   function playerShipWingGunsSprite() {
-    const w4 = "white";
     const n5 = null;
+    const t = "#ffffff";
+    const c = "#ffe8c8";
+    const h = "#fff0e0";
+    const m = "#ffd0a8";
+    const w4 = "#e87848";
+    const e = "#a84028";
     return new Sprite([
-      [n5, n5, n5, n5, w4, n5, n5, n5, n5],
-      [n5, n5, n5, n5, w4, n5, n5, n5, n5],
-      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
-      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
-      [w4, n5, n5, w4, w4, w4, n5, n5, w4],
-      [w4, n5, w4, w4, w4, w4, w4, n5, w4],
-      [w4, w4, w4, w4, w4, w4, w4, w4, w4],
-      [n5, n5, n5, w4, w4, w4, n5, n5, n5],
-      [n5, n5, n5, n5, w4, n5, n5, n5, n5]
+      [n5, n5, n5, n5, w4, w4, w4, n5, n5],
+      [n5, n5, n5, n5, n5, n5, m, n5, n5],
+      [n5, n5, n5, n5, n5, m, m, n5, n5],
+      [n5, n5, m, m, m, m, m, m, n5],
+      [t, t, c, c, c, e, h, e, e],
+      [n5, n5, m, m, m, m, m, m, n5],
+      [n5, n5, n5, n5, n5, m, m, n5, n5],
+      [n5, n5, n5, n5, n5, n5, m, n5, n5],
+      [n5, n5, n5, n5, w4, w4, w4, n5, n5]
     ], {
       guns: [
         { x: 0, y: 5 },
         { x: 4, y: 1 },
         { x: 8, y: 5 }
       ]
-    });
+    }).rotateLeft();
   }
 
   // src/ships/player-controlled-ship.ts
@@ -4802,6 +5406,12 @@ void main() {
         new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 2),
         new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 3),
         new LevelGroup03(this, this.game, this.difficultyMultiplier, true, "boss"),
+        this.shop,
+        new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+        new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 2),
+        new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 3),
+        new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 4),
+        new LevelGroup04(this, this.game, this.difficultyMultiplier, false, "boss"),
         this.shop
       ];
       this.levelIndex = -1;
