@@ -25,6 +25,7 @@ export default class TextDisplay extends GameObject {
     padding: number;
     background: string | null;
     isPhysicalEntity?: boolean;
+    preserveSpriteColors: boolean;
     message?: string[][];
     width?: number;
     height?: number;
@@ -35,6 +36,7 @@ export default class TextDisplay extends GameObject {
         this.rawMessage = options.message || " ";
         this.font = fonts[options.font || "arcade-small"];
         this.color = options.color || "white";
+        this.preserveSpriteColors = !!options.preserveSpriteColors;
         this.position = options.position;
         this.border = !!options.border;
         this.padding = options.padding || 0;
@@ -61,7 +63,9 @@ export default class TextDisplay extends GameObject {
         this.message = charArrays;
 
         this.populateSprites();
-        this.updateColor(this.color);
+        if (!this.preserveSpriteColors) {
+            this.updateColor(this.color);
+        }
     }
 
     private populateSprites(): void {

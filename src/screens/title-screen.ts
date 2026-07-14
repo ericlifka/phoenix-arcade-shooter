@@ -55,7 +55,8 @@ export default class TitleScreen extends GameObject {
         this.addChild(new TextDisplay(this, {
             font: 'phoenix',
             message: this.headerDef.message,
-            position: this.headerDef.position
+            position: this.headerDef.position,
+            preserveSpriteColors: true
         }));
 
         this.menuItems.forEach(function (this: TitleScreen, item: MenuItem) {

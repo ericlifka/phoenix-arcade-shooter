@@ -54,6 +54,8 @@ export interface TextDisplayOptions {
     message?: string | string[];
     font?: string;
     color?: string;
+    /** When true, keep the font's authored multi-color pixels (skip tint). */
+    preserveSpriteColors?: boolean;
     position?: Position;
     border?: boolean;
     padding?: number;

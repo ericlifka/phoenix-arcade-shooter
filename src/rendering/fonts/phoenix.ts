@@ -1,7 +1,51 @@
 import Sprite from '../core/sprite.js';
 
-const w = "white";
 const n = null;
+const w = 'white';
+
+/** White-ember branding — matches the player ship palette. */
+const TIP = '#ffffff';
+const HIGHLIGHT = '#fff0e0';
+const BODY = '#ffd0a8';
+const WING = '#e87848';
+const EDGE = '#a84028';
+
+type Cell = string | null;
+
+/**
+ * Shade a filled glyph: hot white interior near the top of the source mask,
+ * ember outline, deeper red on the trailing edge. Applied before invertY/rotateRight.
+ */
+function shadeGlyph(mask: Cell[][]): Cell[][] {
+    const width = mask.length;
+    const height = mask[0].length;
+    const out: Cell[][] = mask.map((col) => col.slice());
+
+    for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
+            if (!mask[x][y]) continue;
+
+            const isEdge = !(mask[x - 1]?.[y] && mask[x + 1]?.[y] && mask[x][y - 1] && mask[x][y + 1]);
+            const t = height <= 1 ? 0 : y / (height - 1);
+
+            if (isEdge) {
+                out[x][y] = t > 0.65 ? EDGE : WING;
+            } else if (t < 0.3) {
+                out[x][y] = TIP;
+            } else if (t < 0.6) {
+                out[x][y] = HIGHLIGHT;
+            } else {
+                out[x][y] = BODY;
+            }
+        }
+    }
+
+    return out;
+}
+
+function letter(mask: Cell[][]): Sprite {
+    return new Sprite(shadeGlyph(mask)).invertY().rotateRight();
+}
 
 export default {
     meta: {
@@ -10,7 +54,7 @@ export default {
         lineHeight: 16,
         letterSpacing: -1
     },
-    P: new Sprite([
+    P: letter([
         [n, n, n, w, w, w, w, w, w, w, w, w, n, n],
         [n, n, n, n, n, w, w, w, n, n, w, w, w, n],
         [n, n, n, n, n, w, w, n, n, n, n, w, w, w],
@@ -26,8 +70,8 @@ export default {
         [n, n, w, w, n, n, n, n, n, n, n, n, n, n],
         [n, n, w, w, n, n, n, n, n, n, n, n, n, n],
         [w, w, w, w, w, w, n, n, n, n, n, n, n, n]
-    ]).invertY().rotateRight(),
-    H: new Sprite([
+    ]),
+    H: letter([
         [n, n, n, w, w, w, w, w, w, n, n, w, w, w, w, w, w],
         [n, n, n, n, n, w, w, n, n, n, n, n, n, w, w, n, n],
         [n, n, n, n, n, w, w, n, n, n, n, n, n, w, w, n, n],
@@ -43,8 +87,8 @@ export default {
         [n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n, n],
         [n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n, n],
         [w, w, w, w, w, w, n, n, w, w, w, w, w, w, n, n, n]
-    ]).invertY().rotateRight(),
-    O: new Sprite([
+    ]),
+    O: letter([
         [n, n, n, n, n, w, w, w, w, w, n, n],
         [n, n, n, n, w, w, w, n, w, w, w, n],
         [n, n, n, w, w, w, n, n, n, w, w, n],
@@ -60,8 +104,8 @@ export default {
         [n, w, w, n, n, n, n, w, w, n, n, n],
         [n, n, w, w, n, n, w, w, n, n, n, n],
         [n, n, n, w, w, w, w, n, n, n, n, n]
-    ]).invertY().rotateRight(),
-    E: new Sprite([
+    ]),
+    E: letter([
         [n, n, n, w, w, w, w, w, w, w, w, w, w, w],
         [n, n, n, n, n, w, w, n, n, n, n, n, n, w],
         [n, n, n, n, n, w, w, n, n, n, n, n, n, n],
@@ -77,8 +121,8 @@ export default {
         [n, n, w, w, n, n, n, n, n, n, n, n, n, n],
         [n, n, w, w, n, n, n, n, n, n, n, w, n, n],
         [w, w, w, w, w, w, w, w, w, w, w, w, n, n]
-    ]).invertY().rotateRight(),
-    N: new Sprite([
+    ]),
+    N: letter([
         [n, n, n, w, w, w, w, n, n, n, n, w, w, w, w, w, w],
         [n, n, n, n, n, w, w, n, n, n, n, n, n, w, w, n, n],
         [n, n, n, n, n, w, w, w, n, n, n, n, n, w, w, n, n],
@@ -94,8 +138,8 @@ export default {
         [n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n, n],
         [n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n, n],
         [w, w, w, w, w, w, n, n, n, n, w, w, w, w, n, n, n]
-    ]).invertY().rotateRight(),
-    I: new Sprite([
+    ]),
+    I: letter([
         [n, n, n, w, w, w, w, w, w],
         [n, n, n, n, n, w, w, n, n],
         [n, n, n, n, n, w, w, n, n],
@@ -111,8 +155,8 @@ export default {
         [n, n, w, w, n, n, n, n, n],
         [n, n, w, w, n, n, n, n, n],
         [w, w, w, w, w, w, n, n, n]
-    ]).invertY().rotateRight(),
-    X: new Sprite([
+    ]),
+    X: letter([
         [n, n, n, w, w, w, w, w, w, n, n, w, w, w, w, w, w],
         [n, n, n, n, n, w, w, n, n, n, n, n, n, w, w, n, n],
         [n, n, n, n, n, w, w, n, n, n, n, n, w, w, n, n, n],
@@ -128,5 +172,5 @@ export default {
         [n, n, n, w, w, n, n, n, n, n, w, w, n, n, n, n, n],
         [n, n, w, w, n, n, n, n, n, n, w, w, n, n, n, n, n],
         [w, w, w, w, w, w, n, n, w, w, w, w, w, w, n, n, n]
-    ]).invertY().rotateRight()
+    ])
 };
