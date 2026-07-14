@@ -3,6 +3,7 @@ import GameObject from '../models/game-object.js';
 import LevelGroup01 from './level-group-01.js';
 import LevelGroup02 from './level-group-02.js';
 import LevelGroup03 from './level-group-03.js';
+import LevelGroup04 from './level-group-04.js';
 import Shop from './shop.js';
 import type PlayerControlledShip from '../ships/player-controlled-ship.js';
 import type { GameForLevels } from '../types/levels.js';
@@ -92,6 +93,14 @@ export default class LevelManager extends GameObject {
             new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 3),
             new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 'boss'),
             this.shop,
+
+            // Dash and Pause Ship
+            new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+            new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 2),
+            new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 3),
+            new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 4),
+            new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 'boss'),
+            this.shop
         ];
         this.levelIndex = -1;
     }
