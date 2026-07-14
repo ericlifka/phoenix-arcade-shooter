@@ -590,7 +590,7 @@ void main() {
     } else if (n > max) {
       return max;
     } else {
-      return n;
+      return Math.round(n);
     }
   }
   function sample(collection, requestedCount) {
@@ -3183,17 +3183,20 @@ void main() {
     reset() {
       super.reset();
       this.sprite = arrowBossSprite().rotateRight();
-      this.orbitPathOffset = {
-        x: Math.floor((ENEMY_ORBIT_SPRITE_WIDTH - this.sprite.width) / 2),
-        y: Math.floor((ENEMY_ORBIT_SPRITE_HEIGHT - this.sprite.height) / 2)
-      };
       this.explosion = shipExplosion;
       this.guns = this.sprite.meta.guns;
+      this.orbitPathOffset = undefined;
       this.position = { x: 0, y: 0 };
       this.velocity = { x: 0, y: 0 };
       this.damage = 50 * this.difficultyMultiplier;
       this.life = 20 * this.difficultyMultiplier;
       this.maxLife = 20 * this.difficultyMultiplier;
+    }
+    enableOrbitPathAlignment() {
+      this.orbitPathOffset = {
+        x: Math.floor((ENEMY_ORBIT_SPRITE_WIDTH - this.sprite.width) / 2),
+        y: Math.floor((ENEMY_ORBIT_SPRITE_HEIGHT - this.sprite.height) / 2)
+      };
     }
     fire(gunIndex) {
       const gun = this.guns[gunIndex];
@@ -3745,13 +3748,13 @@ void main() {
       if (this.levelName) {
         this.scripts.push(new FadeoutBanner(this, this.levelName, 2000));
       }
-      this.ships.forEach(function(ship) {
+      this.ships.forEach((ship) => {
         this.addChild(ship);
-      }.bind(this));
-      this.scripts.forEach(function(script) {
+      });
+      this.scripts.forEach((script) => {
         script.start();
         this.addChild(script);
-      }.bind(this));
+      });
     }
     checkIfLevelComplete() {
       for (let i = 0;i < this.children.length; i++) {
@@ -3781,7 +3784,6 @@ void main() {
     }
     newBossShip() {
       const boss = new ArrowBoss(this, this.difficultyMultiplier);
-      window.boss = boss;
       const gameWidth = this.game.width;
       const bossWidth = boss.sprite.width;
       boss.position.x = -this.game.width / 2;
@@ -3799,7 +3801,7 @@ void main() {
         new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
         new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
       ]));
-      this.scripts.push(new WatchForDeath(this, boss, function() {
+      this.scripts.push(new WatchForDeath(this, boss, () => {
         const p = boss.position;
         this.addChild(new MoneyDrop(this, {
           x: p.x,
@@ -3813,18 +3815,18 @@ void main() {
           x: p.x + 4,
           y: p.y + 8
         }));
-      }.bind(this)));
+      }));
       this.ships.push(boss);
     }
     attachMoneyScripts() {
       const divisor = this.difficultyMultiplier > 4 ? 2 : 3;
       const count = Math.floor(this.ships.length / divisor);
       const selectedShips = sample(this.ships, count);
-      selectedShips.forEach(function(ship) {
-        this.scripts.push(new WatchForDeath(this, ship, function() {
+      selectedShips.forEach((ship) => {
+        this.scripts.push(new WatchForDeath(this, ship, () => {
           this.addChild(new MoneyDrop(this, ship.position));
-        }.bind(this)));
-      }.bind(this));
+        }));
+      });
     }
   }
 
@@ -4253,6 +4255,7 @@ void main() {
       const entryPoint = orbit === "left" ? { x: center.x - BOSS_ORBIT_RADIUS, y: center.y } : { x: center.x + BOSS_ORBIT_RADIUS, y: center.y };
       const startX = orbit === "left" ? -40 : this.game.width + 20;
       const boss = new ArrowBoss(this, this.difficultyMultiplier);
+      boss.enableOrbitPathAlignment();
       const offset = boss.orbitPathOffset;
       boss.position.x = startX + offset.x;
       boss.position.y = center.y + offset.y;
