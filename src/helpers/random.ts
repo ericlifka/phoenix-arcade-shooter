@@ -16,7 +16,7 @@ export function rangeCap(n: number, min: number, max: number): number {
         return max;
     }
     else {
-        return n;
+        return Math.round(n);
     }
 }
 

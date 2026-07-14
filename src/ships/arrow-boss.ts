@@ -20,8 +20,12 @@ export default class ArrowBoss extends GameObject {
     guns!: Position[];
     position!: Position;
     velocity!: { x: number; y: number };
-    /** Shifts logical position so the boss tracks the same orbit paths as standard enemies. */
-    orbitPathOffset!: Position;
+    /**
+     * Optional. When set (Group 03 orbits), MoveObjectToPoint / MoveObjectInCircle
+     * shift path targets so the larger boss footprint tracks smaller enemy routes.
+     * Leave unset for literal MoveObjectToPoint targets (e.g. Group 01 patrol).
+     */
+    orbitPathOffset?: Position;
 
     constructor(parent: GameObject | null | undefined, difficultyMultiplier: number) {
         super(parent);
@@ -33,12 +37,9 @@ export default class ArrowBoss extends GameObject {
         super.reset();
 
         this.sprite = shipSprite().rotateRight();
-        this.orbitPathOffset = {
-            x: Math.floor((ENEMY_ORBIT_SPRITE_WIDTH - this.sprite.width) / 2),
-            y: Math.floor((ENEMY_ORBIT_SPRITE_HEIGHT - this.sprite.height) / 2)
-        };
         this.explosion = shipExplosion;
         this.guns = this.sprite.meta.guns;
+        this.orbitPathOffset = undefined;
 
         this.position = { x: 0, y: 0 };
         this.velocity = { x: 0, y: 0 };
@@ -46,6 +47,14 @@ export default class ArrowBoss extends GameObject {
         this.damage = 50 * this.difficultyMultiplier;
         this.life = 20 * this.difficultyMultiplier;
         this.maxLife = 20 * this.difficultyMultiplier;
+    }
+
+    /** Align this boss with standard enemy orbit footprint (Group 03). */
+    enableOrbitPathAlignment(): void {
+        this.orbitPathOffset = {
+            x: Math.floor((ENEMY_ORBIT_SPRITE_WIDTH - this.sprite.width) / 2),
+            y: Math.floor((ENEMY_ORBIT_SPRITE_HEIGHT - this.sprite.height) / 2)
+        };
     }
 
     fire(gunIndex: number): void {

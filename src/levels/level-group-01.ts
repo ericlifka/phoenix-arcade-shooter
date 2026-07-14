@@ -87,14 +87,14 @@ export default class LevelGroup01 extends GameObject {
             this.scripts.push(new Banner(this, this.levelName, 2000));
         }
 
-        this.ships.forEach(function (this: LevelGroup01, ship: EnemyShip | BossShip) {
+        this.ships.forEach((ship: EnemyShip | BossShip) => {
             this.addChild(ship);
-        }.bind(this));
+        });
 
-        this.scripts.forEach(function (this: LevelGroup01, script: GameObject) {
+        this.scripts.forEach((script: GameObject) => {
             (script as GameObject & { start(): void }).start();
             this.addChild(script);
-        }.bind(this));
+        });
     }
 
     checkIfLevelComplete(): boolean {
@@ -131,7 +131,6 @@ export default class LevelGroup01 extends GameObject {
 
     newBossShip(): void {
         const boss = new BossShip(this, this.difficultyMultiplier);
-        (window as unknown as { boss: BossShip }).boss = boss;
         const gameWidth = this.game.width;
         const bossWidth = boss.sprite.width;
 
@@ -153,7 +152,7 @@ export default class LevelGroup01 extends GameObject {
             new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
             new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
         ]) as any);
-        this.scripts.push(new WatchForDeath(this, boss, function (this: LevelGroup01) {
+        this.scripts.push(new WatchForDeath(this, boss, () => {
             const p = boss.position!;
             this.addChild(new MoneyDrop(this, {
                 x: p.x,
@@ -167,7 +166,7 @@ export default class LevelGroup01 extends GameObject {
                 x: p.x + 4,
                 y: p.y + 8
             }));
-        }.bind(this)));
+        }));
 
         this.ships.push(boss);
     }
@@ -177,10 +176,10 @@ export default class LevelGroup01 extends GameObject {
         const count = Math.floor(this.ships.length / divisor);
         const selectedShips = sample(this.ships, count);
 
-        selectedShips.forEach(function (this: LevelGroup01, ship: EnemyShip | BossShip) {
-            this.scripts.push(new WatchForDeath(this, ship, function (this: LevelGroup01) {
+        selectedShips.forEach((ship: EnemyShip | BossShip) => {
+            this.scripts.push(new WatchForDeath(this, ship, () => {
                 this.addChild(new MoneyDrop(this, ship.position!));
-            }.bind(this)));
-        }.bind(this));
+            }));
+        });
     }
 }

@@ -303,7 +303,8 @@ export default class LevelGroup03 extends GameObject {
         const startX = orbit === 'left' ? -40 : this.game.width + 20;
 
         const boss = new BossShip(this, this.difficultyMultiplier);
-        const offset = boss.orbitPathOffset;
+        boss.enableOrbitPathAlignment();
+        const offset = boss.orbitPathOffset!;
         boss.position!.x = startX + offset.x;
         boss.position!.y = center.y + offset.y;
 
