@@ -1,8 +1,8 @@
 /** Default options for firing / dash-movement scripts (overridable per level). */
 
 export const randomRateFire = {
-    thresholdMinMs: 1000,
-    thresholdMaxMs: 3000,
+    thresholdMinMs: 500,
+    thresholdMaxMs: 3500,
     initialDelayMs: 0
 };
 

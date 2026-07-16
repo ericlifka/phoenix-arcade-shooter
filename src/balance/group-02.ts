@@ -24,7 +24,7 @@ export const group02 = {
     laneMax: 8,
 
     /** Extra seconds after stagger before first shot: (delay + fireDelayPadding) * 1000. */
-    fireDelayPaddingSeconds: 1.5
+    fireDelayPaddingSeconds: -3
 };
 
 export function group02ShipCount(rowCount: number): number {

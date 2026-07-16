@@ -136,11 +136,11 @@ export default class LevelGroup02 extends GameObject {
         const fireDelayMs = (delaySeconds + group02.fireDelayPaddingSeconds) * 1000;
         this.scripts.push(new FireSingleGunRandomRate(this, boss, {
             gunIndex: 0,
-            initialDelayMs: fireDelayMs
+            initialDelayMs: 0
         }));
         this.scripts.push(new FireSingleGunRandomRate(this, boss, {
             gunIndex: 2,
-            initialDelayMs: fireDelayMs
+            initialDelayMs: 0
         }));
         this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
         this.scripts.push(buildSerpentineScripts(this, boss, destinations, group02.pathSpeed, delaySeconds));
