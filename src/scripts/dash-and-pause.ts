@@ -1,5 +1,6 @@
 import GameObject from '../models/game-object.js';
 import { integer } from '../helpers/random.js';
+import { dashAndPause as dashAndPauseDefaults } from '../balance/fire.js';
 import { Position } from '../types/rendering';
 import type { DashPhase } from '../ships/dash-ship.js';
 
@@ -65,14 +66,14 @@ export default class DashAndPause extends GameObject {
         super(parent);
         this.ship = ship;
         this.bounds = options.bounds;
-        this.dashSpeed = options.dashSpeed ?? 120;
-        this.pauseSecondsMin = options.pauseSecondsMin ?? 0.8;
-        this.pauseSecondsMax = options.pauseSecondsMax ?? 1.6;
-        this.telegraphSeconds = options.telegraphSeconds ?? 0.38;
-        this.maxDashDistance = options.maxDashDistance ?? 70;
-        this.minDashDistance = options.minDashDistance ?? 25;
-        this.initialWaitSecondsMin = options.initialWaitSecondsMin ?? 1;
-        this.initialWaitSecondsMax = options.initialWaitSecondsMax ?? 10;
+        this.dashSpeed = options.dashSpeed ?? dashAndPauseDefaults.dashSpeed;
+        this.pauseSecondsMin = options.pauseSecondsMin ?? dashAndPauseDefaults.pauseSecondsMin;
+        this.pauseSecondsMax = options.pauseSecondsMax ?? dashAndPauseDefaults.pauseSecondsMax;
+        this.telegraphSeconds = options.telegraphSeconds ?? dashAndPauseDefaults.telegraphSeconds;
+        this.maxDashDistance = options.maxDashDistance ?? dashAndPauseDefaults.maxDashDistance;
+        this.minDashDistance = options.minDashDistance ?? dashAndPauseDefaults.minDashDistance;
+        this.initialWaitSecondsMin = options.initialWaitSecondsMin ?? dashAndPauseDefaults.initialWaitSecondsMin;
+        this.initialWaitSecondsMax = options.initialWaitSecondsMax ?? dashAndPauseDefaults.initialWaitSecondsMax;
     }
 
     start(): void {

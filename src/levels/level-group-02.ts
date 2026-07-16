@@ -9,6 +9,8 @@ import MoneyDrop from '../components/money-drop.js';
 import MoveObjectToPoint from '../scripts/move-object-to-point.js';
 import ScriptChain from '../models/script-chain.js';
 import Wait from '../scripts/wait.js';
+import { bossMoneyPositions, moneyDropCount } from '../balance/economy.js';
+import { group02, group02LaneCount, group02ShipCount } from '../balance/group-02.js';
 import { sample } from '../helpers/random.js';
 import WatchForDeath from '../scripts/watch-for-death.js';
 import type { GameForLevels } from '../types/levels.js';
@@ -16,33 +18,9 @@ import type { Position } from '../types/rendering';
 
 type EnemyShipLike = EnemyShip | BossShip;
 
-/** Left edge — upward return channel (`^`). */
-const PATH_LEFT = 4;
-/** Left edge of middle horizontal runs (leaves room for the return channel). */
-const PATH_INNER = 20;
-/** Right turnaround edge (`V`). */
-const PATH_RIGHT = 182;
-/** Top lane Y of the serpentine. */
-const PATH_TOP = 4;
-/** Vertical distance between horizontal lanes. */
-const LANE_GAP = 14;
-/** Pixels per second along the path. */
-const PATH_SPEED = 40;
-const ENTER_X = -24;
-const STAGGER_SECONDS = 0.45;
-
 /**
  * Level group 02 — a long line of enemies enters from the left and follows an
- * infinite serpentine path:
- *
- *   X>>>>>>>>>>>>V
- *   ^  V<<<<<<<<<<<
- *   ^  >>>>>>>>>>>V
- *   ^  V<<<<<<<<<<<
- *   ^  >>>>>>>>>>>V
- *   ^<<<<<<<<<<<<<
- *
- * rowCount grows the parade (more ships) and adds more horizontal lanes.
+ * infinite serpentine path. Tunables live in src/balance/group-02.ts.
  */
 export default class LevelGroup02 extends GameObject {
     alternateShip: boolean;
@@ -91,12 +69,11 @@ export default class LevelGroup02 extends GameObject {
         const shipCount = this.spawnParade();
 
         if (this.boss) {
-            // One stagger after the last parade ship so the boss is the tail of the line.
-            this.spawnBoss(shipCount * STAGGER_SECONDS);
+            this.spawnBoss(shipCount * group02.staggerSeconds);
         }
 
         if (this.levelName) {
-            this.scripts.push(new Banner(this, this.levelName, 2000));
+            this.scripts.push(new Banner(this, this.levelName, group02.bannerMs));
         }
 
         this.ships.forEach((ship) => this.addChild(ship));
@@ -121,10 +98,10 @@ export default class LevelGroup02 extends GameObject {
     private spawnParade(): number {
         const laneYs = this.laneYs();
         const destinations = serpentineDestinations(laneYs);
-        const shipCount = 8 * (this.rowCount + 1); // counts: 16 -> 24 -> 32 -> 40
+        const shipCount = group02ShipCount(this.rowCount);
 
         for (let i = 0; i < shipCount; i++) {
-            this.spawnShip(i * STAGGER_SECONDS, destinations, PATH_SPEED);
+            this.spawnShip(i * group02.staggerSeconds, destinations, group02.pathSpeed);
         }
 
         this.attachMoneyScripts();
@@ -133,11 +110,11 @@ export default class LevelGroup02 extends GameObject {
 
     private spawnShip(delaySeconds: number, destinations: Position[], speed: number): void {
         const ship = new EnemyShip(this, this.difficultyMultiplier, this.alternateShip);
-        ship.position!.x = ENTER_X;
+        ship.position!.x = group02.enterX;
         ship.position!.y = destinations[0].y;
 
         this.scripts.push(new FireSingleGunRandomRate(this, ship, {
-            initialDelayMs: (delaySeconds + 1.5) * 1000
+            initialDelayMs: (delaySeconds + group02.fireDelayPaddingSeconds) * 1000
         }));
         this.scripts.push(buildSerpentineScripts(this, ship, destinations, speed, delaySeconds));
         this.ships.push(ship);
@@ -146,7 +123,7 @@ export default class LevelGroup02 extends GameObject {
     private spawnBoss(delaySeconds: number): void {
         const destinations = serpentineDestinations(this.laneYs());
         const boss = new BossShip(this, this.difficultyMultiplier);
-        boss.position!.x = ENTER_X;
+        boss.position!.x = group02.enterX;
         boss.position!.y = destinations[0].y;
 
         boss.addChild(new LifeMeter(boss, {
@@ -156,40 +133,38 @@ export default class LevelGroup02 extends GameObject {
             horizontal: true
         }));
 
+        const fireDelayMs = (delaySeconds + group02.fireDelayPaddingSeconds) * 1000;
         this.scripts.push(new FireSingleGunRandomRate(this, boss, {
             gunIndex: 0,
-            initialDelayMs: (delaySeconds + 1.5) * 1000
+            initialDelayMs: fireDelayMs
         }));
         this.scripts.push(new FireSingleGunRandomRate(this, boss, {
             gunIndex: 2,
-            initialDelayMs: (delaySeconds + 1.5) * 1000
+            initialDelayMs: fireDelayMs
         }));
         this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
-        this.scripts.push(buildSerpentineScripts(this, boss, destinations, PATH_SPEED, delaySeconds));
+        this.scripts.push(buildSerpentineScripts(this, boss, destinations, group02.pathSpeed, delaySeconds));
 
         this.scripts.push(new WatchForDeath(this, boss, () => {
-            const p = boss.position!;
-            this.addChild(new MoneyDrop(this, { x: p.x, y: p.y }));
-            this.addChild(new MoneyDrop(this, { x: p.x + 7, y: p.y }));
-            this.addChild(new MoneyDrop(this, { x: p.x + 4, y: p.y + 8 }));
+            bossMoneyPositions(boss.position!).forEach((pos) => {
+                this.addChild(new MoneyDrop(this, pos));
+            });
         }));
 
         this.ships.push(boss);
     }
 
     private laneYs(): number[] {
-        // Even lane counts so the bottom run is always leftward into the return channel.
-        const laneCount = Math.min(2 + this.rowCount * 2, 8);
+        const laneCount = group02LaneCount(this.rowCount);
         const lanes: number[] = [];
         for (let i = 0; i < laneCount; i++) {
-            lanes.push(PATH_TOP + i * LANE_GAP);
+            lanes.push(group02.pathTop + i * group02.laneGap);
         }
         return lanes;
     }
 
     private attachMoneyScripts(): void {
-        const divisor = this.difficultyMultiplier > 4 ? 2 : 3;
-        const count = Math.floor(this.ships.length / divisor);
+        const count = moneyDropCount(this.ships.length, this.difficultyMultiplier);
         const selectedShips = sample(this.ships, count);
 
         selectedShips.forEach((ship) => {
@@ -201,12 +176,8 @@ export default class LevelGroup02 extends GameObject {
     }
 }
 
-/**
- * Destinations for one full serpentine lap, ending with the climb back to the top-left
- * so a repeating ScriptChain loops forever.
- */
 function serpentineDestinations(laneYs: number[]): Position[] {
-    const points: Position[] = [{ x: PATH_LEFT, y: laneYs[0] }];
+    const points: Position[] = [{ x: group02.pathLeft, y: laneYs[0] }];
 
     for (let i = 0; i < laneYs.length; i++) {
         const y = laneYs[i];
@@ -214,12 +185,12 @@ function serpentineDestinations(laneYs: number[]): Position[] {
         const isLast = i === laneYs.length - 1;
 
         if (goingRight) {
-            points.push({ x: PATH_RIGHT, y });
+            points.push({ x: group02.pathRight, y });
             if (!isLast) {
-                points.push({ x: PATH_RIGHT, y: laneYs[i + 1] });
+                points.push({ x: group02.pathRight, y: laneYs[i + 1] });
             }
         } else {
-            const leftTarget = isLast ? PATH_LEFT : PATH_INNER;
+            const leftTarget = isLast ? group02.pathLeft : group02.pathInner;
             points.push({ x: leftTarget, y });
             if (!isLast) {
                 points.push({ x: leftTarget, y: laneYs[i + 1] });
@@ -227,8 +198,7 @@ function serpentineDestinations(laneYs: number[]): Position[] {
         }
     }
 
-    // Climb the left return channel back to the top of the loop.
-    points.push({ x: PATH_LEFT, y: laneYs[0] });
+    points.push({ x: group02.pathLeft, y: laneYs[0] });
     return points;
 }
 
@@ -245,7 +215,6 @@ function buildSerpentineScripts(
     speed: number,
     delaySeconds: number
 ): ScriptChain {
-    // Enter from off-screen to the top-left path start, then loop the lap forever.
     const entry = destinations[0];
     const enterFrom = { x: ship.position!.x, y: ship.position!.y };
 

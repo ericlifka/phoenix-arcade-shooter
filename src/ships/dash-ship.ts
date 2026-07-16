@@ -2,6 +2,7 @@ import GameObject from '../models/game-object.js';
 import MuzzleFlash from '../components/muzzle-flash.js';
 import shipSprite from '../sprites/dash-ship.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
+import { dashScout } from '../balance/enemies.js';
 import { Position } from '../types/rendering';
 
 export type DashPhase = 'idle' | 'dash' | 'telegraph' | 'pause';
@@ -12,7 +13,7 @@ export type DashPhase = 'idle' | 'dash' | 'telegraph' | 'pause';
  */
 export default class DashShip extends GameObject {
     isPhysicalEntity = true;
-    BULLET_SPEED = 110;
+    BULLET_SPEED = dashScout.bulletSpeed;
     team = 1;
     index = 5;
 
@@ -43,8 +44,8 @@ export default class DashShip extends GameObject {
         this.position = { x: 0, y: 0 };
         this.velocity = { x: 0, y: 0 };
 
-        this.damage = 5 + this.difficultyMultiplier;
-        this.maxLife = this.difficultyMultiplier;
+        this.damage = dashScout.contactDamage(this.difficultyMultiplier);
+        this.maxLife = dashScout.life(this.difficultyMultiplier);
         this.life = this.maxLife;
     }
 
@@ -60,7 +61,7 @@ export default class DashShip extends GameObject {
             team: this.team,
             position,
             velocity,
-            damage: 4 + this.difficultyMultiplier
+            damage: dashScout.bulletDamage(this.difficultyMultiplier)
         });
         this.addChild(new MuzzleFlash(this, gun));
     }

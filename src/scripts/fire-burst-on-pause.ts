@@ -1,4 +1,5 @@
 import GameObject from '../models/game-object.js';
+import { burstOnPause } from '../balance/fire.js';
 import type { DashPhase } from '../ships/dash-ship.js';
 
 type ShipWithPhaseFire = GameObject & {
@@ -43,9 +44,9 @@ export default class FireBurstOnPause extends GameObject {
         const opts = options || {};
         this.ship = ship;
         this.gunIndex = opts.gunIndex ?? 0;
-        this.burstSize = opts.burstSize ?? 3;
-        this.fireRateMs = opts.fireRateMs ?? 120;
-        this.windupMs = opts.windupMs ?? 80;
+        this.burstSize = opts.burstSize ?? burstOnPause.burstSize;
+        this.fireRateMs = opts.fireRateMs ?? burstOnPause.fireRateMs;
+        this.windupMs = opts.windupMs ?? burstOnPause.windupMs;
     }
 
     start(): void {

@@ -10,6 +10,8 @@ import MoveObjectInCircle from '../scripts/move-object-in-circle.js';
 import MoveObjectToPoint from '../scripts/move-object-to-point.js';
 import ScriptChain from '../models/script-chain.js';
 import Wait from '../scripts/wait.js';
+import { bossMoneyPositions, moneyDropCount } from '../balance/economy.js';
+import { group03 } from '../balance/group-03.js';
 import { sample } from '../helpers/random.js';
 import WatchForDeath from '../scripts/watch-for-death.js';
 import type { GameForLevels } from '../types/levels.js';
@@ -17,52 +19,32 @@ import type { GameForLevels } from '../types/levels.js';
 type EnemyShipLike = EnemyShip | BossShip;
 type OrbitSide = 'left' | 'right';
 
-const CENTER_X = 100;
-const SPLIT_Y = 60;
-const LEFT_ORBIT = { x: 55, y: 60 };
-const RIGHT_ORBIT = { x: 145, y: 60 };
-const ORBIT_RADIUS = 45;
-/** Tighter ring used by outer-column ships (rowCount >= 2). */
-const INNER_ORBIT_RADIUS = 33;
-/** Innermost ring used by inner-column ships (rowCount >= 3). */
-const INNERMOST_ORBIT_RADIUS = 21;
-const STAGGER_SECONDS = 0.5;
-const DESCENT_SECONDS = 3;
-const PEEL_SECONDS = 2;
-const ORBIT_PERIOD_SECONDS = 8;
-const CENTER_PROCESSION_SHIP_COUNT = 16;
-const OUTER_PROCESSION_SHIP_COUNT = 8;
-const INNERMOST_PROCESSION_SHIP_COUNT = 8;
-const BOSS_ORBIT_RADIUS = 26;
-const BOSS_ENTER_SECONDS = 3;
-const BOSS_ORBIT_PERIOD_SECONDS = 5;
-
 function orbitCenter(orbit: OrbitSide): { x: number; y: number } {
-    return orbit === 'left' ? LEFT_ORBIT : RIGHT_ORBIT;
+    return orbit === 'left' ? group03.leftOrbit : group03.rightOrbit;
 }
 
 /** Center-column ships join on the inner side of the main ring (toward screen center). */
 function centerOrbitEntryPoint(orbit: OrbitSide): { x: number; y: number } {
     const center = orbitCenter(orbit);
     return orbit === 'left'
-        ? { x: center.x + ORBIT_RADIUS, y: center.y }
-        : { x: center.x - ORBIT_RADIUS, y: center.y };
+        ? { x: center.x + group03.orbitRadius, y: center.y }
+        : { x: center.x - group03.orbitRadius, y: center.y };
 }
 
 /** Outer-column ships join on the outer side of the middle ring (toward screen edge). */
 function outerOrbitEntryPoint(orbit: OrbitSide): { x: number; y: number } {
     const center = orbitCenter(orbit);
     return orbit === 'left'
-        ? { x: center.x - INNER_ORBIT_RADIUS, y: center.y }
-        : { x: center.x + INNER_ORBIT_RADIUS, y: center.y };
+        ? { x: center.x - group03.innerOrbitRadius, y: center.y }
+        : { x: center.x + group03.innerOrbitRadius, y: center.y };
 }
 
 /** Inner-column ships join on the inner side of the innermost ring (toward screen center). */
 function innermostOrbitEntryPoint(orbit: OrbitSide): { x: number; y: number } {
     const center = orbitCenter(orbit);
     return orbit === 'left'
-        ? { x: center.x + INNERMOST_ORBIT_RADIUS, y: center.y }
-        : { x: center.x - INNERMOST_ORBIT_RADIUS, y: center.y };
+        ? { x: center.x + group03.innermostOrbitRadius, y: center.y }
+        : { x: center.x - group03.innermostOrbitRadius, y: center.y };
 }
 
 /**
@@ -121,7 +103,7 @@ export default class LevelGroup03 extends GameObject {
         }
 
         if (this.levelName) {
-            this.scripts.push(new Banner(this, this.levelName, 2000));
+            this.scripts.push(new Banner(this, this.levelName, group03.bannerMs));
         }
 
         this.ships.forEach((ship) => this.addChild(ship));
@@ -144,7 +126,7 @@ export default class LevelGroup03 extends GameObject {
     }
 
     private spawnWave(): void {
-        for (let i = 0; i < CENTER_PROCESSION_SHIP_COUNT; i++) {
+        for (let i = 0; i < group03.centerProcessionShipCount; i++) {
             const orbit = i % 2 === 0 ? 'left' : 'right';
             this.spawnCenterProcessionShip(i, orbit);
         }
@@ -165,17 +147,17 @@ export default class LevelGroup03 extends GameObject {
     private spawnCenterProcessionShip(index: number, orbit: OrbitSide): void {
         const orbitCenterPoint = orbitCenter(orbit);
         const entryPoint = centerOrbitEntryPoint(orbit);
-        const staggerSeconds = index * STAGGER_SECONDS;
-        const pathSeconds = staggerSeconds + DESCENT_SECONDS;
-        const needsPeel = entryPoint.x !== CENTER_X || entryPoint.y !== SPLIT_Y;
+        const staggerSeconds = index * group03.staggerSeconds;
+        const pathSeconds = staggerSeconds + group03.descentSeconds;
+        const needsPeel = entryPoint.x !== group03.centerX || entryPoint.y !== group03.splitY;
 
         this.spawnProcessionShip({
-            descentX: CENTER_X,
+            descentX: group03.centerX,
             staggerSeconds,
-            fireDelayMs: (pathSeconds - 2) * 1000,
+            fireDelayMs: (pathSeconds - group03.fireDelaySlackSeconds) * 1000,
             entryPoint,
             orbitCenter: orbitCenterPoint,
-            orbitRadius: ORBIT_RADIUS,
+            orbitRadius: group03.orbitRadius,
             clockwise: orbit === 'left',
             needsPeel
         });
@@ -184,17 +166,17 @@ export default class LevelGroup03 extends GameObject {
     private spawnOuterProcession(orbit: OrbitSide): void {
         const columnX = outerOrbitEntryPoint(orbit).x;
 
-        for (let i = 0; i < OUTER_PROCESSION_SHIP_COUNT; i++) {
-            const staggerSeconds = i * 2 * STAGGER_SECONDS;
-            const pathSeconds = staggerSeconds + DESCENT_SECONDS + PEEL_SECONDS;
+        for (let i = 0; i < group03.outerProcessionShipCount; i++) {
+            const staggerSeconds = i * 2 * group03.staggerSeconds;
+            const pathSeconds = staggerSeconds + group03.descentSeconds + group03.peelSeconds;
 
             this.spawnProcessionShip({
                 descentX: columnX,
                 staggerSeconds,
-                fireDelayMs: (pathSeconds - 2) * 1000,
+                fireDelayMs: (pathSeconds - group03.fireDelaySlackSeconds) * 1000,
                 entryPoint: outerOrbitEntryPoint(orbit),
                 orbitCenter: orbitCenter(orbit),
-                orbitRadius: INNER_ORBIT_RADIUS,
+                orbitRadius: group03.innerOrbitRadius,
                 // Opposite direction from the main (outer) ring on each side
                 clockwise: orbit === 'right',
                 needsPeel: true
@@ -206,20 +188,20 @@ export default class LevelGroup03 extends GameObject {
         const entryPoint = innermostOrbitEntryPoint(orbit);
         const columnX = entryPoint.x;
 
-        for (let i = 0; i < INNERMOST_PROCESSION_SHIP_COUNT; i++) {
-            const staggerSeconds = i * 2 * STAGGER_SECONDS;
-            const pathSeconds = staggerSeconds + DESCENT_SECONDS;
+        for (let i = 0; i < group03.innermostProcessionShipCount; i++) {
+            const staggerSeconds = i * 2 * group03.staggerSeconds;
+            const pathSeconds = staggerSeconds + group03.descentSeconds;
 
             this.spawnProcessionShip({
                 descentX: columnX,
                 staggerSeconds,
-                fireDelayMs: (pathSeconds - 2) * 1000,
+                fireDelayMs: (pathSeconds - group03.fireDelaySlackSeconds) * 1000,
                 entryPoint,
                 orbitCenter: orbitCenter(orbit),
-                orbitRadius: INNERMOST_ORBIT_RADIUS,
+                orbitRadius: group03.innermostOrbitRadius,
                 // Same direction as the main (outer) ring on each side
                 clockwise: orbit === 'left',
-                needsPeel: entryPoint.x !== columnX || entryPoint.y !== SPLIT_Y
+                needsPeel: entryPoint.x !== columnX || entryPoint.y !== group03.splitY
             });
         }
     }
@@ -273,17 +255,17 @@ export default class LevelGroup03 extends GameObject {
         }
 
         steps.push(
-            new MoveObjectToPoint(null, ship, { x: descentX, y: SPLIT_Y }, DESCENT_SECONDS)
+            new MoveObjectToPoint(null, ship, { x: descentX, y: group03.splitY }, group03.descentSeconds)
         );
 
         if (needsPeel) {
-            steps.push(new MoveObjectToPoint(null, ship, entryPoint, PEEL_SECONDS));
+            steps.push(new MoveObjectToPoint(null, ship, entryPoint, group03.peelSeconds));
         }
 
         steps.push(new MoveObjectInCircle(null, ship, {
             center: orbitCenterPoint,
             radius: orbitRadius,
-            period: ORBIT_PERIOD_SECONDS,
+            period: group03.orbitPeriodSeconds,
             clockwise
         }));
 
@@ -298,8 +280,8 @@ export default class LevelGroup03 extends GameObject {
     private spawnOrbitingBoss(orbit: OrbitSide): void {
         const center = orbitCenter(orbit);
         const entryPoint = orbit === 'left'
-            ? { x: center.x - BOSS_ORBIT_RADIUS, y: center.y }
-            : { x: center.x + BOSS_ORBIT_RADIUS, y: center.y };
+            ? { x: center.x - group03.bossOrbitRadius, y: center.y }
+            : { x: center.x + group03.bossOrbitRadius, y: center.y };
         const startX = orbit === 'left' ? -40 : this.game.width + 20;
 
         const boss = new BossShip(this, this.difficultyMultiplier);
@@ -326,29 +308,27 @@ export default class LevelGroup03 extends GameObject {
         this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
 
         this.scripts.push(new ScriptChain(this, false, [
-            new MoveObjectToPoint(null, boss, entryPoint, BOSS_ENTER_SECONDS),
+            new MoveObjectToPoint(null, boss, entryPoint, group03.bossEnterSeconds),
             new MoveObjectInCircle(null, boss, {
                 center,
-                radius: BOSS_ORBIT_RADIUS,
-                period: BOSS_ORBIT_PERIOD_SECONDS,
+                radius: group03.bossOrbitRadius,
+                period: group03.bossOrbitPeriodSeconds,
                 // Opposite direction from the main enemy ring on each side
                 clockwise: orbit === 'right'
             })
         ]) as any);
 
         this.scripts.push(new WatchForDeath(this, boss, () => {
-            const p = boss.position!;
-            this.addChild(new MoneyDrop(this, { x: p.x, y: p.y }));
-            this.addChild(new MoneyDrop(this, { x: p.x + 7, y: p.y }));
-            this.addChild(new MoneyDrop(this, { x: p.x + 4, y: p.y + 8 }));
+            bossMoneyPositions(boss.position!).forEach((pos) => {
+                this.addChild(new MoneyDrop(this, pos));
+            });
         }));
 
         this.ships.push(boss);
     }
 
     private attachMoneyScripts(): void {
-        const divisor = this.difficultyMultiplier > 4 ? 2 : 3;
-        const count = Math.floor(this.ships.length / divisor);
+        const count = moneyDropCount(this.ships.length, this.difficultyMultiplier);
         const selectedShips = sample(this.ships, count);
 
         selectedShips.forEach((ship) => {

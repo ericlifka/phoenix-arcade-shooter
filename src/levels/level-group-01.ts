@@ -8,6 +8,8 @@ import LifeMeter from '../components/life-meter.js';
 import MoneyDrop from '../components/money-drop.js';
 import MoveObjectToPoint from '../scripts/move-object-to-point.js';
 import ScriptChain from '../models/script-chain.js';
+import { bossMoneyPositions, moneyDropCount } from '../balance/economy.js';
+import { group01, group01ColumnRange } from '../balance/group-01.js';
 import { sample } from '../helpers/random.js';
 import WatchForDeath from '../scripts/watch-for-death.js';
 import type { GameForLevels } from '../types/levels.js';
@@ -56,24 +58,24 @@ export default class LevelGroup01 extends GameObject {
         this.ships = [];
         this.scripts = [];
 
-        let start = 4 - this.difficultyMultiplier;
-        start = start < 1 ? 1 : start;
-        let end = 7 + this.difficultyMultiplier;
-        end = end > 10 ? 10 : end;
+        const { start, end } = group01ColumnRange(this.difficultyMultiplier);
+        const time = group01.moveTimeSeconds;
 
         for (let i = start; i <= end; i++) {
-            this.newShip(10 * i + 39, -40, 45, 3);
+            const x = group01.columnSpacing * i + group01.columnOffsetX;
+
+            this.newShip(x, group01.enterY[0], group01.restY[0], time);
 
             if (this.rowCount >= 2) {
-                this.newShip(10 * i + 39, -30, 55, 3);
+                this.newShip(x, group01.enterY[1], group01.restY[1], time);
             }
 
             if (this.rowCount >= 3) {
-                this.newShip(10 * i + 39, -20, 65, 3);
+                this.newShip(x, group01.enterY[2], group01.restY[2], time);
             }
 
             if (this.rowCount >= 4) {
-                this.newShip(10 * i + 39, -10, 75, 3);
+                this.newShip(x, group01.enterY[3], group01.restY[3], time);
             }
         }
 
@@ -84,7 +86,7 @@ export default class LevelGroup01 extends GameObject {
         }
 
         if (this.levelName) {
-            this.scripts.push(new Banner(this, this.levelName, 2000));
+            this.scripts.push(new Banner(this, this.levelName, group01.bannerMs));
         }
 
         this.ships.forEach((ship: EnemyShip | BossShip) => {
@@ -110,6 +112,8 @@ export default class LevelGroup01 extends GameObject {
 
     newShip(startX: number, startY: number, endY: number, time: number): void {
         const ship = new EnemyShip(this, this.difficultyMultiplier, this.alternateShip);
+        const swayX = group01.swayOffsetX;
+        const swayY = group01.swayOffsetY;
 
         ship.position!.x = startX;
         ship.position!.y = startY;
@@ -117,12 +121,12 @@ export default class LevelGroup01 extends GameObject {
         this.scripts.push(new FireSingleGunRandomRate(this, ship));
         this.scripts.push(new ScriptChain(this, false, [
             new MoveObjectToPoint(null, ship, { x: startX, y: endY }, time * 2),
-            new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time),
+            new MoveObjectToPoint(null, ship, { x: startX - swayX, y: endY }, time),
             new ScriptChain(this, true, [
-                new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY - 30 }, time),
-                new MoveObjectToPoint(null, ship, { x: startX + 40, y: endY - 30 }, time * 2),
-                new MoveObjectToPoint(null, ship, { x: startX + 40, y: endY }, time),
-                new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time * 2)
+                new MoveObjectToPoint(null, ship, { x: startX - swayX, y: endY - swayY }, time),
+                new MoveObjectToPoint(null, ship, { x: startX + swayX, y: endY - swayY }, time * 2),
+                new MoveObjectToPoint(null, ship, { x: startX + swayX, y: endY }, time),
+                new MoveObjectToPoint(null, ship, { x: startX - swayX, y: endY }, time * 2)
             ]) as any
         ]) as any);
 
@@ -133,9 +137,11 @@ export default class LevelGroup01 extends GameObject {
         const boss = new BossShip(this, this.difficultyMultiplier);
         const gameWidth = this.game.width;
         const bossWidth = boss.sprite.width;
+        const patrolY = group01.bossPatrolY;
+        const patrolSeconds = group01.bossPatrolSeconds;
 
         boss.position!.x = -this.game.width / 2;
-        boss.position!.y = 1;
+        boss.position!.y = patrolY;
 
         boss.addChild(new LifeMeter(boss, {
             position: { x: 0, y: 0 },
@@ -149,31 +155,23 @@ export default class LevelGroup01 extends GameObject {
         this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
 
         this.scripts.push(new ScriptChain(this, true, [
-            new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
-            new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
+            new MoveObjectToPoint(null, boss, { x: group01.bossPatrolLeftX, y: patrolY }, patrolSeconds),
+            new MoveObjectToPoint(null, boss, {
+                x: gameWidth - bossWidth - group01.bossPatrolRightMargin,
+                y: patrolY
+            }, patrolSeconds)
         ]) as any);
         this.scripts.push(new WatchForDeath(this, boss, () => {
-            const p = boss.position!;
-            this.addChild(new MoneyDrop(this, {
-                x: p.x,
-                y: p.y
-            }));
-            this.addChild(new MoneyDrop(this, {
-                x: p.x + 7,
-                y: p.y
-            }));
-            this.addChild(new MoneyDrop(this, {
-                x: p.x + 4,
-                y: p.y + 8
-            }));
+            bossMoneyPositions(boss.position!).forEach((pos) => {
+                this.addChild(new MoneyDrop(this, pos));
+            });
         }));
 
         this.ships.push(boss);
     }
 
-    attachMoneyScripts(): void {
-        const divisor = this.difficultyMultiplier > 4 ? 2 : 3;
-        const count = Math.floor(this.ships.length / divisor);
+    private attachMoneyScripts(): void {
+        const count = moneyDropCount(this.ships.length, this.difficultyMultiplier);
         const selectedShips = sample(this.ships, count);
 
         selectedShips.forEach((ship: EnemyShip | BossShip) => {

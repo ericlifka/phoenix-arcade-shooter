@@ -2,6 +2,7 @@ import GameObject from '../models/game-object.js';
 import shipSprite from '../sprites/arrow-boss.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
 import MuzzleFlash from '../components/muzzle-flash.js';
+import { arrowBoss } from '../balance/enemies.js';
 import { Position } from '../types/rendering';
 
 /** Standard arrow-ship footprint after rotateRight(); aligns boss path with enemy orbits. */
@@ -10,7 +11,7 @@ const ENEMY_ORBIT_SPRITE_HEIGHT = 7;
 
 export default class ArrowBoss extends GameObject {
     isPhysicalEntity = true;
-    BULLET_SPEED = 120;
+    BULLET_SPEED = arrowBoss.bulletSpeed;
     team = 1;
     index = 5;
 
@@ -44,9 +45,9 @@ export default class ArrowBoss extends GameObject {
         this.position = { x: 0, y: 0 };
         this.velocity = { x: 0, y: 0 };
 
-        this.damage = 50 * this.difficultyMultiplier;
-        this.life = 20 * this.difficultyMultiplier;
-        this.maxLife = 20 * this.difficultyMultiplier;
+        this.damage = arrowBoss.contactDamage(this.difficultyMultiplier);
+        this.life = arrowBoss.life(this.difficultyMultiplier);
+        this.maxLife = this.life;
     }
 
     /** Align this boss with standard enemy orbit footprint (Group 03). */
@@ -70,7 +71,7 @@ export default class ArrowBoss extends GameObject {
             team: this.team,
             position: position,
             velocity: velocity,
-            damage: 4 + this.difficultyMultiplier
+            damage: arrowBoss.bulletDamage(this.difficultyMultiplier)
         });
         this.addChild(new MuzzleFlash(this, gun));
     }

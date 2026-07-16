@@ -2,6 +2,7 @@ import GameObject from '../models/game-object.js';
 import MuzzleFlash from '../components/muzzle-flash.js';
 import shipSprite from '../sprites/dash-boss.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
+import { dashBoss } from '../balance/enemies.js';
 import { Position } from '../types/rendering';
 import type { DashPhase } from './dash-ship.js';
 
@@ -10,7 +11,7 @@ import type { DashPhase } from './dash-ship.js';
  */
 export default class DashBoss extends GameObject {
     isPhysicalEntity = true;
-    BULLET_SPEED = 130;
+    BULLET_SPEED = dashBoss.bulletSpeed;
     team = 1;
     index = 5;
 
@@ -39,9 +40,9 @@ export default class DashBoss extends GameObject {
         this.position = { x: 0, y: 0 };
         this.velocity = { x: 0, y: 0 };
 
-        this.damage = 40 * this.difficultyMultiplier;
-        this.life = 18 * this.difficultyMultiplier;
-        this.maxLife = 18 * this.difficultyMultiplier;
+        this.damage = dashBoss.contactDamage(this.difficultyMultiplier);
+        this.life = dashBoss.life(this.difficultyMultiplier);
+        this.maxLife = this.life;
     }
 
     fire(gunIndex = 0): void {
@@ -58,7 +59,7 @@ export default class DashBoss extends GameObject {
             team: this.team,
             position,
             velocity,
-            damage: 5 + this.difficultyMultiplier
+            damage: dashBoss.bulletDamage(this.difficultyMultiplier)
         });
         this.addChild(new MuzzleFlash(this, gun));
     }

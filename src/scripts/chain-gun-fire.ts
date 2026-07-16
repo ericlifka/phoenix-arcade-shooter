@@ -1,5 +1,6 @@
 import GameObject from '../models/game-object.js';
 import { integer } from '../helpers/random.js';
+import { chainGunFire } from '../balance/fire.js';
 
 type ShipWithFire = GameObject & {
     fire(gunIndex?: number): void;
@@ -31,10 +32,10 @@ export default class ChainGunFire extends GameObject {
 
         this.ship = ship;
         this.gunIndex = opts.gunIndex ?? 0;
-        this.fireRate = opts.fireRate ?? 150;
-        this.burstSize = opts.burstSize ?? 5;
-        this.thresholdMin = opts.thresholdMin ?? 2000;
-        this.thresholdMax = opts.thresholdMax ?? 6000;
+        this.fireRate = opts.fireRate ?? chainGunFire.fireRateMs;
+        this.burstSize = opts.burstSize ?? chainGunFire.burstSize;
+        this.thresholdMin = opts.thresholdMin ?? chainGunFire.thresholdMinMs;
+        this.thresholdMax = opts.thresholdMax ?? chainGunFire.thresholdMaxMs;
 
         this.reset();
     }

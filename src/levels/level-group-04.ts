@@ -6,6 +6,8 @@ import FireBurstOnPause from '../scripts/fire-burst-on-pause.js';
 import GameObject from '../models/game-object.js';
 import LifeMeter from '../components/life-meter.js';
 import MoneyDrop from '../components/money-drop.js';
+import { bossMoneyPositions, moneyDropCount } from '../balance/economy.js';
+import { group04, group04ShipCount } from '../balance/group-04.js';
 import { integer, sample } from '../helpers/random.js';
 import WatchForDeath from '../scripts/watch-for-death.js';
 import type { GameForLevels } from '../types/levels.js';
@@ -13,16 +15,8 @@ import type { GameForLevels } from '../types/levels.js';
 type DashShipLike = DashShip | DashBoss;
 
 /**
- * Level group 04 — Dash-and-pause scouts.
- *
- * Plan (v0 scaffold):
- * - Ships enter staggered onto the mid-field and loop DashAndPause forever.
- * - During each pause they fire a short burst (FireBurstOnPause).
- * - rowCount increases ship count / density (tune later).
- * - Boss stage: same movement model, tougher DashBoss with multi-gun bursts + life meter.
- *
- * Distinct from groups 1–3: no fixed ScriptChain path — movement is procedural
- * (random waypoints within bounds), with telegraphable pause windows for the player.
+ * Level group 04 — dash-and-pause scouts.
+ * Tunables live in src/balance/group-04.ts.
  */
 export default class LevelGroup04 extends GameObject {
     difficultyMultiplier: number;
@@ -73,7 +67,7 @@ export default class LevelGroup04 extends GameObject {
         }
 
         if (this.levelName) {
-            this.scripts.push(new Banner(this, this.levelName, 2000));
+            this.scripts.push(new Banner(this, this.levelName, group04.bannerMs));
         }
 
         this.ships.forEach((ship) => this.addChild(ship));
@@ -95,44 +89,49 @@ export default class LevelGroup04 extends GameObject {
 
     private playBounds() {
         return {
-            left: 8,
-            right: this.game.width - 8,
-            top: 12,
-            bottom: Math.floor(this.game.height * 0.55)
+            left: group04.boundsLeft,
+            right: this.game.width - group04.boundsRightInset,
+            top: group04.boundsTop,
+            bottom: Math.floor(this.game.height * group04.boundsBottomFraction)
         };
     }
 
-    /** Longer entry delay on the set opener so the player can finish flying in. */
     private entryWaitOptions(): { initialWaitSecondsMin: number; initialWaitSecondsMax: number } {
         if (this.levelName) {
-            return { initialWaitSecondsMin: 1, initialWaitSecondsMax: 10 };
+            return {
+                initialWaitSecondsMin: group04.entryWaitOpenerMin,
+                initialWaitSecondsMax: group04.entryWaitOpenerMax
+            };
         }
-        return { initialWaitSecondsMin: 0.5, initialWaitSecondsMax: 5 };
+        return {
+            initialWaitSecondsMin: group04.entryWaitFollowUpMin,
+            initialWaitSecondsMax: group04.entryWaitFollowUpMax
+        };
     }
 
     private spawnWave(): void {
-        const count = 4 + this.rowCount * 3;
+        const count = group04ShipCount(this.rowCount);
         const bounds = this.playBounds();
         const entryWait = this.entryWaitOptions();
+        const scout = group04.scout;
 
         for (let i = 0; i < count; i++) {
             const ship = new DashShip(this, this.difficultyMultiplier);
-            // Staggered start positions across the upper playfield
             ship.position.x = 20 + ((i * 37) % Math.max(1, bounds.right - 40));
             ship.position.y = -20 - (i % 5) * 12;
 
             this.scripts.push(new DashAndPause(this, ship, {
                 bounds,
-                dashSpeed: 130,
-                pauseSecondsMin: 0.55,
-                pauseSecondsMax: 1.2,
-                minDashDistance: 28,
-                maxDashDistance: 75,
+                dashSpeed: scout.dashSpeed,
+                pauseSecondsMin: scout.pauseSecondsMin,
+                pauseSecondsMax: scout.pauseSecondsMax,
+                minDashDistance: scout.minDashDistance,
+                maxDashDistance: scout.maxDashDistance,
                 ...entryWait
             }));
             this.scripts.push(new FireBurstOnPause(this, ship, {
-                burstSize: integer(1, this.rowCount + 3),
-                fireRateMs: 110
+                burstSize: integer(1, this.rowCount + scout.burstSizeRowBonus),
+                fireRateMs: scout.burstFireRateMs
             }));
 
             this.ships.push(ship);
@@ -144,9 +143,10 @@ export default class LevelGroup04 extends GameObject {
     private spawnBoss(): void {
         const bounds = this.playBounds();
         const entryWait = this.entryWaitOptions();
+        const bossTuning = group04.boss;
         const boss = new DashBoss(this, this.difficultyMultiplier);
         boss.position.x = Math.floor(this.game.width / 2) - 7;
-        boss.position.y = -30;
+        boss.position.y = bossTuning.spawnY;
 
         boss.addChild(new LifeMeter(boss, {
             position: { x: 0, y: 0 },
@@ -156,31 +156,33 @@ export default class LevelGroup04 extends GameObject {
         }));
 
         this.scripts.push(new DashAndPause(this, boss, {
-            bounds: { ...bounds, bottom: Math.floor(this.game.height * 0.45) },
-            dashSpeed: 95,
-            pauseSecondsMin: 0.8,
-            pauseSecondsMax: 1.6,
-            minDashDistance: 35,
-            maxDashDistance: 90,
+            bounds: {
+                ...bounds,
+                bottom: Math.floor(this.game.height * group04.bossBoundsBottomFraction)
+            },
+            dashSpeed: bossTuning.dashSpeed,
+            pauseSecondsMin: bossTuning.pauseSecondsMin,
+            pauseSecondsMax: bossTuning.pauseSecondsMax,
+            minDashDistance: bossTuning.minDashDistance,
+            maxDashDistance: bossTuning.maxDashDistance,
             ...entryWait
         }));
-        this.scripts.push(new FireBurstOnPause(this, boss, { gunIndex: 0, burstSize: 4, fireRateMs: 90 }));
-        this.scripts.push(new FireBurstOnPause(this, boss, { gunIndex: 1, burstSize: 5, fireRateMs: 70, windupMs: 40 }));
-        this.scripts.push(new FireBurstOnPause(this, boss, { gunIndex: 2, burstSize: 4, fireRateMs: 90 }));
+
+        for (const burst of bossTuning.bursts) {
+            this.scripts.push(new FireBurstOnPause(this, boss, { ...burst }));
+        }
 
         this.scripts.push(new WatchForDeath(this, boss, () => {
-            const p = boss.position;
-            this.addChild(new MoneyDrop(this, { x: p.x, y: p.y }));
-            this.addChild(new MoneyDrop(this, { x: p.x + 7, y: p.y }));
-            this.addChild(new MoneyDrop(this, { x: p.x + 4, y: p.y + 8 }));
+            bossMoneyPositions(boss.position).forEach((pos) => {
+                this.addChild(new MoneyDrop(this, pos));
+            });
         }));
 
         this.ships.push(boss);
     }
 
     private attachMoneyScripts(): void {
-        const divisor = this.difficultyMultiplier > 4 ? 2 : 3;
-        const count = Math.floor(this.ships.length / divisor);
+        const count = moneyDropCount(this.ships.length, this.difficultyMultiplier);
         if (count < 1) return;
 
         sample(this.ships, count).forEach((ship) => {

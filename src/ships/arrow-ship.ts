@@ -3,11 +3,12 @@ import MuzzleFlash from '../components/muzzle-flash.js';
 import shipSprite from '../sprites/arrow-ship.js';
 import daggerSprite from '../sprites/dagger-ship.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
+import { arrowScout } from '../balance/enemies.js';
 import { Position } from '../types/rendering';
 
 export default class ArrowShip extends GameObject {
     isPhysicalEntity = true;
-    BULLET_SPEED = 100;
+    BULLET_SPEED = arrowScout.bulletSpeed;
     team = 1;
     index = 5;
 
@@ -41,9 +42,9 @@ export default class ArrowShip extends GameObject {
         this.position = { x: 0, y: 0 };
         this.velocity = { x: 0, y: 0 };
 
-        this.damage = 4 + this.difficultyMultiplier;
-        this.maxLife = this.difficultyMultiplier;
-        this.life = this.difficultyMultiplier;
+        this.damage = arrowScout.contactDamage(this.difficultyMultiplier);
+        this.maxLife = arrowScout.life(this.difficultyMultiplier);
+        this.life = this.maxLife;
     }
 
     fire(): void {
@@ -57,7 +58,7 @@ export default class ArrowShip extends GameObject {
             team: this.team,
             position: position,
             velocity: velocity,
-            damage: 4 + this.difficultyMultiplier
+            damage: arrowScout.bulletDamage(this.difficultyMultiplier)
         });
         this.addChild(new MuzzleFlash(this, this.gun));
     }

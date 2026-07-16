@@ -1,5 +1,6 @@
 import GameObject from '../models/game-object.js';
 import { integer } from '../helpers/random.js';
+import { randomRateFire } from '../balance/fire.js';
 
 /** Ships that expose `fire` for scripted firing (e.g. boss multi-gun). */
 type ShipWithFire = GameObject & {
@@ -31,9 +32,9 @@ export default class FireSingleGunRandomRate extends GameObject {
 
         this.ship = ship;
         this.gunIndex = opts.gunIndex ?? 0;
-        this.thresholdMin = opts.thresholdMin ?? 1000;
-        this.thresholdMax = opts.thresholdMax ?? 3000;
-        this.initialDelayMs = opts.initialDelayMs ?? 0;
+        this.thresholdMin = opts.thresholdMin ?? randomRateFire.thresholdMinMs;
+        this.thresholdMax = opts.thresholdMax ?? randomRateFire.thresholdMaxMs;
+        this.initialDelayMs = opts.initialDelayMs ?? randomRateFire.initialDelayMs;
 
         this.reset();
     }

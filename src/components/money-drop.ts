@@ -1,5 +1,6 @@
 import GameObject from '../models/game-object.js';
 import ArcadeFont from '../rendering/fonts/arcade.js';
+import { MONEY_DROP_FALL_SPEED, MONEY_DROP_VALUE } from '../balance/economy.js';
 import { Position, Velocity } from '../types/rendering';
 
 /**
@@ -15,9 +16,11 @@ export default class MoneyDrop extends GameObject {
     constructor(parent: GameObject, position: Position, velocity?: Velocity) {
         super(parent);
 
-        this.value = 5;
+        this.value = MONEY_DROP_VALUE;
         this.position = { x: position.x, y: position.y };
-        this.velocity = velocity ? { x: velocity.x, y: velocity.y } : { x: 0, y: 50 };
+        this.velocity = velocity
+            ? { x: velocity.x, y: velocity.y }
+            : { x: 0, y: MONEY_DROP_FALL_SPEED };
         this.sprite = ArcadeFont['$'];
 
         this.reset();
