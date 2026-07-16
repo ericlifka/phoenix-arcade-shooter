@@ -48,9 +48,10 @@ function innermostOrbitEntryPoint(orbit: OrbitSide): { x: number; y: number } {
 }
 
 /**
- * Level group 03 — procession down the center line, then split into two orbits.
- * rowCount >= 2: outer columns + middle ring (opposite rotation from main).
- * rowCount >= 3: inner columns + innermost ring (same rotation as main).
+ * Level group 03 — dual orbits with concentric rings unlocking outward.
+ * rowCount 1: innermost ring only.
+ * rowCount >= 2: + middle ring (opposite rotation from outer).
+ * rowCount >= 3: + outermost ring via center-line procession.
  */
 export default class LevelGroup03 extends GameObject {
     alternateShip: boolean;
@@ -126,19 +127,22 @@ export default class LevelGroup03 extends GameObject {
     }
 
     private spawnWave(): void {
-        for (let i = 0; i < group03.centerProcessionShipCount; i++) {
-            const orbit = i % 2 === 0 ? 'left' : 'right';
-            this.spawnCenterProcessionShip(i, orbit);
-        }
+        // Tier 1+: innermost ring
+        this.spawnInnermostProcession('left');
+        this.spawnInnermostProcession('right');
 
+        // Tier 2+: middle ring
         if (this.rowCount >= 2) {
             this.spawnOuterProcession('left');
             this.spawnOuterProcession('right');
         }
 
+        // Tier 3+: outermost ring (center-line procession)
         if (this.rowCount >= 3) {
-            this.spawnInnermostProcession('left');
-            this.spawnInnermostProcession('right');
+            for (let i = 0; i < group03.centerProcessionShipCount; i++) {
+                const orbit = i % 2 === 0 ? 'left' : 'right';
+                this.spawnCenterProcessionShip(i, orbit);
+            }
         }
 
         this.attachMoneyScripts();

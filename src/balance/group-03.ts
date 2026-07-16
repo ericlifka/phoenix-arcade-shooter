@@ -21,9 +21,9 @@ export const group03 = {
     outerProcessionShipCount: 8,
     innermostProcessionShipCount: 8,
 
-    bossOrbitRadius: 26,
-    bossEnterSeconds: 3,
-    bossOrbitPeriodSeconds: 5,
+    bossOrbitRadius: 36,
+    bossEnterSeconds: 2,
+    bossOrbitPeriodSeconds: 6,
 
     /** First shot after (pathSeconds - fireDelaySlackSeconds) * 1000. */
     fireDelaySlackSeconds: 2
