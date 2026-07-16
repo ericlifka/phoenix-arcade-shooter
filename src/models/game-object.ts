@@ -63,11 +63,14 @@ export default class GameObject {
     }
 
     update(dtime: number): void {
-        this.children && this.children.forEach((child) => {
-            if (typeof child.update === "function") {
-                child.update(dtime);
+        if (this.children) {
+            // Snapshot so removeChild during update doesn't skip siblings.
+            for (const child of this.children.slice()) {
+                if (!child.destroyed && typeof child.update === "function") {
+                    child.update(dtime);
+                }
             }
-        });
+        }
 
         if (this.sprite) {
             this.sprite.update(dtime);
