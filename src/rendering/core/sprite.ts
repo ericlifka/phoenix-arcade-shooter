@@ -109,10 +109,31 @@ export default class Sprite extends CellGrid {
     }
 
     rotateRight(): this {
-        return this
-            .rotateLeft()
-            .rotateLeft()
-            .rotateLeft();
+        const width = this.width;
+        const height = this.height;
+        const oldCells = this.cells;
+        const newCells: typeof this.cells = [];
+        let x: number;
+        let y: number;
+
+        for (x = 0; x < height; x++) {
+            newCells[x] = [];
+        }
+
+        for (x = 0; x < width; x++) {
+            for (y = 0; y < height; y++) {
+                newCells[height - y - 1][x] = {
+                    x: height - y - 1,
+                    y: x,
+                    color: oldCells[x][y].color
+                };
+            }
+        }
+
+        this.width = height;
+        this.height = width;
+        this.cells = newCells;
+        return this;
     }
 
     invertX(): this {

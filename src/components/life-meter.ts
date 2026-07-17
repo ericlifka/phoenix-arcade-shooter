@@ -40,6 +40,12 @@ export default class LifeMeter extends GameObject {
         this.reset();
     }
 
+    reset(): void {
+        super.reset();
+        this.currentLife = undefined;
+        this.maxLife = undefined;
+    }
+
     update(): void {
         if (this.entity.destroyed) {
             this.destroy();

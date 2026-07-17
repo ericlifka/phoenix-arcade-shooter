@@ -130,6 +130,8 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         this.player.resetForNewRun();
         this.levelManager.reset();
 
+        this.lifeMeter.reset();
+
         this.addChild(this.bank);
         this.addChild(this.comboGauge);
         this.addChild(this.lifeMeter);

@@ -1,6 +1,6 @@
 import GameObject from '../models/game-object.js';
 import MuzzleFlash from '../components/muzzle-flash.js';
-import shipSprite from '../sprites/dash-ship.js';
+import { dashShipOrientations } from '../sprites/dash-ship.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
 import { dashScout } from '../balance/enemies.js';
 import { Position } from '../types/rendering';
@@ -25,6 +25,7 @@ export default class DashShip extends GameObject {
     position!: Position;
     velocity!: { x: number; y: number };
     phase: DashPhase = 'idle';
+    orientationIndex = 0;
 
     constructor(parent: GameObject | null | undefined, difficultyMultiplier: number) {
         super(parent);
@@ -35,10 +36,12 @@ export default class DashShip extends GameObject {
     reset(): void {
         super.reset();
 
-        this.sprite = shipSprite();
-        this.explosion = shipExplosion;
-        this.guns = this.sprite.meta.guns as Position[];
+        this.orientationIndex = 0;
+        const orientation = dashShipOrientations[0];
+        this.sprite = orientation.sprite;
+        this.guns = orientation.guns;
         this.gun = this.guns[0];
+        this.explosion = shipExplosion;
         this.phase = 'idle';
 
         this.position = { x: 0, y: 0 };
@@ -68,31 +71,25 @@ export default class DashShip extends GameObject {
 
     /** One 90° CCW turn, recentered so the telegraph spin stays visually locked. */
     spinQuarterLeft(): void {
-        const sw = this.sprite.width;
-        const sh = this.sprite.height;
-        const cx = this.position.x + sw / 2;
-        const cy = this.position.y + sh / 2;
-
-        this.guns = this.guns.map((g) => ({ x: g.y, y: sw - 1 - g.x }));
-        this.gun = this.guns[0];
-        this.sprite.meta.guns = this.guns;
-        this.sprite.rotateLeft();
-
-        this.position.x = cx - this.sprite.width / 2;
-        this.position.y = cy - this.sprite.height / 2;
+        this.applyOrientation((this.orientationIndex + 3) % 4);
     }
 
     /** One 90° CW turn, recentered so the telegraph spin stays visually locked. */
     spinQuarterRight(): void {
+        this.applyOrientation((this.orientationIndex + 1) % 4);
+    }
+
+    private applyOrientation(index: number): void {
         const sw = this.sprite.width;
         const sh = this.sprite.height;
         const cx = this.position.x + sw / 2;
         const cy = this.position.y + sh / 2;
 
-        this.guns = this.guns.map((g) => ({ x: sh - 1 - g.y, y: g.x }));
+        this.orientationIndex = index;
+        const orientation = dashShipOrientations[index];
+        this.sprite = orientation.sprite;
+        this.guns = orientation.guns;
         this.gun = this.guns[0];
-        this.sprite.meta.guns = this.guns;
-        this.sprite.rotateRight();
 
         this.position.x = cx - this.sprite.width / 2;
         this.position.y = cy - this.sprite.height / 2;
