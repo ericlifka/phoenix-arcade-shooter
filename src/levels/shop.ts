@@ -3,54 +3,45 @@ import Bullet from '../components/bullet.js';
 import EventedInput from '../models/evented-input.js';
 import GameObject from '../models/game-object.js';
 import TextDisplay from '../components/text-display.js';
-import { Position } from '../types/rendering';
 import type { GameForShop } from '../types/levels.js';
-import { MAX_GUN_TIER } from '../ships/player-controlled-ship.js';
-import { MAX_COMBO_SEGMENTS } from '../components/combo-gauge.js';
+import {
+    nextUpgradeCost,
+    shopTabs,
+    upgradesForTab,
+    type ShopTabId,
+    type ShopUpgradeDef,
+    type ShopUpgradeId
+} from '../balance/shop.js';
 
-const GUN_UPGRADE_NAMES = ['Double Guns', 'Triple Guns', 'Radial Guns'];
-const GUN_UPGRADE_BASE_COST = 500;
-const COMBO_UPGRADE_COSTS = [
-    25, 50, 100, 200, 400, 1000, 2000, 3500, 6000, 10000
-];
+const LIST_BASE_Y = 49;
+const LIST_ROW_STRIDE = 15;
+const LIST_LABEL_X = 90;
+const LIST_COST_X = 60;
+const LEAVE_LABEL_X = 60;
 
-interface ShopMenuLine {
-    message: string;
-    position: Position;
+interface ShopRow {
+    kind: 'upgrade' | 'leave';
+    upgrade?: ShopUpgradeDef;
     description?: TextDisplay;
     costText?: TextDisplay;
-    cost?: number;
+    /** Next purchase cost, or null when maxed / N/A. */
+    cost: number | null;
 }
 
 export default class Shop extends GameObject {
     isShop = true;
     index = 1;
-    headerDef = { message: 'Ship Upgrades', position: { x: 50, y: 10 } };
-    menuItems: {
-        health: ShopMenuLine;
-        rate: ShopMenuLine;
-        damage: ShopMenuLine;
-        guns: ShopMenuLine;
-        armor: ShopMenuLine;
-        combo: ShopMenuLine;
-        leave: ShopMenuLine;
-    } = {
-            health: { message: '+1 Ship Health', position: { x: 90, y: 50 } },
-            rate: { message: '10% faster Firing Rate', position: { x: 90, y: 65 } },
-            damage: { message: '+1 Bullet Damage', position: { x: 90, y: 80 } },
-            armor: { message: '+1 Armor', position: { x: 90, y: 95 } },
-            guns: { message: 'Double Guns', position: { x: 90, y: 110 } },
-            combo: { message: 'Extend Combo', position: { x: 90, y: 125 } },
-            leave: { message: 'Leave Shop', position: { x: 60, y: 140 } }
-        };
-    menuSelectorPositions = [49, 64, 79, 94, 109, 124, 139];
     disabledColor = '#777';
 
     game: GameForShop;
     bank: GameForShop['bank'];
     player: GameForShop['player'];
     input: EventedInput;
+
     titleText!: TextDisplay;
+    tabDisplays: TextDisplay[] = [];
+    activeTabIndex = 0;
+    rows: ShopRow[] = [];
     selectorShip!: GameObject;
     selectedMenuItem!: number;
     timeSinceSelected!: number;
@@ -67,10 +58,16 @@ export default class Shop extends GameObject {
         this.input = new EventedInput({
             onUp: this.onUp.bind(this),
             onDown: this.onDown.bind(this),
+            onLeft: this.onLeft.bind(this),
+            onRight: this.onRight.bind(this),
             onSelect: this.onSelect.bind(this)
         });
 
         this.reset();
+    }
+
+    get activeTab(): ShopTabId {
+        return shopTabs[this.activeTabIndex].id;
     }
 
     reset(): void {
@@ -79,9 +76,14 @@ export default class Shop extends GameObject {
         this.input.reset();
         this.isDoneShopping = false;
         this.selectedMenuItem = 0;
-        this.createMenuText();
-        this.setCosts();
+        this.activeTabIndex = 0;
+        this.rows = [];
+        this.tabDisplays = [];
+
         this.createSelectorShip();
+        this.createChrome();
+        this.rebuildRows();
+
 
         this.addChild(this.input as unknown as GameObject);
     }
@@ -89,7 +91,7 @@ export default class Shop extends GameObject {
     start(): void {
         this.input.reset();
         this.isDoneShopping = false;
-        this.setCosts();
+        this.refreshRows();
     }
 
     checkIfLevelComplete(): boolean {
@@ -105,95 +107,150 @@ export default class Shop extends GameObject {
         }
     }
 
-    createMenuText(): void {
+    private createChrome(): void {
         this.titleText = new TextDisplay(this, {
             font: 'arcade',
-            message: this.headerDef.message,
-            position: this.headerDef.position,
+            message: shopTabs[this.activeTabIndex].label,
+            position: { x: 50, y: 8 },
             color: this.game.interfaceColor
         });
         this.addChild(this.titleText);
 
-        Object.keys(this.menuItems).forEach(function (this: Shop, key: string) {
-            const item = this.menuItems[key as keyof Shop['menuItems']];
-
-            item.description = new TextDisplay(this, {
+        this.tabDisplays = shopTabs.map((tab, index) => {
+            const display = new TextDisplay(this, {
                 font: 'arcade-small',
-                message: item.message,
-                position: item.position,
-                color: this.game.interfaceColor,
-                isPhysicalEntity: true
+                message: tab.label,
+                position: { x: 30 + index * 90, y: 28 },
+                color: this.game.interfaceColor
             });
-            this.addChild(item.description);
-
-            item.costText = new TextDisplay(this, {
-                font: 'arcade-small',
-                message: '',
-                position: { x: item.position.x - 30, y: item.position.y },
-                color: this.game.interfaceColor,
-                isPhysicalEntity: true
-            });
-            this.addChild(item.costText);
-        }.bind(this));
+            this.addChild(display);
+            return display;
+        });
+        this.refreshTabHeaders();
     }
 
-    setCosts(): void {
-        const items = this.menuItems;
+    private refreshTabHeaders(): void {
+        this.titleText.changeMessage(shopTabs[this.activeTabIndex].label);
+        this.tabDisplays.forEach((display, index) => {
+            display.updateColor(
+                index === this.activeTabIndex
+                    ? this.game.interfaceColor
+                    : this.disabledColor
+            );
+        });
+    }
+
+    private clearRows(): void {
+        this.rows.forEach((row) => {
+            if (row.description) {
+                this.removeChild(row.description);
+            }
+            if (row.costText) {
+                this.removeChild(row.costText);
+            }
+        });
+        this.rows = [];
+    }
+
+    private rebuildRows(): void {
+        this.clearRows();
+
+        const upgrades = upgradesForTab(this.activeTab);
+        this.rows = [
+            ...upgrades.map((upgrade) => ({
+                kind: 'upgrade' as const,
+                upgrade,
+                cost: null as number | null
+            })),
+            { kind: 'leave', cost: null }
+        ];
+
+        this.rows.forEach((row, index) => {
+            const y = LIST_BASE_Y + index * LIST_ROW_STRIDE;
+            const labelX = row.kind === 'leave' ? LEAVE_LABEL_X : LIST_LABEL_X;
+
+            row.description = new TextDisplay(this, {
+                font: 'arcade-small',
+                message: ' ',
+                position: { x: labelX, y },
+                color: this.game.interfaceColor,
+                isPhysicalEntity: true
+            });
+            this.addChild(row.description);
+
+            if (row.kind === 'upgrade') {
+                row.costText = new TextDisplay(this, {
+                    font: 'arcade-small',
+                    message: '',
+                    position: { x: LIST_COST_X, y },
+                    color: this.game.interfaceColor,
+                    isPhysicalEntity: true
+                });
+                this.addChild(row.costText);
+            }
+        });
+
+        if (this.selectedMenuItem >= this.rows.length) {
+            this.selectedMenuItem = Math.max(0, this.rows.length - 1);
+        }
+
+        this.refreshRows();
+        this.updateSelectorPosition();
+    }
+
+    private ownedRank(upgrade: ShopUpgradeDef): number {
         const player = this.player;
-        const bank = this.bank;
-
-        items.health.cost = 5 + player.lifeUpgrades * 5;
-        items.rate.cost = 50 + player.rateUpgrades * 50;
-        items.damage.cost = 100 + player.damageUpgrades * 100;
-        items.guns.cost = player.gunTier >= MAX_GUN_TIER
-            ? -1
-            : (player.gunTier + 1) * GUN_UPGRADE_BASE_COST;
-        items.armor.cost = 75 + player.armorUpgrades * 75;
-        items.combo.cost = player.comboSegments >= MAX_COMBO_SEGMENTS
-            ? -1
-            : COMBO_UPGRADE_COSTS[player.comboUpgrades];
-
-        items.damage.costText!.changeMessage('$' + items.damage.cost);
-        items.health.costText!.changeMessage('$' + items.health.cost);
-        items.rate.costText!.changeMessage('$' + items.rate.cost);
-        items.guns.costText!.changeMessage(
-            player.gunTier >= MAX_GUN_TIER ? '--' : '$' + items.guns.cost
-        );
-        items.guns.description!.changeMessage(
-            player.gunTier >= MAX_GUN_TIER
-                ? 'Guns maxed'
-                : GUN_UPGRADE_NAMES[player.gunTier]
-        );
-        items.armor.costText!.changeMessage('$' + items.armor.cost);
-        items.combo.costText!.changeMessage(
-            player.comboSegments >= MAX_COMBO_SEGMENTS ? '--' : '$' + items.combo.cost
-        );
-        items.combo.description!.changeMessage(
-            player.comboSegments >= MAX_COMBO_SEGMENTS
-                ? 'Combo maxed'
-                : player.comboSegments === 0
-                    ? 'Unlock Combo'
-                    : items.combo.message
-        );
-        items.leave.description!.changeMessage(items.leave.message);
-
-        items.health.costText!.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-        items.rate.costText!.updateColor(items.rate.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-        items.damage.costText!.updateColor(items.damage.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-        items.guns.costText!.updateColor(
-            items.guns.cost > bank.value || player.gunTier >= MAX_GUN_TIER
-                ? this.disabledColor
-                : this.game.interfaceColor
-        );
-        items.armor.costText!.updateColor(items.armor.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-        items.combo.costText!.updateColor(
-            items.combo.cost > bank.value || player.comboSegments >= MAX_COMBO_SEGMENTS
-                ? this.disabledColor
-                : this.game.interfaceColor
-        );
+        switch (upgrade.id) {
+            case 'health': return player.lifeUpgrades;
+            case 'rate': return player.rateUpgrades;
+            case 'damage': return player.damageUpgrades;
+            case 'armor': return player.armorUpgrades;
+            case 'guns': return player.gunTier;
+            case 'combo': return player.comboUpgrades;
+        }
     }
 
-    createSelectorShip(): void {
+    private rowLabel(upgrade: ShopUpgradeDef, owned: number, maxed: boolean): string {
+        if (upgrade.id === 'guns') {
+            return maxed ? 'Guns maxed' : (upgrade.labelsByRank?.[owned] ?? upgrade.label);
+        }
+        if (upgrade.id === 'combo') {
+            if (maxed) return 'Combo maxed';
+            if (owned === 0) return 'Unlock Combo';
+            return upgrade.label;
+        }
+        return upgrade.label;
+    }
+
+    private refreshRows(): void {
+        this.rows.forEach((row) => {
+            if (row.kind === 'leave') {
+                row.description!.changeMessage('Leave Shop');
+                row.description!.updateColor(this.game.interfaceColor);
+                return;
+            }
+
+            const upgrade = row.upgrade!;
+            const owned = this.ownedRank(upgrade);
+            const cost = nextUpgradeCost(upgrade, owned);
+            row.cost = cost;
+            const maxed = cost === null;
+
+            row.description!.changeMessage(this.rowLabel(upgrade, owned, maxed));
+            row.description!.updateColor(this.game.interfaceColor);
+
+            if (row.costText) {
+                row.costText.changeMessage(maxed ? '--' : '$' + cost);
+                row.costText.updateColor(
+                    maxed || cost! > this.bank.value
+                        ? this.disabledColor
+                        : this.game.interfaceColor
+                );
+            }
+        });
+    }
+
+    private createSelectorShip(): void {
         this.selectorShip = new GameObject();
         this.selectorShip.sprite = ArrowShip();
         this.selectorShip.position = { x: 40, y: 0 };
@@ -202,8 +259,18 @@ export default class Shop extends GameObject {
         this.updateSelectorPosition();
     }
 
-    updateSelectorPosition(): void {
-        this.selectorShip.position!.y = this.menuSelectorPositions[this.selectedMenuItem];
+    private updateSelectorPosition(): void {
+        this.selectorShip.position!.y = LIST_BASE_Y + this.selectedMenuItem * LIST_ROW_STRIDE;
+    }
+
+    private setActiveTab(index: number): void {
+        if (index < 0 || index >= shopTabs.length || index === this.activeTabIndex) {
+            return;
+        }
+        this.activeTabIndex = index;
+        this.selectedMenuItem = 0;
+        this.refreshTabHeaders();
+        this.rebuildRows();
     }
 
     onUp(): void {
@@ -214,35 +281,48 @@ export default class Shop extends GameObject {
     }
 
     onDown(): void {
-        if (!this.selecting && this.selectedMenuItem < this.menuSelectorPositions.length - 1) {
+        if (!this.selecting && this.selectedMenuItem < this.rows.length - 1) {
             this.selectedMenuItem++;
             this.updateSelectorPosition();
         }
     }
 
-    onSelect(): void {
+    onLeft(): void {
         if (!this.selecting) {
-            let selection: ShopMenuLine | undefined;
-            switch (this.selectedMenuItem) {
-                case 0: selection = this.menuItems.health; break;
-                case 1: selection = this.menuItems.rate; break;
-                case 2: selection = this.menuItems.damage; break;
-                case 3: selection = this.menuItems.armor; break;
-                case 4: selection = this.menuItems.guns; break;
-                case 5: selection = this.menuItems.combo; break;
-                case 6: this.startGame(); return;
-                default: return;
-            }
-
-            if (this.bank.value >= selection.cost! && selection.cost !== -1) {
-                this.bank.removeMoney(selection.cost!);
-                this.game.recordDollarsSpent(selection.cost!);
-                this.startGame();
-            }
+            this.setActiveTab(this.activeTabIndex - 1);
         }
     }
 
-    startGame(): void {
+    onRight(): void {
+        if (!this.selecting) {
+            this.setActiveTab(this.activeTabIndex + 1);
+        }
+    }
+
+    onSelect(): void {
+        if (this.selecting) {
+            return;
+        }
+
+        const row = this.rows[this.selectedMenuItem];
+        if (!row) {
+            return;
+        }
+
+        if (row.kind === 'leave') {
+            this.startPurchaseAnimation();
+            return;
+        }
+
+        const cost = row.cost;
+        if (cost !== null && this.bank.value >= cost) {
+            this.bank.removeMoney(cost);
+            this.game.recordDollarsSpent(cost);
+            this.startPurchaseAnimation();
+        }
+    }
+
+    private startPurchaseAnimation(): void {
         this.selecting = true;
         this.timeSinceSelected = 0;
 
@@ -256,43 +336,48 @@ export default class Shop extends GameObject {
         }));
     }
 
-    propagateSelection(): void {
-        switch (this.selectedMenuItem) {
-            case 0:
+    private applyUpgrade(id: ShopUpgradeId): void {
+        switch (id) {
+            case 'health':
                 this.player.lifeUpgrades++;
-                this.player.maxLife++;
-                this.player.life++;
+                this.player.maxLife = (this.player.maxLife || 0) + 1;
+                this.player.life = (this.player.life || 0) + 1;
                 break;
-
-            case 1: // rate
+            case 'rate':
                 this.player.rateUpgrades++;
                 this.player.FIRE_RATE = Math.ceil(this.player.FIRE_RATE * 0.9);
                 break;
-
-            case 2: // damage
+            case 'damage':
                 this.player.damageUpgrades++;
                 break;
-
-            case 3: // armor
+            case 'armor':
                 this.player.armorUpgrades++;
                 this.player.armor++;
                 break;
-
-            case 4: // guns
+            case 'guns':
                 this.player.upgradeGunTier();
                 break;
-
-            case 5: // combo
+            case 'combo':
                 this.player.extendCombo();
                 this.game.comboGauge.syncFromPlayer();
                 break;
+        }
+    }
 
-            case 6: // done shopping
-                this.isDoneShopping = true;
-                break;
+    propagateSelection(): void {
+        const row = this.rows[this.selectedMenuItem];
+        if (!row) {
+            this.selecting = false;
+            return;
         }
 
-        this.setCosts();
+        if (row.kind === 'leave') {
+            this.isDoneShopping = true;
+        } else if (row.upgrade) {
+            this.applyUpgrade(row.upgrade.id);
+        }
+
+        this.refreshRows();
         this.selecting = false;
     }
 }

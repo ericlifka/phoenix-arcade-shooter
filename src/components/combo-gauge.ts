@@ -5,8 +5,9 @@ import Sprite from '../rendering/core/sprite.js';
 import TextDisplay from './text-display.js';
 import { ComboGaugeOptions } from '../types/game';
 import type PlayerControlledShip from '../ships/player-controlled-ship.js';
+import { MAX_COMBO_UPGRADES } from '../balance/shop.js';
 
-export const MAX_COMBO_SEGMENTS = 10;
+export const MAX_COMBO_SEGMENTS = MAX_COMBO_UPGRADES;
 export const MAX_COMBO_MULTIPLIER = MAX_COMBO_SEGMENTS + 1;
 export const COMBO_SEGMENT_HEIGHT = 12;
 export const MAX_COMBO_FILL_HEIGHT = MAX_COMBO_SEGMENTS * COMBO_SEGMENT_HEIGHT;

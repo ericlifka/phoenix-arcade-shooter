@@ -4,11 +4,16 @@ import playerShipSprite from '../sprites/player-ship.js';
 import playerShipDoubleGuns from '../sprites/player-ship-double-guns.js';
 import playerShipSpriteWingGuns from '../sprites/player-ship-wing-guns.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
-import { MAX_COMBO_SEGMENTS } from '../components/combo-gauge.js';
+import {
+    createStarterShipProfile,
+    MAX_COMBO_UPGRADES,
+    MAX_GUN_TIER,
+    type PlayerShipProfile
+} from './player-ship-profile.js';
 import { InputState } from '../types/game';
 import { Position } from '../types/rendering';
 
-export const MAX_GUN_TIER = 3;
+export { MAX_GUN_TIER } from './player-ship-profile.js';
 
 type SizedGameParent = GameObject & { width: number; height: number };
 
@@ -21,14 +26,17 @@ export default class PlayerControlledShip extends GameObject {
     sprite!: any;
     position!: Position;
     velocity!: { x: number; y: number };
+
+    /** Active ship; permanent shop upgrades live here. */
+    shipProfile!: PlayerShipProfile;
+
+    /** Run-only upgrade ranks (cleared on resetForNewRun). */
     damageUpgrades = 0;
     lifeUpgrades = 0;
     rateUpgrades = 0;
     armorUpgrades = 0;
+
     armor = 0;
-    gunTier = 0;
-    comboSegments = 0;
-    comboUpgrades = 0;
     SPEED = 50;
     BULLET_SPEED = 100;
     FIRE_RATE = 500;
@@ -44,22 +52,49 @@ export default class PlayerControlledShip extends GameObject {
         this.reset();
     }
 
+    get gunTier(): number {
+        return this.shipProfile.gunTier;
+    }
+
+    set gunTier(value: number) {
+        this.shipProfile.gunTier = value;
+    }
+
+    get comboSegments(): number {
+        return this.shipProfile.comboSegments;
+    }
+
+    set comboSegments(value: number) {
+        this.shipProfile.comboSegments = value;
+    }
+
+    get comboUpgrades(): number {
+        return this.shipProfile.comboUpgrades;
+    }
+
+    set comboUpgrades(value: number) {
+        this.shipProfile.comboUpgrades = value;
+    }
+
     reset(): void {
         super.reset();
 
+        this.shipProfile = createStarterShipProfile();
         this.damageUpgrades = 0;
         this.lifeUpgrades = 0;
         this.rateUpgrades = 0;
         this.armorUpgrades = 0;
-        this.gunTier = 0;
-        this.comboSegments = 0;
-        this.comboUpgrades = 0;
 
         this.resetForNewRun();
     }
 
     resetForNewRun(): void {
         super.reset();
+
+        this.damageUpgrades = 0;
+        this.lifeUpgrades = 0;
+        this.rateUpgrades = 0;
+        this.armorUpgrades = 0;
 
         this.explosion = shipExplosion;
         this.position = { x: -100, y: -100 };
@@ -97,7 +132,7 @@ export default class PlayerControlledShip extends GameObject {
     }
 
     extendCombo(): void {
-        if (this.comboSegments >= MAX_COMBO_SEGMENTS) {
+        if (this.comboSegments >= MAX_COMBO_UPGRADES) {
             return;
         }
 

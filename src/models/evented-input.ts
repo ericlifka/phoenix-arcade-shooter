@@ -3,6 +3,8 @@ import { InputState } from '../types/game';
 interface EventedInputOptions {
     onUp?: () => void;
     onDown?: () => void;
+    onLeft?: () => void;
+    onRight?: () => void;
     onFire?: () => void;
     onStart?: () => void;
     onSelect?: () => void;
@@ -15,18 +17,24 @@ interface EventedInputOptions {
 export default class EventedInput {
     private onUp: () => void;
     private onDown: () => void;
+    private onLeft: () => void;
+    private onRight: () => void;
     private onFire: () => void;
     private onStart: () => void;
     private onSelect: () => void;
 
     private upReleased: boolean = false;
     private downReleased: boolean = false;
+    private leftReleased: boolean = false;
+    private rightReleased: boolean = false;
     private fireReleased: boolean = false;
     private startReleased: boolean = false;
 
     constructor(options: EventedInputOptions) {
         this.onUp = options.onUp || function () { };
         this.onDown = options.onDown || function () { };
+        this.onLeft = options.onLeft || function () { };
+        this.onRight = options.onRight || function () { };
         this.onFire = options.onFire || function () { };
         this.onStart = options.onStart || function () { };
         this.onSelect = options.onSelect || function () { };
@@ -37,6 +45,8 @@ export default class EventedInput {
     reset(): void {
         this.upReleased = false;
         this.downReleased = false;
+        this.leftReleased = false;
+        this.rightReleased = false;
         this.fireReleased = false;
         this.startReleased = false;
     }
@@ -47,6 +57,12 @@ export default class EventedInput {
         }
         if (input.movementVector.y > -.6) {
             this.upReleased = true;
+        }
+        if (input.movementVector.x < .6) {
+            this.rightReleased = true;
+        }
+        if (input.movementVector.x > -.6) {
+            this.leftReleased = true;
         }
         if (!input.start) {
             this.startReleased = true;
@@ -62,6 +78,14 @@ export default class EventedInput {
         if (input.movementVector.y <= -.6 && this.upReleased) {
             this.upReleased = false;
             this.onUp();
+        }
+        if (input.movementVector.x >= .6 && this.rightReleased) {
+            this.rightReleased = false;
+            this.onRight();
+        }
+        if (input.movementVector.x <= -.6 && this.leftReleased) {
+            this.leftReleased = false;
+            this.onLeft();
         }
         if (input.start && this.startReleased) {
             this.startReleased = false;
