@@ -38,7 +38,7 @@ export default class LevelGroup01 extends GameObject {
         super(parent);
 
         this.alternateShip = alternateShip;
-        this.difficultyMultiplier = difficultyMultiplier;
+        this.difficultyMultiplier = difficultyMultiplier + (alternateShip ? 1 : 0);
         this.width = (this.parent as GameObject & { width: number }).width;
         this.height = (this.parent as GameObject & { height: number }).height;
 

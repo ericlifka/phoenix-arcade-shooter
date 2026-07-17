@@ -7,7 +7,7 @@
  */
 
 export const arrowScout = {
-    contactDamage: (dm: number) => 4 + dm,
+    contactDamage: (dm: number) => 30 + dm,
     life: (dm: number) => dm,
     bulletDamage: (dm: number) => 4 + dm,
     bulletSpeed: 100
@@ -15,21 +15,21 @@ export const arrowScout = {
 
 export const arrowBoss = {
     contactDamage: (dm: number) => 50 * dm,
-    life: (dm: number) => 20 * dm,
-    bulletDamage: (dm: number) => 4 + dm,
-    bulletSpeed: 120
+    life: (dm: number) => 75 + 25 * dm,
+    bulletDamage: (dm: number) => 9 + dm,
+    bulletSpeed: 125
 };
 
 export const dashScout = {
-    contactDamage: (dm: number) => 5 + dm,
-    life: (dm: number) => dm,
-    bulletDamage: (dm: number) => 4 + dm,
-    bulletSpeed: 110
+    contactDamage: (dm: number) => 15 + dm,
+    life: (dm: number) => dm + 2,
+    bulletDamage: (dm: number) => 3 + dm * 2,
+    bulletSpeed: 125
 };
 
 export const dashBoss = {
     contactDamage: (dm: number) => 40 * dm,
-    life: (dm: number) => 18 * dm,
-    bulletDamage: (dm: number) => 5 + dm,
-    bulletSpeed: 130
+    life: (dm: number) => 100 + 50 * dm,
+    bulletDamage: (dm: number) => 5 + dm * 2,
+    bulletSpeed: 150
 };
