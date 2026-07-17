@@ -8,10 +8,10 @@ export const MONEY_DROP_FALL_SPEED = 50;
 
 /**
  * How many ships get money: floor(ships / divisor).
- * After dm > 4, roughly half the wave drops; otherwise about one third.
+ * After dm > 4, roughly 1/3 of the wave drops; otherwise about 1/4.
  */
 export function moneyDropDivisor(difficultyMultiplier: number): number {
-    return difficultyMultiplier > 4 ? 2 : 3;
+    return difficultyMultiplier > 5 ? 3 : 4;
 }
 
 export function moneyDropCount(shipCount: number, difficultyMultiplier: number): number {

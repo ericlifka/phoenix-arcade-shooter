@@ -4,9 +4,9 @@ export const group01 = {
     bannerMs: 2000,
 
     /** Column index range vs difficultyMultiplier (inclusive). */
-    columnStartBase: 4,
+    columnStartBase: 3,
     columnStartMin: 1,
-    columnEndBase: 7,
+    columnEndBase: 8,
     columnEndMax: 10,
 
     /** X = columnSpacing * i + columnOffsetX */
