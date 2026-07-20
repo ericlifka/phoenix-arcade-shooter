@@ -4,16 +4,16 @@ import playerShipSprite from '../sprites/player-ship.js';
 import playerShipDoubleGuns from '../sprites/player-ship-double-guns.js';
 import playerShipSpriteWingGuns from '../sprites/player-ship-wing-guns.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
+import type { PlayerShipId } from '../balance/player-ships.js';
 import {
-    createStarterShipProfile,
+    createStarterHangar,
+    defaultActiveShipId,
     MAX_COMBO_UPGRADES,
-    MAX_GUN_TIER,
+    type PlayerShipHangar,
     type PlayerShipProfile
 } from './player-ship-profile.js';
 import { InputState } from '../types/game';
 import { Position } from '../types/rendering';
-
-export { MAX_GUN_TIER } from './player-ship-profile.js';
 
 type SizedGameParent = GameObject & { width: number; height: number };
 
@@ -27,8 +27,10 @@ export default class PlayerControlledShip extends GameObject {
     position!: Position;
     velocity!: { x: number; y: number };
 
-    /** Active ship; permanent shop upgrades live here. */
-    shipProfile!: PlayerShipProfile;
+    /** All unlockable ships and their permanent upgrades. */
+    shipHangar!: PlayerShipHangar;
+    /** Ship used for the current run (picker comes later; defaults to starter). */
+    activeShipId!: PlayerShipId;
 
     /** Run-only upgrade ranks (cleared on resetForNewRun). */
     damageUpgrades = 0;
@@ -52,12 +54,8 @@ export default class PlayerControlledShip extends GameObject {
         this.reset();
     }
 
-    get gunTier(): number {
-        return this.shipProfile.gunTier;
-    }
-
-    set gunTier(value: number) {
-        this.shipProfile.gunTier = value;
+    get shipProfile(): PlayerShipProfile {
+        return this.shipHangar[this.activeShipId];
     }
 
     get comboSegments(): number {
@@ -76,10 +74,23 @@ export default class PlayerControlledShip extends GameObject {
         this.shipProfile.comboUpgrades = value;
     }
 
+    isShipUnlocked(shipId: PlayerShipId): boolean {
+        return this.shipHangar[shipId].unlocked;
+    }
+
+    unlockShip(shipId: PlayerShipId): void {
+        this.shipHangar[shipId].unlocked = true;
+    }
+
+    profileFor(shipId: PlayerShipId): PlayerShipProfile {
+        return this.shipHangar[shipId];
+    }
+
     reset(): void {
         super.reset();
 
-        this.shipProfile = createStarterShipProfile();
+        this.shipHangar = createStarterHangar();
+        this.activeShipId = defaultActiveShipId();
         this.damageUpgrades = 0;
         this.lifeUpgrades = 0;
         this.rateUpgrades = 0;
@@ -95,6 +106,7 @@ export default class PlayerControlledShip extends GameObject {
         this.lifeUpgrades = 0;
         this.rateUpgrades = 0;
         this.armorUpgrades = 0;
+        this.activeShipId = defaultActiveShipId();
 
         this.explosion = shipExplosion;
         this.position = { x: -100, y: -100 };
@@ -115,48 +127,53 @@ export default class PlayerControlledShip extends GameObject {
         this.life = this.maxLife;
         this.armor = this.armorUpgrades;
         this.FIRE_RATE = Math.ceil(500 * Math.pow(0.9, this.rateUpgrades));
-        this.applyGunTier();
+        this.applyActiveShipSprite();
     }
 
     refillHealth(): void {
         this.life = this.maxLife;
     }
 
-    upgradeGunTier(): void {
-        if (this.gunTier >= MAX_GUN_TIER) {
+    extendCombo(shipId: PlayerShipId = this.activeShipId): void {
+        const profile = this.shipHangar[shipId];
+        if (profile.comboSegments >= MAX_COMBO_UPGRADES) {
             return;
         }
 
-        this.gunTier++;
-        this.applyGunTier();
+        profile.comboSegments++;
+        profile.comboUpgrades++;
     }
 
-    extendCombo(): void {
-        if (this.comboSegments >= MAX_COMBO_UPGRADES) {
-            return;
-        }
-
-        this.comboSegments++;
-        this.comboUpgrades++;
-    }
-
-    applyGunTier(): void {
-        switch (this.gunTier) {
-            case 0:
+    applyActiveShipSprite(): void {
+        switch (this.activeShipId) {
+            case 'starter':
                 this.sprite = playerShipSprite().rotateRight();
                 break;
-            case 1:
+            case 'double':
                 this.sprite = playerShipDoubleGuns().rotateRight();
                 break;
-            case 2:
-            case 3:
+            case 'triple':
+            case 'radial':
                 this.sprite = playerShipSpriteWingGuns().rotateRight();
                 break;
         }
     }
 
+    /** Factory helpers for shop tab icons (same facing as in combat). */
+    static spriteForShipId(shipId: PlayerShipId): any {
+        switch (shipId) {
+            case 'starter':
+                return playerShipSprite().rotateRight();
+            case 'double':
+                return playerShipDoubleGuns().rotateRight();
+            case 'triple':
+            case 'radial':
+                return playerShipSpriteWingGuns().rotateRight();
+        }
+    }
+
     private bulletSpreadX(gunIndex: number, gunCount: number): number {
-        if (this.gunTier >= 3 && gunCount === 3) {
+        if (this.activeShipId === 'radial' && gunCount === 3) {
             return (gunIndex - 1) * 10;
         }
 
@@ -166,7 +183,6 @@ export default class PlayerControlledShip extends GameObject {
     processInput(input: InputState): void {
         super.processInput(input);
         if (this.preventInputControl || this.exploding || this.destroyed) {
-            // ship in a state where input isn't appropriate
             return;
         }
 
@@ -196,7 +212,6 @@ export default class PlayerControlledShip extends GameObject {
 
     checkBoundaries(): void {
         if (this.preventInputControl) {
-            // don't check screen boundaries when an external script is controlling the player
             return;
         }
 

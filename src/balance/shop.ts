@@ -1,19 +1,30 @@
 /**
  * Shop upgrade definitions — costs, ranks, permanence, and tab placement.
+ * Unlockable player ships live here too (each ship is its own shop tab).
  */
 
-export type ShopTabId = 'run' | 'ship';
+import type { PlayerShipId } from './player-ships.js';
+import { playerShipDefs } from './player-ships.js';
 
-export type ShopUpgradeId = 'health' | 'rate' | 'damage' | 'armor' | 'guns' | 'combo';
+export type ShopTabId = 'run' | PlayerShipId;
+
+export type ShopUpgradeId = 'health' | 'rate' | 'damage' | 'armor' | 'combo' | 'unlock';
 
 export type CostFormula =
     | { kind: 'linear'; base: number; perRank: number }
     | { kind: 'tierLinear'; base: number }
-    | { kind: 'schedule'; costs: number[] };
+    | { kind: 'schedule'; costs: number[] }
+    | { kind: 'fixed'; amount: number };
+
+export type ShopTabKind = 'text' | 'ship';
 
 export interface ShopTabDef {
     id: ShopTabId;
-    label: string;
+    kind: ShopTabKind;
+    /** Text tabs only. */
+    label?: string;
+    /** Ship tabs only. */
+    shipId?: PlayerShipId;
 }
 
 export interface ShopUpgradeDef {
@@ -22,28 +33,25 @@ export interface ShopUpgradeDef {
     permanent: boolean;
     /** Default list label when not using labelsByRank. */
     label: string;
-    /** Label for the next purchase at each owned rank (guns). */
-    labelsByRank?: string[];
     /** Max owned ranks; null = uncapped. */
     maxRanks: number | null;
     cost: CostFormula;
 }
 
-/** Matches historical gun tier cap (Double / Triple / Radial). */
-export const MAX_GUN_TIER = 3;
-
 /** Matches combo gauge segment cap. */
 export const MAX_COMBO_UPGRADES = 10;
-
-export const GUN_UPGRADE_NAMES = ['Double Guns', 'Triple Guns', 'Radial Guns'] as const;
 
 export const COMBO_UPGRADE_COSTS = [
     25, 50, 100, 200, 400, 1000, 2000, 3500, 6000, 10000
 ] as const;
 
 export const shopTabs: ReadonlyArray<ShopTabDef> = [
-    { id: 'run', label: 'Current Run' },
-    { id: 'ship', label: 'Player Ship' }
+    { id: 'run', kind: 'text', label: 'Current Run' },
+    ...playerShipDefs.map((ship) => ({
+        id: ship.id as ShopTabId,
+        kind: 'ship' as const,
+        shipId: ship.id
+    }))
 ];
 
 export const shopUpgrades: ReadonlyArray<ShopUpgradeDef> = [
@@ -80,22 +88,23 @@ export const shopUpgrades: ReadonlyArray<ShopUpgradeDef> = [
         cost: { kind: 'linear', base: 75, perRank: 75 }
     },
     {
-        id: 'guns',
-        tab: 'ship',
-        permanent: true,
-        label: 'Gun Upgrade',
-        labelsByRank: [...GUN_UPGRADE_NAMES],
-        maxRanks: MAX_GUN_TIER,
-        cost: { kind: 'tierLinear', base: 500 }
-    },
-    {
         id: 'combo',
-        tab: 'ship',
+        tab: 'starter',
         permanent: true,
         label: 'Extend Combo',
         maxRanks: MAX_COMBO_UPGRADES,
         cost: { kind: 'schedule', costs: [...COMBO_UPGRADE_COSTS] }
-    }
+    },
+    ...playerShipDefs
+        .filter((ship) => ship.unlockCost !== null)
+        .map((ship) => ({
+            id: 'unlock' as const,
+            tab: ship.id as ShopTabId,
+            permanent: true,
+            label: 'Unlock',
+            maxRanks: 1,
+            cost: { kind: 'fixed' as const, amount: ship.unlockCost as number }
+        }))
 ];
 
 /** Cost of the next rank, or null if maxed. */
@@ -115,9 +124,33 @@ export function nextUpgradeCost(def: ShopUpgradeDef, ownedRank: number): number 
             }
             return def.cost.costs[ownedRank];
         }
+        case 'fixed':
+            return def.cost.amount;
     }
 }
 
-export function upgradesForTab(tab: ShopTabId): ShopUpgradeDef[] {
-    return shopUpgrades.filter((upgrade) => upgrade.tab === tab);
+/**
+ * Rows for a tab. Locked ships only show Unlock; unlocked premium ships
+ * have no permanent upgrades yet (combo stays on starter).
+ */
+export function upgradesForTab(
+    tab: ShopTabId,
+    isShipUnlocked: (shipId: PlayerShipId) => boolean
+): ShopUpgradeDef[] {
+    if (tab === 'run') {
+        return shopUpgrades.filter((upgrade) => upgrade.tab === 'run');
+    }
+
+    const shipId = tab as PlayerShipId;
+    const unlocked = isShipUnlocked(shipId);
+
+    if (!unlocked) {
+        return shopUpgrades.filter(
+            (upgrade) => upgrade.tab === tab && upgrade.id === 'unlock'
+        );
+    }
+
+    return shopUpgrades.filter(
+        (upgrade) => upgrade.tab === tab && upgrade.id !== 'unlock'
+    );
 }

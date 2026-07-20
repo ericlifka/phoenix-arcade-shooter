@@ -348,6 +348,16 @@ export default {
         [n, w, w, w, n],
         [n, n, w, n, n]
     ]),
+    '[': new Sprite([
+        [w, w, w, w, w],
+        [w, n, n, n, w],
+        [w, n, n, n, w]
+    ]),
+    ']': new Sprite([
+        [w, n, n, n, w],
+        [w, n, n, n, w],
+        [w, w, w, w, w]
+    ]),
     '-': new Sprite([
         [n, n, w, n, n],
         [n, n, w, n, n],

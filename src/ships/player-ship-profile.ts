@@ -1,33 +1,41 @@
-import { MAX_COMBO_UPGRADES, MAX_GUN_TIER } from '../balance/shop.js';
+import {
+    DEFAULT_PLAYER_SHIP_ID,
+    playerShipDefs,
+    type PlayerShipId
+} from '../balance/player-ships.js';
+import { MAX_COMBO_UPGRADES } from '../balance/shop.js';
 
 /**
  * Persistent modifiers for a single unlockable player ship.
- * Ship selection UI comes later; for now only the starter profile is used.
  */
 export interface PlayerShipProfile {
-    id: string;
-    gunTier: number;
+    id: PlayerShipId;
+    unlocked: boolean;
     comboSegments: number;
     comboUpgrades: number;
 }
 
-export function createStarterShipProfile(): PlayerShipProfile {
+export type PlayerShipHangar = Record<PlayerShipId, PlayerShipProfile>;
+
+export function createShipProfile(id: PlayerShipId, unlocked: boolean): PlayerShipProfile {
     return {
-        id: 'starter',
-        gunTier: 0,
+        id,
+        unlocked,
         comboSegments: 0,
         comboUpgrades: 0
     };
 }
 
-export function cloneShipProfile(profile: PlayerShipProfile): PlayerShipProfile {
-    return {
-        id: profile.id,
-        gunTier: profile.gunTier,
-        comboSegments: profile.comboSegments,
-        comboUpgrades: profile.comboUpgrades
-    };
+export function createStarterHangar(): PlayerShipHangar {
+    const hangar = {} as PlayerShipHangar;
+    for (const def of playerShipDefs) {
+        hangar[def.id] = createShipProfile(def.id, def.unlockCost === null);
+    }
+    return hangar;
 }
 
-/** Re-export caps used by profile mutations. */
-export { MAX_COMBO_UPGRADES, MAX_GUN_TIER };
+export function defaultActiveShipId(): PlayerShipId {
+    return DEFAULT_PLAYER_SHIP_ID;
+}
+
+export { MAX_COMBO_UPGRADES };
