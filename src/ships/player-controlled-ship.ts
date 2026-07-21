@@ -4,11 +4,10 @@ import playerShipSprite from '../sprites/player-ship.js';
 import playerShipDoubleGuns from '../sprites/player-ship-double-guns.js';
 import playerShipSpriteWingGuns from '../sprites/player-ship-wing-guns.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
-import type { PlayerShipId } from '../balance/player-ships.js';
+import { playerShipDef, type PlayerShipId } from '../balance/player-ships.js';
 import {
     createStarterHangar,
     defaultActiveShipId,
-    MAX_COMBO_UPGRADES,
     type PlayerShipHangar,
     type PlayerShipProfile
 } from './player-ship-profile.js';
@@ -16,6 +15,10 @@ import { InputState } from '../types/game';
 import { Position } from '../types/rendering';
 
 type SizedGameParent = GameObject & { width: number; height: number };
+
+const BASE_MAX_LIFE = 20;
+const BASE_SPEED = 50;
+const BASE_FIRE_RATE = 500;
 
 export default class PlayerControlledShip extends GameObject {
     type = 'player';
@@ -32,16 +35,16 @@ export default class PlayerControlledShip extends GameObject {
     /** Ship used for the current run (picker comes later; defaults to starter). */
     activeShipId!: PlayerShipId;
 
-    /** Run-only upgrade ranks (cleared on resetForNewRun). */
-    damageUpgrades = 0;
+    /** Run-only counters (cleared on resetForNewRun). */
     lifeUpgrades = 0;
-    rateUpgrades = 0;
-    armorUpgrades = 0;
+    fullHealPurchases = 0;
+    energyShield = 0;
+    bombs = 0;
 
     armor = 0;
-    SPEED = 50;
+    SPEED = BASE_SPEED;
     BULLET_SPEED = 100;
-    FIRE_RATE = 500;
+    FIRE_RATE = BASE_FIRE_RATE;
     preventInputControl = true;
     exploding = false;
     team = 0;
@@ -91,10 +94,7 @@ export default class PlayerControlledShip extends GameObject {
 
         this.shipHangar = createStarterHangar();
         this.activeShipId = defaultActiveShipId();
-        this.damageUpgrades = 0;
-        this.lifeUpgrades = 0;
-        this.rateUpgrades = 0;
-        this.armorUpgrades = 0;
+        this.clearRunCounters();
 
         this.resetForNewRun();
     }
@@ -102,16 +102,12 @@ export default class PlayerControlledShip extends GameObject {
     resetForNewRun(): void {
         super.reset();
 
-        this.damageUpgrades = 0;
-        this.lifeUpgrades = 0;
-        this.rateUpgrades = 0;
-        this.armorUpgrades = 0;
+        this.clearRunCounters();
         this.activeShipId = defaultActiveShipId();
 
         this.explosion = shipExplosion;
         this.position = { x: -100, y: -100 };
         this.velocity = { x: 0, y: 0 };
-        this.SPEED = 50;
         this.BULLET_SPEED = 100;
         this.preventInputControl = true;
         this.exploding = false;
@@ -122,24 +118,119 @@ export default class PlayerControlledShip extends GameObject {
         this.applyPersistentUpgrades();
     }
 
+    private clearRunCounters(): void {
+        this.lifeUpgrades = 0;
+        this.fullHealPurchases = 0;
+        this.energyShield = 0;
+        this.bombs = 0;
+    }
+
     applyPersistentUpgrades(): void {
-        this.maxLife = 20 + this.lifeUpgrades;
+        const profile = this.shipProfile;
+        this.maxLife = BASE_MAX_LIFE + profile.maxHealthRanks * 5 + this.lifeUpgrades;
         this.life = this.maxLife;
-        this.armor = this.armorUpgrades;
-        this.FIRE_RATE = Math.ceil(500 * Math.pow(0.9, this.rateUpgrades));
+        this.armor = profile.armorRanks;
+        this.SPEED = Math.round(BASE_SPEED * Math.pow(1.1, profile.shipSpeedRanks));
+        this.FIRE_RATE = Math.ceil(BASE_FIRE_RATE * Math.pow(0.9, profile.fireSpeedRanks));
         this.applyActiveShipSprite();
+    }
+
+    /** Recompute stats from profile + run life without forcing a full heal. */
+    syncStatsFromUpgrades(opts?: { healBy?: number }): void {
+        const profile = this.shipProfile;
+        const previousMax = this.maxLife || BASE_MAX_LIFE;
+        this.maxLife = BASE_MAX_LIFE + profile.maxHealthRanks * 5 + this.lifeUpgrades;
+        this.armor = profile.armorRanks;
+        this.SPEED = Math.round(BASE_SPEED * Math.pow(1.1, profile.shipSpeedRanks));
+        this.FIRE_RATE = Math.ceil(BASE_FIRE_RATE * Math.pow(0.9, profile.fireSpeedRanks));
+
+        if (opts?.healBy !== undefined) {
+            this.life = Math.min(
+                this.maxLife,
+                (this.life || 0) + opts.healBy
+            );
+        } else if ((this.life || 0) > this.maxLife) {
+            this.life = this.maxLife;
+        } else if (this.maxLife > previousMax && this.life === previousMax) {
+            // keep full if they were already at old max
+            this.life = this.maxLife;
+        }
     }
 
     refillHealth(): void {
         this.life = this.maxLife;
     }
 
-    extendCombo(shipId: PlayerShipId = this.activeShipId): void {
-        const profile = this.shipHangar[shipId];
-        if (profile.comboSegments >= MAX_COMBO_UPGRADES) {
-            return;
-        }
+    purchaseFullHeal(): void {
+        this.fullHealPurchases++;
+        this.refillHealth();
+    }
 
+    purchaseRunHealth(): void {
+        this.lifeUpgrades++;
+        this.maxLife = (this.maxLife || BASE_MAX_LIFE) + 1;
+        this.life = (this.life || 0) + 1;
+    }
+
+    purchaseEnergyShield(): void {
+        this.energyShield++;
+    }
+
+    purchaseBomb(): void {
+        this.bombs++;
+    }
+
+    purchaseMaxHealth(shipId: PlayerShipId): void {
+        const profile = this.shipHangar[shipId];
+        const cap = playerShipDef(shipId).maxHealth;
+        if (profile.maxHealthRanks >= cap) return;
+        profile.maxHealthRanks++;
+        if (shipId === this.activeShipId) {
+            this.syncStatsFromUpgrades({ healBy: 5 });
+        }
+    }
+
+    purchaseArmor(shipId: PlayerShipId): void {
+        const profile = this.shipHangar[shipId];
+        const cap = playerShipDef(shipId).maxArmor;
+        if (profile.armorRanks >= cap) return;
+        profile.armorRanks++;
+        if (shipId === this.activeShipId) {
+            this.syncStatsFromUpgrades();
+        }
+    }
+
+    purchaseBombCapacity(shipId: PlayerShipId): void {
+        const profile = this.shipHangar[shipId];
+        const cap = playerShipDef(shipId).maxBombCapacity;
+        if (profile.bombCapacityRanks >= cap) return;
+        profile.bombCapacityRanks++;
+    }
+
+    purchaseShipSpeed(shipId: PlayerShipId): void {
+        const profile = this.shipHangar[shipId];
+        const cap = playerShipDef(shipId).maxShipSpeed;
+        if (profile.shipSpeedRanks >= cap) return;
+        profile.shipSpeedRanks++;
+        if (shipId === this.activeShipId) {
+            this.syncStatsFromUpgrades();
+        }
+    }
+
+    purchaseFireSpeed(shipId: PlayerShipId): void {
+        const profile = this.shipHangar[shipId];
+        const cap = playerShipDef(shipId).maxFireSpeed;
+        if (profile.fireSpeedRanks >= cap) return;
+        profile.fireSpeedRanks++;
+        if (shipId === this.activeShipId) {
+            this.syncStatsFromUpgrades();
+        }
+    }
+
+    purchaseCombo(shipId: PlayerShipId): void {
+        const profile = this.shipHangar[shipId];
+        const cap = playerShipDef(shipId).maxCombo;
+        if (profile.comboSegments >= cap) return;
         profile.comboSegments++;
         profile.comboUpgrades++;
     }
@@ -239,7 +330,7 @@ export default class PlayerControlledShip extends GameObject {
             function (this: PlayerControlledShip, gun: Position, index: number) {
                 this.triggerEvent('spawnBullet', {
                     team: this.team,
-                    damage: this.damageUpgrades + 1,
+                    damage: 1,
                     velocity: {
                         x: this.bulletSpreadX(index, guns.length),
                         y: -this.BULLET_SPEED

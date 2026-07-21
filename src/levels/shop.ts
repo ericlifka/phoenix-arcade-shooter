@@ -260,14 +260,22 @@ export default class Shop extends GameObject {
     private ownedRank(upgrade: ShopUpgradeDef): number {
         const player = this.player;
         switch (upgrade.id) {
+            case 'fullHeal': return player.fullHealPurchases;
             case 'health': return player.lifeUpgrades;
-            case 'rate': return player.rateUpgrades;
-            case 'damage': return player.damageUpgrades;
-            case 'armor': return player.armorUpgrades;
-            case 'combo': {
-                const shipId = upgrade.tab as PlayerShipId;
-                return player.profileFor(shipId).comboUpgrades;
-            }
+            case 'energyShield': return player.energyShield;
+            case 'bomb': return player.bombs;
+            case 'maxHealth':
+                return player.profileFor(upgrade.tab as PlayerShipId).maxHealthRanks;
+            case 'armor':
+                return player.profileFor(upgrade.tab as PlayerShipId).armorRanks;
+            case 'bombCapacity':
+                return player.profileFor(upgrade.tab as PlayerShipId).bombCapacityRanks;
+            case 'shipSpeed':
+                return player.profileFor(upgrade.tab as PlayerShipId).shipSpeedRanks;
+            case 'fireSpeed':
+                return player.profileFor(upgrade.tab as PlayerShipId).fireSpeedRanks;
+            case 'combo':
+                return player.profileFor(upgrade.tab as PlayerShipId).comboUpgrades;
             case 'unlock': {
                 const shipId = upgrade.tab as PlayerShipId;
                 return player.isShipUnlocked(shipId) ? 1 : 0;
@@ -402,29 +410,44 @@ export default class Shop extends GameObject {
     }
 
     private applyUpgrade(id: ShopUpgradeId, tab: ShopTabId): void {
+        const shipId = tab as PlayerShipId;
+
         switch (id) {
+            case 'fullHeal':
+                this.player.purchaseFullHeal();
+                break;
             case 'health':
-                this.player.lifeUpgrades++;
-                this.player.maxLife = (this.player.maxLife || 0) + 1;
-                this.player.life = (this.player.life || 0) + 1;
+                this.player.purchaseRunHealth();
                 break;
-            case 'rate':
-                this.player.rateUpgrades++;
-                this.player.FIRE_RATE = Math.ceil(this.player.FIRE_RATE * 0.9);
+            case 'energyShield':
+                this.player.purchaseEnergyShield();
                 break;
-            case 'damage':
-                this.player.damageUpgrades++;
+            case 'bomb':
+                this.player.purchaseBomb();
+                break;
+            case 'maxHealth':
+                this.player.purchaseMaxHealth(shipId);
                 break;
             case 'armor':
-                this.player.armorUpgrades++;
-                this.player.armor++;
+                this.player.purchaseArmor(shipId);
+                break;
+            case 'bombCapacity':
+                this.player.purchaseBombCapacity(shipId);
+                break;
+            case 'shipSpeed':
+                this.player.purchaseShipSpeed(shipId);
+                break;
+            case 'fireSpeed':
+                this.player.purchaseFireSpeed(shipId);
                 break;
             case 'combo':
-                this.player.extendCombo(tab as PlayerShipId);
-                this.game.comboGauge.syncFromPlayer();
+                this.player.purchaseCombo(shipId);
+                if (shipId === this.player.activeShipId) {
+                    this.game.comboGauge.syncFromPlayer();
+                }
                 break;
             case 'unlock':
-                this.player.unlockShip(tab as PlayerShipId);
+                this.player.unlockShip(shipId);
                 this.refreshTabChrome();
                 this.rebuildRows();
                 break;

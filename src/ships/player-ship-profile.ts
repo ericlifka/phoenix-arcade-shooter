@@ -3,7 +3,6 @@ import {
     playerShipDefs,
     type PlayerShipId
 } from '../balance/player-ships.js';
-import { MAX_COMBO_UPGRADES } from '../balance/shop.js';
 
 /**
  * Persistent modifiers for a single unlockable player ship.
@@ -13,6 +12,11 @@ export interface PlayerShipProfile {
     unlocked: boolean;
     comboSegments: number;
     comboUpgrades: number;
+    maxHealthRanks: number;
+    armorRanks: number;
+    bombCapacityRanks: number;
+    shipSpeedRanks: number;
+    fireSpeedRanks: number;
 }
 
 export type PlayerShipHangar = Record<PlayerShipId, PlayerShipProfile>;
@@ -22,7 +26,12 @@ export function createShipProfile(id: PlayerShipId, unlocked: boolean): PlayerSh
         id,
         unlocked,
         comboSegments: 0,
-        comboUpgrades: 0
+        comboUpgrades: 0,
+        maxHealthRanks: 0,
+        armorRanks: 0,
+        bombCapacityRanks: 0,
+        shipSpeedRanks: 0,
+        fireSpeedRanks: 0
     };
 }
 
@@ -37,5 +46,3 @@ export function createStarterHangar(): PlayerShipHangar {
 export function defaultActiveShipId(): PlayerShipId {
     return DEFAULT_PLAYER_SHIP_ID;
 }
-
-export { MAX_COMBO_UPGRADES };
