@@ -16,7 +16,7 @@ import {
     type ShopUpgradeId
 } from '../balance/shop.js';
 
-const LIST_BASE_Y = 55;
+const LIST_BASE_Y = 45;
 const LIST_ROW_STRIDE = 15;
 const LIST_LABEL_X = 90;
 const LIST_COST_X = 60;
