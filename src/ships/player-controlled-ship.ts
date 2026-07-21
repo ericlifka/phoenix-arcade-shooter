@@ -85,6 +85,14 @@ export default class PlayerControlledShip extends GameObject {
         this.shipHangar[shipId].unlocked = true;
     }
 
+    selectShipForRun(shipId: PlayerShipId): void {
+        if (!this.isShipUnlocked(shipId)) {
+            return;
+        }
+        this.activeShipId = shipId;
+        this.applyPersistentUpgrades();
+    }
+
     profileFor(shipId: PlayerShipId): PlayerShipProfile {
         return this.shipHangar[shipId];
     }

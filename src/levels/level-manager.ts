@@ -1,5 +1,6 @@
 import FlyPlayerInFromBottom from '../scripts/fly-player-in-from-bottom.js';
 import GameObject from '../models/game-object.js';
+import Hangar from './hangar.js';
 import LevelGroup01 from './level-group-01.js';
 import LevelGroup02 from './level-group-02.js';
 import LevelGroup03 from './level-group-03.js';
@@ -26,6 +27,7 @@ export default class LevelManager extends GameObject {
     running!: boolean;
     complete!: boolean;
     currentLevel: LevelLike | null = null;
+    hangar!: Hangar;
     shop!: Shop;
     levels!: LevelLike[];
     levelIndex!: number;
@@ -49,6 +51,7 @@ export default class LevelManager extends GameObject {
         this.running = false;
         this.complete = false;
         this.currentLevel = null;
+        this.hangar = new Hangar(this, this.game);
         this.shop = new Shop(this, this.game);
 
         this.loadLevels();
@@ -56,6 +59,7 @@ export default class LevelManager extends GameObject {
 
     loadLevels(): void {
         this.levels = [
+            this.hangar,
             this.shop,
             // Standard Enemy Ship
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),

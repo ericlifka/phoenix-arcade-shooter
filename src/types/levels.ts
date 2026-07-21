@@ -18,3 +18,10 @@ export interface GameForShop {
     interfaceColor: string;
     recordDollarsSpent(amount: number): void;
 }
+
+/** Subset used by the hangar ship-select screen. */
+export interface GameForHangar {
+    player: PlayerControlledShip;
+    comboGauge: ComboGauge;
+    interfaceColor: string;
+}
