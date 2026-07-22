@@ -137,12 +137,13 @@ export default class LevelManager extends GameObject {
         const cameFromShop = !!previousLevel?.isShop;
 
         if (this.currentLevel.isShop) {
+            // Hangar/shop: keep the combat ship off-screen and input-locked.
+            // Do not fly in — that would steal stick/keyboard from the menu.
             this.game.clearBullets();
+            this.clearFlyInScripts();
             this.player.hideOffscreen();
-        }
-
-        if (this.currentLevel.levelName || cameFromShop) {
-            // Fly in at the start of each level set, or after any shop visit
+        } else if (this.currentLevel.levelName || cameFromShop) {
+            // Fly in at the start of each level set, or after leaving the shop
             this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
         }
 
@@ -162,6 +163,14 @@ export default class LevelManager extends GameObject {
 
             this.loadNextLevel();
         }
+    }
+
+    private clearFlyInScripts(): void {
+        this.children
+            .filter((child) => child instanceof FlyPlayerInFromBottom)
+            .forEach((child) => {
+                this.removeChild(child);
+            });
     }
 
     levelName(): string {
