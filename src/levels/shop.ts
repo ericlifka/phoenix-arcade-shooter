@@ -19,10 +19,10 @@ import {
 
 const LIST_BASE_Y = 45;
 const LIST_ROW_STRIDE = 15;
-const LIST_LABEL_X = 80;
-const LIST_COST_X = 50;
-const LEAVE_LABEL_X = 50;
-const PROGRESS_RIGHT_X = 192;
+const LIST_LABEL_X = 70;
+const LIST_COST_X = 40;
+const LEAVE_LABEL_X = 40;
+const PROGRESS_RIGHT_X = 182;
 const TAB_Y = 22;
 const SHIP_TAB_START_X = 100;
 const SHIP_TAB_STRIDE = 22;
@@ -347,7 +347,7 @@ export default class Shop extends GameObject {
     private createSelectorShip(): void {
         this.selectorShip = new GameObject();
         this.selectorShip.sprite = ArrowShip();
-        this.selectorShip.position = { x: 30, y: 0 };
+        this.selectorShip.position = { x: 20, y: 0 };
         this.addChild(this.selectorShip);
 
         this.updateSelectorPosition();
