@@ -9,6 +9,7 @@ function newInputDescriptor(): InputState {
     return {
         movementVector: { x: 0, y: 0 },
         fire: false,
+        bomb: false,
         start: false
     };
 }
@@ -57,6 +58,10 @@ export default class InputInterpreter {
             gameInput.fire = true;
         }
 
+        if (keyboard['B']) {
+            gameInput.bomb = true;
+        }
+
         if (keyboard['W']) {
             gameInput.movementVector.y -= 1;
         }
@@ -81,6 +86,10 @@ export default class InputInterpreter {
 
         if (gamepad['A']) {
             gameInput.fire = true;
+        }
+
+        if (gamepad['B']) {
+            gameInput.bomb = true;
         }
 
         gameInput.movementVector.x += gamepad['left-stick-x'];

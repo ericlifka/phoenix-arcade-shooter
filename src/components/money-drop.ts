@@ -45,6 +45,8 @@ export default class MoneyDrop extends GameObject {
         if (sourceEntity && (sourceEntity as any).type === "player") {
             this.triggerEvent('moneyCollected', this.value);
             this.destroy();
+        } else if (sourceEntity && (sourceEntity as any).type === "bomb") {
+            this.destroy();
         }
     }
 }

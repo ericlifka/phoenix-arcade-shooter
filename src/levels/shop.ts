@@ -307,7 +307,9 @@ export default class Shop extends GameObject {
             const owned = this.ownedRank(upgrade);
             const cost = nextUpgradeCost(upgrade, owned);
             row.cost = cost;
-            const maxed = cost === null;
+            const bombUnavailable =
+                upgrade.id === 'bomb' && !this.player.canPurchaseBomb();
+            const maxed = cost === null || bombUnavailable;
 
             row.description!.changeMessage(this.rowLabel(upgrade, owned, maxed));
             row.description!.updateColor(this.game.interfaceColor);
@@ -388,7 +390,11 @@ export default class Shop extends GameObject {
         }
 
         const cost = row.cost;
-        if (cost !== null && this.bank.value >= cost) {
+        if (
+            cost !== null &&
+            this.bank.value >= cost &&
+            !(row.upgrade?.id === 'bomb' && !this.player.canPurchaseBomb())
+        ) {
             this.bank.removeMoney(cost);
             this.game.recordDollarsSpent(cost);
             this.startPurchaseAnimation();

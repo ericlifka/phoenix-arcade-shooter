@@ -32,6 +32,7 @@ export interface GameObjectLike {
 export interface InputState {
     movementVector: Position;
     fire: boolean;
+    bomb: boolean;
     start: boolean;
     up?: boolean;
     down?: boolean;
@@ -48,6 +49,14 @@ export interface BulletOptions {
     damage?: number;
     life?: number;
     maxLife?: number;
+}
+
+// Bomb options
+export interface BombOptions {
+    team?: number;
+    position?: Position;
+    velocity?: Velocity;
+    acceleration?: Acceleration;
 }
 
 // Text display options

@@ -76,6 +76,11 @@ export default class GameObject {
             this.sprite.update(dtime);
         }
 
+        if (this.velocity && this.acceleration) {
+            this.velocity.x += this.acceleration.x * dtime / 1000;
+            this.velocity.y += this.acceleration.y * dtime / 1000;
+        }
+
         if (this.position && this.velocity) {
             this.position.x += this.velocity.x * dtime / 1000;
             this.position.y += this.velocity.y * dtime / 1000;

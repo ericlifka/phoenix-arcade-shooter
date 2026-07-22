@@ -53,6 +53,7 @@ export default class PlayerControlledShip extends GameObject {
     timeSinceFired = 0;
     firing?: boolean;
     private shieldOutlineApplied = false;
+    private bombPressed = false;
 
     constructor(parent?: GameObject | null) {
         super(parent);
@@ -87,12 +88,20 @@ export default class PlayerControlledShip extends GameObject {
         this.shipHangar[shipId].unlocked = true;
     }
 
+    get bombCapacity(): number {
+        return this.shipProfile.bombCapacityRanks;
+    }
+
     selectShipForRun(shipId: PlayerShipId): void {
         if (!this.isShipUnlocked(shipId)) {
             return;
         }
         this.activeShipId = shipId;
         this.applyPersistentUpgrades();
+    }
+
+    refillBombs(): void {
+        this.bombs = this.bombCapacity;
     }
 
     profileFor(shipId: PlayerShipId): PlayerShipProfile {
@@ -126,6 +135,7 @@ export default class PlayerControlledShip extends GameObject {
         this.team = 0;
         this.damage = 5;
         this.timeSinceFired = 0;
+        this.bombPressed = false;
 
         this.applyPersistentUpgrades();
     }
@@ -144,6 +154,7 @@ export default class PlayerControlledShip extends GameObject {
         this.armor = profile.armorRanks;
         this.SPEED = Math.round(BASE_SPEED * Math.pow(1.1, profile.shipSpeedRanks));
         this.FIRE_RATE = Math.ceil(BASE_FIRE_RATE * Math.pow(0.9, profile.fireSpeedRanks));
+        this.refillBombs();
         this.refreshShieldVisual();
     }
 
@@ -189,7 +200,14 @@ export default class PlayerControlledShip extends GameObject {
     }
 
     purchaseBomb(): void {
+        if (this.bombs >= this.bombCapacity) {
+            return;
+        }
         this.bombs++;
+    }
+
+    canPurchaseBomb(): boolean {
+        return this.bombCapacity > 0 && this.bombs < this.bombCapacity;
     }
 
     purchaseMaxHealth(shipId: PlayerShipId): void {
@@ -318,6 +336,34 @@ export default class PlayerControlledShip extends GameObject {
         this.velocity.y = input.movementVector.y * this.SPEED;
 
         this.firing = input.fire;
+
+        if (input.bomb && !this.bombPressed) {
+            this.handleBombPress();
+        }
+        this.bombPressed = !!input.bomb;
+    }
+
+    private handleBombPress(): void {
+        const phoenix = this.parent as { activeBomb?: { destroyed?: boolean; exploding?: boolean } | null } | null | undefined;
+        const liveBomb = phoenix?.activeBomb && !phoenix.activeBomb.destroyed && !phoenix.activeBomb.exploding;
+
+        if (liveBomb) {
+            this.triggerEvent('detonateBomb');
+            return;
+        }
+
+        if (this.bombs <= 0 || !this.position || !this.sprite) {
+            return;
+        }
+
+        this.bombs--;
+        this.triggerEvent('spawnBomb', {
+            team: this.team,
+            position: {
+                x: this.position.x + Math.floor(this.sprite.width / 2) - 1,
+                y: this.position.y
+            }
+        });
     }
 
     update(dtime: number): void {

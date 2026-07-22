@@ -5,6 +5,7 @@ interface KeyboardState {
     S: boolean;
     D: boolean;
     SPACE: boolean;
+    B: boolean;
     ENTER: boolean;
 }
 
@@ -19,13 +20,13 @@ function cloneObj<T extends Record<string, any>>(obj: T): T {
 function newInputDescriptor(): Omit<KeyboardState, 'INPUT_TYPE'> {
     return {
         W: false, A: false, S: false, D: false,
-        SPACE: false, ENTER: false
+        SPACE: false, B: false, ENTER: false
     };
 }
 
 const KEYS: Record<number, keyof Omit<KeyboardState, 'INPUT_TYPE'>> = {
     87: 'W', 65: 'A', 83: 'S', 68: 'D',
-    32: 'SPACE', 13: 'ENTER'
+    32: 'SPACE', 66: 'B', 13: 'ENTER'
 };
 
 /**

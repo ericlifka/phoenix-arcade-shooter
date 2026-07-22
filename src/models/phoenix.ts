@@ -1,7 +1,8 @@
 import Bank from '../components/bank.js';
+import Bomb from '../components/bomb.js';
 import Bullet from '../components/bullet.js';
 import collectEntities from '../helpers/collect-entities.js';
-import { boxCollision, spriteCollision } from '../helpers/collisions.js';
+import { boxCollision, circleIntersectsBox, spriteCollision } from '../helpers/collisions.js';
 import ComboGauge from '../components/combo-gauge.js';
 import ControlsScreen from '../screens/controls-description.js';
 import EmbeddedTitleScreen from '../screens/slim-title-screen.js';
@@ -14,7 +15,7 @@ import LifeMeter from '../components/life-meter.js';
 import PlayerShip from '../ships/player-controlled-ship.js';
 import RunStats from './run-stats.js';
 import TextDisplay from '../components/text-display.js';
-import { BulletOptions, GameOverResult, PhysicalEntity } from '../types/game';
+import { BombOptions, BulletOptions, GameOverResult, PhysicalEntity } from '../types/game';
 import type { GameForLevels, GameForShop } from '../types/levels.js';
 
 export interface PhoenixOptions {
@@ -46,6 +47,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
     paused = false;
     runsCompleted = 0;
     gameOverCallback?: (result: GameOverResult) => void;
+    activeBomb: Bomb | null = null;
 
     constructor(options: PhoenixOptions) {
         super(null);
@@ -123,12 +125,26 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
             );
     }
 
+    clearBombs(): void {
+        this.activeBomb = null;
+        this.children
+            .filter(function (entity) {
+                return (entity as any).type === 'bomb';
+            })
+            .forEach(
+                function (this: Phoenix, bomb: GameObject) {
+                    this.removeChild(bomb);
+                }.bind(this)
+            );
+    }
+
     startNewGame(): void {
         this.runStats.reset();
         this.bank.resetForRun();
         this.comboGauge.reset();
         this.player.resetForNewRun();
         this.levelManager.reset();
+        this.clearBombs();
 
         this.lifeMeter.reset();
 
@@ -164,6 +180,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         this.removeChild(this.lifeMeter);
         this.levelManager.stop();
         this.clearBullets();
+        this.clearBombs();
 
         this.gameOverScreen.reset();
         this.titleScreen.reset(this.runsCompleted);
@@ -262,14 +279,32 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
     }
 
     checkPairsForCollision(pairs: PhysicalEntity[][]): void {
-        pairs.forEach(function (pair) {
+        pairs.forEach((pair) => {
             const a = pair[0];
             const b = pair[1];
 
-            if (spriteCollision(a, b)) {
-                a.applyDamage(b.damage, b);
-                b.applyDamage(a.damage, a);
+            if (!spriteCollision(a, b)) {
+                return;
             }
+
+            if (a.type === 'bomb' || b.type === 'bomb') {
+                const bomb = (a.type === 'bomb' ? a : b) as unknown as Bomb;
+                const other = a.type === 'bomb' ? b : a;
+
+                // Enemy bullets do not trigger detonation.
+                if (other.type === 'bullet') {
+                    return;
+                }
+
+                // Contact with an enemy ship detonates immediately.
+                if (other.team !== 0 && other.type !== 'pickup') {
+                    bomb.detonate();
+                }
+                return;
+            }
+
+            a.applyDamage(b.damage, b);
+            b.applyDamage(a.damage, a);
         });
     }
 
@@ -293,6 +328,46 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
 
     spawnBullet(data: BulletOptions): void {
         this.addChild(new Bullet(this, data));
+    }
+
+    spawnBomb(data: BombOptions): void {
+        if (this.activeBomb && !this.activeBomb.destroyed && !this.activeBomb.exploding) {
+            return;
+        }
+
+        const bomb = new Bomb(this, data);
+        this.activeBomb = bomb;
+        this.addChild(bomb);
+    }
+
+    detonateBomb(): void {
+        if (this.activeBomb && !this.activeBomb.destroyed && !this.activeBomb.exploding) {
+            this.activeBomb.detonate();
+        }
+    }
+
+    bombCleared(bomb: Bomb): void {
+        if (this.activeBomb === bomb) {
+            this.activeBomb = null;
+        }
+    }
+
+    applyBombBlast(data: {
+        center: { x: number; y: number };
+        radius: number;
+        damage: number;
+        source: Bomb;
+    }): void {
+        const entities = collectEntities(this, this.physicalEntityMatcher) as PhysicalEntity[];
+
+        entities.forEach((entity) => {
+            if (entity === data.source) {
+                return;
+            }
+            if (circleIntersectsBox(data.center.x, data.center.y, data.radius, entity)) {
+                entity.applyDamage(data.damage, data.source);
+            }
+        });
     }
 
     enemyDestroyed(data: { shipValue: number }): void {

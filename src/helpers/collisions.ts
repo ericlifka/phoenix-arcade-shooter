@@ -67,6 +67,26 @@ export function boxCollision(entityA: CollisionEntity, entityB: CollisionEntity)
 }
 
 /**
+ * True when a circle intersects an entity's axis-aligned sprite bounds.
+ */
+export function circleIntersectsBox(
+    cx: number,
+    cy: number,
+    radius: number,
+    entity: CollisionEntity
+): boolean {
+    const left = entity.position.x;
+    const right = entity.position.x + entity.sprite.width;
+    const top = entity.position.y;
+    const bottom = entity.position.y + entity.sprite.height;
+    const nearestX = Math.max(left, Math.min(cx, right));
+    const nearestY = Math.max(top, Math.min(cy, bottom));
+    const dx = cx - nearestX;
+    const dy = cy - nearestY;
+    return dx * dx + dy * dy <= radius * radius;
+}
+
+/**
  * Pixel-perfect sprite collision detection
  * More expensive than boxCollision but more accurate
  * Returns true if any rendered pixels from both entities overlap
