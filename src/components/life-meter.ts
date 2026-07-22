@@ -1,11 +1,17 @@
 import GameObject from '../models/game-object.js';
 import { GreenToRed, colorAtPercent } from '../helpers/gradients.js';
 import Sprite from '../rendering/core/sprite.js';
+import {
+    ENERGY_SHIELD_ORB_SIZE,
+    ENERGY_SHIELD_ORB_STRIDE,
+    energyShieldOrbSprite
+} from '../sprites/energy-shield.js';
 import { LifeMeterOptions } from '../types/game';
 import { Anchor } from '../types/rendering';
 
 /**
- * Visual health/life meter that displays entity health with color gradient
+ * Visual health/life meter that displays entity health with color gradient.
+ * Player vertical bordered meters also show stacked energy-shield orbs.
  */
 export default class LifeMeter extends GameObject {
     index = 1;
@@ -20,6 +26,8 @@ export default class LifeMeter extends GameObject {
     private mirror: boolean;
     private currentLife?: number;
     private maxLife?: number;
+    private currentShield?: number;
+    private shieldOrbs: GameObject[] = [];
 
     constructor(boundEntity: GameObject, options?: LifeMeterOptions) {
         super(boundEntity);
@@ -44,6 +52,16 @@ export default class LifeMeter extends GameObject {
         super.reset();
         this.currentLife = undefined;
         this.maxLife = undefined;
+        this.currentShield = undefined;
+        this.shieldOrbs = [];
+    }
+
+    private showsShieldOrbs(): boolean {
+        return !!this.scale && !this.horizontal && this.showBorder;
+    }
+
+    private entityShield(): number {
+        return (this.entity as GameObject & { energyShield?: number }).energyShield || 0;
     }
 
     update(): void {
@@ -52,21 +70,52 @@ export default class LifeMeter extends GameObject {
             return;
         }
 
-        if (this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife) {
+        const lifeChanged =
+            this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife;
+        const shield = this.entityShield();
+        const shieldChanged = this.showsShieldOrbs() && shield !== this.currentShield;
+
+        if (lifeChanged) {
             this.currentLife = this.entity.life;
             this.maxLife = this.entity.maxLife;
 
             if (this.scale && this.maxLife) {
                 this.length = this.maxLife * this.scale;
                 if (this.length > 140) {
-                    // this just applies to the player's health if they get so many upgrades
-                    // it would overflow the screen, manually set lengths will always honor them.
                     this.length = 140;
                 }
             }
 
             this.redrawMeter();
         }
+
+        if (lifeChanged || shieldChanged) {
+            this.currentShield = shield;
+            this.syncShieldOrbs();
+        }
+    }
+
+    renderToFrame(frame: any): void {
+        // Draw meter first, then orbs on top where they overlap the bar.
+        if (this.sprite && this.position) {
+            this.sprite.renderToFrame(
+                frame,
+                Math.floor(this.position.x),
+                Math.floor(this.position.y),
+                this.index || 0
+            );
+        }
+
+        this.shieldOrbs.forEach((orb) => {
+            if (orb.sprite && orb.position) {
+                orb.sprite.renderToFrame(
+                    frame,
+                    Math.floor(orb.position.x),
+                    Math.floor(orb.position.y),
+                    (this.index || 0) + 1
+                );
+            }
+        });
     }
 
     private redrawMeter(): void {
@@ -83,6 +132,31 @@ export default class LifeMeter extends GameObject {
         }
 
         this.updatePosition();
+    }
+
+    private syncShieldOrbs(): void {
+        if (!this.showsShieldOrbs() || !this.position || !this.sprite) {
+            this.shieldOrbs = [];
+            return;
+        }
+
+        const count = this.currentShield || 0;
+        this.shieldOrbs = [];
+
+        const barWidth = this.sprite.width;
+        const orbX = this.position.x + Math.floor((barWidth - ENERGY_SHIELD_ORB_SIZE) / 2);
+        // First orb bottom overlaps the top of the health bar by one pixel row.
+        const firstOrbY = this.position.y - ENERGY_SHIELD_ORB_SIZE + 1;
+
+        for (let i = 0; i < count; i++) {
+            const orb = new GameObject();
+            orb.sprite = energyShieldOrbSprite();
+            orb.position = {
+                x: orbX,
+                y: firstOrbY - i * ENERGY_SHIELD_ORB_STRIDE
+            };
+            this.shieldOrbs.push(orb);
+        }
     }
 
     private buildSpriteColorArray(): (string | null)[][] {

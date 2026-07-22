@@ -4,6 +4,7 @@ import playerShipSprite from '../sprites/player-ship.js';
 import playerShipDoubleGuns from '../sprites/player-ship-double-guns.js';
 import playerShipSpriteWingGuns from '../sprites/player-ship-wing-guns.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
+import { applySilhouetteOutline } from '../sprites/energy-shield.js';
 import { playerShipDef, type PlayerShipId } from '../balance/player-ships.js';
 import {
     createStarterHangar,
@@ -51,6 +52,7 @@ export default class PlayerControlledShip extends GameObject {
     damage = 5;
     timeSinceFired = 0;
     firing?: boolean;
+    private shieldOutlineApplied = false;
 
     constructor(parent?: GameObject | null) {
         super(parent);
@@ -102,6 +104,7 @@ export default class PlayerControlledShip extends GameObject {
 
         this.shipHangar = createStarterHangar();
         this.activeShipId = defaultActiveShipId();
+        this.shieldOutlineApplied = false;
         this.clearRunCounters();
 
         this.resetForNewRun();
@@ -112,6 +115,7 @@ export default class PlayerControlledShip extends GameObject {
 
         this.clearRunCounters();
         this.activeShipId = defaultActiveShipId();
+        this.shieldOutlineApplied = false;
 
         this.explosion = shipExplosion;
         this.position = { x: -100, y: -100 };
@@ -140,7 +144,7 @@ export default class PlayerControlledShip extends GameObject {
         this.armor = profile.armorRanks;
         this.SPEED = Math.round(BASE_SPEED * Math.pow(1.1, profile.shipSpeedRanks));
         this.FIRE_RATE = Math.ceil(BASE_FIRE_RATE * Math.pow(0.9, profile.fireSpeedRanks));
-        this.applyActiveShipSprite();
+        this.refreshShieldVisual();
     }
 
     /** Recompute stats from profile + run life without forcing a full heal. */
@@ -160,7 +164,6 @@ export default class PlayerControlledShip extends GameObject {
         } else if ((this.life || 0) > this.maxLife) {
             this.life = this.maxLife;
         } else if (this.maxLife > previousMax && this.life === previousMax) {
-            // keep full if they were already at old max
             this.life = this.maxLife;
         }
     }
@@ -182,6 +185,7 @@ export default class PlayerControlledShip extends GameObject {
 
     purchaseEnergyShield(): void {
         this.energyShield++;
+        this.refreshShieldVisual();
     }
 
     purchaseBomb(): void {
@@ -255,6 +259,31 @@ export default class PlayerControlledShip extends GameObject {
             case 'radial':
                 this.sprite = playerShipSpriteWingGuns().rotateRight();
                 break;
+        }
+    }
+
+    /**
+     * Rebuild the combat sprite from the active hull, then apply/remove
+     * the energy-shield silhouette outline as needed.
+     */
+    refreshShieldVisual(): void {
+        if (this.exploding) {
+            return;
+        }
+
+        if (this.shieldOutlineApplied && this.position) {
+            this.position.x += 1;
+            this.position.y += 1;
+            this.shieldOutlineApplied = false;
+        }
+
+        this.applyActiveShipSprite();
+
+        if (this.energyShield > 0 && this.sprite && this.position) {
+            this.sprite = applySilhouetteOutline(this.sprite);
+            this.position.x -= 1;
+            this.position.y -= 1;
+            this.shieldOutlineApplied = true;
         }
     }
 
@@ -357,6 +386,12 @@ export default class PlayerControlledShip extends GameObject {
     applyDamage(damage: number, sourceEntity?: GameObject): void {
         if (damage <= 0) {
             super.applyDamage(damage, sourceEntity);
+            return;
+        }
+
+        if (this.energyShield > 0) {
+            this.energyShield--;
+            this.refreshShieldVisual();
             return;
         }
 
