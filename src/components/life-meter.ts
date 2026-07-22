@@ -1,6 +1,7 @@
 import GameObject from '../models/game-object.js';
 import { GreenToRed, colorAtPercent } from '../helpers/gradients.js';
 import Sprite from '../rendering/core/sprite.js';
+import bombSprite from '../sprites/bomb.js';
 import {
     ENERGY_SHIELD_ORB_SIZE,
     ENERGY_SHIELD_ORB_STRIDE,
@@ -9,9 +10,16 @@ import {
 import { LifeMeterOptions } from '../types/game';
 import { Anchor } from '../types/rendering';
 
+const BOMB_ICON_SIZE = 3;
+/** Vertical spacing between stacked bomb icon tops. */
+const BOMB_ICON_STRIDE = 4;
+/** Gap between bomb column and the left edge of the health bar. */
+const BOMB_ICON_GAP = 1;
+
 /**
  * Visual health/life meter that displays entity health with color gradient.
- * Player vertical bordered meters also show stacked energy-shield orbs.
+ * Player vertical bordered meters also show stacked energy-shield orbs
+ * and bomb ammo icons to the left of the bar.
  */
 export default class LifeMeter extends GameObject {
     index = 1;
@@ -27,7 +35,9 @@ export default class LifeMeter extends GameObject {
     private currentLife?: number;
     private maxLife?: number;
     private currentShield?: number;
+    private currentBombs?: number;
     private shieldOrbs: GameObject[] = [];
+    private bombIcons: GameObject[] = [];
 
     constructor(boundEntity: GameObject, options?: LifeMeterOptions) {
         super(boundEntity);
@@ -53,15 +63,21 @@ export default class LifeMeter extends GameObject {
         this.currentLife = undefined;
         this.maxLife = undefined;
         this.currentShield = undefined;
+        this.currentBombs = undefined;
         this.shieldOrbs = [];
+        this.bombIcons = [];
     }
 
-    private showsShieldOrbs(): boolean {
+    private showsPlayerHudExtras(): boolean {
         return !!this.scale && !this.horizontal && this.showBorder;
     }
 
     private entityShield(): number {
         return (this.entity as GameObject & { energyShield?: number }).energyShield || 0;
+    }
+
+    private entityBombs(): number {
+        return (this.entity as GameObject & { bombs?: number }).bombs || 0;
     }
 
     update(): void {
@@ -73,7 +89,9 @@ export default class LifeMeter extends GameObject {
         const lifeChanged =
             this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife;
         const shield = this.entityShield();
-        const shieldChanged = this.showsShieldOrbs() && shield !== this.currentShield;
+        const bombs = this.entityBombs();
+        const shieldChanged = this.showsPlayerHudExtras() && shield !== this.currentShield;
+        const bombsChanged = this.showsPlayerHudExtras() && bombs !== this.currentBombs;
 
         if (lifeChanged) {
             this.currentLife = this.entity.life;
@@ -93,10 +111,15 @@ export default class LifeMeter extends GameObject {
             this.currentShield = shield;
             this.syncShieldOrbs();
         }
+
+        if (lifeChanged || bombsChanged) {
+            this.currentBombs = bombs;
+            this.syncBombIcons();
+        }
     }
 
     renderToFrame(frame: any): void {
-        // Draw meter first, then orbs on top where they overlap the bar.
+        // Draw meter first, then HUD extras on top where they overlap.
         if (this.sprite && this.position) {
             this.sprite.renderToFrame(
                 frame,
@@ -112,6 +135,17 @@ export default class LifeMeter extends GameObject {
                     frame,
                     Math.floor(orb.position.x),
                     Math.floor(orb.position.y),
+                    (this.index || 0) + 1
+                );
+            }
+        });
+
+        this.bombIcons.forEach((icon) => {
+            if (icon.sprite && icon.position) {
+                icon.sprite.renderToFrame(
+                    frame,
+                    Math.floor(icon.position.x),
+                    Math.floor(icon.position.y),
                     (this.index || 0) + 1
                 );
             }
@@ -135,7 +169,7 @@ export default class LifeMeter extends GameObject {
     }
 
     private syncShieldOrbs(): void {
-        if (!this.showsShieldOrbs() || !this.position || !this.sprite) {
+        if (!this.showsPlayerHudExtras() || !this.position || !this.sprite) {
             this.shieldOrbs = [];
             return;
         }
@@ -156,6 +190,30 @@ export default class LifeMeter extends GameObject {
                 y: firstOrbY - i * ENERGY_SHIELD_ORB_STRIDE
             };
             this.shieldOrbs.push(orb);
+        }
+    }
+
+    private syncBombIcons(): void {
+        if (!this.showsPlayerHudExtras() || !this.position || !this.sprite) {
+            this.bombIcons = [];
+            return;
+        }
+
+        const count = this.currentBombs || 0;
+        this.bombIcons = [];
+
+        const iconX = this.position.x - BOMB_ICON_SIZE - BOMB_ICON_GAP;
+        // Stack upward from the bottom of the health bar.
+        const firstIconY = this.position.y + this.sprite.height - BOMB_ICON_SIZE;
+
+        for (let i = 0; i < count; i++) {
+            const icon = new GameObject();
+            icon.sprite = bombSprite();
+            icon.position = {
+                x: iconX,
+                y: firstIconY - i * BOMB_ICON_STRIDE
+            };
+            this.bombIcons.push(icon);
         }
     }
 
