@@ -3,6 +3,7 @@ import Bullet from '../components/bullet.js';
 import EventedInput from '../models/evented-input.js';
 import GameObject from '../models/game-object.js';
 import TextDisplay from '../components/text-display.js';
+import UpgradeProgressOrbs from '../components/upgrade-progress-orbs.js';
 import PlayerControlledShip from '../ships/player-controlled-ship.js';
 import type { GameForShop } from '../types/levels.js';
 import type { PlayerShipId } from '../balance/player-ships.js';
@@ -18,9 +19,10 @@ import {
 
 const LIST_BASE_Y = 45;
 const LIST_ROW_STRIDE = 15;
-const LIST_LABEL_X = 90;
-const LIST_COST_X = 60;
-const LEAVE_LABEL_X = 60;
+const LIST_LABEL_X = 80;
+const LIST_COST_X = 50;
+const LEAVE_LABEL_X = 50;
+const PROGRESS_RIGHT_X = 192;
 const TAB_Y = 22;
 const SHIP_TAB_START_X = 100;
 const SHIP_TAB_STRIDE = 22;
@@ -30,6 +32,7 @@ interface ShopRow {
     upgrade?: ShopUpgradeDef;
     description?: TextDisplay;
     costText?: TextDisplay;
+    progressOrbs?: UpgradeProgressOrbs;
     cost: number | null;
 }
 
@@ -205,8 +208,15 @@ export default class Shop extends GameObject {
             if (row.costText) {
                 this.removeChild(row.costText);
             }
+            if (row.progressOrbs) {
+                this.removeChild(row.progressOrbs);
+            }
         });
         this.rows = [];
+    }
+
+    private showsProgressOrbs(upgrade: ShopUpgradeDef): boolean {
+        return upgrade.maxRanks !== null && upgrade.id !== 'unlock';
     }
 
     private rebuildRows(): void {
@@ -246,6 +256,11 @@ export default class Shop extends GameObject {
                     isPhysicalEntity: true
                 });
                 this.addChild(row.costText);
+
+                if (row.upgrade && this.showsProgressOrbs(row.upgrade)) {
+                    row.progressOrbs = new UpgradeProgressOrbs(this, PROGRESS_RIGHT_X, y);
+                    this.addChild(row.progressOrbs);
+                }
             }
         });
 
@@ -322,13 +337,17 @@ export default class Shop extends GameObject {
                         : this.game.interfaceColor
                 );
             }
+
+            if (row.progressOrbs && upgrade.maxRanks !== null) {
+                row.progressOrbs.setProgress(owned, upgrade.maxRanks);
+            }
         });
     }
 
     private createSelectorShip(): void {
         this.selectorShip = new GameObject();
         this.selectorShip.sprite = ArrowShip();
-        this.selectorShip.position = { x: 40, y: 0 };
+        this.selectorShip.position = { x: 30, y: 0 };
         this.addChild(this.selectorShip);
 
         this.updateSelectorPosition();

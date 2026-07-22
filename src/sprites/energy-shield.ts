@@ -4,15 +4,18 @@ import type { Position } from '../types/rendering';
 /** Light blue used for ship outline and orb cores — tweak freely. */
 export const ENERGY_SHIELD_COLOR = '#7ec8ff';
 
+/** Full-health green from GreenToRed — filled shop upgrade ranks. */
+export const UPGRADE_RANK_FILL_COLOR = 'hsl(120, 100%, 50%)';
+
 const n = null;
 const w = '#ffffff';
-const c = ENERGY_SHIELD_COLOR;
 
 /**
- * Energy shield HUD orb (6x6).
+ * 6×6 orb with white outline and optional core color.
  * Pattern (rows top→bottom): .****. / **cc** / *cccc* / *cccc* / **cc** / .****.
  */
-export function energyShieldOrbSprite(): Sprite {
+export function orbSprite(coreColor: string | null): Sprite {
+    const c = coreColor;
     return new Sprite([
         [n, w, w, w, w, n],
         [w, w, c, c, w, w],
@@ -23,9 +26,24 @@ export function energyShieldOrbSprite(): Sprite {
     ]);
 }
 
+/**
+ * Energy shield HUD orb (6x6).
+ */
+export function energyShieldOrbSprite(): Sprite {
+    return orbSprite(ENERGY_SHIELD_COLOR);
+}
+
+/** Shop upgrade rank orb — green fill when owned, empty outline when not. */
+export function upgradeRankOrbSprite(filled: boolean): Sprite {
+    return orbSprite(filled ? UPGRADE_RANK_FILL_COLOR : null);
+}
+
 export const ENERGY_SHIELD_ORB_SIZE = 6;
+export const UPGRADE_RANK_ORB_SIZE = 6;
 /** Y distance between stacked orb tops (size - 1 so only one pixel row overlaps). */
 export const ENERGY_SHIELD_ORB_STRIDE = 5;
+/** X distance between horizontal upgrade-rank orb lefts. */
+export const UPGRADE_RANK_ORB_STRIDE = 5;
 
 /**
  * Expand a sprite by 1px and paint a silhouette outline in empty cells
