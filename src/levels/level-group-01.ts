@@ -9,7 +9,7 @@ import MoneyDrop from '../components/money-drop.js';
 import MoveObjectToPoint from '../scripts/move-object-to-point.js';
 import ScriptChain from '../models/script-chain.js';
 import { bossMoneyPositions, moneyDropCount } from '../balance/economy.js';
-import { group01, group01ColumnRange } from '../balance/group-01.js';
+import { group01 } from '../balance/group-01.js';
 import { sample } from '../helpers/random.js';
 import WatchForDeath from '../scripts/watch-for-death.js';
 import type { GameForLevels } from '../types/levels.js';
@@ -58,7 +58,8 @@ export default class LevelGroup01 extends GameObject {
         this.ships = [];
         this.scripts = [];
 
-        const { start, end } = group01ColumnRange(this.difficultyMultiplier);
+        const start = group01.columnStartMin;
+        const end = group01.columnEndMax;
         const time = group01.moveTimeSeconds;
 
         for (let i = start; i <= end; i++) {
