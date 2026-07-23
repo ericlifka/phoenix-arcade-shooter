@@ -56,7 +56,7 @@ export const COMBO_UPGRADE_COSTS = [
 ] as const;
 
 export const shopTabs: ReadonlyArray<ShopTabDef> = [
-    { id: 'run', kind: 'text', label: 'Current Run' },
+    { id: 'run', kind: 'text', label: 'Supplies' },
     ...playerShipDefs.map((ship) => ({
         id: ship.id as ShopTabId,
         kind: 'ship' as const,

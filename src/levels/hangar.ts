@@ -210,7 +210,8 @@ export default class Hangar extends GameObject {
             font: 'arcade-small',
             message: 'Select',
             position: { x: SELECT_LABEL_X, y: SELECT_Y },
-            color: this.game.interfaceColor
+            color: this.game.interfaceColor,
+            isPhysicalEntity: true
         });
         this.addChild(this.selectText);
     }
