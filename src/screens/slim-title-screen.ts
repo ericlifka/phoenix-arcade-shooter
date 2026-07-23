@@ -61,7 +61,7 @@ export default class SlimTitleScreen extends GameObject {
         this.addChild(new TextDisplay(this, {
             font: 'phoenix',
             message: 'PHOENIX',
-            position: { x: 50, y: 30 },
+            position: { x: 54, y: 30 },
             preserveSpriteColors: true
         }));
 
