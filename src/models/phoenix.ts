@@ -3,7 +3,7 @@ import Bomb from '../components/bomb.js';
 import Bullet from '../components/bullet.js';
 import collectEntities from '../helpers/collect-entities.js';
 import { boxCollision, circleIntersectsBox, spriteCollision } from '../helpers/collisions.js';
-import { applySave, captureSave, loadSave, writeSave } from '../helpers/game-save.js';
+import { applySave, captureSave, clearSave, hangarHasMetaProgress, loadSave, writeSave } from '../helpers/game-save.js';
 import ComboGauge from '../components/combo-gauge.js';
 import ControlsScreen from '../screens/controls-description.js';
 import EmbeddedTitleScreen from '../screens/slim-title-screen.js';
@@ -14,6 +14,7 @@ import InputInterpreter from '../helpers/input-interpreter.js';
 import LevelManager from '../levels/level-manager.js';
 import LifeMeter from '../components/life-meter.js';
 import PlayerShip from '../ships/player-controlled-ship.js';
+import { createStarterHangar } from '../ships/player-ship-profile.js';
 import RunStats from './run-stats.js';
 import TextDisplay from '../components/text-display.js';
 import { BombOptions, BulletOptions, GameOverResult, PhysicalEntity } from '../types/game';
@@ -110,7 +111,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
             applySave(this, save);
         }
 
-        this.titleScreen.reset(this.runsCompleted);
+        this.titleScreen.reset(this.runsCompleted, this.hasMetaProgress());
         this.gameOverScreen.reset();
         this.levelManager.reset();
 
@@ -120,9 +121,21 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         this.addChild(this.pauseInputTracker as unknown as GameObject);
     }
 
+    hasMetaProgress(): boolean {
+        return this.runsCompleted > 0 || hangarHasMetaProgress(this.player.shipHangar);
+    }
+
     /** Snapshot hangar unlocks/ranks + runs completed to localStorage. */
     persistMeta(): void {
         writeSave(captureSave(this));
+    }
+
+    /** Wipe localStorage meta and restore starter hangar / title. */
+    resetMetaProgress(): void {
+        clearSave();
+        this.runsCompleted = 0;
+        this.player.shipHangar = createStarterHangar();
+        this.titleScreen.reset(0, false);
     }
 
     clearBullets(): void {
@@ -196,7 +209,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         this.clearBombs();
 
         this.gameOverScreen.reset();
-        this.titleScreen.reset(this.runsCompleted);
+        this.titleScreen.reset(this.runsCompleted, this.hasMetaProgress());
 
         if (!this.children.includes(this.player)) {
             this.addChild(this.player);

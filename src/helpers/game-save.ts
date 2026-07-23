@@ -166,6 +166,38 @@ export function writeSave(data: SaveData): void {
     }
 }
 
+export function clearSave(): void {
+    try {
+        localStorage.removeItem(SAVE_STORAGE_KEY);
+    } catch {
+        // ignore
+    }
+}
+
+export function hangarHasMetaProgress(hangar: PlayerShipHangar): boolean {
+    for (const def of playerShipDefs) {
+        const profile = hangar[def.id];
+        if (!profile) {
+            continue;
+        }
+        if (def.unlockCost !== null && profile.unlocked) {
+            return true;
+        }
+        if (
+            profile.maxHealthRanks > 0 ||
+            profile.armorRanks > 0 ||
+            profile.bombCapacityRanks > 0 ||
+            profile.shipSpeedRanks > 0 ||
+            profile.fireSpeedRanks > 0 ||
+            profile.comboSegments > 0 ||
+            profile.comboUpgrades > 0
+        ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 export function captureSave(host: SaveHost): SaveData {
     return {
         version: SAVE_VERSION,
