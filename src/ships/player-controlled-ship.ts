@@ -21,6 +21,8 @@ const BASE_MAX_LIFE = 20;
 const BASE_SPEED = 50;
 const BASE_FIRE_RATE = 500;
 
+export { BASE_MAX_LIFE };
+
 export default class PlayerControlledShip extends GameObject {
     type = 'player';
     isPhysicalEntity = true;
