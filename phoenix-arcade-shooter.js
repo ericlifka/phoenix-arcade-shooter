@@ -412,6 +412,7 @@ void main() {
       S: false,
       D: false,
       SPACE: false,
+      B: false,
       ENTER: false
     };
   }
@@ -421,6 +422,7 @@ void main() {
     83: "S",
     68: "D",
     32: "SPACE",
+    66: "B",
     13: "ENTER"
   };
 
@@ -511,13 +513,19 @@ void main() {
       });
     }
     update(dtime) {
-      this.children && this.children.forEach((child) => {
-        if (typeof child.update === "function") {
-          child.update(dtime);
+      if (this.children) {
+        for (const child of this.children.slice()) {
+          if (!child.destroyed && typeof child.update === "function") {
+            child.update(dtime);
+          }
         }
-      });
+      }
       if (this.sprite) {
         this.sprite.update(dtime);
+      }
+      if (this.velocity && this.acceleration) {
+        this.velocity.x += this.acceleration.x * dtime / 1000;
+        this.velocity.y += this.acceleration.y * dtime / 1000;
       }
       if (this.position && this.velocity) {
         this.position.x += this.velocity.x * dtime / 1000;
@@ -741,7 +749,28 @@ void main() {
       return this;
     }
     rotateRight() {
-      return this.rotateLeft().rotateLeft().rotateLeft();
+      const width = this.width;
+      const height = this.height;
+      const oldCells = this.cells;
+      const newCells = [];
+      let x;
+      let y;
+      for (x = 0;x < height; x++) {
+        newCells[x] = [];
+      }
+      for (x = 0;x < width; x++) {
+        for (y = 0;y < height; y++) {
+          newCells[height - y - 1][x] = {
+            x: height - y - 1,
+            y: x,
+            color: oldCells[x][y].color
+          };
+        }
+      }
+      this.width = height;
+      this.height = width;
+      this.cells = newCells;
+      return this;
     }
     invertX() {
       for (let x = 0;x < this.width / 2; x++) {
@@ -1810,6 +1839,16 @@ void main() {
       [n3, w2, w2, w2, n3],
       [n3, n3, w2, n3, n3]
     ]),
+    "[": new Sprite([
+      [w2, w2, w2, w2, w2],
+      [w2, n3, n3, n3, w2],
+      [w2, n3, n3, n3, w2]
+    ]),
+    "]": new Sprite([
+      [w2, n3, n3, n3, w2],
+      [w2, n3, n3, n3, w2],
+      [w2, w2, w2, w2, w2]
+    ]),
     "-": new Sprite([
       [n3, n3, w2, n3, n3],
       [n3, n3, w2, n3, n3],
@@ -2178,7 +2217,7 @@ void main() {
       this.resetForRun();
     }
     resetForRun() {
-      this.value = 0;
+      this.value = 5000;
       this.updateDisplay();
     }
     addMoney(value) {
@@ -2196,6 +2235,113 @@ void main() {
         this.position.x = this.valueDisplay.position.x = this.anchorPoint.x - width;
       }
     }
+  }
+
+  // src/balance/bombs.ts
+  var bombs = {
+    damage: 50,
+    blastRadius: 15,
+    initialSpeed: 40,
+    acceleration: 120
+  };
+
+  // src/sprites/bomb.ts
+  function bombSprite() {
+    return new Sprite([
+      [null, "orange", null],
+      ["orange", "yellow", "orange"],
+      [null, "orange", null]
+    ]);
+  }
+
+  // src/sprites/animations/bomb-explosion.ts
+  function bombExplosion() {
+    const sprites = [];
+    const center = 20;
+    for (let ring = 0;ring < 5; ring++) {
+      const count = 4 + ring * 2;
+      for (let i = 0;i < count; i++) {
+        const angle = i / count * Math.PI * 2 + ring * 0.2;
+        const dist = ring * 4 + integer(0, 2);
+        sprites.push({
+          x: center + Math.round(Math.cos(angle) * dist),
+          y: center + Math.round(Math.sin(angle) * dist),
+          sprite: smallExplosion()
+        });
+      }
+    }
+    for (let i = 0;i < 6; i++) {
+      sprites.push({
+        x: center + integer(-3, 3),
+        y: center + integer(-3, 3),
+        sprite: smallExplosion()
+      });
+    }
+    return new SpriteGroup(sprites);
+  }
+
+  // src/components/bomb.ts
+  class Bomb extends GameObject {
+    type = "bomb";
+    isPhysicalEntity = true;
+    index = 5;
+    team;
+    exploding = false;
+    constructor(parent, options) {
+      super(parent);
+      const opts = options || {};
+      this.team = opts.team ?? 0;
+      this.position = opts.position ? { x: opts.position.x, y: opts.position.y } : { x: 0, y: 0 };
+      this.velocity = opts.velocity ? { x: opts.velocity.x, y: opts.velocity.y } : { x: 0, y: -bombs.initialSpeed };
+      this.acceleration = opts.acceleration ? { x: opts.acceleration.x, y: opts.acceleration.y } : { x: 0, y: -bombs.acceleration };
+      this.damage = 0;
+      this.sprite = bombSprite();
+      this.explosion = bombExplosion;
+    }
+    get blastCenter() {
+      return {
+        x: (this.position?.x || 0) + (this.sprite?.width || 0) / 2,
+        y: (this.position?.y || 0) + (this.sprite?.height || 0) / 2
+      };
+    }
+    checkBoundaries() {
+      if (!this.position || this.exploding) {
+        return;
+      }
+      if (this.position.y + bombs.blastRadius < 0) {
+        this.triggerEvent("bombCleared", this);
+        this.destroy();
+      }
+    }
+    detonate() {
+      if (this.exploding || this.destroyed) {
+        return;
+      }
+      this.exploding = true;
+      this.isPhysicalEntity = false;
+      const center = this.blastCenter;
+      this.triggerEvent("applyBombBlast", {
+        center,
+        radius: bombs.blastRadius,
+        damage: bombs.damage,
+        source: this
+      });
+      if (this.position && this.sprite) {
+        this.position.x = center.x - 20;
+        this.position.y = center.y - 20;
+      }
+      this.sprite = bombExplosion();
+      if (this.velocity) {
+        this.velocity.x = 0;
+        this.velocity.y = 0;
+      }
+      if (this.acceleration) {
+        this.acceleration.x = 0;
+        this.acceleration.y = 0;
+      }
+      this.triggerEvent("bombCleared", this);
+    }
+    applyDamage() {}
   }
 
   // src/sprites/bullet.ts
@@ -2316,11 +2462,248 @@ void main() {
     const b = entityToBoundingBox(entityB);
     return a.x1 < b.x2 && a.x2 > b.x1 && a.y1 < b.y2 && a.y2 > b.y1;
   }
+  function circleIntersectsBox(cx, cy, radius, entity) {
+    const left = entity.position.x;
+    const right = entity.position.x + entity.sprite.width;
+    const top = entity.position.y;
+    const bottom = entity.position.y + entity.sprite.height;
+    const nearestX = Math.max(left, Math.min(cx, right));
+    const nearestY = Math.max(top, Math.min(cy, bottom));
+    const dx = cx - nearestX;
+    const dy = cy - nearestY;
+    return dx * dx + dy * dy <= radius * radius;
+  }
   function spriteCollision(entityA, entityB) {
     const collisionFrame = new CollisionDetectionFrame;
     entityA.renderToFrame(collisionFrame);
     entityB.renderToFrame(collisionFrame);
     return collisionFrame.collisionDetected;
+  }
+
+  // src/balance/player-ships.ts
+  var playerShipDefs = [
+    {
+      id: "starter",
+      unlockCost: null,
+      maxHealth: 3,
+      maxArmor: 2,
+      maxBombCapacity: 3,
+      maxShipSpeed: 5,
+      maxFireSpeed: 5,
+      maxCombo: 4
+    },
+    {
+      id: "double",
+      unlockCost: 500,
+      maxHealth: 4,
+      maxArmor: 3,
+      maxBombCapacity: 3,
+      maxShipSpeed: 4,
+      maxFireSpeed: 4,
+      maxCombo: 6
+    },
+    {
+      id: "triple",
+      unlockCost: 1000,
+      maxHealth: 5,
+      maxArmor: 5,
+      maxBombCapacity: 3,
+      maxShipSpeed: 3,
+      maxFireSpeed: 3,
+      maxCombo: 8
+    },
+    {
+      id: "radial",
+      unlockCost: 1500,
+      maxHealth: 6,
+      maxArmor: 8,
+      maxBombCapacity: 3,
+      maxShipSpeed: 2,
+      maxFireSpeed: 2,
+      maxCombo: 10
+    }
+  ];
+  var DEFAULT_PLAYER_SHIP_ID = "starter";
+  function playerShipDef(id) {
+    const def = playerShipDefs.find((ship) => ship.id === id);
+    if (!def) {
+      throw new Error(`Unknown player ship id: ${id}`);
+    }
+    return def;
+  }
+
+  // src/ships/player-ship-profile.ts
+  function createShipProfile(id, unlocked) {
+    return {
+      id,
+      unlocked,
+      comboSegments: 0,
+      comboUpgrades: 0,
+      maxHealthRanks: 0,
+      armorRanks: 0,
+      bombCapacityRanks: 0,
+      shipSpeedRanks: 0,
+      fireSpeedRanks: 0
+    };
+  }
+  function createStarterHangar() {
+    const hangar = {};
+    for (const def of playerShipDefs) {
+      hangar[def.id] = createShipProfile(def.id, def.unlockCost === null);
+    }
+    return hangar;
+  }
+  function defaultActiveShipId() {
+    return DEFAULT_PLAYER_SHIP_ID;
+  }
+
+  // src/helpers/game-save.ts
+  var SAVE_VERSION = 1;
+  var SAVE_STORAGE_KEY = "phoenix-arcade-shooter-save-v1";
+  var RANK_KEYS = [
+    "comboSegments",
+    "comboUpgrades",
+    "maxHealthRanks",
+    "armorRanks",
+    "bombCapacityRanks",
+    "shipSpeedRanks",
+    "fireSpeedRanks"
+  ];
+  function isPlayerShipId(id) {
+    return playerShipDefs.some((def) => def.id === id);
+  }
+  function isNonNegativeInt(value) {
+    return typeof value === "number" && Number.isFinite(value) && value >= 0;
+  }
+  function cloneProfile(profile) {
+    return {
+      id: profile.id,
+      unlocked: profile.unlocked,
+      comboSegments: profile.comboSegments,
+      comboUpgrades: profile.comboUpgrades,
+      maxHealthRanks: profile.maxHealthRanks,
+      armorRanks: profile.armorRanks,
+      bombCapacityRanks: profile.bombCapacityRanks,
+      shipSpeedRanks: profile.shipSpeedRanks,
+      fireSpeedRanks: profile.fireSpeedRanks
+    };
+  }
+  function cloneHangar(hangar) {
+    const clone = {};
+    for (const def of playerShipDefs) {
+      const profile = hangar[def.id];
+      clone[def.id] = profile ? cloneProfile(profile) : createShipProfile(def.id, def.unlockCost === null);
+    }
+    return clone;
+  }
+  function mergeHangarWithDefs(saved) {
+    return cloneHangar(saved);
+  }
+  function validateProfile(id, raw) {
+    if (!raw || typeof raw !== "object") {
+      return null;
+    }
+    const profile = raw;
+    if (typeof profile.unlocked !== "boolean") {
+      return null;
+    }
+    for (const key of RANK_KEYS) {
+      if (!isNonNegativeInt(profile[key])) {
+        return null;
+      }
+    }
+    return {
+      id,
+      unlocked: profile.unlocked,
+      comboSegments: profile.comboSegments,
+      comboUpgrades: profile.comboUpgrades,
+      maxHealthRanks: profile.maxHealthRanks,
+      armorRanks: profile.armorRanks,
+      bombCapacityRanks: profile.bombCapacityRanks,
+      shipSpeedRanks: profile.shipSpeedRanks,
+      fireSpeedRanks: profile.fireSpeedRanks
+    };
+  }
+  function validateSave(raw) {
+    if (!raw || typeof raw !== "object") {
+      return null;
+    }
+    const data = raw;
+    if (data.version !== SAVE_VERSION) {
+      return null;
+    }
+    if (!isNonNegativeInt(data.runsCompleted)) {
+      return null;
+    }
+    if (!data.shipHangar || typeof data.shipHangar !== "object") {
+      return null;
+    }
+    const hangarRaw = data.shipHangar;
+    const hangar = {};
+    for (const def of playerShipDefs) {
+      const validated = hangarRaw[def.id] ? validateProfile(def.id, hangarRaw[def.id]) : null;
+      hangar[def.id] = validated || createShipProfile(def.id, def.unlockCost === null);
+      if (hangarRaw[def.id] && !validated) {
+        return null;
+      }
+    }
+    for (const key of Object.keys(hangarRaw)) {
+      if (!isPlayerShipId(key)) {
+        continue;
+      }
+    }
+    return {
+      version: SAVE_VERSION,
+      runsCompleted: data.runsCompleted,
+      shipHangar: hangar
+    };
+  }
+  function loadSave() {
+    try {
+      const raw = localStorage.getItem(SAVE_STORAGE_KEY);
+      if (!raw) {
+        return null;
+      }
+      return validateSave(JSON.parse(raw));
+    } catch {
+      return null;
+    }
+  }
+  function writeSave(data) {
+    try {
+      localStorage.setItem(SAVE_STORAGE_KEY, JSON.stringify(data));
+    } catch {}
+  }
+  function clearSave() {
+    try {
+      localStorage.removeItem(SAVE_STORAGE_KEY);
+    } catch {}
+  }
+  function hangarHasMetaProgress(hangar) {
+    for (const def of playerShipDefs) {
+      const profile = hangar[def.id];
+      if (!profile) {
+        continue;
+      }
+      if (def.unlockCost !== null && profile.unlocked) {
+        return true;
+      }
+      if (profile.maxHealthRanks > 0 || profile.armorRanks > 0 || profile.bombCapacityRanks > 0 || profile.shipSpeedRanks > 0 || profile.fireSpeedRanks > 0 || profile.comboSegments > 0 || profile.comboUpgrades > 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+  function captureSave(host) {
+    return {
+      version: SAVE_VERSION,
+      runsCompleted: host.runsCompleted,
+      shipHangar: cloneHangar(host.player.shipHangar)
+    };
+  }
+  function applySave(host, data) {
+    host.runsCompleted = data.runsCompleted;
+    host.player.shipHangar = mergeHangarWithDefs(data.shipHangar);
   }
 
   // src/helpers/gradients.ts
@@ -2364,8 +2747,161 @@ void main() {
     return scoreStr;
   }
 
+  // src/balance/shop.ts
+  var MAX_COMBO_UPGRADES = 10;
+  var COMBO_UPGRADE_COSTS = [
+    25,
+    50,
+    100,
+    200,
+    400,
+    1000,
+    2000,
+    3500,
+    6000,
+    1e4
+  ];
+  var shopTabs = [
+    { id: "run", kind: "text", label: "Supplies" },
+    ...playerShipDefs.map((ship) => ({
+      id: ship.id,
+      kind: "ship",
+      shipId: ship.id
+    }))
+  ];
+  var runShopUpgrades = [
+    {
+      id: "fullHeal",
+      tab: "run",
+      permanent: false,
+      label: "Full Heal",
+      maxRanks: null,
+      cost: { kind: "linear", base: 25, perRank: 10 }
+    },
+    {
+      id: "health",
+      tab: "run",
+      permanent: false,
+      label: "+1 Ship Health",
+      maxRanks: null,
+      cost: { kind: "linear", base: 5, perRank: 5 }
+    },
+    {
+      id: "energyShield",
+      tab: "run",
+      permanent: false,
+      label: "+1 Energy Shield",
+      maxRanks: null,
+      cost: { kind: "linear", base: 15, perRank: 10 }
+    },
+    {
+      id: "bomb",
+      tab: "run",
+      permanent: false,
+      label: "+1 Bomb",
+      maxRanks: null,
+      cost: { kind: "linear", base: 25, perRank: 15 }
+    }
+  ];
+  var shipShopUpgradeTemplates = [
+    {
+      id: "maxHealth",
+      permanent: true,
+      label: "+5 Health",
+      cost: { kind: "linear", base: 100, perRank: 50 },
+      maxRanksForShip: (shipId) => playerShipDef(shipId).maxHealth
+    },
+    {
+      id: "armor",
+      permanent: true,
+      label: "+1 Armor",
+      cost: { kind: "linear", base: 75, perRank: 75 },
+      maxRanksForShip: (shipId) => playerShipDef(shipId).maxArmor
+    },
+    {
+      id: "bombCapacity",
+      permanent: true,
+      label: "+1 Bomb Capacity",
+      cost: { kind: "linear", base: 50, perRank: 100 },
+      maxRanksForShip: (shipId) => playerShipDef(shipId).maxBombCapacity
+    },
+    {
+      id: "shipSpeed",
+      permanent: true,
+      label: "+10% Ship Speed",
+      cost: { kind: "linear", base: 100, perRank: 100 },
+      maxRanksForShip: (shipId) => playerShipDef(shipId).maxShipSpeed
+    },
+    {
+      id: "fireSpeed",
+      permanent: true,
+      label: "10% Fire Speed",
+      cost: { kind: "linear", base: 100, perRank: 100 },
+      maxRanksForShip: (shipId) => playerShipDef(shipId).maxFireSpeed
+    },
+    {
+      id: "combo",
+      permanent: true,
+      label: "Extend Combo",
+      cost: { kind: "schedule", costs: [...COMBO_UPGRADE_COSTS] },
+      maxRanksForShip: (shipId) => playerShipDef(shipId).maxCombo
+    }
+  ];
+  var shipUnlockUpgrades = playerShipDefs.filter((ship) => ship.unlockCost !== null).map((ship) => ({
+    id: "unlock",
+    tab: ship.id,
+    permanent: true,
+    label: "Unlock",
+    maxRanks: 1,
+    cost: { kind: "fixed", amount: ship.unlockCost }
+  }));
+  var shopUpgrades = [
+    ...runShopUpgrades,
+    ...shipUnlockUpgrades
+  ];
+  function nextUpgradeCost(def, ownedRank) {
+    if (def.maxRanks !== null && ownedRank >= def.maxRanks) {
+      return null;
+    }
+    switch (def.cost.kind) {
+      case "linear":
+        return def.cost.base + ownedRank * def.cost.perRank;
+      case "tierLinear":
+        return (ownedRank + 1) * def.cost.base;
+      case "schedule": {
+        if (ownedRank >= def.cost.costs.length) {
+          return null;
+        }
+        return def.cost.costs[ownedRank];
+      }
+      case "fixed":
+        return def.cost.amount;
+    }
+  }
+  function shipUpgradesFor(shipId) {
+    return shipShopUpgradeTemplates.map((template) => ({
+      id: template.id,
+      tab: shipId,
+      permanent: template.permanent,
+      label: template.label,
+      cost: template.cost,
+      maxRanks: template.maxRanksForShip(shipId)
+    }));
+  }
+  function upgradesForTab(tab, isShipUnlocked) {
+    if (tab === "run") {
+      return [...runShopUpgrades];
+    }
+    const shipId = tab;
+    const unlocked = isShipUnlocked(shipId);
+    if (!unlocked) {
+      return shipUnlockUpgrades.filter((upgrade) => upgrade.tab === tab);
+    }
+    return shipUpgradesFor(shipId);
+  }
+
   // src/components/combo-gauge.ts
-  var MAX_COMBO_SEGMENTS = 10;
+  var MAX_COMBO_SEGMENTS = MAX_COMBO_UPGRADES;
   var MAX_COMBO_MULTIPLIER = MAX_COMBO_SEGMENTS + 1;
   var COMBO_SEGMENT_HEIGHT = 12;
   var MAX_COMBO_FILL_HEIGHT = MAX_COMBO_SEGMENTS * COMBO_SEGMENT_HEIGHT;
@@ -2613,16 +3149,22 @@ void main() {
   class EventedInput {
     onUp;
     onDown;
+    onLeft;
+    onRight;
     onFire;
     onStart;
     onSelect;
     upReleased = false;
     downReleased = false;
+    leftReleased = false;
+    rightReleased = false;
     fireReleased = false;
     startReleased = false;
     constructor(options) {
       this.onUp = options.onUp || function() {};
       this.onDown = options.onDown || function() {};
+      this.onLeft = options.onLeft || function() {};
+      this.onRight = options.onRight || function() {};
       this.onFire = options.onFire || function() {};
       this.onStart = options.onStart || function() {};
       this.onSelect = options.onSelect || function() {};
@@ -2631,6 +3173,8 @@ void main() {
     reset() {
       this.upReleased = false;
       this.downReleased = false;
+      this.leftReleased = false;
+      this.rightReleased = false;
       this.fireReleased = false;
       this.startReleased = false;
     }
@@ -2640,6 +3184,12 @@ void main() {
       }
       if (input.movementVector.y > -0.6) {
         this.upReleased = true;
+      }
+      if (input.movementVector.x < 0.6) {
+        this.rightReleased = true;
+      }
+      if (input.movementVector.x > -0.6) {
+        this.leftReleased = true;
       }
       if (!input.start) {
         this.startReleased = true;
@@ -2654,6 +3204,14 @@ void main() {
       if (input.movementVector.y <= -0.6 && this.upReleased) {
         this.upReleased = false;
         this.onUp();
+      }
+      if (input.movementVector.x >= 0.6 && this.rightReleased) {
+        this.rightReleased = false;
+        this.onRight();
+      }
+      if (input.movementVector.x <= -0.6 && this.leftReleased) {
+        this.leftReleased = false;
+        this.onLeft();
       }
       if (input.start && this.startReleased) {
         this.startReleased = false;
@@ -2738,28 +3296,41 @@ void main() {
   }
 
   // src/screens/slim-title-screen.ts
+  var SELECTOR_LEFT_X = 65;
+  var SELECTOR_RIGHT_X = 125;
+  var START_Y = 80;
+  var RESET_Y = 95;
+
   class SlimTitleScreen extends GameObject {
-    selectedMenuItem;
-    timeSinceSelected;
-    selecting;
+    selectedMenuItem = 0;
+    timeSinceSelected = 0;
+    selecting = false;
+    resetConfirmPending = false;
     selectorShip;
     selectorRight;
+    menuItems = [];
     constructor(parent) {
       super(parent);
-      this.reset(0);
+      this.reset(0, false);
     }
-    reset(runsCompleted = 0) {
+    reset(runsCompleted = 0, showResetSave = false) {
       super.reset();
       this.selectedMenuItem = 0;
       this.timeSinceSelected = 0;
       this.selecting = false;
-      this.addDisplayText(runsCompleted);
+      this.resetConfirmPending = false;
+      this.menuItems = [];
+      this.addChrome(runsCompleted);
+      this.buildMenu(showResetSave);
       this.createShipSelectors();
+      this.updateSelectorPosition();
       this.addChild(new EventedInput({
+        onUp: this.onUp.bind(this),
+        onDown: this.onDown.bind(this),
         onSelect: this.onSelect.bind(this)
       }));
     }
-    addDisplayText(runsCompleted) {
+    addChrome(runsCompleted) {
       this.addChild(new TextDisplay(this, {
         font: "phoenix",
         message: "PHOENIX",
@@ -2773,12 +3344,6 @@ void main() {
           position: { x: 125, y: 140 }
         }));
       }
-      this.addChild(new TextDisplay(this, {
-        font: "arcade-small",
-        message: "Start",
-        position: { x: 90, y: 80 },
-        isPhysicalEntity: true
-      }));
       this.addChild(new TextDisplay(this, {
         font: "arcade-small",
         message: "WASD - move ship",
@@ -2795,15 +3360,57 @@ void main() {
         position: { x: 5, y: 140 }
       }));
     }
+    buildMenu(showResetSave) {
+      this.menuItems = [
+        { id: "start", message: "Start", position: { x: 90, y: START_Y } }
+      ];
+      if (showResetSave) {
+        this.menuItems.push({
+          id: "reset",
+          message: "Reset Save",
+          position: { x: 80, y: RESET_Y }
+        });
+      }
+      this.menuItems.forEach((item) => {
+        item.label = new TextDisplay(this, {
+          font: "arcade-small",
+          message: item.message,
+          position: { ...item.position },
+          isPhysicalEntity: true
+        });
+        this.addChild(item.label);
+      });
+    }
     createShipSelectors() {
       this.selectorShip = new GameObject;
       this.selectorRight = new GameObject;
       this.selectorShip.sprite = arrowShipSprite();
       this.selectorRight.sprite = arrowShipSprite().invertX();
-      this.selectorShip.position = { x: 70, y: 80 };
-      this.selectorRight.position = { x: 120, y: 80 };
+      this.selectorShip.position = { x: SELECTOR_LEFT_X, y: START_Y };
+      this.selectorRight.position = { x: SELECTOR_RIGHT_X, y: START_Y };
       this.addChild(this.selectorShip);
       this.addChild(this.selectorRight);
+    }
+    updateSelectorPosition() {
+      const item = this.menuItems[this.selectedMenuItem];
+      if (!item) {
+        return;
+      }
+      this.selectorShip.position.x = SELECTOR_LEFT_X;
+      this.selectorRight.position.x = SELECTOR_RIGHT_X;
+      this.selectorShip.position.y = item.position.y;
+      this.selectorRight.position.y = item.position.y;
+    }
+    clearResetConfirm() {
+      if (!this.resetConfirmPending) {
+        return;
+      }
+      this.resetConfirmPending = false;
+      const resetItem = this.menuItems.find((item) => item.id === "reset");
+      if (resetItem?.label) {
+        resetItem.message = "Reset Save";
+        resetItem.label.changeMessage("Reset Save");
+      }
     }
     update(dtime) {
       super.update(dtime);
@@ -2812,12 +3419,41 @@ void main() {
         this.propagateSelection();
       }
     }
-    onSelect() {
-      if (!this.selecting) {
-        this.startGame();
+    onUp() {
+      if (this.selecting || this.selectedMenuItem <= 0) {
+        return;
       }
+      this.selectedMenuItem--;
+      this.clearResetConfirm();
+      this.updateSelectorPosition();
     }
-    startGame() {
+    onDown() {
+      if (this.selecting || this.selectedMenuItem >= this.menuItems.length - 1) {
+        return;
+      }
+      this.selectedMenuItem++;
+      this.clearResetConfirm();
+      this.updateSelectorPosition();
+    }
+    onSelect() {
+      if (this.selecting) {
+        return;
+      }
+      const item = this.menuItems[this.selectedMenuItem];
+      if (!item) {
+        return;
+      }
+      if (item.id === "reset") {
+        if (!this.resetConfirmPending) {
+          this.resetConfirmPending = true;
+          item.message = "Confirm?";
+          item.label?.changeMessage(" Confirm?");
+          return;
+        }
+      }
+      this.startSelectionAnimation();
+    }
+    startSelectionAnimation() {
       this.selecting = true;
       this.timeSinceSelected = 0;
       const x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
@@ -2835,7 +3471,14 @@ void main() {
       }));
     }
     propagateSelection() {
-      this.parent.startNewGame();
+      const item = this.menuItems[this.selectedMenuItem];
+      const parent = this.parent;
+      if (item?.id === "reset") {
+        this.selecting = false;
+        parent.resetMetaProgress();
+        return;
+      }
+      parent.startNewGame();
       this.destroy();
     }
   }
@@ -2933,6 +3576,7 @@ void main() {
     return {
       movementVector: { x: 0, y: 0 },
       fire: false,
+      bomb: false,
       start: false
     };
   }
@@ -2969,6 +3613,9 @@ void main() {
       if (keyboard["SPACE"]) {
         gameInput.fire = true;
       }
+      if (keyboard["B"]) {
+        gameInput.bomb = true;
+      }
       if (keyboard["W"]) {
         gameInput.movementVector.y -= 1;
       }
@@ -2988,6 +3635,9 @@ void main() {
       }
       if (gamepad["A"]) {
         gameInput.fire = true;
+      }
+      if (gamepad["B"]) {
+        gameInput.bomb = true;
       }
       gameInput.movementVector.x += gamepad["left-stick-x"];
       gameInput.movementVector.y += gamepad["left-stick-y"];
@@ -3032,6 +3682,960 @@ void main() {
         this.player.preventInputControl = false;
         this.destroy();
       }
+    }
+  }
+
+  // src/sprites/energy-shield.ts
+  var ENERGY_SHIELD_COLOR = "hsl(179, 92%, 82%)";
+  var UPGRADE_RANK_FILL_COLOR = "hsl(120, 100%, 50%)";
+  var n5 = null;
+  var w4 = "#ffffff";
+  function orbSprite(coreColor) {
+    const c = coreColor;
+    return new Sprite([
+      [n5, w4, w4, w4, w4, n5],
+      [w4, w4, c, c, w4, w4],
+      [w4, c, c, c, c, w4],
+      [w4, c, c, c, c, w4],
+      [w4, w4, c, c, w4, w4],
+      [n5, w4, w4, w4, w4, n5]
+    ]);
+  }
+  function energyShieldOrbSprite() {
+    return orbSprite(ENERGY_SHIELD_COLOR);
+  }
+  function upgradeRankOrbSprite(filled) {
+    return orbSprite(filled ? UPGRADE_RANK_FILL_COLOR : null);
+  }
+  var ENERGY_SHIELD_ORB_SIZE = 6;
+  var UPGRADE_RANK_ORB_SIZE = 6;
+  var ENERGY_SHIELD_ORB_STRIDE = 5;
+  var UPGRADE_RANK_ORB_STRIDE = 5;
+  function applySilhouetteOutline(sprite, outlineColor = ENERGY_SHIELD_COLOR) {
+    const w0 = sprite.width;
+    const h0 = sprite.height;
+    const body = [];
+    for (let x = 0;x < w0 + 2; x++) {
+      body[x] = [];
+      for (let y2 = 0;y2 < h0 + 2; y2++) {
+        body[x][y2] = null;
+      }
+    }
+    for (let x = 0;x < w0; x++) {
+      for (let y2 = 0;y2 < h0; y2++) {
+        body[x + 1][y2 + 1] = sprite.cells[x][y2].color;
+      }
+    }
+    const pixels = body.map((col) => col.slice());
+    const isBody = (x, y2) => x >= 0 && y2 >= 0 && x < body.length && y2 < body[0].length && !!body[x][y2];
+    for (let x = 0;x < pixels.length; x++) {
+      for (let y2 = 0;y2 < pixels[0].length; y2++) {
+        if (pixels[x][y2])
+          continue;
+        if (isBody(x - 1, y2) || isBody(x + 1, y2) || isBody(x, y2 - 1) || isBody(x, y2 + 1) || isBody(x - 1, y2 - 1) || isBody(x + 1, y2 - 1) || isBody(x - 1, y2 + 1) || isBody(x + 1, y2 + 1)) {
+          pixels[x][y2] = outlineColor;
+        }
+      }
+    }
+    const outlined = new Sprite(pixels);
+    const guns = sprite.meta.guns || [];
+    outlined.meta = {
+      ...sprite.meta,
+      guns: guns.map((g) => ({ x: g.x + 1, y: g.y + 1 }))
+    };
+    outlined.setPermanentOffset(sprite.offsetAdjustment);
+    return outlined;
+  }
+
+  // src/components/upgrade-progress-orbs.ts
+  class UpgradeProgressOrbs extends GameObject {
+    index = 2;
+    owned = 0;
+    max = 0;
+    rightX = 0;
+    rowY = 0;
+    constructor(parent, rightX, rowY) {
+      super(parent);
+      this.rightX = rightX;
+      this.rowY = rowY;
+      this.position = { x: rightX, y: rowY };
+    }
+    setProgress(owned, max) {
+      const nextOwned = Math.max(0, Math.min(owned, max));
+      if (nextOwned === this.owned && max === this.max) {
+        return;
+      }
+      this.owned = nextOwned;
+      this.max = max;
+      this.rebuild();
+    }
+    rebuild() {
+      this.children = [];
+      if (this.max <= 0) {
+        return;
+      }
+      const width = this.max * UPGRADE_RANK_ORB_STRIDE + 1;
+      const leftX = this.rightX - width;
+      this.position = { x: leftX, y: this.rowY };
+      for (let i = 0;i < this.max; i++) {
+        const orb = new GameObject(this);
+        orb.sprite = upgradeRankOrbSprite(i < this.owned);
+        orb.position = {
+          x: leftX + i * UPGRADE_RANK_ORB_STRIDE,
+          y: this.rowY
+        };
+        orb.index = this.index;
+        this.addChild(orb);
+      }
+    }
+    static get orbSize() {
+      return UPGRADE_RANK_ORB_SIZE;
+    }
+  }
+
+  // src/components/muzzle-flash.ts
+  var shades = [
+    "#ff0000",
+    "#ff3300",
+    "#ff6600",
+    "#ff9933",
+    "#ffcc00",
+    "#ff9900",
+    "#ffcc00",
+    "#ffcc66",
+    "#ffcc99"
+  ];
+  var frames = shades.map((shade) => {
+    return new Sprite([
+      [shade, shade]
+    ]);
+  });
+
+  class MuzzleFlash extends GameObject {
+    gunPosition;
+    constructor(parent, gunPosition) {
+      super(parent);
+      this.gunPosition = gunPosition;
+      this.sprite = new Animation({
+        frames,
+        millisPerFrame: 25
+      });
+      this.reset();
+    }
+    update(dtime) {
+      super.update(dtime);
+      if (this.sprite && this.sprite.finished) {
+        this.destroy();
+      }
+    }
+    renderToFrame(frame) {
+      if (this.sprite && this.parent && this.parent.position) {
+        this.sprite.renderToFrame(frame, Math.floor(this.parent.position.x + this.gunPosition.x), Math.floor(this.parent.position.y + this.gunPosition.y - 1), (this.parent.index || 0) + 1);
+      }
+    }
+  }
+
+  // src/sprites/player-ship.ts
+  function playerShipSprite() {
+    const n6 = null;
+    const t = "#ffffff";
+    const c = "#ffe8c8";
+    const h = "#fff0e0";
+    const m = "#ffd0a8";
+    const w5 = "#e87848";
+    const e = "#a84028";
+    return new Sprite([
+      [n6, n6, n6, n6, n6, n6, w5, n6, n6],
+      [n6, n6, n6, n6, n6, w5, m, n6, n6],
+      [n6, n6, m, m, m, m, m, m, n6],
+      [t, t, c, c, c, e, h, e, e],
+      [n6, n6, m, m, m, m, m, m, n6],
+      [n6, n6, n6, n6, n6, w5, m, n6, n6],
+      [n6, n6, n6, n6, n6, n6, w5, n6, n6]
+    ], {
+      guns: [
+        { x: 3, y: 1 }
+      ]
+    }).rotateLeft();
+  }
+
+  // src/sprites/player-ship-double-guns.ts
+  function playerShipDoubleGunsSprite() {
+    const n6 = null;
+    const t = "#ffffff";
+    const c = "#ffe0e0";
+    const h = "#fff0f0";
+    const m = "#e09898";
+    const w5 = "#c04040";
+    const e = "#702020";
+    return new Sprite([
+      [n6, n6, n6, n6, n6, w5, w5, n6, n6],
+      [n6, n6, n6, n6, n6, n6, m, n6, n6],
+      [n6, n6, n6, n6, n6, m, m, n6, n6],
+      [n6, n6, m, m, m, m, m, m, n6],
+      [n6, t, c, c, c, e, h, e, e],
+      [n6, n6, m, m, m, m, m, m, n6],
+      [n6, n6, n6, n6, n6, m, m, n6, n6],
+      [n6, n6, n6, n6, n6, n6, m, n6, n6],
+      [n6, n6, n6, n6, n6, w5, w5, n6, n6]
+    ], {
+      guns: [
+        { x: 0, y: 6 },
+        { x: 8, y: 6 }
+      ]
+    }).rotateLeft();
+  }
+
+  // src/sprites/player-ship-wing-guns.ts
+  function playerShipWingGunsSprite() {
+    const n6 = null;
+    const t = "#ffffff";
+    const c = "#d0fff8";
+    const h = "#e8fff8";
+    const m = "#60b8a8";
+    const w5 = "#289080";
+    const e = "#185848";
+    return new Sprite([
+      [n6, n6, n6, n6, w5, w5, w5, n6, n6],
+      [n6, n6, n6, n6, n6, n6, m, n6, n6],
+      [n6, n6, n6, n6, n6, m, m, n6, n6],
+      [n6, n6, m, m, m, m, m, m, n6],
+      [t, t, c, c, c, e, h, e, e],
+      [n6, n6, m, m, m, m, m, m, n6],
+      [n6, n6, n6, n6, n6, m, m, n6, n6],
+      [n6, n6, n6, n6, n6, n6, m, n6, n6],
+      [n6, n6, n6, n6, w5, w5, w5, n6, n6]
+    ], {
+      guns: [
+        { x: 0, y: 5 },
+        { x: 4, y: 1 },
+        { x: 8, y: 5 }
+      ]
+    }).rotateLeft();
+  }
+
+  // src/sprites/player-ship-radial.ts
+  function playerShipRadialSprite() {
+    const n6 = null;
+    const t = "#ffffff";
+    const c = "#f0e0ff";
+    const h = "#f8f0ff";
+    const m = "#c0a0e0";
+    const w5 = "#9040c0";
+    const e = "#502878";
+    return new Sprite([
+      [n6, n6, n6, n6, n6, t, w5, w5, n6],
+      [n6, n6, n6, n6, n6, m, m, w5, n6],
+      [n6, n6, n6, n6, m, m, m, n6, n6],
+      [n6, n6, m, m, m, m, e, n6, n6],
+      [t, t, c, c, h, e, e, e, e],
+      [n6, n6, m, m, m, m, e, n6, n6],
+      [n6, n6, n6, n6, m, m, m, n6, n6],
+      [n6, n6, n6, n6, n6, m, m, w5, n6],
+      [n6, n6, n6, n6, n6, t, w5, w5, n6]
+    ], {
+      guns: [
+        { x: 0, y: 6 },
+        { x: 4, y: 1 },
+        { x: 8, y: 6 }
+      ]
+    }).rotateLeft();
+  }
+
+  // src/ships/player-controlled-ship.ts
+  var BASE_MAX_LIFE = 20;
+  var BASE_SPEED = 50;
+  var BASE_FIRE_RATE = 500;
+  class PlayerControlledShip extends GameObject {
+    type = "player";
+    isPhysicalEntity = true;
+    index = 5;
+    explosion;
+    sprite;
+    position;
+    velocity;
+    shipHangar;
+    activeShipId;
+    lifeUpgrades = 0;
+    fullHealPurchases = 0;
+    energyShield = 0;
+    bombs = 0;
+    armor = 0;
+    SPEED = BASE_SPEED;
+    BULLET_SPEED = 100;
+    FIRE_RATE = BASE_FIRE_RATE;
+    preventInputControl = true;
+    exploding = false;
+    team = 0;
+    damage = 5;
+    timeSinceFired = 0;
+    firing;
+    shieldOutlineApplied = false;
+    bombPressed = false;
+    constructor(parent) {
+      super(parent);
+      this.reset();
+    }
+    get shipProfile() {
+      return this.shipHangar[this.activeShipId];
+    }
+    get comboSegments() {
+      return this.shipProfile.comboSegments;
+    }
+    set comboSegments(value) {
+      this.shipProfile.comboSegments = value;
+    }
+    get comboUpgrades() {
+      return this.shipProfile.comboUpgrades;
+    }
+    set comboUpgrades(value) {
+      this.shipProfile.comboUpgrades = value;
+    }
+    isShipUnlocked(shipId) {
+      return this.shipHangar[shipId].unlocked;
+    }
+    unlockShip(shipId) {
+      this.shipHangar[shipId].unlocked = true;
+      this.triggerEvent("persistMeta");
+    }
+    get bombCapacity() {
+      return this.shipProfile.bombCapacityRanks;
+    }
+    selectShipForRun(shipId) {
+      if (!this.isShipUnlocked(shipId)) {
+        return;
+      }
+      this.activeShipId = shipId;
+      this.applyPersistentUpgrades();
+    }
+    refillBombs() {
+      this.bombs = this.bombCapacity;
+    }
+    profileFor(shipId) {
+      return this.shipHangar[shipId];
+    }
+    reset() {
+      super.reset();
+      this.shipHangar = createStarterHangar();
+      this.activeShipId = defaultActiveShipId();
+      this.shieldOutlineApplied = false;
+      this.clearRunCounters();
+      this.resetForNewRun();
+    }
+    resetForNewRun() {
+      super.reset();
+      this.clearRunCounters();
+      this.activeShipId = defaultActiveShipId();
+      this.shieldOutlineApplied = false;
+      this.explosion = shipExplosion;
+      this.position = { x: -100, y: -100 };
+      this.velocity = { x: 0, y: 0 };
+      this.BULLET_SPEED = 100;
+      this.preventInputControl = true;
+      this.exploding = false;
+      this.team = 0;
+      this.damage = 5;
+      this.timeSinceFired = 0;
+      this.bombPressed = false;
+      this.applyPersistentUpgrades();
+    }
+    clearRunCounters() {
+      this.lifeUpgrades = 0;
+      this.fullHealPurchases = 0;
+      this.energyShield = 0;
+      this.bombs = 0;
+    }
+    applyPersistentUpgrades() {
+      const profile = this.shipProfile;
+      this.maxLife = BASE_MAX_LIFE + profile.maxHealthRanks * 5 + this.lifeUpgrades;
+      this.life = this.maxLife;
+      this.armor = profile.armorRanks;
+      this.SPEED = Math.round(BASE_SPEED * Math.pow(1.1, profile.shipSpeedRanks));
+      this.FIRE_RATE = Math.ceil(BASE_FIRE_RATE * Math.pow(0.9, profile.fireSpeedRanks));
+      this.refillBombs();
+      this.refreshShieldVisual();
+    }
+    syncStatsFromUpgrades(opts) {
+      const profile = this.shipProfile;
+      const previousMax = this.maxLife || BASE_MAX_LIFE;
+      this.maxLife = BASE_MAX_LIFE + profile.maxHealthRanks * 5 + this.lifeUpgrades;
+      this.armor = profile.armorRanks;
+      this.SPEED = Math.round(BASE_SPEED * Math.pow(1.1, profile.shipSpeedRanks));
+      this.FIRE_RATE = Math.ceil(BASE_FIRE_RATE * Math.pow(0.9, profile.fireSpeedRanks));
+      if (opts?.healBy !== undefined) {
+        this.life = Math.min(this.maxLife, (this.life || 0) + opts.healBy);
+      } else if ((this.life || 0) > this.maxLife) {
+        this.life = this.maxLife;
+      } else if (this.maxLife > previousMax && this.life === previousMax) {
+        this.life = this.maxLife;
+      }
+    }
+    refillHealth() {
+      this.life = this.maxLife;
+    }
+    purchaseFullHeal() {
+      if (!this.canPurchaseFullHeal()) {
+        return;
+      }
+      this.fullHealPurchases++;
+      this.refillHealth();
+    }
+    canPurchaseFullHeal() {
+      return (this.life || 0) < (this.maxLife || 0);
+    }
+    purchaseRunHealth() {
+      this.lifeUpgrades++;
+      this.maxLife = (this.maxLife || BASE_MAX_LIFE) + 1;
+      this.life = (this.life || 0) + 1;
+    }
+    purchaseEnergyShield() {
+      this.energyShield++;
+      this.refreshShieldVisual();
+    }
+    purchaseBomb() {
+      if (this.bombs >= this.bombCapacity) {
+        return;
+      }
+      this.bombs++;
+    }
+    canPurchaseBomb() {
+      return this.bombCapacity > 0 && this.bombs < this.bombCapacity;
+    }
+    purchaseMaxHealth(shipId) {
+      const profile = this.shipHangar[shipId];
+      const cap = playerShipDef(shipId).maxHealth;
+      if (profile.maxHealthRanks >= cap)
+        return;
+      profile.maxHealthRanks++;
+      if (shipId === this.activeShipId) {
+        this.syncStatsFromUpgrades({ healBy: 5 });
+      }
+      this.triggerEvent("persistMeta");
+    }
+    purchaseArmor(shipId) {
+      const profile = this.shipHangar[shipId];
+      const cap = playerShipDef(shipId).maxArmor;
+      if (profile.armorRanks >= cap)
+        return;
+      profile.armorRanks++;
+      if (shipId === this.activeShipId) {
+        this.syncStatsFromUpgrades();
+      }
+      this.triggerEvent("persistMeta");
+    }
+    purchaseBombCapacity(shipId) {
+      const profile = this.shipHangar[shipId];
+      const cap = playerShipDef(shipId).maxBombCapacity;
+      if (profile.bombCapacityRanks >= cap)
+        return;
+      profile.bombCapacityRanks++;
+      this.triggerEvent("persistMeta");
+    }
+    purchaseShipSpeed(shipId) {
+      const profile = this.shipHangar[shipId];
+      const cap = playerShipDef(shipId).maxShipSpeed;
+      if (profile.shipSpeedRanks >= cap)
+        return;
+      profile.shipSpeedRanks++;
+      if (shipId === this.activeShipId) {
+        this.syncStatsFromUpgrades();
+      }
+      this.triggerEvent("persistMeta");
+    }
+    purchaseFireSpeed(shipId) {
+      const profile = this.shipHangar[shipId];
+      const cap = playerShipDef(shipId).maxFireSpeed;
+      if (profile.fireSpeedRanks >= cap)
+        return;
+      profile.fireSpeedRanks++;
+      if (shipId === this.activeShipId) {
+        this.syncStatsFromUpgrades();
+      }
+      this.triggerEvent("persistMeta");
+    }
+    purchaseCombo(shipId) {
+      const profile = this.shipHangar[shipId];
+      const cap = playerShipDef(shipId).maxCombo;
+      if (profile.comboSegments >= cap)
+        return;
+      profile.comboSegments++;
+      profile.comboUpgrades++;
+      this.triggerEvent("persistMeta");
+    }
+    applyActiveShipSprite() {
+      switch (this.activeShipId) {
+        case "starter":
+          this.sprite = playerShipSprite().rotateRight();
+          break;
+        case "double":
+          this.sprite = playerShipDoubleGunsSprite().rotateRight();
+          break;
+        case "triple":
+          this.sprite = playerShipWingGunsSprite().rotateRight();
+          break;
+        case "radial":
+          this.sprite = playerShipRadialSprite().rotateRight();
+          break;
+      }
+    }
+    refreshShieldVisual() {
+      if (this.exploding) {
+        return;
+      }
+      if (this.shieldOutlineApplied && this.position) {
+        this.position.x += 1;
+        this.position.y += 1;
+        this.shieldOutlineApplied = false;
+      }
+      this.applyActiveShipSprite();
+      if (this.energyShield > 0 && this.sprite && this.position) {
+        this.sprite = applySilhouetteOutline(this.sprite);
+        this.position.x -= 1;
+        this.position.y -= 1;
+        this.shieldOutlineApplied = true;
+      }
+    }
+    static spriteForShipId(shipId) {
+      switch (shipId) {
+        case "starter":
+          return playerShipSprite().rotateRight();
+        case "double":
+          return playerShipDoubleGunsSprite().rotateRight();
+        case "triple":
+          return playerShipWingGunsSprite().rotateRight();
+        case "radial":
+          return playerShipRadialSprite().rotateRight();
+      }
+    }
+    bulletSpreadX(gunIndex, gunCount) {
+      if (this.activeShipId === "radial" && gunCount === 3) {
+        return (gunIndex - 1) * 10;
+      }
+      return 0;
+    }
+    processInput(input) {
+      super.processInput(input);
+      if (this.preventInputControl || this.exploding || this.destroyed) {
+        return;
+      }
+      this.velocity.x = input.movementVector.x * this.SPEED;
+      this.velocity.y = input.movementVector.y * this.SPEED;
+      this.firing = input.fire;
+      if (input.bomb && !this.bombPressed) {
+        this.handleBombPress();
+      }
+      this.bombPressed = !!input.bomb;
+    }
+    handleBombPress() {
+      const phoenix = this.parent;
+      const liveBomb = phoenix?.activeBomb && !phoenix.activeBomb.destroyed && !phoenix.activeBomb.exploding;
+      if (liveBomb) {
+        this.triggerEvent("detonateBomb");
+        return;
+      }
+      if (this.bombs <= 0 || !this.position || !this.sprite) {
+        return;
+      }
+      this.bombs--;
+      this.triggerEvent("spawnBomb", {
+        team: this.team,
+        position: {
+          x: this.position.x + Math.floor(this.sprite.width / 2) - 1,
+          y: this.position.y
+        }
+      });
+    }
+    update(dtime) {
+      super.update(dtime);
+      this.timeSinceFired += dtime;
+      if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
+        this.timeSinceFired = 0;
+        this.fire();
+      }
+    }
+    hideOffscreen() {
+      this.preventInputControl = true;
+      this.position.x = -100;
+      this.velocity.x = 0;
+      this.velocity.y = 0;
+    }
+    checkBoundaries() {
+      if (this.preventInputControl) {
+        return;
+      }
+      if (this.position.x < 0) {
+        this.position.x = 0;
+      }
+      if (this.position.y < 0) {
+        this.position.y = 0;
+      }
+      const parent = this.parent;
+      if (parent && this.sprite) {
+        if (this.position.x + this.sprite.width > parent.width) {
+          this.position.x = parent.width - this.sprite.width;
+        }
+        if (this.position.y + this.sprite.height > parent.height) {
+          this.position.y = parent.height - this.sprite.height;
+        }
+      }
+    }
+    fire() {
+      const guns = this.sprite.meta.guns;
+      guns.forEach(function(gun, index) {
+        this.triggerEvent("spawnBullet", {
+          team: this.team,
+          damage: 1,
+          velocity: {
+            x: this.bulletSpreadX(index, guns.length),
+            y: -this.BULLET_SPEED
+          },
+          position: {
+            x: this.position.x + gun.x,
+            y: this.position.y + gun.y
+          }
+        });
+        this.addChild(new MuzzleFlash(this, gun));
+      }.bind(this));
+    }
+    applyDamage(damage, sourceEntity) {
+      if (damage <= 0) {
+        super.applyDamage(damage, sourceEntity);
+        return;
+      }
+      if (this.energyShield > 0) {
+        this.energyShield--;
+        this.refreshShieldVisual();
+        return;
+      }
+      this.triggerEvent("playerHit");
+      const effectiveDamage = Math.max(1, damage - this.armor);
+      super.applyDamage(effectiveDamage, sourceEntity);
+    }
+  }
+
+  // src/levels/hangar.ts
+  var TAB_Y = 22;
+  var SHIP_TAB_START_X = 100;
+  var SHIP_TAB_STRIDE = 22;
+  var STAT_BASE_Y = 40;
+  var STAT_ROW_STRIDE = 12;
+  var STAT_LABEL_X2 = 40;
+  var PROGRESS_RIGHT_X = 182;
+  var SELECT_Y = 120;
+  var SELECT_LABEL_X = 50;
+  var SELECTOR_X = 20;
+
+  class Hangar extends GameObject {
+    isShop = true;
+    index = 1;
+    disabledColor = "#777";
+    game;
+    player;
+    input;
+    titleText;
+    selectText;
+    selectorShip;
+    tabChrome = [];
+    statRows = [];
+    activeTabIndex = 0;
+    timeSinceSelected = 0;
+    selecting = false;
+    isDone = false;
+    interactive = false;
+    constructor(parent, game) {
+      super(parent);
+      this.game = game;
+      this.player = game.player;
+      this.input = new EventedInput({
+        onLeft: this.onLeft.bind(this),
+        onRight: this.onRight.bind(this),
+        onSelect: this.onSelect.bind(this)
+      });
+      this.reset();
+    }
+    reset() {
+      super.reset();
+      this.input.reset();
+      this.isDone = false;
+      this.selecting = false;
+      this.interactive = false;
+      this.activeTabIndex = 0;
+      this.tabChrome = [];
+      this.statRows = [];
+      this.createTitle();
+      this.createTabChrome();
+      this.createSelectRow();
+      this.createSelectorShip();
+      this.addChild(this.input);
+    }
+    start() {
+      this.input.reset();
+      this.isDone = false;
+      this.selecting = false;
+      this.clearStatRows();
+      const unlocked = this.unlockedShipIds();
+      if (unlocked.length <= 1) {
+        this.interactive = false;
+        this.hideChrome();
+        this.isDone = true;
+        return;
+      }
+      this.interactive = true;
+      this.showChrome();
+      const activeIndex = playerShipDefs.findIndex((def) => def.id === this.player.activeShipId);
+      this.activeTabIndex = activeIndex >= 0 ? activeIndex : 0;
+      this.refreshTabChrome();
+      this.rebuildStatsForActiveTab();
+      this.refreshSelectRow();
+    }
+    checkIfLevelComplete() {
+      return this.isDone;
+    }
+    update(dtime) {
+      super.update(dtime);
+      if (!this.interactive) {
+        return;
+      }
+      this.timeSinceSelected += dtime;
+      if (this.selecting && this.timeSinceSelected > 595) {
+        this.propagateSelection();
+      }
+    }
+    unlockedShipIds() {
+      return playerShipDefs.filter((def) => this.player.isShipUnlocked(def.id)).map((def) => def.id);
+    }
+    activeShipId() {
+      return playerShipDefs[this.activeTabIndex].id;
+    }
+    createTitle() {
+      this.titleText = new TextDisplay(this, {
+        font: "arcade",
+        message: "Hangar",
+        position: { x: 70, y: 8 },
+        color: this.game.interfaceColor
+      });
+      this.addChild(this.titleText);
+    }
+    createTabChrome() {
+      this.tabChrome = playerShipDefs.map((def, index) => {
+        const sprite = PlayerControlledShip.spriteForShipId(def.id);
+        const x = SHIP_TAB_START_X + index * SHIP_TAB_STRIDE;
+        const shipIcon = new GameObject;
+        shipIcon.sprite = sprite;
+        shipIcon.position = { x, y: TAB_Y - 2 };
+        shipIcon.index = 2;
+        this.addChild(shipIcon);
+        const leftBracket = new TextDisplay(this, {
+          font: "arcade-small",
+          message: "[",
+          position: { x: x - 5, y: TAB_Y },
+          color: this.game.interfaceColor
+        });
+        const rightBracket = new TextDisplay(this, {
+          font: "arcade-small",
+          message: "]",
+          position: { x: x + sprite.width + 1, y: TAB_Y },
+          color: this.game.interfaceColor
+        });
+        this.addChild(leftBracket);
+        this.addChild(rightBracket);
+        return { shipId: def.id, shipIcon, leftBracket, rightBracket };
+      });
+      this.refreshTabChrome();
+    }
+    refreshTabChrome() {
+      this.tabChrome.forEach((tab, index) => {
+        const active = index === this.activeTabIndex;
+        const unlocked = this.player.isShipUnlocked(tab.shipId);
+        tab.shipIcon.sprite = PlayerControlledShip.spriteForShipId(tab.shipId);
+        if (!unlocked) {
+          tab.shipIcon.sprite.applyColor(this.disabledColor);
+        }
+        tab.leftBracket.changeMessage(active ? "[" : " ");
+        tab.rightBracket.changeMessage(active ? "]" : " ");
+        tab.leftBracket.updateColor(this.game.interfaceColor);
+        tab.rightBracket.updateColor(this.game.interfaceColor);
+      });
+    }
+    createSelectRow() {
+      this.selectText = new TextDisplay(this, {
+        font: "arcade-small",
+        message: "Select",
+        position: { x: SELECT_LABEL_X, y: SELECT_Y },
+        color: this.game.interfaceColor,
+        isPhysicalEntity: true
+      });
+      this.addChild(this.selectText);
+    }
+    createSelectorShip() {
+      this.selectorShip = new GameObject;
+      this.selectorShip.sprite = arrowShipSprite();
+      this.selectorShip.position = { x: SELECTOR_X, y: SELECT_Y };
+      this.addChild(this.selectorShip);
+    }
+    refreshSelectRow() {
+      const unlocked = this.player.isShipUnlocked(this.activeShipId());
+      this.selectText.updateColor(unlocked ? this.game.interfaceColor : this.disabledColor);
+    }
+    hideChrome() {
+      if (this.titleText.position) {
+        this.titleText.position.y = -100;
+      }
+      if (this.selectorShip.position) {
+        this.selectorShip.position.y = -100;
+      }
+      if (this.selectText.position) {
+        this.selectText.position.y = -100;
+      }
+      this.tabChrome.forEach((tab) => {
+        if (tab.shipIcon.position) {
+          tab.shipIcon.position.y = -100;
+        }
+        if (tab.leftBracket.position) {
+          tab.leftBracket.position.y = -100;
+        }
+        if (tab.rightBracket.position) {
+          tab.rightBracket.position.y = -100;
+        }
+      });
+    }
+    showChrome() {
+      if (this.titleText.position) {
+        this.titleText.position.y = 8;
+      }
+      if (this.selectorShip.position) {
+        this.selectorShip.position.y = SELECT_Y;
+      }
+      if (this.selectText.position) {
+        this.selectText.position.y = SELECT_Y;
+      }
+      this.tabChrome.forEach((tab) => {
+        if (tab.shipIcon.position) {
+          tab.shipIcon.position.y = TAB_Y - 2;
+        }
+        if (tab.leftBracket.position) {
+          tab.leftBracket.position.y = TAB_Y;
+        }
+        if (tab.rightBracket.position) {
+          tab.rightBracket.position.y = TAB_Y;
+        }
+      });
+    }
+    clearStatRows() {
+      this.statRows.forEach((row) => {
+        this.removeChild(row.label);
+        this.removeChild(row.progressOrbs);
+      });
+      this.statRows = [];
+    }
+    rebuildStatsForActiveTab() {
+      this.clearStatRows();
+      const shipId = this.activeShipId();
+      if (!this.player.isShipUnlocked(shipId)) {
+        return;
+      }
+      const profile = this.player.profileFor(shipId);
+      const def = playerShipDef(shipId);
+      const stats = this.statDescriptors(profile, def);
+      this.statRows = stats.map((stat, index) => {
+        const y2 = STAT_BASE_Y + index * STAT_ROW_STRIDE;
+        const label = new TextDisplay(this, {
+          font: "arcade-small",
+          message: stat.text,
+          position: { x: STAT_LABEL_X2, y: y2 },
+          color: this.game.interfaceColor
+        });
+        this.addChild(label);
+        const progressOrbs = new UpgradeProgressOrbs(this, PROGRESS_RIGHT_X, y2);
+        progressOrbs.setProgress(stat.owned, stat.max);
+        this.addChild(progressOrbs);
+        return { label, progressOrbs };
+      });
+    }
+    statDescriptors(profile, def) {
+      const health = BASE_MAX_LIFE + profile.maxHealthRanks * 5;
+      const speedPct = profile.shipSpeedRanks * 10;
+      const firePct = profile.fireSpeedRanks * 10;
+      const comboMult = profile.comboSegments + 1;
+      return [
+        {
+          text: "Health: " + health,
+          owned: profile.maxHealthRanks,
+          max: def.maxHealth
+        },
+        {
+          text: "Armor: " + profile.armorRanks,
+          owned: profile.armorRanks,
+          max: def.maxArmor
+        },
+        {
+          text: "Bombs: " + profile.bombCapacityRanks,
+          owned: profile.bombCapacityRanks,
+          max: def.maxBombCapacity
+        },
+        {
+          text: "Ship Speed: +" + speedPct + "%",
+          owned: profile.shipSpeedRanks,
+          max: def.maxShipSpeed
+        },
+        {
+          text: "Fire Rate: +" + firePct + "%",
+          owned: profile.fireSpeedRanks,
+          max: def.maxFireSpeed
+        },
+        {
+          text: "Combo: " + comboMult + "x",
+          owned: profile.comboSegments,
+          max: def.maxCombo
+        }
+      ];
+    }
+    setActiveTab(index) {
+      if (index < 0 || index >= playerShipDefs.length || index === this.activeTabIndex || this.selecting) {
+        return;
+      }
+      this.activeTabIndex = index;
+      this.refreshTabChrome();
+      this.rebuildStatsForActiveTab();
+      this.refreshSelectRow();
+    }
+    onLeft() {
+      if (!this.interactive || this.selecting) {
+        return;
+      }
+      this.setActiveTab(this.activeTabIndex - 1);
+    }
+    onRight() {
+      if (!this.interactive || this.selecting) {
+        return;
+      }
+      this.setActiveTab(this.activeTabIndex + 1);
+    }
+    onSelect() {
+      if (!this.interactive || this.selecting) {
+        return;
+      }
+      if (!this.player.isShipUnlocked(this.activeShipId())) {
+        return;
+      }
+      this.selecting = true;
+      this.timeSinceSelected = 0;
+      const x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
+      const y2 = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
+      this.addChild(new Bullet(this, {
+        team: 2,
+        position: { x: x1, y: y2 },
+        velocity: { x: 50, y: 0 }
+      }));
+    }
+    propagateSelection() {
+      const shipId = this.activeShipId();
+      if (this.player.isShipUnlocked(shipId)) {
+        this.player.selectShipForRun(shipId);
+        this.game.comboGauge.syncFromPlayer();
+      }
+      this.selecting = false;
+      this.isDone = true;
     }
   }
 
@@ -3117,47 +4721,31 @@ void main() {
     });
   }
 
-  // src/components/muzzle-flash.ts
-  var shades = [
-    "#ff0000",
-    "#ff3300",
-    "#ff6600",
-    "#ff9933",
-    "#ffcc00",
-    "#ff9900",
-    "#ffcc00",
-    "#ffcc66",
-    "#ffcc99"
-  ];
-  var frames = shades.map((shade) => {
-    return new Sprite([
-      [shade, shade]
-    ]);
-  });
-
-  class MuzzleFlash extends GameObject {
-    gunPosition;
-    constructor(parent, gunPosition) {
-      super(parent);
-      this.gunPosition = gunPosition;
-      this.sprite = new Animation({
-        frames,
-        millisPerFrame: 25
-      });
-      this.reset();
-    }
-    update(dtime) {
-      super.update(dtime);
-      if (this.sprite && this.sprite.finished) {
-        this.destroy();
-      }
-    }
-    renderToFrame(frame) {
-      if (this.sprite && this.parent && this.parent.position) {
-        this.sprite.renderToFrame(frame, Math.floor(this.parent.position.x + this.gunPosition.x), Math.floor(this.parent.position.y + this.gunPosition.y - 1), (this.parent.index || 0) + 1);
-      }
-    }
-  }
+  // src/balance/enemies.ts
+  var arrowScout = {
+    contactDamage: (dm) => 30 + dm,
+    life: (dm) => dm,
+    bulletDamage: (dm) => 4 + dm,
+    bulletSpeed: 100
+  };
+  var arrowBoss = {
+    contactDamage: (dm) => 50 * dm,
+    life: (dm) => 75 + 25 * dm,
+    bulletDamage: (dm) => 9 + dm,
+    bulletSpeed: 125
+  };
+  var dashScout = {
+    contactDamage: (dm) => 15 + dm,
+    life: (dm) => dm + 2,
+    bulletDamage: (dm) => 3 + dm * 2,
+    bulletSpeed: 125
+  };
+  var dashBoss = {
+    contactDamage: (dm) => 40 * dm,
+    life: (dm) => 100 + 50 * dm,
+    bulletDamage: (dm) => 5 + dm * 2,
+    bulletSpeed: 150
+  };
 
   // src/ships/arrow-boss.ts
   var ENEMY_ORBIT_SPRITE_WIDTH = 8;
@@ -3165,7 +4753,7 @@ void main() {
 
   class ArrowBoss extends GameObject {
     isPhysicalEntity = true;
-    BULLET_SPEED = 120;
+    BULLET_SPEED = arrowBoss.bulletSpeed;
     team = 1;
     index = 5;
     difficultyMultiplier;
@@ -3188,9 +4776,9 @@ void main() {
       this.orbitPathOffset = undefined;
       this.position = { x: 0, y: 0 };
       this.velocity = { x: 0, y: 0 };
-      this.damage = 50 * this.difficultyMultiplier;
-      this.life = 20 * this.difficultyMultiplier;
-      this.maxLife = 20 * this.difficultyMultiplier;
+      this.damage = arrowBoss.contactDamage(this.difficultyMultiplier);
+      this.life = arrowBoss.life(this.difficultyMultiplier);
+      this.maxLife = this.life;
     }
     enableOrbitPathAlignment() {
       this.orbitPathOffset = {
@@ -3209,7 +4797,7 @@ void main() {
         team: this.team,
         position,
         velocity,
-        damage: 4 + this.difficultyMultiplier
+        damage: arrowBoss.bulletDamage(this.difficultyMultiplier)
       });
       this.addChild(new MuzzleFlash(this, gun));
     }
@@ -3224,6 +4812,34 @@ void main() {
       super.destroy();
     }
   }
+
+  // src/balance/fire.ts
+  var randomRateFire = {
+    thresholdMinMs: 500,
+    thresholdMaxMs: 3500,
+    initialDelayMs: 0
+  };
+  var chainGunFire = {
+    fireRateMs: 150,
+    burstSize: 5,
+    thresholdMinMs: 2000,
+    thresholdMaxMs: 6000
+  };
+  var burstOnPause = {
+    burstSize: 3,
+    fireRateMs: 120,
+    windupMs: 80
+  };
+  var dashAndPause = {
+    dashSpeed: 120,
+    pauseSecondsMin: 0.8,
+    pauseSecondsMax: 1.6,
+    telegraphSeconds: 0.38,
+    minDashDistance: 25,
+    maxDashDistance: 70,
+    initialWaitSecondsMin: 1,
+    initialWaitSecondsMax: 10
+  };
 
   // src/scripts/chain-gun-fire.ts
   class ChainGunFire extends GameObject {
@@ -3242,10 +4858,10 @@ void main() {
       const opts = options || {};
       this.ship = ship;
       this.gunIndex = opts.gunIndex ?? 0;
-      this.fireRate = opts.fireRate ?? 150;
-      this.burstSize = opts.burstSize ?? 5;
-      this.thresholdMin = opts.thresholdMin ?? 2000;
-      this.thresholdMax = opts.thresholdMax ?? 6000;
+      this.fireRate = opts.fireRate ?? chainGunFire.fireRateMs;
+      this.burstSize = opts.burstSize ?? chainGunFire.burstSize;
+      this.thresholdMin = opts.thresholdMin ?? chainGunFire.thresholdMinMs;
+      this.thresholdMax = opts.thresholdMax ?? chainGunFire.thresholdMaxMs;
       this.reset();
     }
     start() {
@@ -3308,7 +4924,7 @@ void main() {
   // src/ships/arrow-ship.ts
   class ArrowShip extends GameObject {
     isPhysicalEntity = true;
-    BULLET_SPEED = 100;
+    BULLET_SPEED = arrowScout.bulletSpeed;
     team = 1;
     index = 5;
     difficultyMultiplier;
@@ -3335,9 +4951,9 @@ void main() {
       this.gun = this.sprite.meta.guns[0];
       this.position = { x: 0, y: 0 };
       this.velocity = { x: 0, y: 0 };
-      this.damage = 4 + this.difficultyMultiplier;
-      this.maxLife = this.difficultyMultiplier;
-      this.life = this.difficultyMultiplier;
+      this.damage = arrowScout.contactDamage(this.difficultyMultiplier);
+      this.maxLife = arrowScout.life(this.difficultyMultiplier);
+      this.life = this.maxLife;
     }
     fire() {
       const position = {
@@ -3349,7 +4965,7 @@ void main() {
         team: this.team,
         position,
         velocity,
-        damage: 4 + this.difficultyMultiplier
+        damage: arrowScout.bulletDamage(this.difficultyMultiplier)
       });
       this.addChild(new MuzzleFlash(this, this.gun));
     }
@@ -3381,9 +4997,9 @@ void main() {
       const opts = options || {};
       this.ship = ship;
       this.gunIndex = opts.gunIndex ?? 0;
-      this.thresholdMin = opts.thresholdMin ?? 1000;
-      this.thresholdMax = opts.thresholdMax ?? 3000;
-      this.initialDelayMs = opts.initialDelayMs ?? 0;
+      this.thresholdMin = opts.thresholdMin ?? randomRateFire.thresholdMinMs;
+      this.thresholdMax = opts.thresholdMax ?? randomRateFire.thresholdMaxMs;
+      this.initialDelayMs = opts.initialDelayMs ?? randomRateFire.initialDelayMs;
       this.reset();
     }
     start() {
@@ -3423,6 +5039,10 @@ void main() {
   }
 
   // src/components/life-meter.ts
+  var BOMB_ICON_SIZE = 3;
+  var BOMB_ICON_STRIDE = 4;
+  var BOMB_ICON_GAP = 1;
+
   class LifeMeter extends GameObject {
     index = 1;
     entity;
@@ -3436,6 +5056,10 @@ void main() {
     mirror;
     currentLife;
     maxLife;
+    currentShield;
+    currentBombs;
+    shieldOrbs = [];
+    bombIcons = [];
     constructor(boundEntity, options) {
       super(boundEntity);
       const opts = options || {};
@@ -3451,12 +5075,35 @@ void main() {
       this.mirror = !!opts.mirror;
       this.reset();
     }
+    reset() {
+      super.reset();
+      this.currentLife = undefined;
+      this.maxLife = undefined;
+      this.currentShield = undefined;
+      this.currentBombs = undefined;
+      this.shieldOrbs = [];
+      this.bombIcons = [];
+    }
+    showsPlayerHudExtras() {
+      return !!this.scale && !this.horizontal && this.showBorder;
+    }
+    entityShield() {
+      return this.entity.energyShield || 0;
+    }
+    entityBombs() {
+      return this.entity.bombs || 0;
+    }
     update() {
       if (this.entity.destroyed) {
         this.destroy();
         return;
       }
-      if (this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife) {
+      const lifeChanged = this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife;
+      const shield = this.entityShield();
+      const bombs2 = this.entityBombs();
+      const shieldChanged = this.showsPlayerHudExtras() && shield !== this.currentShield;
+      const bombsChanged = this.showsPlayerHudExtras() && bombs2 !== this.currentBombs;
+      if (lifeChanged) {
         this.currentLife = this.entity.life;
         this.maxLife = this.entity.maxLife;
         if (this.scale && this.maxLife) {
@@ -3467,6 +5114,29 @@ void main() {
         }
         this.redrawMeter();
       }
+      if (lifeChanged || shieldChanged) {
+        this.currentShield = shield;
+        this.syncShieldOrbs();
+      }
+      if (lifeChanged || bombsChanged) {
+        this.currentBombs = bombs2;
+        this.syncBombIcons();
+      }
+    }
+    renderToFrame(frame) {
+      if (this.sprite && this.position) {
+        this.sprite.renderToFrame(frame, Math.floor(this.position.x), Math.floor(this.position.y), this.index || 0);
+      }
+      this.shieldOrbs.forEach((orb) => {
+        if (orb.sprite && orb.position) {
+          orb.sprite.renderToFrame(frame, Math.floor(orb.position.x), Math.floor(orb.position.y), (this.index || 0) + 1);
+        }
+      });
+      this.bombIcons.forEach((icon) => {
+        if (icon.sprite && icon.position) {
+          icon.sprite.renderToFrame(frame, Math.floor(icon.position.x), Math.floor(icon.position.y), (this.index || 0) + 1);
+        }
+      });
     }
     redrawMeter() {
       const colors = this.buildSpriteColorArray();
@@ -3478,6 +5148,45 @@ void main() {
         this.sprite.rotateRight();
       }
       this.updatePosition();
+    }
+    syncShieldOrbs() {
+      if (!this.showsPlayerHudExtras() || !this.position || !this.sprite) {
+        this.shieldOrbs = [];
+        return;
+      }
+      const count = this.currentShield || 0;
+      this.shieldOrbs = [];
+      const barWidth = this.sprite.width;
+      const orbX = this.position.x + Math.floor((barWidth - ENERGY_SHIELD_ORB_SIZE) / 2);
+      const firstOrbY = this.position.y - ENERGY_SHIELD_ORB_SIZE + 1;
+      for (let i = 0;i < count; i++) {
+        const orb = new GameObject;
+        orb.sprite = energyShieldOrbSprite();
+        orb.position = {
+          x: orbX,
+          y: firstOrbY - i * ENERGY_SHIELD_ORB_STRIDE
+        };
+        this.shieldOrbs.push(orb);
+      }
+    }
+    syncBombIcons() {
+      if (!this.showsPlayerHudExtras() || !this.position || !this.sprite) {
+        this.bombIcons = [];
+        return;
+      }
+      const count = this.currentBombs || 0;
+      this.bombIcons = [];
+      const iconX = this.position.x - BOMB_ICON_SIZE - BOMB_ICON_GAP;
+      const firstIconY = this.position.y + this.sprite.height - BOMB_ICON_SIZE;
+      for (let i = 0;i < count; i++) {
+        const icon = new GameObject;
+        icon.sprite = bombSprite();
+        icon.position = {
+          x: iconX,
+          y: firstIconY - i * BOMB_ICON_STRIDE
+        };
+        this.bombIcons.push(icon);
+      }
     }
     buildSpriteColorArray() {
       const percentage = (this.currentLife || 0) / (this.maxLife || 1) * 100;
@@ -3550,6 +5259,27 @@ void main() {
     }
   }
 
+  // src/balance/economy.ts
+  var MONEY_DROP_VALUE = 5;
+  var MONEY_DROP_FALL_SPEED = 50;
+  function moneyDropDivisor(difficultyMultiplier) {
+    return difficultyMultiplier > 5 ? 3 : 4;
+  }
+  function moneyDropCount(shipCount, difficultyMultiplier) {
+    return Math.floor(shipCount / moneyDropDivisor(difficultyMultiplier));
+  }
+  var BOSS_MONEY_OFFSETS = [
+    { x: 0, y: 0 },
+    { x: 7, y: 0 },
+    { x: 4, y: 8 }
+  ];
+  function bossMoneyPositions(origin) {
+    return BOSS_MONEY_OFFSETS.map((offset) => ({
+      x: origin.x + offset.x,
+      y: origin.y + offset.y
+    }));
+  }
+
   // src/components/money-drop.ts
   class MoneyDrop extends GameObject {
     isPhysicalEntity = true;
@@ -3559,9 +5289,9 @@ void main() {
     value;
     constructor(parent, position, velocity) {
       super(parent);
-      this.value = 5;
+      this.value = MONEY_DROP_VALUE;
       this.position = { x: position.x, y: position.y };
-      this.velocity = velocity ? { x: velocity.x, y: velocity.y } : { x: 0, y: 50 };
+      this.velocity = velocity ? { x: velocity.x, y: velocity.y } : { x: 0, y: MONEY_DROP_FALL_SPEED };
       this.sprite = arcade_default["$"];
       this.reset();
     }
@@ -3577,6 +5307,8 @@ void main() {
     applyDamage(damage, sourceEntity) {
       if (sourceEntity && sourceEntity.type === "player") {
         this.triggerEvent("moneyCollected", this.value);
+        this.destroy();
+      } else if (sourceEntity && sourceEntity.type === "bomb") {
         this.destroy();
       }
     }
@@ -3672,6 +5404,35 @@ void main() {
     }
   }
 
+  // src/balance/group-01.ts
+  var group01 = {
+    bannerMs: 2000,
+    columnStartBase: 3,
+    columnStartMin: 1,
+    columnEndBase: 8,
+    columnEndMax: 10,
+    columnSpacing: 10,
+    columnOffsetX: 39,
+    enterY: [-40, -30, -20, -10],
+    restY: [45, 55, 65, 75],
+    moveTimeSeconds: 3,
+    swayOffsetX: 40,
+    swayOffsetY: 30,
+    bossPatrolY: 1,
+    bossPatrolLeftX: 1,
+    bossPatrolRightMargin: 5,
+    bossPatrolSeconds: 8
+  };
+  function group01ColumnRange(difficultyMultiplier) {
+    let start = group01.columnStartBase - difficultyMultiplier;
+    if (start < group01.columnStartMin)
+      start = group01.columnStartMin;
+    let end = group01.columnEndBase + difficultyMultiplier;
+    if (end > group01.columnEndMax)
+      end = group01.columnEndMax;
+    return { start, end };
+  }
+
   // src/scripts/watch-for-death.ts
   class WatchForDeath extends GameObject {
     entity;
@@ -3710,7 +5471,7 @@ void main() {
     constructor(parent, game, difficultyMultiplier, alternateShip, rowCount, levelName) {
       super(parent);
       this.alternateShip = alternateShip;
-      this.difficultyMultiplier = difficultyMultiplier;
+      this.difficultyMultiplier = difficultyMultiplier + (alternateShip ? 1 : 0);
       this.width = this.parent.width;
       this.height = this.parent.height;
       if (rowCount === "boss") {
@@ -3725,20 +5486,19 @@ void main() {
     start() {
       this.ships = [];
       this.scripts = [];
-      let start = 4 - this.difficultyMultiplier;
-      start = start < 1 ? 1 : start;
-      let end = 7 + this.difficultyMultiplier;
-      end = end > 10 ? 10 : end;
+      const { start, end } = group01ColumnRange(this.difficultyMultiplier);
+      const time = group01.moveTimeSeconds;
       for (let i = start;i <= end; i++) {
-        this.newShip(10 * i + 39, -40, 45, 3);
+        const x = group01.columnSpacing * i + group01.columnOffsetX;
+        this.newShip(x, group01.enterY[0], group01.restY[0], time);
         if (this.rowCount >= 2) {
-          this.newShip(10 * i + 39, -30, 55, 3);
+          this.newShip(x, group01.enterY[1], group01.restY[1], time);
         }
         if (this.rowCount >= 3) {
-          this.newShip(10 * i + 39, -20, 65, 3);
+          this.newShip(x, group01.enterY[2], group01.restY[2], time);
         }
         if (this.rowCount >= 4) {
-          this.newShip(10 * i + 39, -10, 75, 3);
+          this.newShip(x, group01.enterY[3], group01.restY[3], time);
         }
       }
       this.attachMoneyScripts();
@@ -3746,7 +5506,7 @@ void main() {
         this.newBossShip();
       }
       if (this.levelName) {
-        this.scripts.push(new FadeoutBanner(this, this.levelName, 2000));
+        this.scripts.push(new FadeoutBanner(this, this.levelName, group01.bannerMs));
       }
       this.ships.forEach((ship) => {
         this.addChild(ship);
@@ -3767,17 +5527,19 @@ void main() {
     }
     newShip(startX, startY, endY, time) {
       const ship = new ArrowShip(this, this.difficultyMultiplier, this.alternateShip);
+      const swayX = group01.swayOffsetX;
+      const swayY = group01.swayOffsetY;
       ship.position.x = startX;
       ship.position.y = startY;
       this.scripts.push(new FireSingleGunRandomRate(this, ship));
       this.scripts.push(new ScriptChain(this, false, [
         new MoveObjectToPoint(null, ship, { x: startX, y: endY }, time * 2),
-        new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time),
+        new MoveObjectToPoint(null, ship, { x: startX - swayX, y: endY }, time),
         new ScriptChain(this, true, [
-          new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY - 30 }, time),
-          new MoveObjectToPoint(null, ship, { x: startX + 40, y: endY - 30 }, time * 2),
-          new MoveObjectToPoint(null, ship, { x: startX + 40, y: endY }, time),
-          new MoveObjectToPoint(null, ship, { x: startX - 40, y: endY }, time * 2)
+          new MoveObjectToPoint(null, ship, { x: startX - swayX, y: endY - swayY }, time),
+          new MoveObjectToPoint(null, ship, { x: startX + swayX, y: endY - swayY }, time * 2),
+          new MoveObjectToPoint(null, ship, { x: startX + swayX, y: endY }, time),
+          new MoveObjectToPoint(null, ship, { x: startX - swayX, y: endY }, time * 2)
         ])
       ]));
       this.ships.push(ship);
@@ -3786,8 +5548,10 @@ void main() {
       const boss = new ArrowBoss(this, this.difficultyMultiplier);
       const gameWidth = this.game.width;
       const bossWidth = boss.sprite.width;
+      const patrolY = group01.bossPatrolY;
+      const patrolSeconds = group01.bossPatrolSeconds;
       boss.position.x = -this.game.width / 2;
-      boss.position.y = 1;
+      boss.position.y = patrolY;
       boss.addChild(new LifeMeter(boss, {
         position: { x: 0, y: 0 },
         length: this.game.width,
@@ -3798,29 +5562,21 @@ void main() {
       this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
       this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
       this.scripts.push(new ScriptChain(this, true, [
-        new MoveObjectToPoint(null, boss, { x: 1, y: 1 }, 8),
-        new MoveObjectToPoint(null, boss, { x: gameWidth - bossWidth - 5, y: 1 }, 8)
+        new MoveObjectToPoint(null, boss, { x: group01.bossPatrolLeftX, y: patrolY }, patrolSeconds),
+        new MoveObjectToPoint(null, boss, {
+          x: gameWidth - bossWidth - group01.bossPatrolRightMargin,
+          y: patrolY
+        }, patrolSeconds)
       ]));
       this.scripts.push(new WatchForDeath(this, boss, () => {
-        const p = boss.position;
-        this.addChild(new MoneyDrop(this, {
-          x: p.x,
-          y: p.y
-        }));
-        this.addChild(new MoneyDrop(this, {
-          x: p.x + 7,
-          y: p.y
-        }));
-        this.addChild(new MoneyDrop(this, {
-          x: p.x + 4,
-          y: p.y + 8
-        }));
+        bossMoneyPositions(boss.position).forEach((pos) => {
+          this.addChild(new MoneyDrop(this, pos));
+        });
       }));
       this.ships.push(boss);
     }
     attachMoneyScripts() {
-      const divisor = this.difficultyMultiplier > 4 ? 2 : 3;
-      const count = Math.floor(this.ships.length / divisor);
+      const count = moneyDropCount(this.ships.length, this.difficultyMultiplier);
       const selectedShips = sample(this.ships, count);
       selectedShips.forEach((ship) => {
         this.scripts.push(new WatchForDeath(this, ship, () => {
@@ -3849,16 +5605,31 @@ void main() {
     }
   }
 
-  // src/levels/level-group-02.ts
-  var PATH_LEFT = 4;
-  var PATH_INNER = 20;
-  var PATH_RIGHT = 182;
-  var PATH_TOP = 4;
-  var LANE_GAP = 14;
-  var PATH_SPEED = 40;
-  var ENTER_X = -24;
-  var STAGGER_SECONDS = 0.45;
+  // src/balance/group-02.ts
+  var group02 = {
+    bannerMs: 2000,
+    pathLeft: 4,
+    pathInner: 20,
+    pathRight: 182,
+    pathTop: 4,
+    laneGap: 14,
+    enterX: -24,
+    pathSpeed: 40,
+    staggerSeconds: 0.45,
+    shipsPerTierBase: 8,
+    laneBase: 2,
+    laneStep: 2,
+    laneMax: 8,
+    fireDelayPaddingSeconds: -3
+  };
+  function group02ShipCount(rowCount) {
+    return group02.shipsPerTierBase * (rowCount + 1);
+  }
+  function group02LaneCount(rowCount) {
+    return Math.min(group02.laneBase + rowCount * group02.laneStep, group02.laneMax);
+  }
 
+  // src/levels/level-group-02.ts
   class LevelGroup02 extends GameObject {
     alternateShip;
     difficultyMultiplier;
@@ -3873,7 +5644,7 @@ void main() {
     constructor(parent, game, difficultyMultiplier, alternateShip, rowCount, levelName) {
       super(parent);
       this.alternateShip = alternateShip;
-      this.difficultyMultiplier = difficultyMultiplier;
+      this.difficultyMultiplier = difficultyMultiplier + (alternateShip ? 1 : 0);
       this.width = this.parent.width;
       this.height = this.parent.height;
       if (rowCount === "boss") {
@@ -3890,10 +5661,10 @@ void main() {
       this.scripts = [];
       const shipCount = this.spawnParade();
       if (this.boss) {
-        this.spawnBoss(shipCount * STAGGER_SECONDS);
+        this.spawnBoss(shipCount * group02.staggerSeconds);
       }
       if (this.levelName) {
-        this.scripts.push(new FadeoutBanner(this, this.levelName, 2000));
+        this.scripts.push(new FadeoutBanner(this, this.levelName, group02.bannerMs));
       }
       this.ships.forEach((ship) => this.addChild(ship));
       this.scripts.forEach((script) => {
@@ -3913,19 +5684,19 @@ void main() {
     spawnParade() {
       const laneYs = this.laneYs();
       const destinations = serpentineDestinations(laneYs);
-      const shipCount = 8 * (this.rowCount + 1);
+      const shipCount = group02ShipCount(this.rowCount);
       for (let i = 0;i < shipCount; i++) {
-        this.spawnShip(i * STAGGER_SECONDS, destinations, PATH_SPEED);
+        this.spawnShip(i * group02.staggerSeconds, destinations, group02.pathSpeed);
       }
       this.attachMoneyScripts();
       return shipCount;
     }
     spawnShip(delaySeconds, destinations, speed) {
       const ship = new ArrowShip(this, this.difficultyMultiplier, this.alternateShip);
-      ship.position.x = ENTER_X;
+      ship.position.x = group02.enterX;
       ship.position.y = destinations[0].y;
       this.scripts.push(new FireSingleGunRandomRate(this, ship, {
-        initialDelayMs: (delaySeconds + 1.5) * 1000
+        initialDelayMs: (delaySeconds + group02.fireDelayPaddingSeconds) * 1000
       }));
       this.scripts.push(buildSerpentineScripts(this, ship, destinations, speed, delaySeconds));
       this.ships.push(ship);
@@ -3933,7 +5704,7 @@ void main() {
     spawnBoss(delaySeconds) {
       const destinations = serpentineDestinations(this.laneYs());
       const boss = new ArrowBoss(this, this.difficultyMultiplier);
-      boss.position.x = ENTER_X;
+      boss.position.x = group02.enterX;
       boss.position.y = destinations[0].y;
       boss.addChild(new LifeMeter(boss, {
         position: { x: 0, y: 0 },
@@ -3941,35 +5712,34 @@ void main() {
         width: 1,
         horizontal: true
       }));
+      const fireDelayMs = (delaySeconds + group02.fireDelayPaddingSeconds) * 1000;
       this.scripts.push(new FireSingleGunRandomRate(this, boss, {
         gunIndex: 0,
-        initialDelayMs: (delaySeconds + 1.5) * 1000
+        initialDelayMs: 0
       }));
       this.scripts.push(new FireSingleGunRandomRate(this, boss, {
         gunIndex: 2,
-        initialDelayMs: (delaySeconds + 1.5) * 1000
+        initialDelayMs: 0
       }));
       this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
-      this.scripts.push(buildSerpentineScripts(this, boss, destinations, PATH_SPEED, delaySeconds));
+      this.scripts.push(buildSerpentineScripts(this, boss, destinations, group02.pathSpeed, delaySeconds));
       this.scripts.push(new WatchForDeath(this, boss, () => {
-        const p = boss.position;
-        this.addChild(new MoneyDrop(this, { x: p.x, y: p.y }));
-        this.addChild(new MoneyDrop(this, { x: p.x + 7, y: p.y }));
-        this.addChild(new MoneyDrop(this, { x: p.x + 4, y: p.y + 8 }));
+        bossMoneyPositions(boss.position).forEach((pos) => {
+          this.addChild(new MoneyDrop(this, pos));
+        });
       }));
       this.ships.push(boss);
     }
     laneYs() {
-      const laneCount = Math.min(2 + this.rowCount * 2, 8);
+      const laneCount = group02LaneCount(this.rowCount);
       const lanes = [];
       for (let i = 0;i < laneCount; i++) {
-        lanes.push(PATH_TOP + i * LANE_GAP);
+        lanes.push(group02.pathTop + i * group02.laneGap);
       }
       return lanes;
     }
     attachMoneyScripts() {
-      const divisor = this.difficultyMultiplier > 4 ? 2 : 3;
-      const count = Math.floor(this.ships.length / divisor);
+      const count = moneyDropCount(this.ships.length, this.difficultyMultiplier);
       const selectedShips = sample(this.ships, count);
       selectedShips.forEach((ship) => {
         this.scripts.push(new WatchForDeath(this, ship, () => {
@@ -3980,25 +5750,25 @@ void main() {
     }
   }
   function serpentineDestinations(laneYs) {
-    const points = [{ x: PATH_LEFT, y: laneYs[0] }];
+    const points = [{ x: group02.pathLeft, y: laneYs[0] }];
     for (let i = 0;i < laneYs.length; i++) {
       const y2 = laneYs[i];
       const goingRight = i % 2 === 0;
       const isLast = i === laneYs.length - 1;
       if (goingRight) {
-        points.push({ x: PATH_RIGHT, y: y2 });
+        points.push({ x: group02.pathRight, y: y2 });
         if (!isLast) {
-          points.push({ x: PATH_RIGHT, y: laneYs[i + 1] });
+          points.push({ x: group02.pathRight, y: laneYs[i + 1] });
         }
       } else {
-        const leftTarget = isLast ? PATH_LEFT : PATH_INNER;
+        const leftTarget = isLast ? group02.pathLeft : group02.pathInner;
         points.push({ x: leftTarget, y: y2 });
         if (!isLast) {
           points.push({ x: leftTarget, y: laneYs[i + 1] });
         }
       }
     }
-    points.push({ x: PATH_LEFT, y: laneYs[0] });
+    points.push({ x: group02.pathLeft, y: laneYs[0] });
     return points;
   }
   function travelTime(from, to, speed) {
@@ -4067,38 +5837,44 @@ void main() {
     }
   }
 
+  // src/balance/group-03.ts
+  var group03 = {
+    bannerMs: 2000,
+    centerX: 100,
+    splitY: 60,
+    leftOrbit: { x: 55, y: 60 },
+    rightOrbit: { x: 145, y: 60 },
+    orbitRadius: 45,
+    innerOrbitRadius: 33,
+    innermostOrbitRadius: 21,
+    staggerSeconds: 0.5,
+    descentSeconds: 3,
+    peelSeconds: 2,
+    orbitPeriodSeconds: 8,
+    centerProcessionShipCount: 16,
+    outerProcessionShipCount: 8,
+    innermostProcessionShipCount: 8,
+    bossOrbitRadius: 36,
+    bossEnterSeconds: 2,
+    bossOrbitPeriodSeconds: 6,
+    fireDelaySlackSeconds: 2
+  };
+
   // src/levels/level-group-03.ts
-  var CENTER_X = 100;
-  var SPLIT_Y = 60;
-  var LEFT_ORBIT = { x: 55, y: 60 };
-  var RIGHT_ORBIT = { x: 145, y: 60 };
-  var ORBIT_RADIUS = 45;
-  var INNER_ORBIT_RADIUS = 33;
-  var INNERMOST_ORBIT_RADIUS = 21;
-  var STAGGER_SECONDS2 = 0.5;
-  var DESCENT_SECONDS = 3;
-  var PEEL_SECONDS = 2;
-  var ORBIT_PERIOD_SECONDS = 8;
-  var CENTER_PROCESSION_SHIP_COUNT = 16;
-  var OUTER_PROCESSION_SHIP_COUNT = 8;
-  var INNERMOST_PROCESSION_SHIP_COUNT = 8;
-  var BOSS_ORBIT_RADIUS = 26;
-  var BOSS_ENTER_SECONDS = 3;
-  var BOSS_ORBIT_PERIOD_SECONDS = 5;
   function orbitCenter(orbit) {
-    return orbit === "left" ? LEFT_ORBIT : RIGHT_ORBIT;
+    return orbit === "left" ? group03.leftOrbit : group03.rightOrbit;
   }
   function centerOrbitEntryPoint(orbit) {
     const center = orbitCenter(orbit);
-    return orbit === "left" ? { x: center.x + ORBIT_RADIUS, y: center.y } : { x: center.x - ORBIT_RADIUS, y: center.y };
+    return orbit === "left" ? { x: center.x + group03.orbitRadius, y: center.y } : { x: center.x - group03.orbitRadius, y: center.y };
   }
   function outerOrbitEntryPoint(orbit) {
     const center = orbitCenter(orbit);
-    return orbit === "left" ? { x: center.x - INNER_ORBIT_RADIUS, y: center.y } : { x: center.x + INNER_ORBIT_RADIUS, y: center.y };
+    return orbit === "left" ? { x: center.x - group03.innerOrbitRadius, y: center.y } : { x: center.x + group03.innerOrbitRadius, y: center.y };
   }
   function innermostOrbitEntryPoint(orbit) {
     const center = orbitCenter(orbit);
-    return orbit === "left" ? { x: center.x + INNERMOST_ORBIT_RADIUS, y: center.y } : { x: center.x - INNERMOST_ORBIT_RADIUS, y: center.y };
+    return orbit === "left" ? { x: center.x + group03.innermostOrbitRadius, y: center.y } : { x: center.x - group03.innermostOrbitRadius, y: center.y };
   }
 
   class LevelGroup03 extends GameObject {
@@ -4115,7 +5891,7 @@ void main() {
     constructor(parent, game, difficultyMultiplier, alternateShip, rowCount, levelName) {
       super(parent);
       this.alternateShip = alternateShip;
-      this.difficultyMultiplier = difficultyMultiplier;
+      this.difficultyMultiplier = difficultyMultiplier + (alternateShip ? 1 : 0);
       this.width = this.parent.width;
       this.height = this.parent.height;
       if (rowCount === "boss") {
@@ -4135,7 +5911,7 @@ void main() {
         this.spawnBoss();
       }
       if (this.levelName) {
-        this.scripts.push(new FadeoutBanner(this, this.levelName, 2000));
+        this.scripts.push(new FadeoutBanner(this, this.levelName, group03.bannerMs));
       }
       this.ships.forEach((ship) => this.addChild(ship));
       this.scripts.forEach((script) => {
@@ -4153,49 +5929,49 @@ void main() {
       return true;
     }
     spawnWave() {
-      for (let i = 0;i < CENTER_PROCESSION_SHIP_COUNT; i++) {
-        const orbit = i % 2 === 0 ? "left" : "right";
-        this.spawnCenterProcessionShip(i, orbit);
-      }
+      this.spawnInnermostProcession("left");
+      this.spawnInnermostProcession("right");
       if (this.rowCount >= 2) {
         this.spawnOuterProcession("left");
         this.spawnOuterProcession("right");
       }
       if (this.rowCount >= 3) {
-        this.spawnInnermostProcession("left");
-        this.spawnInnermostProcession("right");
+        for (let i = 0;i < group03.centerProcessionShipCount; i++) {
+          const orbit = i % 2 === 0 ? "left" : "right";
+          this.spawnCenterProcessionShip(i, orbit);
+        }
       }
       this.attachMoneyScripts();
     }
     spawnCenterProcessionShip(index, orbit) {
       const orbitCenterPoint = orbitCenter(orbit);
       const entryPoint = centerOrbitEntryPoint(orbit);
-      const staggerSeconds = index * STAGGER_SECONDS2;
-      const pathSeconds = staggerSeconds + DESCENT_SECONDS;
-      const needsPeel = entryPoint.x !== CENTER_X || entryPoint.y !== SPLIT_Y;
+      const staggerSeconds = index * group03.staggerSeconds;
+      const pathSeconds = staggerSeconds + group03.descentSeconds;
+      const needsPeel = entryPoint.x !== group03.centerX || entryPoint.y !== group03.splitY;
       this.spawnProcessionShip({
-        descentX: CENTER_X,
+        descentX: group03.centerX,
         staggerSeconds,
-        fireDelayMs: (pathSeconds - 2) * 1000,
+        fireDelayMs: (pathSeconds - group03.fireDelaySlackSeconds) * 1000,
         entryPoint,
         orbitCenter: orbitCenterPoint,
-        orbitRadius: ORBIT_RADIUS,
+        orbitRadius: group03.orbitRadius,
         clockwise: orbit === "left",
         needsPeel
       });
     }
     spawnOuterProcession(orbit) {
       const columnX = outerOrbitEntryPoint(orbit).x;
-      for (let i = 0;i < OUTER_PROCESSION_SHIP_COUNT; i++) {
-        const staggerSeconds = i * 2 * STAGGER_SECONDS2;
-        const pathSeconds = staggerSeconds + DESCENT_SECONDS + PEEL_SECONDS;
+      for (let i = 0;i < group03.outerProcessionShipCount; i++) {
+        const staggerSeconds = i * 2 * group03.staggerSeconds;
+        const pathSeconds = staggerSeconds + group03.descentSeconds + group03.peelSeconds;
         this.spawnProcessionShip({
           descentX: columnX,
           staggerSeconds,
-          fireDelayMs: (pathSeconds - 2) * 1000,
+          fireDelayMs: (pathSeconds - group03.fireDelaySlackSeconds) * 1000,
           entryPoint: outerOrbitEntryPoint(orbit),
           orbitCenter: orbitCenter(orbit),
-          orbitRadius: INNER_ORBIT_RADIUS,
+          orbitRadius: group03.innerOrbitRadius,
           clockwise: orbit === "right",
           needsPeel: true
         });
@@ -4204,18 +5980,18 @@ void main() {
     spawnInnermostProcession(orbit) {
       const entryPoint = innermostOrbitEntryPoint(orbit);
       const columnX = entryPoint.x;
-      for (let i = 0;i < INNERMOST_PROCESSION_SHIP_COUNT; i++) {
-        const staggerSeconds = i * 2 * STAGGER_SECONDS2;
-        const pathSeconds = staggerSeconds + DESCENT_SECONDS;
+      for (let i = 0;i < group03.innermostProcessionShipCount; i++) {
+        const staggerSeconds = i * 2 * group03.staggerSeconds;
+        const pathSeconds = staggerSeconds + group03.descentSeconds;
         this.spawnProcessionShip({
           descentX: columnX,
           staggerSeconds,
-          fireDelayMs: (pathSeconds - 2) * 1000,
+          fireDelayMs: (pathSeconds - group03.fireDelaySlackSeconds) * 1000,
           entryPoint,
           orbitCenter: orbitCenter(orbit),
-          orbitRadius: INNERMOST_ORBIT_RADIUS,
+          orbitRadius: group03.innermostOrbitRadius,
           clockwise: orbit === "left",
-          needsPeel: entryPoint.x !== columnX || entryPoint.y !== SPLIT_Y
+          needsPeel: entryPoint.x !== columnX || entryPoint.y !== group03.splitY
         });
       }
     }
@@ -4234,14 +6010,14 @@ void main() {
       if (staggerSeconds > 0) {
         steps.push(new Wait(null, staggerSeconds));
       }
-      steps.push(new MoveObjectToPoint(null, ship, { x: descentX, y: SPLIT_Y }, DESCENT_SECONDS));
+      steps.push(new MoveObjectToPoint(null, ship, { x: descentX, y: group03.splitY }, group03.descentSeconds));
       if (needsPeel) {
-        steps.push(new MoveObjectToPoint(null, ship, entryPoint, PEEL_SECONDS));
+        steps.push(new MoveObjectToPoint(null, ship, entryPoint, group03.peelSeconds));
       }
       steps.push(new MoveObjectInCircle(null, ship, {
         center: orbitCenterPoint,
         radius: orbitRadius,
-        period: ORBIT_PERIOD_SECONDS,
+        period: group03.orbitPeriodSeconds,
         clockwise
       }));
       return steps;
@@ -4252,7 +6028,7 @@ void main() {
     }
     spawnOrbitingBoss(orbit) {
       const center = orbitCenter(orbit);
-      const entryPoint = orbit === "left" ? { x: center.x - BOSS_ORBIT_RADIUS, y: center.y } : { x: center.x + BOSS_ORBIT_RADIUS, y: center.y };
+      const entryPoint = orbit === "left" ? { x: center.x - group03.bossOrbitRadius, y: center.y } : { x: center.x + group03.bossOrbitRadius, y: center.y };
       const startX = orbit === "left" ? -40 : this.game.width + 20;
       const boss = new ArrowBoss(this, this.difficultyMultiplier);
       boss.enableOrbitPathAlignment();
@@ -4272,25 +6048,23 @@ void main() {
       this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
       this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
       this.scripts.push(new ScriptChain(this, false, [
-        new MoveObjectToPoint(null, boss, entryPoint, BOSS_ENTER_SECONDS),
+        new MoveObjectToPoint(null, boss, entryPoint, group03.bossEnterSeconds),
         new MoveObjectInCircle(null, boss, {
           center,
-          radius: BOSS_ORBIT_RADIUS,
-          period: BOSS_ORBIT_PERIOD_SECONDS,
+          radius: group03.bossOrbitRadius,
+          period: group03.bossOrbitPeriodSeconds,
           clockwise: orbit === "right"
         })
       ]));
       this.scripts.push(new WatchForDeath(this, boss, () => {
-        const p = boss.position;
-        this.addChild(new MoneyDrop(this, { x: p.x, y: p.y }));
-        this.addChild(new MoneyDrop(this, { x: p.x + 7, y: p.y }));
-        this.addChild(new MoneyDrop(this, { x: p.x + 4, y: p.y + 8 }));
+        bossMoneyPositions(boss.position).forEach((pos) => {
+          this.addChild(new MoneyDrop(this, pos));
+        });
       }));
       this.ships.push(boss);
     }
     attachMoneyScripts() {
-      const divisor = this.difficultyMultiplier > 4 ? 2 : 3;
-      const count = Math.floor(this.ships.length / divisor);
+      const count = moneyDropCount(this.ships.length, this.difficultyMultiplier);
       const selectedShips = sample(this.ships, count);
       selectedShips.forEach((ship) => {
         this.scripts.push(new WatchForDeath(this, ship, () => {
@@ -4302,7 +6076,7 @@ void main() {
   }
 
   // src/sprites/dash-boss.ts
-  function dashBossSprite() {
+  function buildOrientations() {
     const c1 = "#88eeff";
     const c2 = "#44aacc";
     const c3 = "#226688";
@@ -4310,7 +6084,7 @@ void main() {
     const g1 = "#999999";
     const g2 = "#555555";
     const nn = null;
-    return new Sprite([
+    const working = new Sprite([
       [nn, nn, c3, nn, nn, nn, c2, c1, c2, nn, nn, nn, c3, nn, nn],
       [nn, c3, c2, c3, nn, c2, w1, w1, w1, c2, nn, c3, c2, c3, nn],
       [c3, c2, g1, c2, c3, w1, w1, c1, w1, w1, c3, c2, g1, c2, c3],
@@ -4319,19 +6093,30 @@ void main() {
       [nn, nn, nn, nn, nn, c3, c2, c1, c2, c3, nn, nn, nn, nn, nn],
       [nn, nn, nn, nn, nn, nn, c3, c2, c3, nn, nn, nn, nn, nn, nn],
       [nn, nn, nn, nn, nn, nn, nn, c3, nn, nn, nn, nn, nn, nn, nn]
-    ], {
-      guns: [
-        { x: 2, y: 4 },
-        { x: 7, y: 7 },
-        { x: 12, y: 4 }
-      ]
-    }).rotateRight();
+    ]).rotateRight();
+    let guns = [
+      { x: 2, y: 4 },
+      { x: 7, y: 7 },
+      { x: 12, y: 4 }
+    ];
+    const orientations = [];
+    for (let i = 0;i < 4; i++) {
+      const cachedGuns = guns.map((g) => ({ x: g.x, y: g.y }));
+      const cached = working.clone();
+      cached.meta = { guns: cachedGuns };
+      orientations.push({ sprite: cached, guns: cachedGuns });
+      const sh = working.height;
+      guns = guns.map((g) => ({ x: sh - 1 - g.y, y: g.x }));
+      working.rotateRight();
+    }
+    return orientations;
   }
+  var dashBossOrientations = buildOrientations();
 
   // src/ships/dash-boss.ts
   class DashBoss extends GameObject {
     isPhysicalEntity = true;
-    BULLET_SPEED = 130;
+    BULLET_SPEED = dashBoss.bulletSpeed;
     team = 1;
     index = 5;
     difficultyMultiplier;
@@ -4341,6 +6126,7 @@ void main() {
     position;
     velocity;
     phase = "idle";
+    orientationIndex = 0;
     constructor(parent, difficultyMultiplier) {
       super(parent);
       this.difficultyMultiplier = difficultyMultiplier;
@@ -4348,15 +6134,17 @@ void main() {
     }
     reset() {
       super.reset();
-      this.sprite = dashBossSprite();
+      this.orientationIndex = 0;
+      const orientation = dashBossOrientations[0];
+      this.sprite = orientation.sprite;
+      this.guns = orientation.guns;
       this.explosion = shipExplosion;
-      this.guns = this.sprite.meta.guns;
       this.phase = "idle";
       this.position = { x: 0, y: 0 };
       this.velocity = { x: 0, y: 0 };
-      this.damage = 40 * this.difficultyMultiplier;
-      this.life = 18 * this.difficultyMultiplier;
-      this.maxLife = 18 * this.difficultyMultiplier;
+      this.damage = dashBoss.contactDamage(this.difficultyMultiplier);
+      this.life = dashBoss.life(this.difficultyMultiplier);
+      this.maxLife = this.life;
     }
     fire(gunIndex = 0) {
       const gun = this.guns[gunIndex];
@@ -4371,29 +6159,25 @@ void main() {
         team: this.team,
         position,
         velocity,
-        damage: 5 + this.difficultyMultiplier
+        damage: dashBoss.bulletDamage(this.difficultyMultiplier)
       });
       this.addChild(new MuzzleFlash(this, gun));
     }
     spinQuarterLeft() {
-      const sw = this.sprite.width;
-      const sh = this.sprite.height;
-      const cx = this.position.x + sw / 2;
-      const cy = this.position.y + sh / 2;
-      this.guns = this.guns.map((g) => ({ x: g.y, y: sw - 1 - g.x }));
-      this.sprite.meta.guns = this.guns;
-      this.sprite.rotateLeft();
-      this.position.x = cx - this.sprite.width / 2;
-      this.position.y = cy - this.sprite.height / 2;
+      this.applyOrientation((this.orientationIndex + 3) % 4);
     }
     spinQuarterRight() {
+      this.applyOrientation((this.orientationIndex + 1) % 4);
+    }
+    applyOrientation(index) {
       const sw = this.sprite.width;
       const sh = this.sprite.height;
       const cx = this.position.x + sw / 2;
       const cy = this.position.y + sh / 2;
-      this.guns = this.guns.map((g) => ({ x: sh - 1 - g.y, y: g.x }));
-      this.sprite.meta.guns = this.guns;
-      this.sprite.rotateRight();
+      this.orientationIndex = index;
+      const orientation = dashBossOrientations[index];
+      this.sprite = orientation.sprite;
+      this.guns = orientation.guns;
       this.position.x = cx - this.sprite.width / 2;
       this.position.y = cy - this.sprite.height / 2;
     }
@@ -4410,29 +6194,40 @@ void main() {
   }
 
   // src/sprites/dash-ship.ts
-  function dashShipSprite() {
+  function buildOrientations2() {
     const c1 = "#88eeff";
     const c2 = "#44aacc";
     const c3 = "#226688";
     const w1 = "#eeeeee";
     const g1 = "#999999";
     const nn = null;
-    return new Sprite([
+    const working = new Sprite([
       [nn, nn, c3, c2, c1, c2, c3, nn, nn],
       [nn, c3, c2, w1, w1, w1, c2, c3, nn],
       [c3, c2, g1, c1, w1, c1, g1, c2, c3],
       [nn, c3, nn, c2, c1, c2, nn, c3, nn],
       [nn, nn, nn, nn, c2, nn, nn, nn, nn],
       [nn, nn, nn, nn, c3, nn, nn, nn, nn]
-    ], {
-      guns: [{ x: 4, y: 5 }]
-    }).rotateRight();
+    ]).rotateRight();
+    let guns = [{ x: 4, y: 5 }];
+    const orientations = [];
+    for (let i = 0;i < 4; i++) {
+      const cachedGuns = guns.map((g) => ({ x: g.x, y: g.y }));
+      const cached = working.clone();
+      cached.meta = { guns: cachedGuns };
+      orientations.push({ sprite: cached, guns: cachedGuns });
+      const sh = working.height;
+      guns = guns.map((g) => ({ x: sh - 1 - g.y, y: g.x }));
+      working.rotateRight();
+    }
+    return orientations;
   }
+  var dashShipOrientations = buildOrientations2();
 
   // src/ships/dash-ship.ts
   class DashShip extends GameObject {
     isPhysicalEntity = true;
-    BULLET_SPEED = 110;
+    BULLET_SPEED = dashScout.bulletSpeed;
     team = 1;
     index = 5;
     difficultyMultiplier;
@@ -4443,6 +6238,7 @@ void main() {
     position;
     velocity;
     phase = "idle";
+    orientationIndex = 0;
     constructor(parent, difficultyMultiplier) {
       super(parent);
       this.difficultyMultiplier = difficultyMultiplier;
@@ -4450,15 +6246,17 @@ void main() {
     }
     reset() {
       super.reset();
-      this.sprite = dashShipSprite();
-      this.explosion = shipExplosion;
-      this.guns = this.sprite.meta.guns;
+      this.orientationIndex = 0;
+      const orientation = dashShipOrientations[0];
+      this.sprite = orientation.sprite;
+      this.guns = orientation.guns;
       this.gun = this.guns[0];
+      this.explosion = shipExplosion;
       this.phase = "idle";
       this.position = { x: 0, y: 0 };
       this.velocity = { x: 0, y: 0 };
-      this.damage = 5 + this.difficultyMultiplier;
-      this.maxLife = this.difficultyMultiplier;
+      this.damage = dashScout.contactDamage(this.difficultyMultiplier);
+      this.maxLife = dashScout.life(this.difficultyMultiplier);
       this.life = this.maxLife;
     }
     fire(gunIndex = 0) {
@@ -4472,31 +6270,26 @@ void main() {
         team: this.team,
         position,
         velocity,
-        damage: 4 + this.difficultyMultiplier
+        damage: dashScout.bulletDamage(this.difficultyMultiplier)
       });
       this.addChild(new MuzzleFlash(this, gun));
     }
     spinQuarterLeft() {
-      const sw = this.sprite.width;
-      const sh = this.sprite.height;
-      const cx = this.position.x + sw / 2;
-      const cy = this.position.y + sh / 2;
-      this.guns = this.guns.map((g) => ({ x: g.y, y: sw - 1 - g.x }));
-      this.gun = this.guns[0];
-      this.sprite.meta.guns = this.guns;
-      this.sprite.rotateLeft();
-      this.position.x = cx - this.sprite.width / 2;
-      this.position.y = cy - this.sprite.height / 2;
+      this.applyOrientation((this.orientationIndex + 3) % 4);
     }
     spinQuarterRight() {
+      this.applyOrientation((this.orientationIndex + 1) % 4);
+    }
+    applyOrientation(index) {
       const sw = this.sprite.width;
       const sh = this.sprite.height;
       const cx = this.position.x + sw / 2;
       const cy = this.position.y + sh / 2;
-      this.guns = this.guns.map((g) => ({ x: sh - 1 - g.y, y: g.x }));
+      this.orientationIndex = index;
+      const orientation = dashShipOrientations[index];
+      this.sprite = orientation.sprite;
+      this.guns = orientation.guns;
       this.gun = this.guns[0];
-      this.sprite.meta.guns = this.guns;
-      this.sprite.rotateRight();
       this.position.x = cx - this.sprite.width / 2;
       this.position.y = cy - this.sprite.height / 2;
     }
@@ -4536,14 +6329,14 @@ void main() {
       super(parent);
       this.ship = ship;
       this.bounds = options.bounds;
-      this.dashSpeed = options.dashSpeed ?? 120;
-      this.pauseSecondsMin = options.pauseSecondsMin ?? 0.8;
-      this.pauseSecondsMax = options.pauseSecondsMax ?? 1.6;
-      this.telegraphSeconds = options.telegraphSeconds ?? 0.38;
-      this.maxDashDistance = options.maxDashDistance ?? 70;
-      this.minDashDistance = options.minDashDistance ?? 25;
-      this.initialWaitSecondsMin = options.initialWaitSecondsMin ?? 1;
-      this.initialWaitSecondsMax = options.initialWaitSecondsMax ?? 10;
+      this.dashSpeed = options.dashSpeed ?? dashAndPause.dashSpeed;
+      this.pauseSecondsMin = options.pauseSecondsMin ?? dashAndPause.pauseSecondsMin;
+      this.pauseSecondsMax = options.pauseSecondsMax ?? dashAndPause.pauseSecondsMax;
+      this.telegraphSeconds = options.telegraphSeconds ?? dashAndPause.telegraphSeconds;
+      this.maxDashDistance = options.maxDashDistance ?? dashAndPause.maxDashDistance;
+      this.minDashDistance = options.minDashDistance ?? dashAndPause.minDashDistance;
+      this.initialWaitSecondsMin = options.initialWaitSecondsMin ?? dashAndPause.initialWaitSecondsMin;
+      this.initialWaitSecondsMax = options.initialWaitSecondsMax ?? dashAndPause.initialWaitSecondsMax;
     }
     start() {
       this.ship.phase = "idle";
@@ -4674,9 +6467,9 @@ void main() {
       const opts = options || {};
       this.ship = ship;
       this.gunIndex = opts.gunIndex ?? 0;
-      this.burstSize = opts.burstSize ?? 3;
-      this.fireRateMs = opts.fireRateMs ?? 120;
-      this.windupMs = opts.windupMs ?? 80;
+      this.burstSize = opts.burstSize ?? burstOnPause.burstSize;
+      this.fireRateMs = opts.fireRateMs ?? burstOnPause.fireRateMs;
+      this.windupMs = opts.windupMs ?? burstOnPause.windupMs;
     }
     start() {
       this.lastPhase = this.ship.phase;
@@ -4721,6 +6514,47 @@ void main() {
     }
   }
 
+  // src/balance/group-04.ts
+  var group04 = {
+    bannerMs: 2000,
+    shipCountBase: 4,
+    shipCountPerTier: 3,
+    boundsLeft: 8,
+    boundsRightInset: 8,
+    boundsTop: 12,
+    boundsBottomFraction: 0.55,
+    bossBoundsBottomFraction: 0.45,
+    scout: {
+      dashSpeed: 130,
+      pauseSecondsMin: 0.55,
+      pauseSecondsMax: 1.2,
+      minDashDistance: 28,
+      maxDashDistance: 75,
+      burstFireRateMs: 110,
+      burstSizeRowBonus: 3
+    },
+    boss: {
+      dashSpeed: 95,
+      pauseSecondsMin: 0.8,
+      pauseSecondsMax: 1.6,
+      minDashDistance: 35,
+      maxDashDistance: 90,
+      spawnY: -30,
+      bursts: [
+        { gunIndex: 0, burstSize: 4, fireRateMs: 90 },
+        { gunIndex: 1, burstSize: 5, fireRateMs: 70, windupMs: 40 },
+        { gunIndex: 2, burstSize: 4, fireRateMs: 90 }
+      ]
+    },
+    entryWaitOpenerMin: 1,
+    entryWaitOpenerMax: 10,
+    entryWaitFollowUpMin: 0.5,
+    entryWaitFollowUpMax: 5
+  };
+  function group04ShipCount(rowCount) {
+    return group04.shipCountBase + rowCount * group04.shipCountPerTier;
+  }
+
   // src/levels/level-group-04.ts
   class LevelGroup04 extends GameObject {
     difficultyMultiplier;
@@ -4754,7 +6588,7 @@ void main() {
         this.spawnBoss();
       }
       if (this.levelName) {
-        this.scripts.push(new FadeoutBanner(this, this.levelName, 2000));
+        this.scripts.push(new FadeoutBanner(this, this.levelName, group04.bannerMs));
       }
       this.ships.forEach((ship) => this.addChild(ship));
       this.scripts.forEach((script) => {
@@ -4773,38 +6607,45 @@ void main() {
     }
     playBounds() {
       return {
-        left: 8,
-        right: this.game.width - 8,
-        top: 12,
-        bottom: Math.floor(this.game.height * 0.55)
+        left: group04.boundsLeft,
+        right: this.game.width - group04.boundsRightInset,
+        top: group04.boundsTop,
+        bottom: Math.floor(this.game.height * group04.boundsBottomFraction)
       };
     }
     entryWaitOptions() {
       if (this.levelName) {
-        return { initialWaitSecondsMin: 1, initialWaitSecondsMax: 10 };
+        return {
+          initialWaitSecondsMin: group04.entryWaitOpenerMin,
+          initialWaitSecondsMax: group04.entryWaitOpenerMax
+        };
       }
-      return { initialWaitSecondsMin: 0.5, initialWaitSecondsMax: 5 };
+      return {
+        initialWaitSecondsMin: group04.entryWaitFollowUpMin,
+        initialWaitSecondsMax: group04.entryWaitFollowUpMax
+      };
     }
     spawnWave() {
-      const count = 4 + this.rowCount * 3;
+      const count = group04ShipCount(this.rowCount);
       const bounds = this.playBounds();
       const entryWait = this.entryWaitOptions();
+      const scout = group04.scout;
       for (let i = 0;i < count; i++) {
         const ship = new DashShip(this, this.difficultyMultiplier);
         ship.position.x = 20 + i * 37 % Math.max(1, bounds.right - 40);
         ship.position.y = -20 - i % 5 * 12;
         this.scripts.push(new DashAndPause(this, ship, {
           bounds,
-          dashSpeed: 130,
-          pauseSecondsMin: 0.55,
-          pauseSecondsMax: 1.2,
-          minDashDistance: 28,
-          maxDashDistance: 75,
+          dashSpeed: scout.dashSpeed,
+          pauseSecondsMin: scout.pauseSecondsMin,
+          pauseSecondsMax: scout.pauseSecondsMax,
+          minDashDistance: scout.minDashDistance,
+          maxDashDistance: scout.maxDashDistance,
           ...entryWait
         }));
         this.scripts.push(new FireBurstOnPause(this, ship, {
-          burstSize: integer(1, this.rowCount + 3),
-          fireRateMs: 110
+          burstSize: integer(1, this.rowCount + scout.burstSizeRowBonus),
+          fireRateMs: scout.burstFireRateMs
         }));
         this.ships.push(ship);
       }
@@ -4813,9 +6654,10 @@ void main() {
     spawnBoss() {
       const bounds = this.playBounds();
       const entryWait = this.entryWaitOptions();
+      const bossTuning = group04.boss;
       const boss = new DashBoss(this, this.difficultyMultiplier);
       boss.position.x = Math.floor(this.game.width / 2) - 7;
-      boss.position.y = -30;
+      boss.position.y = bossTuning.spawnY;
       boss.addChild(new LifeMeter(boss, {
         position: { x: 0, y: 0 },
         length: this.game.width,
@@ -4823,28 +6665,29 @@ void main() {
         horizontal: true
       }));
       this.scripts.push(new DashAndPause(this, boss, {
-        bounds: { ...bounds, bottom: Math.floor(this.game.height * 0.45) },
-        dashSpeed: 95,
-        pauseSecondsMin: 0.8,
-        pauseSecondsMax: 1.6,
-        minDashDistance: 35,
-        maxDashDistance: 90,
+        bounds: {
+          ...bounds,
+          bottom: Math.floor(this.game.height * group04.bossBoundsBottomFraction)
+        },
+        dashSpeed: bossTuning.dashSpeed,
+        pauseSecondsMin: bossTuning.pauseSecondsMin,
+        pauseSecondsMax: bossTuning.pauseSecondsMax,
+        minDashDistance: bossTuning.minDashDistance,
+        maxDashDistance: bossTuning.maxDashDistance,
         ...entryWait
       }));
-      this.scripts.push(new FireBurstOnPause(this, boss, { gunIndex: 0, burstSize: 4, fireRateMs: 90 }));
-      this.scripts.push(new FireBurstOnPause(this, boss, { gunIndex: 1, burstSize: 5, fireRateMs: 70, windupMs: 40 }));
-      this.scripts.push(new FireBurstOnPause(this, boss, { gunIndex: 2, burstSize: 4, fireRateMs: 90 }));
+      for (const burst of bossTuning.bursts) {
+        this.scripts.push(new FireBurstOnPause(this, boss, { ...burst }));
+      }
       this.scripts.push(new WatchForDeath(this, boss, () => {
-        const p = boss.position;
-        this.addChild(new MoneyDrop(this, { x: p.x, y: p.y }));
-        this.addChild(new MoneyDrop(this, { x: p.x + 7, y: p.y }));
-        this.addChild(new MoneyDrop(this, { x: p.x + 4, y: p.y + 8 }));
+        bossMoneyPositions(boss.position).forEach((pos) => {
+          this.addChild(new MoneyDrop(this, pos));
+        });
       }));
       this.ships.push(boss);
     }
     attachMoneyScripts() {
-      const divisor = this.difficultyMultiplier > 4 ? 2 : 3;
-      const count = Math.floor(this.ships.length / divisor);
+      const count = moneyDropCount(this.ships.length, this.difficultyMultiplier);
       if (count < 1)
         return;
       sample(this.ships, count).forEach((ship) => {
@@ -4856,294 +6699,28 @@ void main() {
     }
   }
 
-  // src/sprites/player-ship.ts
-  function playerShipSprite() {
-    const n5 = null;
-    const t = "#ffffff";
-    const c = "#ffe8c8";
-    const h = "#fff0e0";
-    const m = "#ffd0a8";
-    const w4 = "#e87848";
-    const e = "#a84028";
-    return new Sprite([
-      [n5, n5, n5, n5, n5, n5, w4, n5, n5],
-      [n5, n5, n5, n5, n5, w4, m, n5, n5],
-      [n5, n5, m, m, m, m, m, m, n5],
-      [t, t, c, c, c, e, h, e, e],
-      [n5, n5, m, m, m, m, m, m, n5],
-      [n5, n5, n5, n5, n5, w4, m, n5, n5],
-      [n5, n5, n5, n5, n5, n5, w4, n5, n5]
-    ], {
-      guns: [
-        { x: 3, y: 1 }
-      ]
-    }).rotateLeft();
-  }
-
-  // src/sprites/player-ship-double-guns.ts
-  function playerShipDoubleGunsSprite() {
-    const n5 = null;
-    const t = "#ffffff";
-    const c = "#ffe8c8";
-    const h = "#fff0e0";
-    const m = "#ffd0a8";
-    const w4 = "#e87848";
-    const e = "#a84028";
-    return new Sprite([
-      [n5, n5, n5, n5, n5, w4, w4, n5, n5],
-      [n5, n5, n5, n5, n5, n5, m, n5, n5],
-      [n5, n5, n5, n5, n5, m, m, n5, n5],
-      [n5, n5, m, m, m, m, m, m, n5],
-      [n5, t, c, c, c, e, h, e, e],
-      [n5, n5, m, m, m, m, m, m, n5],
-      [n5, n5, n5, n5, n5, m, m, n5, n5],
-      [n5, n5, n5, n5, n5, n5, m, n5, n5],
-      [n5, n5, n5, n5, n5, w4, w4, n5, n5]
-    ], {
-      guns: [
-        { x: 0, y: 6 },
-        { x: 8, y: 6 }
-      ]
-    }).rotateLeft();
-  }
-
-  // src/sprites/player-ship-wing-guns.ts
-  function playerShipWingGunsSprite() {
-    const n5 = null;
-    const t = "#ffffff";
-    const c = "#ffe8c8";
-    const h = "#fff0e0";
-    const m = "#ffd0a8";
-    const w4 = "#e87848";
-    const e = "#a84028";
-    return new Sprite([
-      [n5, n5, n5, n5, w4, w4, w4, n5, n5],
-      [n5, n5, n5, n5, n5, n5, m, n5, n5],
-      [n5, n5, n5, n5, n5, m, m, n5, n5],
-      [n5, n5, m, m, m, m, m, m, n5],
-      [t, t, c, c, c, e, h, e, e],
-      [n5, n5, m, m, m, m, m, m, n5],
-      [n5, n5, n5, n5, n5, m, m, n5, n5],
-      [n5, n5, n5, n5, n5, n5, m, n5, n5],
-      [n5, n5, n5, n5, w4, w4, w4, n5, n5]
-    ], {
-      guns: [
-        { x: 0, y: 5 },
-        { x: 4, y: 1 },
-        { x: 8, y: 5 }
-      ]
-    }).rotateLeft();
-  }
-
-  // src/ships/player-controlled-ship.ts
-  var MAX_GUN_TIER = 3;
-
-  class PlayerControlledShip extends GameObject {
-    type = "player";
-    isPhysicalEntity = true;
-    index = 5;
-    explosion;
-    sprite;
-    position;
-    velocity;
-    damageUpgrades = 0;
-    lifeUpgrades = 0;
-    rateUpgrades = 0;
-    armorUpgrades = 0;
-    armor = 0;
-    gunTier = 0;
-    comboSegments = 0;
-    comboUpgrades = 0;
-    SPEED = 50;
-    BULLET_SPEED = 100;
-    FIRE_RATE = 500;
-    preventInputControl = true;
-    exploding = false;
-    team = 0;
-    damage = 5;
-    timeSinceFired = 0;
-    firing;
-    constructor(parent) {
-      super(parent);
-      this.reset();
-    }
-    reset() {
-      super.reset();
-      this.damageUpgrades = 0;
-      this.lifeUpgrades = 0;
-      this.rateUpgrades = 0;
-      this.armorUpgrades = 0;
-      this.gunTier = 0;
-      this.comboSegments = 0;
-      this.comboUpgrades = 0;
-      this.resetForNewRun();
-    }
-    resetForNewRun() {
-      super.reset();
-      this.explosion = shipExplosion;
-      this.position = { x: -100, y: -100 };
-      this.velocity = { x: 0, y: 0 };
-      this.SPEED = 50;
-      this.BULLET_SPEED = 100;
-      this.preventInputControl = true;
-      this.exploding = false;
-      this.team = 0;
-      this.damage = 5;
-      this.timeSinceFired = 0;
-      this.applyPersistentUpgrades();
-    }
-    applyPersistentUpgrades() {
-      this.maxLife = 20 + this.lifeUpgrades;
-      this.life = this.maxLife;
-      this.armor = this.armorUpgrades;
-      this.FIRE_RATE = Math.ceil(500 * Math.pow(0.9, this.rateUpgrades));
-      this.applyGunTier();
-    }
-    refillHealth() {
-      this.life = this.maxLife;
-    }
-    upgradeGunTier() {
-      if (this.gunTier >= MAX_GUN_TIER) {
-        return;
-      }
-      this.gunTier++;
-      this.applyGunTier();
-    }
-    extendCombo() {
-      if (this.comboSegments >= MAX_COMBO_SEGMENTS) {
-        return;
-      }
-      this.comboSegments++;
-      this.comboUpgrades++;
-    }
-    applyGunTier() {
-      switch (this.gunTier) {
-        case 0:
-          this.sprite = playerShipSprite().rotateRight();
-          break;
-        case 1:
-          this.sprite = playerShipDoubleGunsSprite().rotateRight();
-          break;
-        case 2:
-        case 3:
-          this.sprite = playerShipWingGunsSprite().rotateRight();
-          break;
-      }
-    }
-    bulletSpreadX(gunIndex, gunCount) {
-      if (this.gunTier >= 3 && gunCount === 3) {
-        return (gunIndex - 1) * 10;
-      }
-      return 0;
-    }
-    processInput(input) {
-      super.processInput(input);
-      if (this.preventInputControl || this.exploding || this.destroyed) {
-        return;
-      }
-      this.velocity.x = input.movementVector.x * this.SPEED;
-      this.velocity.y = input.movementVector.y * this.SPEED;
-      this.firing = input.fire;
-    }
-    update(dtime) {
-      super.update(dtime);
-      this.timeSinceFired += dtime;
-      if (this.firing && this.timeSinceFired > this.FIRE_RATE) {
-        this.timeSinceFired = 0;
-        this.fire();
-      }
-    }
-    hideOffscreen() {
-      this.preventInputControl = true;
-      this.position.x = -100;
-      this.velocity.x = 0;
-      this.velocity.y = 0;
-    }
-    checkBoundaries() {
-      if (this.preventInputControl) {
-        return;
-      }
-      if (this.position.x < 0) {
-        this.position.x = 0;
-      }
-      if (this.position.y < 0) {
-        this.position.y = 0;
-      }
-      const parent = this.parent;
-      if (parent && this.sprite) {
-        if (this.position.x + this.sprite.width > parent.width) {
-          this.position.x = parent.width - this.sprite.width;
-        }
-        if (this.position.y + this.sprite.height > parent.height) {
-          this.position.y = parent.height - this.sprite.height;
-        }
-      }
-    }
-    fire() {
-      const guns = this.sprite.meta.guns;
-      guns.forEach(function(gun, index) {
-        this.triggerEvent("spawnBullet", {
-          team: this.team,
-          damage: this.damageUpgrades + 1,
-          velocity: {
-            x: this.bulletSpreadX(index, guns.length),
-            y: -this.BULLET_SPEED
-          },
-          position: {
-            x: this.position.x + gun.x,
-            y: this.position.y + gun.y
-          }
-        });
-        this.addChild(new MuzzleFlash(this, gun));
-      }.bind(this));
-    }
-    applyDamage(damage, sourceEntity) {
-      if (damage <= 0) {
-        super.applyDamage(damage, sourceEntity);
-        return;
-      }
-      this.triggerEvent("playerHit");
-      const effectiveDamage = Math.max(1, damage - this.armor);
-      super.applyDamage(effectiveDamage, sourceEntity);
-    }
-  }
-
   // src/levels/shop.ts
-  var GUN_UPGRADE_NAMES = ["Double Guns", "Triple Guns", "Radial Guns"];
-  var GUN_UPGRADE_BASE_COST = 500;
-  var COMBO_UPGRADE_COSTS = [
-    25,
-    50,
-    100,
-    200,
-    400,
-    1000,
-    2000,
-    3500,
-    6000,
-    1e4
-  ];
+  var LIST_BASE_Y = 45;
+  var LIST_ROW_STRIDE = 15;
+  var LIST_LABEL_X = 70;
+  var LIST_COST_X = 40;
+  var LEAVE_LABEL_X = 40;
+  var PROGRESS_RIGHT_X2 = 182;
+  var TAB_Y2 = 22;
+  var SHIP_TAB_START_X2 = 100;
+  var SHIP_TAB_STRIDE2 = 22;
 
   class Shop extends GameObject {
     isShop = true;
     index = 1;
-    headerDef = { message: "Ship Upgrades", position: { x: 50, y: 10 } };
-    menuItems = {
-      health: { message: "+1 Ship Health", position: { x: 90, y: 50 } },
-      rate: { message: "10% faster Firing Rate", position: { x: 90, y: 65 } },
-      damage: { message: "+1 Bullet Damage", position: { x: 90, y: 80 } },
-      armor: { message: "+1 Armor", position: { x: 90, y: 95 } },
-      guns: { message: "Double Guns", position: { x: 90, y: 110 } },
-      combo: { message: "Extend Combo", position: { x: 90, y: 125 } },
-      leave: { message: "Leave Shop", position: { x: 60, y: 140 } }
-    };
-    menuSelectorPositions = [49, 64, 79, 94, 109, 124, 139];
     disabledColor = "#777";
     game;
     bank;
     player;
     input;
-    titleText;
+    tabChrome = [];
+    activeTabIndex = 0;
+    rows = [];
     selectorShip;
     selectedMenuItem;
     timeSinceSelected;
@@ -5157,24 +6734,33 @@ void main() {
       this.input = new EventedInput({
         onUp: this.onUp.bind(this),
         onDown: this.onDown.bind(this),
+        onLeft: this.onLeft.bind(this),
+        onRight: this.onRight.bind(this),
         onSelect: this.onSelect.bind(this)
       });
       this.reset();
+    }
+    get activeTab() {
+      return shopTabs[this.activeTabIndex].id;
     }
     reset() {
       super.reset();
       this.input.reset();
       this.isDoneShopping = false;
       this.selectedMenuItem = 0;
-      this.createMenuText();
-      this.setCosts();
+      this.activeTabIndex = 0;
+      this.rows = [];
+      this.tabChrome = [];
       this.createSelectorShip();
+      this.createTabChrome();
+      this.rebuildRows();
       this.addChild(this.input);
     }
     start() {
       this.input.reset();
       this.isDoneShopping = false;
-      this.setCosts();
+      this.refreshTabChrome();
+      this.refreshRows();
     }
     checkIfLevelComplete() {
       return this.isDoneShopping;
@@ -5186,69 +6772,233 @@ void main() {
         this.propagateSelection();
       }
     }
-    createMenuText() {
-      this.titleText = new TextDisplay(this, {
-        font: "arcade",
-        message: this.headerDef.message,
-        position: this.headerDef.position,
-        color: this.game.interfaceColor
+    createTabChrome() {
+      let shipTabIndex = 0;
+      this.tabChrome = shopTabs.map((def) => {
+        if (def.kind === "text") {
+          const labelText = def.label || "";
+          const labelX = 8;
+          const label = new TextDisplay(this, {
+            font: "arcade-small",
+            message: labelText,
+            position: { x: labelX, y: TAB_Y2 },
+            color: this.game.interfaceColor
+          });
+          this.addChild(label);
+          const leftBracket2 = new TextDisplay(this, {
+            font: "arcade-small",
+            message: "[",
+            position: { x: labelX - 5, y: TAB_Y2 },
+            color: this.game.interfaceColor
+          });
+          const rightBracket2 = new TextDisplay(this, {
+            font: "arcade-small",
+            message: "]",
+            position: {
+              x: labelX + (label.width || 0) + 1,
+              y: TAB_Y2
+            },
+            color: this.game.interfaceColor
+          });
+          this.addChild(leftBracket2);
+          this.addChild(rightBracket2);
+          return { def, label, leftBracket: leftBracket2, rightBracket: rightBracket2 };
+        }
+        const shipId = def.shipId;
+        const sprite = PlayerControlledShip.spriteForShipId(shipId);
+        const x = SHIP_TAB_START_X2 + shipTabIndex * SHIP_TAB_STRIDE2;
+        shipTabIndex++;
+        const shipIcon = new GameObject;
+        shipIcon.sprite = sprite;
+        shipIcon.position = { x, y: TAB_Y2 - 2 };
+        shipIcon.index = 2;
+        this.addChild(shipIcon);
+        const leftBracket = new TextDisplay(this, {
+          font: "arcade-small",
+          message: "[",
+          position: { x: x - 5, y: TAB_Y2 },
+          color: this.game.interfaceColor
+        });
+        const rightBracket = new TextDisplay(this, {
+          font: "arcade-small",
+          message: "]",
+          position: { x: x + sprite.width + 1, y: TAB_Y2 },
+          color: this.game.interfaceColor
+        });
+        this.addChild(leftBracket);
+        this.addChild(rightBracket);
+        return { def, shipIcon, leftBracket, rightBracket };
       });
-      this.addChild(this.titleText);
-      Object.keys(this.menuItems).forEach(function(key) {
-        const item = this.menuItems[key];
-        item.description = new TextDisplay(this, {
-          font: "arcade-small",
-          message: item.message,
-          position: item.position,
-          color: this.game.interfaceColor,
-          isPhysicalEntity: true
-        });
-        this.addChild(item.description);
-        item.costText = new TextDisplay(this, {
-          font: "arcade-small",
-          message: "",
-          position: { x: item.position.x - 30, y: item.position.y },
-          color: this.game.interfaceColor,
-          isPhysicalEntity: true
-        });
-        this.addChild(item.costText);
-      }.bind(this));
+      this.refreshTabChrome();
     }
-    setCosts() {
-      const items = this.menuItems;
+    refreshTabChrome() {
+      this.tabChrome.forEach((tab, index) => {
+        const active = index === this.activeTabIndex;
+        if (tab.def.kind === "text" && tab.label) {
+          tab.label.updateColor(active ? this.game.interfaceColor : this.disabledColor);
+        } else {
+          const shipId = tab.def.shipId;
+          const unlocked = this.player.isShipUnlocked(shipId);
+          if (tab.shipIcon) {
+            tab.shipIcon.sprite = PlayerControlledShip.spriteForShipId(shipId);
+            if (!unlocked) {
+              tab.shipIcon.sprite.applyColor(this.disabledColor);
+            }
+          }
+        }
+        if (tab.leftBracket && tab.rightBracket) {
+          tab.leftBracket.changeMessage(active ? "[" : " ");
+          tab.rightBracket.changeMessage(active ? "]" : " ");
+          tab.leftBracket.updateColor(this.game.interfaceColor);
+          tab.rightBracket.updateColor(this.game.interfaceColor);
+        }
+      });
+    }
+    clearRows() {
+      this.rows.forEach((row) => {
+        if (row.description) {
+          this.removeChild(row.description);
+        }
+        if (row.costText) {
+          this.removeChild(row.costText);
+        }
+        if (row.progressOrbs) {
+          this.removeChild(row.progressOrbs);
+        }
+      });
+      this.rows = [];
+    }
+    showsProgressOrbs(upgrade) {
+      return upgrade.maxRanks !== null && upgrade.id !== "unlock";
+    }
+    rebuildRows() {
+      this.clearRows();
+      const upgrades = upgradesForTab(this.activeTab, (shipId) => this.player.isShipUnlocked(shipId));
+      this.rows = [
+        ...upgrades.map((upgrade) => ({
+          kind: "upgrade",
+          upgrade,
+          cost: null
+        })),
+        { kind: "leave", cost: null }
+      ];
+      this.rows.forEach((row, index) => {
+        const y2 = LIST_BASE_Y + index * LIST_ROW_STRIDE;
+        const labelX = row.kind === "leave" ? LEAVE_LABEL_X : LIST_LABEL_X;
+        row.description = new TextDisplay(this, {
+          font: "arcade-small",
+          message: " ",
+          position: { x: labelX, y: y2 },
+          color: this.game.interfaceColor,
+          isPhysicalEntity: true
+        });
+        this.addChild(row.description);
+        if (row.kind === "upgrade") {
+          row.costText = new TextDisplay(this, {
+            font: "arcade-small",
+            message: "",
+            position: { x: LIST_COST_X, y: y2 },
+            color: this.game.interfaceColor,
+            isPhysicalEntity: true
+          });
+          this.addChild(row.costText);
+          if (row.upgrade && this.showsProgressOrbs(row.upgrade)) {
+            row.progressOrbs = new UpgradeProgressOrbs(this, PROGRESS_RIGHT_X2, y2);
+            this.addChild(row.progressOrbs);
+          }
+        }
+      });
+      if (this.selectedMenuItem >= this.rows.length) {
+        this.selectedMenuItem = Math.max(0, this.rows.length - 1);
+      }
+      this.refreshRows();
+      this.updateSelectorPosition();
+    }
+    ownedRank(upgrade) {
       const player = this.player;
-      const bank = this.bank;
-      items.health.cost = 5 + player.lifeUpgrades * 5;
-      items.rate.cost = 50 + player.rateUpgrades * 50;
-      items.damage.cost = 100 + player.damageUpgrades * 100;
-      items.guns.cost = player.gunTier >= MAX_GUN_TIER ? -1 : (player.gunTier + 1) * GUN_UPGRADE_BASE_COST;
-      items.armor.cost = 75 + player.armorUpgrades * 75;
-      items.combo.cost = player.comboSegments >= MAX_COMBO_SEGMENTS ? -1 : COMBO_UPGRADE_COSTS[player.comboUpgrades];
-      items.damage.costText.changeMessage("$" + items.damage.cost);
-      items.health.costText.changeMessage("$" + items.health.cost);
-      items.rate.costText.changeMessage("$" + items.rate.cost);
-      items.guns.costText.changeMessage(player.gunTier >= MAX_GUN_TIER ? "--" : "$" + items.guns.cost);
-      items.guns.description.changeMessage(player.gunTier >= MAX_GUN_TIER ? "Guns maxed" : GUN_UPGRADE_NAMES[player.gunTier]);
-      items.armor.costText.changeMessage("$" + items.armor.cost);
-      items.combo.costText.changeMessage(player.comboSegments >= MAX_COMBO_SEGMENTS ? "--" : "$" + items.combo.cost);
-      items.combo.description.changeMessage(player.comboSegments >= MAX_COMBO_SEGMENTS ? "Combo maxed" : player.comboSegments === 0 ? "Unlock Combo" : items.combo.message);
-      items.leave.description.changeMessage(items.leave.message);
-      items.health.costText.updateColor(items.health.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-      items.rate.costText.updateColor(items.rate.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-      items.damage.costText.updateColor(items.damage.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-      items.guns.costText.updateColor(items.guns.cost > bank.value || player.gunTier >= MAX_GUN_TIER ? this.disabledColor : this.game.interfaceColor);
-      items.armor.costText.updateColor(items.armor.cost > bank.value ? this.disabledColor : this.game.interfaceColor);
-      items.combo.costText.updateColor(items.combo.cost > bank.value || player.comboSegments >= MAX_COMBO_SEGMENTS ? this.disabledColor : this.game.interfaceColor);
+      switch (upgrade.id) {
+        case "fullHeal":
+          return player.fullHealPurchases;
+        case "health":
+          return player.lifeUpgrades;
+        case "energyShield":
+          return player.energyShield;
+        case "bomb":
+          return player.bombs;
+        case "maxHealth":
+          return player.profileFor(upgrade.tab).maxHealthRanks;
+        case "armor":
+          return player.profileFor(upgrade.tab).armorRanks;
+        case "bombCapacity":
+          return player.profileFor(upgrade.tab).bombCapacityRanks;
+        case "shipSpeed":
+          return player.profileFor(upgrade.tab).shipSpeedRanks;
+        case "fireSpeed":
+          return player.profileFor(upgrade.tab).fireSpeedRanks;
+        case "combo":
+          return player.profileFor(upgrade.tab).comboUpgrades;
+        case "unlock": {
+          const shipId = upgrade.tab;
+          return player.isShipUnlocked(shipId) ? 1 : 0;
+        }
+      }
+    }
+    rowLabel(upgrade, owned, maxed) {
+      if (upgrade.id === "combo") {
+        if (maxed)
+          return "Combo maxed";
+        if (owned === 0)
+          return "Unlock Combo";
+        return upgrade.label;
+      }
+      if (upgrade.id === "unlock") {
+        return maxed ? "Unlocked" : upgrade.label;
+      }
+      return upgrade.label;
+    }
+    refreshRows() {
+      this.rows.forEach((row) => {
+        if (row.kind === "leave") {
+          row.description.changeMessage("Leave Shop");
+          row.description.updateColor(this.game.interfaceColor);
+          return;
+        }
+        const upgrade = row.upgrade;
+        const owned = this.ownedRank(upgrade);
+        const cost = nextUpgradeCost(upgrade, owned);
+        row.cost = cost;
+        const bombUnavailable = upgrade.id === "bomb" && !this.player.canPurchaseBomb();
+        const fullHealUnavailable = upgrade.id === "fullHeal" && !this.player.canPurchaseFullHeal();
+        const maxed = cost === null || bombUnavailable || fullHealUnavailable;
+        row.description.changeMessage(this.rowLabel(upgrade, owned, maxed));
+        row.description.updateColor(maxed ? this.disabledColor : this.game.interfaceColor);
+        if (row.costText) {
+          row.costText.changeMessage(maxed ? "--" : "$" + cost);
+          row.costText.updateColor(maxed || cost > this.bank.value ? this.disabledColor : this.game.interfaceColor);
+        }
+        if (row.progressOrbs && upgrade.maxRanks !== null) {
+          row.progressOrbs.setProgress(owned, upgrade.maxRanks);
+        }
+      });
     }
     createSelectorShip() {
       this.selectorShip = new GameObject;
       this.selectorShip.sprite = arrowShipSprite();
-      this.selectorShip.position = { x: 40, y: 0 };
+      this.selectorShip.position = { x: 20, y: 0 };
       this.addChild(this.selectorShip);
       this.updateSelectorPosition();
     }
     updateSelectorPosition() {
-      this.selectorShip.position.y = this.menuSelectorPositions[this.selectedMenuItem];
+      this.selectorShip.position.y = LIST_BASE_Y + this.selectedMenuItem * LIST_ROW_STRIDE;
+    }
+    setActiveTab(index) {
+      if (index < 0 || index >= shopTabs.length || index === this.activeTabIndex) {
+        return;
+      }
+      this.activeTabIndex = index;
+      this.selectedMenuItem = 0;
+      this.refreshTabChrome();
+      this.rebuildRows();
     }
     onUp() {
       if (!this.selecting && this.selectedMenuItem > 0) {
@@ -5257,47 +7007,41 @@ void main() {
       }
     }
     onDown() {
-      if (!this.selecting && this.selectedMenuItem < this.menuSelectorPositions.length - 1) {
+      if (!this.selecting && this.selectedMenuItem < this.rows.length - 1) {
         this.selectedMenuItem++;
         this.updateSelectorPosition();
       }
     }
-    onSelect() {
+    onLeft() {
       if (!this.selecting) {
-        let selection;
-        switch (this.selectedMenuItem) {
-          case 0:
-            selection = this.menuItems.health;
-            break;
-          case 1:
-            selection = this.menuItems.rate;
-            break;
-          case 2:
-            selection = this.menuItems.damage;
-            break;
-          case 3:
-            selection = this.menuItems.armor;
-            break;
-          case 4:
-            selection = this.menuItems.guns;
-            break;
-          case 5:
-            selection = this.menuItems.combo;
-            break;
-          case 6:
-            this.startGame();
-            return;
-          default:
-            return;
-        }
-        if (this.bank.value >= selection.cost && selection.cost !== -1) {
-          this.bank.removeMoney(selection.cost);
-          this.game.recordDollarsSpent(selection.cost);
-          this.startGame();
-        }
+        this.setActiveTab(this.activeTabIndex - 1);
       }
     }
-    startGame() {
+    onRight() {
+      if (!this.selecting) {
+        this.setActiveTab(this.activeTabIndex + 1);
+      }
+    }
+    onSelect() {
+      if (this.selecting) {
+        return;
+      }
+      const row = this.rows[this.selectedMenuItem];
+      if (!row) {
+        return;
+      }
+      if (row.kind === "leave") {
+        this.startPurchaseAnimation();
+        return;
+      }
+      const cost = row.cost;
+      if (cost !== null && this.bank.value >= cost && !(row.upgrade?.id === "bomb" && !this.player.canPurchaseBomb()) && !(row.upgrade?.id === "fullHeal" && !this.player.canPurchaseFullHeal())) {
+        this.bank.removeMoney(cost);
+        this.game.recordDollarsSpent(cost);
+        this.startPurchaseAnimation();
+      }
+    }
+    startPurchaseAnimation() {
       this.selecting = true;
       this.timeSinceSelected = 0;
       const x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
@@ -5308,36 +7052,61 @@ void main() {
         velocity: { x: 50, y: 0 }
       }));
     }
-    propagateSelection() {
-      switch (this.selectedMenuItem) {
-        case 0:
-          this.player.lifeUpgrades++;
-          this.player.maxLife++;
-          this.player.life++;
+    applyUpgrade(id, tab) {
+      const shipId = tab;
+      switch (id) {
+        case "fullHeal":
+          this.player.purchaseFullHeal();
           break;
-        case 1:
-          this.player.rateUpgrades++;
-          this.player.FIRE_RATE = Math.ceil(this.player.FIRE_RATE * 0.9);
+        case "health":
+          this.player.purchaseRunHealth();
           break;
-        case 2:
-          this.player.damageUpgrades++;
+        case "energyShield":
+          this.player.purchaseEnergyShield();
           break;
-        case 3:
-          this.player.armorUpgrades++;
-          this.player.armor++;
+        case "bomb":
+          this.player.purchaseBomb();
           break;
-        case 4:
-          this.player.upgradeGunTier();
+        case "maxHealth":
+          this.player.purchaseMaxHealth(shipId);
           break;
-        case 5:
-          this.player.extendCombo();
-          this.game.comboGauge.syncFromPlayer();
+        case "armor":
+          this.player.purchaseArmor(shipId);
           break;
-        case 6:
-          this.isDoneShopping = true;
+        case "bombCapacity":
+          this.player.purchaseBombCapacity(shipId);
+          break;
+        case "shipSpeed":
+          this.player.purchaseShipSpeed(shipId);
+          break;
+        case "fireSpeed":
+          this.player.purchaseFireSpeed(shipId);
+          break;
+        case "combo":
+          this.player.purchaseCombo(shipId);
+          if (shipId === this.player.activeShipId) {
+            this.game.comboGauge.syncFromPlayer();
+          }
+          break;
+        case "unlock":
+          this.player.unlockShip(shipId);
+          this.refreshTabChrome();
+          this.rebuildRows();
           break;
       }
-      this.setCosts();
+    }
+    propagateSelection() {
+      const row = this.rows[this.selectedMenuItem];
+      if (!row) {
+        this.selecting = false;
+        return;
+      }
+      if (row.kind === "leave") {
+        this.isDoneShopping = true;
+      } else if (row.upgrade) {
+        this.applyUpgrade(row.upgrade.id, row.upgrade.tab);
+      }
+      this.refreshRows();
       this.selecting = false;
     }
   }
@@ -5353,6 +7122,7 @@ void main() {
     running;
     complete;
     currentLevel = null;
+    hangar;
     shop;
     levels;
     levelIndex;
@@ -5371,11 +7141,14 @@ void main() {
       this.running = false;
       this.complete = false;
       this.currentLevel = null;
+      this.hangar = new Hangar(this, this.game);
       this.shop = new Shop(this, this.game);
       this.loadLevels();
     }
     loadLevels() {
       this.levels = [
+        this.hangar,
+        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
@@ -5441,9 +7214,9 @@ void main() {
       const cameFromShop = !!previousLevel?.isShop;
       if (this.currentLevel.isShop) {
         this.game.clearBullets();
+        this.clearFlyInScripts();
         this.player.hideOffscreen();
-      }
-      if (this.currentLevel.levelName || cameFromShop) {
+      } else if (this.currentLevel.levelName || cameFromShop) {
         this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
       }
       this.addChild(this.currentLevel);
@@ -5459,6 +7232,11 @@ void main() {
         }
         this.loadNextLevel();
       }
+    }
+    clearFlyInScripts() {
+      this.children.filter((child) => child instanceof FlyPlayerInFromBottom).forEach((child) => {
+        this.removeChild(child);
+      });
     }
     levelName() {
       this.levelNameCounter++;
@@ -5510,6 +7288,7 @@ void main() {
     paused = false;
     runsCompleted = 0;
     gameOverCallback;
+    activeBomb = null;
     constructor(options) {
       super(null);
       this.width = options.width;
@@ -5554,13 +7333,29 @@ void main() {
       this.gameOver = false;
       this.paused = false;
       this.player.reset();
-      this.titleScreen.reset(this.runsCompleted);
+      const save = loadSave();
+      if (save) {
+        applySave(this, save);
+      }
+      this.titleScreen.reset(this.runsCompleted, this.hasMetaProgress());
       this.gameOverScreen.reset();
       this.levelManager.reset();
       this.addChild(this.player);
       this.addChild(this.levelManager);
       this.addChild(this.titleScreen);
       this.addChild(this.pauseInputTracker);
+    }
+    hasMetaProgress() {
+      return this.runsCompleted > 0 || hangarHasMetaProgress(this.player.shipHangar);
+    }
+    persistMeta() {
+      writeSave(captureSave(this));
+    }
+    resetMetaProgress() {
+      clearSave();
+      this.runsCompleted = 0;
+      this.player.shipHangar = createStarterHangar();
+      this.titleScreen.reset(0, false);
     }
     clearBullets() {
       this.children.filter(function(entity) {
@@ -5569,12 +7364,22 @@ void main() {
         this.removeChild(bullet);
       }.bind(this));
     }
+    clearBombs() {
+      this.activeBomb = null;
+      this.children.filter(function(entity) {
+        return entity.type === "bomb";
+      }).forEach(function(bomb) {
+        this.removeChild(bomb);
+      }.bind(this));
+    }
     startNewGame() {
       this.runStats.reset();
       this.bank.resetForRun();
       this.comboGauge.reset();
       this.player.resetForNewRun();
       this.levelManager.reset();
+      this.clearBombs();
+      this.lifeMeter.reset();
       this.addChild(this.bank);
       this.addChild(this.comboGauge);
       this.addChild(this.lifeMeter);
@@ -5582,6 +7387,7 @@ void main() {
     }
     finishGame() {
       this.runsCompleted++;
+      this.persistMeta();
       if (this.gameOverCallback) {
         this.gameOverCallback({
           score: this.comboGauge.getScore(),
@@ -5601,8 +7407,9 @@ void main() {
       this.removeChild(this.lifeMeter);
       this.levelManager.stop();
       this.clearBullets();
+      this.clearBombs();
       this.gameOverScreen.reset();
-      this.titleScreen.reset(this.runsCompleted);
+      this.titleScreen.reset(this.runsCompleted, this.hasMetaProgress());
       if (!this.children.includes(this.player)) {
         this.addChild(this.player);
       }
@@ -5669,13 +7476,25 @@ void main() {
       return collisionPairs;
     }
     checkPairsForCollision(pairs) {
-      pairs.forEach(function(pair) {
+      pairs.forEach((pair) => {
         const a = pair[0];
         const b = pair[1];
-        if (spriteCollision(a, b)) {
-          a.applyDamage(b.damage, b);
-          b.applyDamage(a.damage, a);
+        if (!spriteCollision(a, b)) {
+          return;
         }
+        if (a.type === "bomb" || b.type === "bomb") {
+          const bomb = a.type === "bomb" ? a : b;
+          const other = a.type === "bomb" ? b : a;
+          if (other.type === "bullet") {
+            return;
+          }
+          if (other.team !== 0 && other.type !== "pickup") {
+            bomb.detonate();
+          }
+          return;
+        }
+        a.applyDamage(b.damage, b);
+        b.applyDamage(a.damage, a);
       });
     }
     checkGameOver() {
@@ -5691,6 +7510,35 @@ void main() {
     }
     spawnBullet(data) {
       this.addChild(new Bullet(this, data));
+    }
+    spawnBomb(data) {
+      if (this.activeBomb && !this.activeBomb.destroyed && !this.activeBomb.exploding) {
+        return;
+      }
+      const bomb = new Bomb(this, data);
+      this.activeBomb = bomb;
+      this.addChild(bomb);
+    }
+    detonateBomb() {
+      if (this.activeBomb && !this.activeBomb.destroyed && !this.activeBomb.exploding) {
+        this.activeBomb.detonate();
+      }
+    }
+    bombCleared(bomb) {
+      if (this.activeBomb === bomb) {
+        this.activeBomb = null;
+      }
+    }
+    applyBombBlast(data) {
+      const entities = collectEntities(this, this.physicalEntityMatcher);
+      entities.forEach((entity) => {
+        if (entity === data.source) {
+          return;
+        }
+        if (circleIntersectsBox(data.center.x, data.center.y, data.radius, entity)) {
+          entity.applyDamage(data.damage, data.source);
+        }
+      });
     }
     enemyDestroyed(data) {
       this.runStats.enemiesDestroyed++;
