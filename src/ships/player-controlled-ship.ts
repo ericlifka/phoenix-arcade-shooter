@@ -184,8 +184,15 @@ export default class PlayerControlledShip extends GameObject {
     }
 
     purchaseFullHeal(): void {
+        if (!this.canPurchaseFullHeal()) {
+            return;
+        }
         this.fullHealPurchases++;
         this.refillHealth();
+    }
+
+    canPurchaseFullHeal(): boolean {
+        return (this.life || 0) < (this.maxLife || 0);
     }
 
     purchaseRunHealth(): void {

@@ -324,10 +324,14 @@ export default class Shop extends GameObject {
             row.cost = cost;
             const bombUnavailable =
                 upgrade.id === 'bomb' && !this.player.canPurchaseBomb();
-            const maxed = cost === null || bombUnavailable;
+            const fullHealUnavailable =
+                upgrade.id === 'fullHeal' && !this.player.canPurchaseFullHeal();
+            const maxed = cost === null || bombUnavailable || fullHealUnavailable;
 
             row.description!.changeMessage(this.rowLabel(upgrade, owned, maxed));
-            row.description!.updateColor(this.game.interfaceColor);
+            row.description!.updateColor(
+                maxed ? this.disabledColor : this.game.interfaceColor
+            );
 
             if (row.costText) {
                 row.costText.changeMessage(maxed ? '--' : '$' + cost);
@@ -412,7 +416,8 @@ export default class Shop extends GameObject {
         if (
             cost !== null &&
             this.bank.value >= cost &&
-            !(row.upgrade?.id === 'bomb' && !this.player.canPurchaseBomb())
+            !(row.upgrade?.id === 'bomb' && !this.player.canPurchaseBomb()) &&
+            !(row.upgrade?.id === 'fullHeal' && !this.player.canPurchaseFullHeal())
         ) {
             this.bank.removeMoney(cost);
             this.game.recordDollarsSpent(cost);
