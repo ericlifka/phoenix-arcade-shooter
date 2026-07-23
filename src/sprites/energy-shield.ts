@@ -2,7 +2,7 @@ import Sprite from '../rendering/core/sprite.js';
 import type { Position } from '../types/rendering';
 
 /** Light blue used for ship outline and orb cores — tweak freely. */
-export const ENERGY_SHIELD_COLOR = '#7ec8ff';
+export const ENERGY_SHIELD_COLOR = 'hsl(179, 100%, 70%)';
 
 /** Full-health green from GreenToRed — filled shop upgrade ranks. */
 export const UPGRADE_RANK_FILL_COLOR = 'hsl(120, 100%, 50%)';

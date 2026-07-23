@@ -3,6 +3,7 @@ import MuzzleFlash from '../components/muzzle-flash.js';
 import playerShipSprite from '../sprites/player-ship.js';
 import playerShipDoubleGuns from '../sprites/player-ship-double-guns.js';
 import playerShipSpriteWingGuns from '../sprites/player-ship-wing-guns.js';
+import playerShipRadialSprite from '../sprites/player-ship-radial.js';
 import shipExplosion from '../sprites/animations/ship-explosion.js';
 import { applySilhouetteOutline } from '../sprites/energy-shield.js';
 import { playerShipDef, type PlayerShipId } from '../balance/player-ships.js';
@@ -283,8 +284,10 @@ export default class PlayerControlledShip extends GameObject {
                 this.sprite = playerShipDoubleGuns().rotateRight();
                 break;
             case 'triple':
-            case 'radial':
                 this.sprite = playerShipSpriteWingGuns().rotateRight();
+                break;
+            case 'radial':
+                this.sprite = playerShipRadialSprite().rotateRight();
                 break;
         }
     }
@@ -322,8 +325,9 @@ export default class PlayerControlledShip extends GameObject {
             case 'double':
                 return playerShipDoubleGuns().rotateRight();
             case 'triple':
-            case 'radial':
                 return playerShipSpriteWingGuns().rotateRight();
+            case 'radial':
+                return playerShipRadialSprite().rotateRight();
         }
     }
 
