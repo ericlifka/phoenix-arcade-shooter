@@ -2217,7 +2217,7 @@ void main() {
       this.resetForRun();
     }
     resetForRun() {
-      this.value = 5000;
+      this.value = 0;
       this.updateDisplay();
     }
     addMoney(value) {
@@ -3334,7 +3334,7 @@ void main() {
       this.addChild(new TextDisplay(this, {
         font: "phoenix",
         message: "PHOENIX",
-        position: { x: 50, y: 30 },
+        position: { x: 54, y: 30 },
         preserveSpriteColors: true
       }));
       if (runsCompleted > 0) {
@@ -5423,15 +5423,6 @@ void main() {
     bossPatrolRightMargin: 5,
     bossPatrolSeconds: 8
   };
-  function group01ColumnRange(difficultyMultiplier) {
-    let start = group01.columnStartBase - difficultyMultiplier;
-    if (start < group01.columnStartMin)
-      start = group01.columnStartMin;
-    let end = group01.columnEndBase + difficultyMultiplier;
-    if (end > group01.columnEndMax)
-      end = group01.columnEndMax;
-    return { start, end };
-  }
 
   // src/scripts/watch-for-death.ts
   class WatchForDeath extends GameObject {
@@ -5486,7 +5477,8 @@ void main() {
     start() {
       this.ships = [];
       this.scripts = [];
-      const { start, end } = group01ColumnRange(this.difficultyMultiplier);
+      const start = group01.columnStartMin;
+      const end = group01.columnEndMax;
       const time = group01.moveTimeSeconds;
       for (let i = start;i <= end; i++) {
         const x = group01.columnSpacing * i + group01.columnOffsetX;
@@ -7148,7 +7140,6 @@ void main() {
     loadLevels() {
       this.levels = [
         this.hangar,
-        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
