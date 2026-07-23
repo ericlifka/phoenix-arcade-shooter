@@ -3,6 +3,7 @@ import Bomb from '../components/bomb.js';
 import Bullet from '../components/bullet.js';
 import collectEntities from '../helpers/collect-entities.js';
 import { boxCollision, circleIntersectsBox, spriteCollision } from '../helpers/collisions.js';
+import { applySave, captureSave, loadSave, writeSave } from '../helpers/game-save.js';
 import ComboGauge from '../components/combo-gauge.js';
 import ControlsScreen from '../screens/controls-description.js';
 import EmbeddedTitleScreen from '../screens/slim-title-screen.js';
@@ -103,6 +104,12 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         this.paused = false;
 
         this.player.reset();
+
+        const save = loadSave();
+        if (save) {
+            applySave(this, save);
+        }
+
         this.titleScreen.reset(this.runsCompleted);
         this.gameOverScreen.reset();
         this.levelManager.reset();
@@ -111,6 +118,11 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         this.addChild(this.levelManager);
         this.addChild(this.titleScreen);
         this.addChild(this.pauseInputTracker as unknown as GameObject);
+    }
+
+    /** Snapshot hangar unlocks/ranks + runs completed to localStorage. */
+    persistMeta(): void {
+        writeSave(captureSave(this));
     }
 
     clearBullets(): void {
@@ -157,6 +169,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
 
     finishGame(): void {
         this.runsCompleted++;
+        this.persistMeta();
 
         if (this.gameOverCallback) {
             this.gameOverCallback({

@@ -89,6 +89,7 @@ export default class PlayerControlledShip extends GameObject {
 
     unlockShip(shipId: PlayerShipId): void {
         this.shipHangar[shipId].unlocked = true;
+        this.triggerEvent('persistMeta');
     }
 
     get bombCapacity(): number {
@@ -228,6 +229,7 @@ export default class PlayerControlledShip extends GameObject {
         if (shipId === this.activeShipId) {
             this.syncStatsFromUpgrades({ healBy: 5 });
         }
+        this.triggerEvent('persistMeta');
     }
 
     purchaseArmor(shipId: PlayerShipId): void {
@@ -238,6 +240,7 @@ export default class PlayerControlledShip extends GameObject {
         if (shipId === this.activeShipId) {
             this.syncStatsFromUpgrades();
         }
+        this.triggerEvent('persistMeta');
     }
 
     purchaseBombCapacity(shipId: PlayerShipId): void {
@@ -245,6 +248,7 @@ export default class PlayerControlledShip extends GameObject {
         const cap = playerShipDef(shipId).maxBombCapacity;
         if (profile.bombCapacityRanks >= cap) return;
         profile.bombCapacityRanks++;
+        this.triggerEvent('persistMeta');
     }
 
     purchaseShipSpeed(shipId: PlayerShipId): void {
@@ -255,6 +259,7 @@ export default class PlayerControlledShip extends GameObject {
         if (shipId === this.activeShipId) {
             this.syncStatsFromUpgrades();
         }
+        this.triggerEvent('persistMeta');
     }
 
     purchaseFireSpeed(shipId: PlayerShipId): void {
@@ -265,6 +270,7 @@ export default class PlayerControlledShip extends GameObject {
         if (shipId === this.activeShipId) {
             this.syncStatsFromUpgrades();
         }
+        this.triggerEvent('persistMeta');
     }
 
     purchaseCombo(shipId: PlayerShipId): void {
@@ -273,6 +279,7 @@ export default class PlayerControlledShip extends GameObject {
         if (profile.comboSegments >= cap) return;
         profile.comboSegments++;
         profile.comboUpgrades++;
+        this.triggerEvent('persistMeta');
     }
 
     applyActiveShipSprite(): void {
