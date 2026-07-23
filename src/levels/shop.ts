@@ -127,14 +127,35 @@ export default class Shop extends GameObject {
 
         this.tabChrome = shopTabs.map((def) => {
             if (def.kind === 'text') {
+                const labelText = def.label || '';
+                const labelX = 8;
                 const label = new TextDisplay(this, {
                     font: 'arcade-small',
-                    message: def.label || '',
-                    position: { x: 8, y: TAB_Y },
+                    message: labelText,
+                    position: { x: labelX, y: TAB_Y },
                     color: this.game.interfaceColor
                 });
                 this.addChild(label);
-                return { def, label };
+
+                const leftBracket = new TextDisplay(this, {
+                    font: 'arcade-small',
+                    message: '[',
+                    position: { x: labelX - 5, y: TAB_Y },
+                    color: this.game.interfaceColor
+                });
+                const rightBracket = new TextDisplay(this, {
+                    font: 'arcade-small',
+                    message: ']',
+                    position: {
+                        x: labelX + (label.width || 0) + 1,
+                        y: TAB_Y
+                    },
+                    color: this.game.interfaceColor
+                });
+                this.addChild(leftBracket);
+                this.addChild(rightBracket);
+
+                return { def, label, leftBracket, rightBracket };
             }
 
             const shipId = def.shipId!;
@@ -174,20 +195,17 @@ export default class Shop extends GameObject {
             const active = index === this.activeTabIndex;
 
             if (tab.def.kind === 'text' && tab.label) {
-                const base = tab.def.label || '';
-                tab.label.changeMessage(active ? `[${base}]` : base);
                 tab.label.updateColor(
                     active ? this.game.interfaceColor : this.disabledColor
                 );
-                return;
-            }
-
-            const shipId = tab.def.shipId!;
-            const unlocked = this.player.isShipUnlocked(shipId);
-            if (tab.shipIcon) {
-                tab.shipIcon.sprite = PlayerControlledShip.spriteForShipId(shipId);
-                if (!unlocked) {
-                    tab.shipIcon.sprite.applyColor(this.disabledColor);
+            } else {
+                const shipId = tab.def.shipId!;
+                const unlocked = this.player.isShipUnlocked(shipId);
+                if (tab.shipIcon) {
+                    tab.shipIcon.sprite = PlayerControlledShip.spriteForShipId(shipId);
+                    if (!unlocked) {
+                        tab.shipIcon.sprite.applyColor(this.disabledColor);
+                    }
                 }
             }
 
