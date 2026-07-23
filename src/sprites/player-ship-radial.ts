@@ -2,16 +2,16 @@ import Sprite from '../rendering/core/sprite.js';
 
 /**
  * Radial guns ship — deep chevron with white wing-tip muzzles (option C1).
- * Same white-ember palette as other player hulls.
+ * Plasma violet (Fleet A / radial).
  */
 export default function playerShipRadialSprite(): any {
     const n = null;
     const t = '#ffffff';
-    const c = '#ffe8c8';
-    const h = '#fff0e0';
-    const m = '#ffd0a8';
-    const w = '#e87848';
-    const e = '#a84028';
+    const c = '#f0e0ff';
+    const h = '#f8f0ff';
+    const m = '#c0a0e0';
+    const w = '#9040c0';
+    const e = '#502878';
 
     // Column-major (x, then y), nose up — matches other player ship sprites.
     return new Sprite([

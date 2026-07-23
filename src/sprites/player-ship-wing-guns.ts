@@ -1,16 +1,16 @@
 import Sprite from '../rendering/core/sprite.js';
 
 /**
- * Player ship with wing guns upgrade — white ember shading (outline unchanged).
+ * Player ship with wing guns upgrade — deep teal (Fleet A / triple).
  */
 export default function playerShipWingGunsSprite(): any {
     const n = null;
     const t = '#ffffff';
-    const c = '#ffe8c8';
-    const h = '#fff0e0';
-    const m = '#ffd0a8';
-    const w = '#e87848';
-    const e = '#a84028';
+    const c = '#d0fff8';
+    const h = '#e8fff8';
+    const m = '#60b8a8';
+    const w = '#289080';
+    const e = '#185848';
 
     return new Sprite([
         [n, n, n, n, w, w, w, n, n],

@@ -1,16 +1,16 @@
 import Sprite from '../rendering/core/sprite.js';
 
 /**
- * Player ship with wing guns only — white ember shading (outline unchanged).
+ * Player ship with wing guns only — crimson (Fleet A / double).
  */
 export default function playerShipDoubleGunsSprite(): any {
     const n = null;
     const t = '#ffffff';
-    const c = '#ffe8c8';
-    const h = '#fff0e0';
-    const m = '#ffd0a8';
-    const w = '#e87848';
-    const e = '#a84028';
+    const c = '#ffe0e0';
+    const h = '#fff0f0';
+    const m = '#e09898';
+    const w = '#c04040';
+    const e = '#702020';
 
     return new Sprite([
         [n, n, n, n, n, w, w, n, n],
