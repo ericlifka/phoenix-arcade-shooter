@@ -2490,6 +2490,7 @@ void main() {
       maxBombCapacity: 3,
       maxShipSpeed: 5,
       maxFireSpeed: 5,
+      maxDamage: 3,
       maxCombo: 4
     },
     {
@@ -2500,6 +2501,7 @@ void main() {
       maxBombCapacity: 3,
       maxShipSpeed: 4,
       maxFireSpeed: 4,
+      maxDamage: 4,
       maxCombo: 6
     },
     {
@@ -2510,6 +2512,7 @@ void main() {
       maxBombCapacity: 3,
       maxShipSpeed: 3,
       maxFireSpeed: 3,
+      maxDamage: 5,
       maxCombo: 8
     },
     {
@@ -2520,6 +2523,7 @@ void main() {
       maxBombCapacity: 3,
       maxShipSpeed: 2,
       maxFireSpeed: 2,
+      maxDamage: 6,
       maxCombo: 10
     }
   ];
@@ -2543,7 +2547,8 @@ void main() {
       armorRanks: 0,
       bombCapacityRanks: 0,
       shipSpeedRanks: 0,
-      fireSpeedRanks: 0
+      fireSpeedRanks: 0,
+      damageRanks: 0
     };
   }
   function createStarterHangar() {
@@ -2567,7 +2572,8 @@ void main() {
     "armorRanks",
     "bombCapacityRanks",
     "shipSpeedRanks",
-    "fireSpeedRanks"
+    "fireSpeedRanks",
+    "damageRanks"
   ];
   function isPlayerShipId(id) {
     return playerShipDefs.some((def) => def.id === id);
@@ -2585,7 +2591,8 @@ void main() {
       armorRanks: profile.armorRanks,
       bombCapacityRanks: profile.bombCapacityRanks,
       shipSpeedRanks: profile.shipSpeedRanks,
-      fireSpeedRanks: profile.fireSpeedRanks
+      fireSpeedRanks: profile.fireSpeedRanks,
+      damageRanks: profile.damageRanks
     };
   }
   function cloneHangar(hangar) {
@@ -2608,6 +2615,9 @@ void main() {
       return null;
     }
     for (const key of RANK_KEYS) {
+      if (key === "damageRanks" && profile[key] === undefined) {
+        continue;
+      }
       if (!isNonNegativeInt(profile[key])) {
         return null;
       }
@@ -2621,7 +2631,8 @@ void main() {
       armorRanks: profile.armorRanks,
       bombCapacityRanks: profile.bombCapacityRanks,
       shipSpeedRanks: profile.shipSpeedRanks,
-      fireSpeedRanks: profile.fireSpeedRanks
+      fireSpeedRanks: profile.fireSpeedRanks,
+      damageRanks: isNonNegativeInt(profile.damageRanks) ? profile.damageRanks : 0
     };
   }
   function validateSave(raw) {
@@ -2688,7 +2699,7 @@ void main() {
       if (def.unlockCost !== null && profile.unlocked) {
         return true;
       }
-      if (profile.maxHealthRanks > 0 || profile.armorRanks > 0 || profile.bombCapacityRanks > 0 || profile.shipSpeedRanks > 0 || profile.fireSpeedRanks > 0 || profile.comboSegments > 0 || profile.comboUpgrades > 0) {
+      if (profile.maxHealthRanks > 0 || profile.armorRanks > 0 || profile.bombCapacityRanks > 0 || profile.shipSpeedRanks > 0 || profile.fireSpeedRanks > 0 || profile.damageRanks > 0 || profile.comboSegments > 0 || profile.comboUpgrades > 0) {
         return true;
       }
     }
@@ -2838,6 +2849,13 @@ void main() {
       label: "10% Fire Speed",
       cost: { kind: "linear", base: 100, perRank: 100 },
       maxRanksForShip: (shipId) => playerShipDef(shipId).maxFireSpeed
+    },
+    {
+      id: "damage",
+      permanent: true,
+      label: "+1 Bullet Damage",
+      cost: { kind: "linear", base: 100, perRank: 100 },
+      maxRanksForShip: (shipId) => playerShipDef(shipId).maxDamage
     },
     {
       id: "combo",
@@ -4153,6 +4171,14 @@ void main() {
       }
       this.triggerEvent("persistMeta");
     }
+    purchaseDamage(shipId) {
+      const profile = this.shipHangar[shipId];
+      const cap = playerShipDef(shipId).maxDamage;
+      if (profile.damageRanks >= cap)
+        return;
+      profile.damageRanks++;
+      this.triggerEvent("persistMeta");
+    }
     purchaseCombo(shipId) {
       const profile = this.shipHangar[shipId];
       const cap = playerShipDef(shipId).maxCombo;
@@ -4284,7 +4310,7 @@ void main() {
       guns.forEach(function(gun, index) {
         this.triggerEvent("spawnBullet", {
           team: this.team,
-          damage: 1,
+          damage: 1 + this.shipProfile.damageRanks,
           velocity: {
             x: this.bulletSpreadX(index, guns.length),
             y: -this.BULLET_SPEED
@@ -4582,6 +4608,11 @@ void main() {
           text: "Fire Rate: +" + firePct + "%",
           owned: profile.fireSpeedRanks,
           max: def.maxFireSpeed
+        },
+        {
+          text: "Damage: " + (1 + profile.damageRanks),
+          owned: profile.damageRanks,
+          max: def.maxDamage
         },
         {
           text: "Combo: " + comboMult + "x",
@@ -6692,13 +6723,13 @@ void main() {
   }
 
   // src/levels/shop.ts
-  var LIST_BASE_Y = 45;
+  var LIST_BASE_Y = 35;
   var LIST_ROW_STRIDE = 15;
   var LIST_LABEL_X = 70;
   var LIST_COST_X = 40;
   var LEAVE_LABEL_X = 40;
   var PROGRESS_RIGHT_X2 = 182;
-  var TAB_Y2 = 22;
+  var TAB_Y2 = 12;
   var SHIP_TAB_START_X2 = 100;
   var SHIP_TAB_STRIDE2 = 22;
 
@@ -6927,6 +6958,8 @@ void main() {
           return player.profileFor(upgrade.tab).shipSpeedRanks;
         case "fireSpeed":
           return player.profileFor(upgrade.tab).fireSpeedRanks;
+        case "damage":
+          return player.profileFor(upgrade.tab).damageRanks;
         case "combo":
           return player.profileFor(upgrade.tab).comboUpgrades;
         case "unlock": {
@@ -7073,6 +7106,9 @@ void main() {
           break;
         case "fireSpeed":
           this.player.purchaseFireSpeed(shipId);
+          break;
+        case "damage":
+          this.player.purchaseDamage(shipId);
           break;
         case "combo":
           this.player.purchaseCombo(shipId);
