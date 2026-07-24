@@ -17,13 +17,13 @@ import {
     type ShopUpgradeId
 } from '../balance/shop.js';
 
-const LIST_BASE_Y = 45;
+const LIST_BASE_Y = 35;
 const LIST_ROW_STRIDE = 15;
 const LIST_LABEL_X = 70;
 const LIST_COST_X = 40;
 const LEAVE_LABEL_X = 40;
 const PROGRESS_RIGHT_X = 182;
-const TAB_Y = 22;
+const TAB_Y = 12;
 const SHIP_TAB_START_X = 100;
 const SHIP_TAB_STRIDE = 22;
 
@@ -307,6 +307,8 @@ export default class Shop extends GameObject {
                 return player.profileFor(upgrade.tab as PlayerShipId).shipSpeedRanks;
             case 'fireSpeed':
                 return player.profileFor(upgrade.tab as PlayerShipId).fireSpeedRanks;
+            case 'damage':
+                return player.profileFor(upgrade.tab as PlayerShipId).damageRanks;
             case 'combo':
                 return player.profileFor(upgrade.tab as PlayerShipId).comboUpgrades;
             case 'unlock': {
@@ -487,6 +489,9 @@ export default class Shop extends GameObject {
                 break;
             case 'fireSpeed':
                 this.player.purchaseFireSpeed(shipId);
+                break;
+            case 'damage':
+                this.player.purchaseDamage(shipId);
                 break;
             case 'combo':
                 this.player.purchaseCombo(shipId);

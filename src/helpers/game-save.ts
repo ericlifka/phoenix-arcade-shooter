@@ -28,7 +28,8 @@ const RANK_KEYS: (keyof PlayerShipProfile)[] = [
     'armorRanks',
     'bombCapacityRanks',
     'shipSpeedRanks',
-    'fireSpeedRanks'
+    'fireSpeedRanks',
+    'damageRanks'
 ];
 
 function isPlayerShipId(id: string): id is PlayerShipId {
@@ -49,7 +50,8 @@ function cloneProfile(profile: PlayerShipProfile): PlayerShipProfile {
         armorRanks: profile.armorRanks,
         bombCapacityRanks: profile.bombCapacityRanks,
         shipSpeedRanks: profile.shipSpeedRanks,
-        fireSpeedRanks: profile.fireSpeedRanks
+        fireSpeedRanks: profile.fireSpeedRanks,
+        damageRanks: profile.damageRanks
     };
 }
 
@@ -82,6 +84,10 @@ function validateProfile(id: PlayerShipId, raw: unknown): PlayerShipProfile | nu
     }
 
     for (const key of RANK_KEYS) {
+        // Old saves omit damageRanks — treat as 0 so existing meta still loads.
+        if (key === 'damageRanks' && profile[key] === undefined) {
+            continue;
+        }
         if (!isNonNegativeInt(profile[key])) {
             return null;
         }
@@ -96,7 +102,8 @@ function validateProfile(id: PlayerShipId, raw: unknown): PlayerShipProfile | nu
         armorRanks: profile.armorRanks as number,
         bombCapacityRanks: profile.bombCapacityRanks as number,
         shipSpeedRanks: profile.shipSpeedRanks as number,
-        fireSpeedRanks: profile.fireSpeedRanks as number
+        fireSpeedRanks: profile.fireSpeedRanks as number,
+        damageRanks: isNonNegativeInt(profile.damageRanks) ? profile.damageRanks : 0
     };
 }
 
@@ -189,6 +196,7 @@ export function hangarHasMetaProgress(hangar: PlayerShipHangar): boolean {
             profile.bombCapacityRanks > 0 ||
             profile.shipSpeedRanks > 0 ||
             profile.fireSpeedRanks > 0 ||
+            profile.damageRanks > 0 ||
             profile.comboSegments > 0 ||
             profile.comboUpgrades > 0
         ) {

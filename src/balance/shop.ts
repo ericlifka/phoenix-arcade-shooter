@@ -18,6 +18,7 @@ export type ShopUpgradeId =
     | 'bombCapacity'
     | 'shipSpeed'
     | 'fireSpeed'
+    | 'damage'
     | 'combo'
     | 'unlock';
 
@@ -141,6 +142,13 @@ export const shipShopUpgradeTemplates: ReadonlyArray<ShipUpgradeTemplate> = [
         label: '10% Fire Speed',
         cost: { kind: 'linear', base: 100, perRank: 100 },
         maxRanksForShip: (shipId) => playerShipDef(shipId).maxFireSpeed
+    },
+    {
+        id: 'damage',
+        permanent: true,
+        label: '+1 Bullet Damage',
+        cost: { kind: 'linear', base: 100, perRank: 100 },
+        maxRanksForShip: (shipId) => playerShipDef(shipId).maxDamage
     },
     {
         id: 'combo',

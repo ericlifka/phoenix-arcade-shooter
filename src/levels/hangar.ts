@@ -350,6 +350,11 @@ export default class Hangar extends GameObject {
                 max: def.maxFireSpeed
             },
             {
+                text: 'Damage: ' + (1 + profile.damageRanks),
+                owned: profile.damageRanks,
+                max: def.maxDamage
+            },
+            {
                 text: 'Combo: ' + comboMult + 'x',
                 owned: profile.comboSegments,
                 max: def.maxCombo

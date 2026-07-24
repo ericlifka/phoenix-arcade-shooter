@@ -14,6 +14,7 @@ export interface PlayerShipDef {
     maxBombCapacity: number;
     maxShipSpeed: number;
     maxFireSpeed: number;
+    maxDamage: number;
     maxCombo: number;
 }
 
@@ -21,7 +22,7 @@ export interface PlayerShipDef {
  * Unlock prices match the old gun-tier shop costs:
  * Double $500, Triple $1000, Radial $1500.
  *
- * Caps: maxHealth / maxArmor / maxShipSpeed / maxFireSpeed / maxCombo
+ * Caps: maxHealth / maxArmor / maxShipSpeed / maxFireSpeed / maxDamage / maxCombo
  * (bomb capacity is 3 on every ship).
  */
 export const playerShipDefs: ReadonlyArray<PlayerShipDef> = [
@@ -33,6 +34,7 @@ export const playerShipDefs: ReadonlyArray<PlayerShipDef> = [
         maxBombCapacity: 3,
         maxShipSpeed: 5,
         maxFireSpeed: 5,
+        maxDamage: 3,
         maxCombo: 4
     },
     {
@@ -43,6 +45,7 @@ export const playerShipDefs: ReadonlyArray<PlayerShipDef> = [
         maxBombCapacity: 3,
         maxShipSpeed: 4,
         maxFireSpeed: 4,
+        maxDamage: 4,
         maxCombo: 6
     },
     {
@@ -53,6 +56,7 @@ export const playerShipDefs: ReadonlyArray<PlayerShipDef> = [
         maxBombCapacity: 3,
         maxShipSpeed: 3,
         maxFireSpeed: 3,
+        maxDamage: 5,
         maxCombo: 8
     },
     {
@@ -63,6 +67,7 @@ export const playerShipDefs: ReadonlyArray<PlayerShipDef> = [
         maxBombCapacity: 3,
         maxShipSpeed: 2,
         maxFireSpeed: 2,
+        maxDamage: 6,
         maxCombo: 10
     }
 ];

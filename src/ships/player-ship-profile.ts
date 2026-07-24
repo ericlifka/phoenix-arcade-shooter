@@ -17,6 +17,7 @@ export interface PlayerShipProfile {
     bombCapacityRanks: number;
     shipSpeedRanks: number;
     fireSpeedRanks: number;
+    damageRanks: number;
 }
 
 export type PlayerShipHangar = Record<PlayerShipId, PlayerShipProfile>;
@@ -31,7 +32,8 @@ export function createShipProfile(id: PlayerShipId, unlocked: boolean): PlayerSh
         armorRanks: 0,
         bombCapacityRanks: 0,
         shipSpeedRanks: 0,
-        fireSpeedRanks: 0
+        fireSpeedRanks: 0,
+        damageRanks: 0
     };
 }
 

@@ -273,6 +273,14 @@ export default class PlayerControlledShip extends GameObject {
         this.triggerEvent('persistMeta');
     }
 
+    purchaseDamage(shipId: PlayerShipId): void {
+        const profile = this.shipHangar[shipId];
+        const cap = playerShipDef(shipId).maxDamage;
+        if (profile.damageRanks >= cap) return;
+        profile.damageRanks++;
+        this.triggerEvent('persistMeta');
+    }
+
     purchaseCombo(shipId: PlayerShipId): void {
         const profile = this.shipHangar[shipId];
         const cap = playerShipDef(shipId).maxCombo;
@@ -433,7 +441,7 @@ export default class PlayerControlledShip extends GameObject {
             function (this: PlayerControlledShip, gun: Position, index: number) {
                 this.triggerEvent('spawnBullet', {
                     team: this.team,
-                    damage: 1,
+                    damage: 1 + this.shipProfile.damageRanks,
                     velocity: {
                         x: this.bulletSpreadX(index, guns.length),
                         y: -this.BULLET_SPEED
