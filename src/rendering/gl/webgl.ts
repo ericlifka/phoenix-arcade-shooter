@@ -1,8 +1,8 @@
 import Frame from './frame.js';
 
 function maximumPixelSize(width: number, height: number): number {
-    const maxWidth = window.innerWidth;
-    const maxHeight = window.innerHeight;
+    const maxWidth = Math.min(window.innerWidth, document.documentElement.clientWidth);
+    const maxHeight = Math.min(window.innerHeight, document.documentElement.clientHeight);
     let pixelSize = 1;
     while (true) {
         if (width * pixelSize > maxWidth ||

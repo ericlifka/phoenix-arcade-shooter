@@ -51,6 +51,50 @@ window.addEventListener('focus', function () {
     gamepadInput.clearState();
 });
 
+/** Enter fullscreen on gesture only while already landscape; stop after success or deny. */
+let landscapeFullscreenSettled = false;
+
+function isLandscape(): boolean {
+    return window.matchMedia('(orientation: landscape)').matches;
+}
+
+function requestLandscapeFullscreen(): void {
+    if (landscapeFullscreenSettled || !isLandscape()) {
+        return;
+    }
+
+    const doc = document as Document & {
+        webkitFullscreenElement?: Element | null;
+    };
+    if (document.fullscreenElement || doc.webkitFullscreenElement) {
+        landscapeFullscreenSettled = true;
+        return;
+    }
+
+    const root = document.documentElement as HTMLElement & {
+        webkitRequestFullscreen?: () => void | Promise<void>;
+    };
+    const request =
+        root.requestFullscreen?.bind(root) ??
+        root.webkitRequestFullscreen?.bind(root);
+
+    if (!request) {
+        landscapeFullscreenSettled = true;
+        return;
+    }
+
+    Promise.resolve(request())
+        .then(function () {
+            landscapeFullscreenSettled = true;
+        })
+        .catch(function () {
+            landscapeFullscreenSettled = true;
+        });
+}
+
+document.addEventListener('pointerdown', requestLandscapeFullscreen, { passive: true });
+document.addEventListener('keydown', requestLandscapeFullscreen);
+
 runLoop.start();
 window.activeGame = phoenix;
 
