@@ -80,8 +80,8 @@
 
   // src/rendering/gl/webgl.ts
   function maximumPixelSize(width, height) {
-    const maxWidth = window.innerWidth;
-    const maxHeight = window.innerHeight;
+    const maxWidth = Math.min(window.innerWidth, document.documentElement.clientWidth);
+    const maxHeight = Math.min(window.innerHeight, document.documentElement.clientHeight);
     let pixelSize = 1;
     while (true) {
       if (width * pixelSize > maxWidth || height * pixelSize > maxHeight) {
@@ -7697,6 +7697,33 @@ void main() {
     keyboardInput.clearState();
     gamepadInput.clearState();
   });
+  var landscapeFullscreenSettled = false;
+  function isLandscape() {
+    return window.matchMedia("(orientation: landscape)").matches;
+  }
+  function requestLandscapeFullscreen() {
+    if (landscapeFullscreenSettled || !isLandscape()) {
+      return;
+    }
+    const doc = document;
+    if (document.fullscreenElement || doc.webkitFullscreenElement) {
+      landscapeFullscreenSettled = true;
+      return;
+    }
+    const root = document.documentElement;
+    const request = root.requestFullscreen?.bind(root) ?? root.webkitRequestFullscreen?.bind(root);
+    if (!request) {
+      landscapeFullscreenSettled = true;
+      return;
+    }
+    Promise.resolve(request()).then(function() {
+      landscapeFullscreenSettled = true;
+    }).catch(function() {
+      landscapeFullscreenSettled = true;
+    });
+  }
+  document.addEventListener("pointerdown", requestLandscapeFullscreen, { passive: true });
+  document.addEventListener("keydown", requestLandscapeFullscreen);
   runLoop.start();
   window.activeGame = phoenix;
 })();
