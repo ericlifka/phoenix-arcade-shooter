@@ -81,7 +81,7 @@ export const runShopUpgrades: ReadonlyArray<Omit<ShopUpgradeDef, 'tab'> & { tab:
         id: 'health',
         tab: 'run',
         permanent: false,
-        label: '+1 Ship Health',
+        label: '+1 Ship Hull',
         maxRanks: null,
         cost: { kind: 'linear', base: 5, perRank: 5 }
     },
@@ -109,7 +109,7 @@ export const deathShopUpgrades: ReadonlyArray<ShopUpgradeDef> = [
         id: 'deathHealth',
         tab: 'run',
         permanent: false,
-        label: '+10 Health',
+        label: '+10 Hull',
         maxRanks: null,
         cost: { kind: 'linear', base: 50, perRank: 25 }
     },
@@ -133,7 +133,7 @@ export const shipShopUpgradeTemplates: ReadonlyArray<ShipUpgradeTemplate> = [
     {
         id: 'maxHealth',
         permanent: true,
-        label: '+5 Health',
+        label: '+5 Hull',
         cost: { kind: 'linear', base: 100, perRank: 50 },
         maxRanksForShip: (shipId) => playerShipDef(shipId).maxHealth
     },
@@ -161,14 +161,14 @@ export const shipShopUpgradeTemplates: ReadonlyArray<ShipUpgradeTemplate> = [
     {
         id: 'fireSpeed',
         permanent: true,
-        label: '10% Fire Speed',
+        label: '+10% Fire Speed',
         cost: { kind: 'linear', base: 100, perRank: 100 },
         maxRanksForShip: (shipId) => playerShipDef(shipId).maxFireSpeed
     },
     {
         id: 'damage',
         permanent: true,
-        label: '+1 Bullet Damage',
+        label: '+1 Damage',
         cost: { kind: 'linear', base: 100, perRank: 100 },
         maxRanksForShip: (shipId) => playerShipDef(shipId).maxDamage
     },
