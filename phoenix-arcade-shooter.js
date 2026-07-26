@@ -2217,7 +2217,7 @@ void main() {
       this.resetForRun();
     }
     resetForRun() {
-      this.value = 0;
+      this.value = 1e4;
       this.updateDisplay();
     }
     addMoney(value) {
@@ -2485,45 +2485,45 @@ void main() {
     {
       id: "starter",
       unlockCost: null,
-      maxHealth: 3,
+      maxHealth: 8,
       maxArmor: 2,
       maxBombCapacity: 3,
-      maxShipSpeed: 5,
-      maxFireSpeed: 5,
+      maxShipSpeed: 10,
+      maxFireSpeed: 10,
       maxDamage: 3,
-      maxCombo: 4
+      maxCombo: 10
     },
     {
       id: "double",
       unlockCost: 500,
-      maxHealth: 4,
-      maxArmor: 3,
+      maxHealth: 12,
+      maxArmor: 5,
       maxBombCapacity: 3,
-      maxShipSpeed: 4,
-      maxFireSpeed: 4,
+      maxShipSpeed: 5,
+      maxFireSpeed: 5,
       maxDamage: 4,
-      maxCombo: 6
+      maxCombo: 10
     },
     {
       id: "triple",
       unlockCost: 1000,
-      maxHealth: 5,
-      maxArmor: 5,
-      maxBombCapacity: 3,
-      maxShipSpeed: 3,
-      maxFireSpeed: 3,
-      maxDamage: 5,
-      maxCombo: 8
+      maxHealth: 16,
+      maxArmor: 9,
+      maxBombCapacity: 6,
+      maxShipSpeed: 1,
+      maxFireSpeed: 1,
+      maxDamage: 10,
+      maxCombo: 10
     },
     {
       id: "radial",
       unlockCost: 1500,
       maxHealth: 6,
-      maxArmor: 8,
-      maxBombCapacity: 3,
-      maxShipSpeed: 2,
-      maxFireSpeed: 2,
-      maxDamage: 6,
+      maxArmor: 2,
+      maxBombCapacity: 2,
+      maxShipSpeed: 3,
+      maxFireSpeed: 3,
+      maxDamage: 1,
       maxCombo: 10
     }
   ];
@@ -2541,8 +2541,6 @@ void main() {
     return {
       id,
       unlocked,
-      comboSegments: 0,
-      comboUpgrades: 0,
       maxHealthRanks: 0,
       armorRanks: 0,
       bombCapacityRanks: 0,
@@ -2562,12 +2560,349 @@ void main() {
     return DEFAULT_PLAYER_SHIP_ID;
   }
 
+  // src/ships/player-technologies.ts
+  function createStarterTechnologies() {
+    return {
+      comboRanks: 0,
+      bombFabricator: false,
+      energyShieldGenerator: false,
+      hangarBay: false,
+      armorRiveter: false,
+      fuelMixingTank: false,
+      focalLenseGrinder: false,
+      thermalCooling: false
+    };
+  }
+  function cloneTechnologies(tech) {
+    return {
+      comboRanks: tech.comboRanks,
+      bombFabricator: tech.bombFabricator,
+      energyShieldGenerator: tech.energyShieldGenerator,
+      hangarBay: tech.hangarBay,
+      armorRiveter: tech.armorRiveter,
+      fuelMixingTank: tech.fuelMixingTank,
+      focalLenseGrinder: tech.focalLenseGrinder,
+      thermalCooling: tech.thermalCooling
+    };
+  }
+  function technologiesHaveProgress(tech) {
+    return tech.comboRanks > 0 || tech.bombFabricator || tech.energyShieldGenerator || tech.hangarBay || tech.armorRiveter || tech.fuelMixingTank || tech.focalLenseGrinder || tech.thermalCooling;
+  }
+
+  // src/balance/shop.ts
+  var MAX_COMBO_UPGRADES = 10;
+  var COMBO_UPGRADE_COSTS = [
+    25,
+    50,
+    100,
+    200,
+    400,
+    1000,
+    2000,
+    3500,
+    6000,
+    1e4
+  ];
+  var baseShopTabs = [
+    { id: "run", kind: "text", label: "Supplies" },
+    { id: "technology", kind: "text", label: "Technology" }
+  ];
+  var shopTabs = [
+    ...baseShopTabs,
+    ...playerShipDefs.map((ship) => ({
+      id: ship.id,
+      kind: "ship",
+      shipId: ship.id
+    }))
+  ];
+  function visibleShopTabs(hangarBay, isShipUnlocked) {
+    const tabs = [...baseShopTabs];
+    if (!hangarBay) {
+      return tabs;
+    }
+    for (const ship of playerShipDefs) {
+      if (isShipUnlocked(ship.id)) {
+        tabs.push({
+          id: ship.id,
+          kind: "ship",
+          shipId: ship.id
+        });
+      }
+    }
+    return tabs;
+  }
+  var runShopUpgrades = [
+    {
+      id: "fullHeal",
+      tab: "run",
+      permanent: false,
+      label: "Repair Hull",
+      maxRanks: null,
+      cost: { kind: "linear", base: 25, perRank: 10 }
+    },
+    {
+      id: "health",
+      tab: "run",
+      permanent: false,
+      label: "+1 Hull",
+      maxRanks: null,
+      cost: { kind: "linear", base: 5, perRank: 5 }
+    },
+    {
+      id: "energyShield",
+      tab: "run",
+      permanent: false,
+      label: "+1 Energy Shield",
+      maxRanks: null,
+      cost: { kind: "linear", base: 15, perRank: 10 }
+    },
+    {
+      id: "bomb",
+      tab: "run",
+      permanent: false,
+      label: "+1 Bomb",
+      maxRanks: null,
+      cost: { kind: "linear", base: 25, perRank: 15 }
+    }
+  ];
+  var deathShopUpgrades = [
+    {
+      id: "deathHealth",
+      tab: "run",
+      permanent: false,
+      label: "+10 Hull",
+      maxRanks: null,
+      cost: { kind: "linear", base: 50, perRank: 25 }
+    },
+    {
+      id: "deathShield",
+      tab: "run",
+      permanent: false,
+      label: "+3 Energy Shield",
+      maxRanks: null,
+      cost: { kind: "linear", base: 50, perRank: 25 }
+    }
+  ];
+  var shipShopUpgradeTemplates = [
+    {
+      id: "maxHealth",
+      permanent: true,
+      label: "+5 Hull",
+      cost: { kind: "linear", base: 100, perRank: 50 },
+      maxRanksForShip: (shipId) => playerShipDef(shipId).maxHealth
+    },
+    {
+      id: "armor",
+      permanent: true,
+      label: "+1 Armor",
+      cost: { kind: "linear", base: 75, perRank: 75 },
+      maxRanksForShip: (shipId) => playerShipDef(shipId).maxArmor,
+      requiresTech: "armorRiveter"
+    },
+    {
+      id: "bombCapacity",
+      permanent: true,
+      label: "+1 Bomb Capacity",
+      cost: { kind: "linear", base: 50, perRank: 100 },
+      maxRanksForShip: (shipId) => playerShipDef(shipId).maxBombCapacity,
+      requiresTech: "bombFabricator"
+    },
+    {
+      id: "shipSpeed",
+      permanent: true,
+      label: "+10% Ship Speed",
+      cost: { kind: "linear", base: 100, perRank: 100 },
+      maxRanksForShip: (shipId) => playerShipDef(shipId).maxShipSpeed,
+      requiresTech: "fuelMixingTank"
+    },
+    {
+      id: "fireSpeed",
+      permanent: true,
+      label: "+10% Fire Speed",
+      cost: { kind: "linear", base: 100, perRank: 100 },
+      maxRanksForShip: (shipId) => playerShipDef(shipId).maxFireSpeed,
+      requiresTech: "thermalCooling"
+    },
+    {
+      id: "damage",
+      permanent: true,
+      label: "+1 Damage",
+      cost: { kind: "linear", base: 100, perRank: 100 },
+      maxRanksForShip: (shipId) => playerShipDef(shipId).maxDamage,
+      requiresTech: "focalLenseGrinder"
+    }
+  ];
+  function nextShipToUnlock(isShipUnlocked) {
+    for (const ship of playerShipDefs) {
+      if (ship.unlockCost === null) {
+        continue;
+      }
+      if (!isShipUnlocked(ship.id)) {
+        return ship;
+      }
+    }
+    return null;
+  }
+  function technologyUpgradesFor(tech, isShipUnlocked) {
+    const rows = [];
+    if (tech.comboRanks < MAX_COMBO_UPGRADES) {
+      rows.push({
+        id: "combo",
+        tab: "technology",
+        permanent: true,
+        label: tech.comboRanks === 0 ? "Combo Meter" : "Extend Combo",
+        maxRanks: MAX_COMBO_UPGRADES,
+        cost: { kind: "schedule", costs: [...COMBO_UPGRADE_COSTS] }
+      });
+    }
+    if (!tech.bombFabricator) {
+      rows.push({
+        id: "bombFabricator",
+        tab: "technology",
+        permanent: true,
+        label: "Bomb Fabricator",
+        maxRanks: 1,
+        cost: { kind: "fixed", amount: 50 }
+      });
+    }
+    if (!tech.energyShieldGenerator) {
+      rows.push({
+        id: "shieldGenerator",
+        tab: "technology",
+        permanent: true,
+        label: "Energy Shield Generator",
+        maxRanks: 1,
+        cost: { kind: "fixed", amount: 75 }
+      });
+    }
+    if (!tech.hangarBay) {
+      rows.push({
+        id: "hangarBay",
+        tab: "technology",
+        permanent: true,
+        label: "Hangar Bay",
+        maxRanks: 1,
+        cost: { kind: "fixed", amount: 100 }
+      });
+    } else {
+      if (!tech.armorRiveter) {
+        rows.push({
+          id: "armorRiveter",
+          tab: "technology",
+          permanent: true,
+          label: "Armor Riveter",
+          maxRanks: 1,
+          cost: { kind: "fixed", amount: 150 }
+        });
+      }
+      if (!tech.fuelMixingTank) {
+        rows.push({
+          id: "fuelMixingTank",
+          tab: "technology",
+          permanent: true,
+          label: "Fuel Mixing Tank",
+          maxRanks: 1,
+          cost: { kind: "fixed", amount: 200 }
+        });
+      }
+      if (!tech.focalLenseGrinder) {
+        rows.push({
+          id: "focalLenseGrinder",
+          tab: "technology",
+          permanent: true,
+          label: "Focal Lense Grinder",
+          maxRanks: 1,
+          cost: { kind: "fixed", amount: 250 }
+        });
+      }
+      if (!tech.thermalCooling) {
+        rows.push({
+          id: "thermalCooling",
+          tab: "technology",
+          permanent: true,
+          label: "Thermal Cooling",
+          maxRanks: 1,
+          cost: { kind: "fixed", amount: 300 }
+        });
+      }
+      const next = nextShipToUnlock(isShipUnlocked);
+      if (next && next.unlockCost !== null) {
+        rows.push({
+          id: "unlock",
+          tab: "technology",
+          permanent: true,
+          label: "Purchase",
+          maxRanks: 1,
+          cost: { kind: "fixed", amount: next.unlockCost },
+          unlockShipId: next.id
+        });
+      }
+    }
+    return rows;
+  }
+  function runUpgradesFor(tech) {
+    return runShopUpgrades.filter((upgrade) => {
+      if (upgrade.id === "bomb") {
+        return tech.bombFabricator;
+      }
+      if (upgrade.id === "energyShield") {
+        return tech.energyShieldGenerator;
+      }
+      return true;
+    });
+  }
+  function shipUpgradesFor(shipId, tech) {
+    return shipShopUpgradeTemplates.filter((template) => {
+      if (!template.requiresTech) {
+        return true;
+      }
+      return !!tech[template.requiresTech];
+    }).map((template) => ({
+      id: template.id,
+      tab: shipId,
+      permanent: template.permanent,
+      label: template.label,
+      cost: template.cost,
+      maxRanks: template.maxRanksForShip(shipId)
+    }));
+  }
+  function nextUpgradeCost(def, ownedRank) {
+    if (def.maxRanks !== null && ownedRank >= def.maxRanks) {
+      return null;
+    }
+    switch (def.cost.kind) {
+      case "linear":
+        return def.cost.base + ownedRank * def.cost.perRank;
+      case "tierLinear":
+        return (ownedRank + 1) * def.cost.base;
+      case "schedule": {
+        if (ownedRank >= def.cost.costs.length) {
+          return null;
+        }
+        return def.cost.costs[ownedRank];
+      }
+      case "fixed":
+        return def.cost.amount;
+    }
+  }
+  function upgradesForTab(tab, context) {
+    if (tab === "run") {
+      return runUpgradesFor(context.technologies);
+    }
+    if (tab === "technology") {
+      return technologyUpgradesFor(context.technologies, context.isShipUnlocked);
+    }
+    const shipId = tab;
+    if (!context.isShipUnlocked(shipId)) {
+      return [];
+    }
+    return shipUpgradesFor(shipId, context.technologies);
+  }
+
   // src/helpers/game-save.ts
-  var SAVE_VERSION = 1;
-  var SAVE_STORAGE_KEY = "phoenix-arcade-shooter-save-v1";
+  var SAVE_VERSION = 2;
+  var SAVE_STORAGE_KEY = "phoenix-arcade-shooter-save-v2";
   var RANK_KEYS = [
-    "comboSegments",
-    "comboUpgrades",
     "maxHealthRanks",
     "armorRanks",
     "bombCapacityRanks",
@@ -2585,8 +2920,6 @@ void main() {
     return {
       id: profile.id,
       unlocked: profile.unlocked,
-      comboSegments: profile.comboSegments,
-      comboUpgrades: profile.comboUpgrades,
       maxHealthRanks: profile.maxHealthRanks,
       armorRanks: profile.armorRanks,
       bombCapacityRanks: profile.bombCapacityRanks,
@@ -2615,9 +2948,6 @@ void main() {
       return null;
     }
     for (const key of RANK_KEYS) {
-      if (key === "damageRanks" && profile[key] === undefined) {
-        continue;
-      }
       if (!isNonNegativeInt(profile[key])) {
         return null;
       }
@@ -2625,14 +2955,45 @@ void main() {
     return {
       id,
       unlocked: profile.unlocked,
-      comboSegments: profile.comboSegments,
-      comboUpgrades: profile.comboUpgrades,
       maxHealthRanks: profile.maxHealthRanks,
       armorRanks: profile.armorRanks,
       bombCapacityRanks: profile.bombCapacityRanks,
       shipSpeedRanks: profile.shipSpeedRanks,
       fireSpeedRanks: profile.fireSpeedRanks,
-      damageRanks: isNonNegativeInt(profile.damageRanks) ? profile.damageRanks : 0
+      damageRanks: profile.damageRanks
+    };
+  }
+  function validateTechnologies(raw) {
+    if (!raw || typeof raw !== "object") {
+      return null;
+    }
+    const tech = raw;
+    if (!isNonNegativeInt(tech.comboRanks) || tech.comboRanks > MAX_COMBO_UPGRADES) {
+      return null;
+    }
+    const flags = [
+      "bombFabricator",
+      "energyShieldGenerator",
+      "hangarBay",
+      "armorRiveter",
+      "fuelMixingTank",
+      "focalLenseGrinder",
+      "thermalCooling"
+    ];
+    for (const key of flags) {
+      if (typeof tech[key] !== "boolean") {
+        return null;
+      }
+    }
+    return {
+      comboRanks: tech.comboRanks,
+      bombFabricator: tech.bombFabricator,
+      energyShieldGenerator: tech.energyShieldGenerator,
+      hangarBay: tech.hangarBay,
+      armorRiveter: tech.armorRiveter,
+      fuelMixingTank: tech.fuelMixingTank,
+      focalLenseGrinder: tech.focalLenseGrinder,
+      thermalCooling: tech.thermalCooling
     };
   }
   function validateSave(raw) {
@@ -2647,6 +3008,10 @@ void main() {
       return null;
     }
     if (!data.shipHangar || typeof data.shipHangar !== "object") {
+      return null;
+    }
+    const technologies = validateTechnologies(data.technologies);
+    if (!technologies) {
       return null;
     }
     const hangarRaw = data.shipHangar;
@@ -2666,7 +3031,8 @@ void main() {
     return {
       version: SAVE_VERSION,
       runsCompleted: data.runsCompleted,
-      shipHangar: hangar
+      shipHangar: hangar,
+      technologies
     };
   }
   function loadSave() {
@@ -2688,9 +3054,13 @@ void main() {
   function clearSave() {
     try {
       localStorage.removeItem(SAVE_STORAGE_KEY);
+      localStorage.removeItem("phoenix-arcade-shooter-save-v1");
     } catch {}
   }
-  function hangarHasMetaProgress(hangar) {
+  function hangarHasMetaProgress(hangar, technologies) {
+    if (technologies && technologiesHaveProgress(technologies)) {
+      return true;
+    }
     for (const def of playerShipDefs) {
       const profile = hangar[def.id];
       if (!profile) {
@@ -2699,7 +3069,7 @@ void main() {
       if (def.unlockCost !== null && profile.unlocked) {
         return true;
       }
-      if (profile.maxHealthRanks > 0 || profile.armorRanks > 0 || profile.bombCapacityRanks > 0 || profile.shipSpeedRanks > 0 || profile.fireSpeedRanks > 0 || profile.damageRanks > 0 || profile.comboSegments > 0 || profile.comboUpgrades > 0) {
+      if (profile.maxHealthRanks > 0 || profile.armorRanks > 0 || profile.bombCapacityRanks > 0 || profile.shipSpeedRanks > 0 || profile.fireSpeedRanks > 0 || profile.damageRanks > 0) {
         return true;
       }
     }
@@ -2709,12 +3079,14 @@ void main() {
     return {
       version: SAVE_VERSION,
       runsCompleted: host.runsCompleted,
-      shipHangar: cloneHangar(host.player.shipHangar)
+      shipHangar: cloneHangar(host.player.shipHangar),
+      technologies: cloneTechnologies(host.player.technologies)
     };
   }
   function applySave(host, data) {
     host.runsCompleted = data.runsCompleted;
     host.player.shipHangar = mergeHangarWithDefs(data.shipHangar);
+    host.player.technologies = cloneTechnologies(data.technologies);
   }
 
   // src/helpers/gradients.ts
@@ -2756,166 +3128,6 @@ void main() {
         scoreStr = "0" + scoreStr;
     }
     return scoreStr;
-  }
-
-  // src/balance/shop.ts
-  var MAX_COMBO_UPGRADES = 10;
-  var COMBO_UPGRADE_COSTS = [
-    25,
-    50,
-    100,
-    200,
-    400,
-    1000,
-    2000,
-    3500,
-    6000,
-    1e4
-  ];
-  var shopTabs = [
-    { id: "run", kind: "text", label: "Supplies" },
-    ...playerShipDefs.map((ship) => ({
-      id: ship.id,
-      kind: "ship",
-      shipId: ship.id
-    }))
-  ];
-  var runShopUpgrades = [
-    {
-      id: "fullHeal",
-      tab: "run",
-      permanent: false,
-      label: "Full Heal",
-      maxRanks: null,
-      cost: { kind: "linear", base: 25, perRank: 10 }
-    },
-    {
-      id: "health",
-      tab: "run",
-      permanent: false,
-      label: "+1 Ship Health",
-      maxRanks: null,
-      cost: { kind: "linear", base: 5, perRank: 5 }
-    },
-    {
-      id: "energyShield",
-      tab: "run",
-      permanent: false,
-      label: "+1 Energy Shield",
-      maxRanks: null,
-      cost: { kind: "linear", base: 15, perRank: 10 }
-    },
-    {
-      id: "bomb",
-      tab: "run",
-      permanent: false,
-      label: "+1 Bomb",
-      maxRanks: null,
-      cost: { kind: "linear", base: 25, perRank: 15 }
-    }
-  ];
-  var shipShopUpgradeTemplates = [
-    {
-      id: "maxHealth",
-      permanent: true,
-      label: "+5 Health",
-      cost: { kind: "linear", base: 100, perRank: 50 },
-      maxRanksForShip: (shipId) => playerShipDef(shipId).maxHealth
-    },
-    {
-      id: "armor",
-      permanent: true,
-      label: "+1 Armor",
-      cost: { kind: "linear", base: 75, perRank: 75 },
-      maxRanksForShip: (shipId) => playerShipDef(shipId).maxArmor
-    },
-    {
-      id: "bombCapacity",
-      permanent: true,
-      label: "+1 Bomb Capacity",
-      cost: { kind: "linear", base: 50, perRank: 100 },
-      maxRanksForShip: (shipId) => playerShipDef(shipId).maxBombCapacity
-    },
-    {
-      id: "shipSpeed",
-      permanent: true,
-      label: "+10% Ship Speed",
-      cost: { kind: "linear", base: 100, perRank: 100 },
-      maxRanksForShip: (shipId) => playerShipDef(shipId).maxShipSpeed
-    },
-    {
-      id: "fireSpeed",
-      permanent: true,
-      label: "10% Fire Speed",
-      cost: { kind: "linear", base: 100, perRank: 100 },
-      maxRanksForShip: (shipId) => playerShipDef(shipId).maxFireSpeed
-    },
-    {
-      id: "damage",
-      permanent: true,
-      label: "+1 Bullet Damage",
-      cost: { kind: "linear", base: 100, perRank: 100 },
-      maxRanksForShip: (shipId) => playerShipDef(shipId).maxDamage
-    },
-    {
-      id: "combo",
-      permanent: true,
-      label: "Extend Combo",
-      cost: { kind: "schedule", costs: [...COMBO_UPGRADE_COSTS] },
-      maxRanksForShip: (shipId) => playerShipDef(shipId).maxCombo
-    }
-  ];
-  var shipUnlockUpgrades = playerShipDefs.filter((ship) => ship.unlockCost !== null).map((ship) => ({
-    id: "unlock",
-    tab: ship.id,
-    permanent: true,
-    label: "Unlock",
-    maxRanks: 1,
-    cost: { kind: "fixed", amount: ship.unlockCost }
-  }));
-  var shopUpgrades = [
-    ...runShopUpgrades,
-    ...shipUnlockUpgrades
-  ];
-  function nextUpgradeCost(def, ownedRank) {
-    if (def.maxRanks !== null && ownedRank >= def.maxRanks) {
-      return null;
-    }
-    switch (def.cost.kind) {
-      case "linear":
-        return def.cost.base + ownedRank * def.cost.perRank;
-      case "tierLinear":
-        return (ownedRank + 1) * def.cost.base;
-      case "schedule": {
-        if (ownedRank >= def.cost.costs.length) {
-          return null;
-        }
-        return def.cost.costs[ownedRank];
-      }
-      case "fixed":
-        return def.cost.amount;
-    }
-  }
-  function shipUpgradesFor(shipId) {
-    return shipShopUpgradeTemplates.map((template) => ({
-      id: template.id,
-      tab: shipId,
-      permanent: template.permanent,
-      label: template.label,
-      cost: template.cost,
-      maxRanks: template.maxRanksForShip(shipId)
-    }));
-  }
-  function upgradesForTab(tab, isShipUnlocked) {
-    if (tab === "run") {
-      return [...runShopUpgrades];
-    }
-    const shipId = tab;
-    const unlocked = isShipUnlocked(shipId);
-    if (!unlocked) {
-      return shipUnlockUpgrades.filter((upgrade) => upgrade.tab === tab);
-    }
-    return shipUpgradesFor(shipId);
   }
 
   // src/components/combo-gauge.ts
@@ -3502,75 +3714,325 @@ void main() {
   }
 
   // src/screens/game-over-screen.ts
-  var STAT_LABELS = ["Score", "Kills", "Earned", "Spent"];
-  var STAT_LINE_Y = [52, 62, 72, 82];
-  var STAT_LABEL_X = 20;
-  var STAT_VALUE_RIGHT = 180;
+  var STAT_LABELS = ["Score", "Kills"];
+  var STAT_LINE_Y = [40, 52];
+  var STAT_LABEL_X = 40;
+  var STAT_VALUE_RIGHT = 160;
+  var LIST_BASE_Y = 85;
+  var LIST_ROW_STRIDE = 15;
+  var LIST_LABEL_X = 70;
+  var LIST_COST_X = 40;
+  var CONTINUE_LABEL_X = 40;
+  var DISABLED_COLOR = "#777";
 
   class GameOverScreen extends GameObject {
-    resultMessage = {
-      font: "arcade",
-      message: "GAME OVER",
-      position: { x: 67, y: 18 }
-    };
-    headerDef = {
-      font: "arcade-small",
-      message: "< hit enter >",
-      position: { x: 75, y: 132 }
-    };
     result;
     header;
-    statLabels;
-    statValues;
+    statLabels = [];
+    statValues = [];
+    rows = [];
+    selectorShip;
     inputEvents;
+    width;
+    height;
     themeColor = "#fff";
+    mode = "loss";
+    selectedMenuItem = 0;
+    selecting = false;
+    timeSinceSelected = 0;
     constructor(parent) {
       super(parent);
-      this.result = new TextDisplay(this, this.resultMessage);
-      this.header = new TextDisplay(this, this.headerDef);
-      this.statLabels = STAT_LINE_Y.map((y2, index) => new TextDisplay(this, {
-        font: "arcade-small",
-        message: STAT_LABELS[index],
-        position: { x: STAT_LABEL_X, y: y2 }
-      }));
-      this.statValues = STAT_LINE_Y.map((y2) => new TextDisplay(this, {
-        font: "arcade-small",
-        message: "",
-        position: { x: STAT_VALUE_RIGHT, y: y2 }
-      }));
-      this.inputEvents = new EventedInput({
-        onStart: this.onStart.bind(this)
-      });
       this.reset();
+    }
+    get game() {
+      return this.parent;
     }
     reset() {
       super.reset();
+      this.width = this.game.width;
+      this.height = this.game.height;
+      this.mode = "loss";
+      this.themeColor = "#fff";
+      this.selectedMenuItem = 0;
+      this.selecting = false;
+      this.timeSinceSelected = 0;
+      this.rows = [];
+      this.statLabels = [];
+      this.statValues = [];
+      this.result = new TextDisplay(this, {
+        font: "arcade",
+        message: "GAME OVER",
+        position: { x: 67, y: 14 }
+      });
       this.addChild(this.result);
+      this.header = new TextDisplay(this, {
+        font: "arcade-small",
+        message: "",
+        position: { x: 75, y: 132 }
+      });
       this.addChild(this.header);
-      this.statLabels.forEach((line) => this.addChild(line));
-      this.statValues.forEach((line) => this.addChild(line));
+      STAT_LINE_Y.forEach((y2, index) => {
+        const label = new TextDisplay(this, {
+          font: "arcade-small",
+          message: STAT_LABELS[index],
+          position: { x: STAT_LABEL_X, y: y2 }
+        });
+        const value = new TextDisplay(this, {
+          font: "arcade-small",
+          message: "",
+          position: { x: STAT_VALUE_RIGHT, y: y2 }
+        });
+        this.statLabels.push(label);
+        this.statValues.push(value);
+        this.addChild(label);
+        this.addChild(value);
+      });
+      this.selectorShip = new GameObject;
+      this.selectorShip.sprite = arrowShipSprite();
+      this.selectorShip.position = { x: 20, y: 0 };
+      this.addChild(this.selectorShip);
+      this.inputEvents = new EventedInput({
+        onStart: this.onStart.bind(this),
+        onUp: this.onUp.bind(this),
+        onDown: this.onDown.bind(this),
+        onSelect: this.onSelect.bind(this)
+      });
       this.addChild(this.inputEvents);
       this.inputEvents.reset();
+      this.buildShopRows();
+      this.applyModeChrome();
+    }
+    buildShopRows() {
+      this.rows.forEach((row) => {
+        if (row.description) {
+          this.removeChild(row.description);
+        }
+        if (row.costText) {
+          this.removeChild(row.costText);
+        }
+      });
+      this.rows = [];
+      deathShopUpgrades.forEach((upgrade, index) => {
+        const y2 = LIST_BASE_Y + index * LIST_ROW_STRIDE;
+        const description = new TextDisplay(this, {
+          font: "arcade-small",
+          message: upgrade.label,
+          position: { x: LIST_LABEL_X, y: y2 },
+          color: this.game.interfaceColor,
+          isPhysicalEntity: true
+        });
+        const costText = new TextDisplay(this, {
+          font: "arcade-small",
+          message: "",
+          position: { x: LIST_COST_X, y: y2 },
+          color: this.game.interfaceColor,
+          isPhysicalEntity: true
+        });
+        this.addChild(description);
+        this.addChild(costText);
+        this.rows.push({
+          kind: "upgrade",
+          upgrade,
+          description,
+          costText,
+          cost: null
+        });
+      });
+      const continueY = LIST_BASE_Y + deathShopUpgrades.length * LIST_ROW_STRIDE;
+      const continueLabel = new TextDisplay(this, {
+        font: "arcade-small",
+        message: "Continue",
+        position: { x: CONTINUE_LABEL_X, y: continueY },
+        color: this.game.interfaceColor,
+        isPhysicalEntity: true
+      });
+      this.addChild(continueLabel);
+      this.rows.push({
+        kind: "continue",
+        description: continueLabel,
+        cost: null
+      });
+      this.refreshShopRows();
+      this.updateSelectorPosition();
+    }
+    refreshShopRows() {
+      const player = this.game.player;
+      const bank = this.game.bank;
+      this.rows.forEach((row) => {
+        if (row.kind === "continue") {
+          row.description.changeMessage("Continue");
+          row.description.updateColor(this.game.interfaceColor);
+          return;
+        }
+        const upgrade = row.upgrade;
+        const owned = this.ownedRank(upgrade.id);
+        const cost = nextUpgradeCost(upgrade, owned);
+        row.cost = cost;
+        const unaffordable = cost === null || bank.value < cost;
+        const color = unaffordable ? DISABLED_COLOR : this.game.interfaceColor;
+        row.description.changeMessage(upgrade.label);
+        row.description.updateColor(color);
+        if (row.costText) {
+          row.costText.changeMessage(cost === null ? "" : "$" + cost);
+          row.costText.updateColor(color);
+        }
+      });
+    }
+    ownedRank(id) {
+      const player = this.game.player;
+      switch (id) {
+        case "deathHealth":
+          return player.deathHealthPurchases;
+        case "deathShield":
+          return player.deathShieldPurchases;
+        default:
+          return 0;
+      }
+    }
+    applyModeChrome() {
+      if (this.mode === "win") {
+        this.header.changeMessage("< hit enter >");
+        this.header.position = { x: 75, y: 132 };
+        this.removeChild(this.selectorShip);
+        this.rows.forEach((row) => {
+          if (row.description) {
+            this.removeChild(row.description);
+          }
+          if (row.costText) {
+            this.removeChild(row.costText);
+          }
+        });
+      } else {
+        this.header.changeMessage("");
+        if (!this.children.includes(this.selectorShip)) {
+          this.addChild(this.selectorShip);
+        }
+        this.rows.forEach((row) => {
+          if (row.description && !this.children.includes(row.description)) {
+            this.addChild(row.description);
+          }
+          if (row.costText && !this.children.includes(row.costText)) {
+            this.addChild(row.costText);
+          }
+        });
+        this.refreshShopRows();
+        this.updateSelectorPosition();
+      }
+      this.applyThemeColor();
+    }
+    update(dtime) {
+      super.update(dtime);
+      if (this.mode !== "loss") {
+        return;
+      }
+      this.timeSinceSelected += dtime;
+      if (this.selecting && this.timeSinceSelected > 595) {
+        this.propagateSelection();
+      }
+    }
+    updateSelectorPosition() {
+      if (this.mode !== "loss" || !this.selectorShip.position) {
+        return;
+      }
+      this.selectorShip.position.y = LIST_BASE_Y + this.selectedMenuItem * LIST_ROW_STRIDE;
+    }
+    onUp() {
+      if (this.mode !== "loss" || this.selecting) {
+        return;
+      }
+      if (this.selectedMenuItem > 0) {
+        this.selectedMenuItem--;
+        this.updateSelectorPosition();
+      }
+    }
+    onDown() {
+      if (this.mode !== "loss" || this.selecting) {
+        return;
+      }
+      if (this.selectedMenuItem < this.rows.length - 1) {
+        this.selectedMenuItem++;
+        this.updateSelectorPosition();
+      }
+    }
+    onSelect() {
+      if (this.mode !== "loss" || this.selecting) {
+        return;
+      }
+      const row = this.rows[this.selectedMenuItem];
+      if (!row) {
+        return;
+      }
+      if (row.kind === "continue") {
+        this.startPurchaseAnimation();
+        return;
+      }
+      const cost = row.cost;
+      if (cost !== null && this.game.bank.value >= cost) {
+        this.game.bank.removeMoney(cost);
+        this.game.recordDollarsSpent(cost);
+        this.startPurchaseAnimation();
+      }
     }
     onStart() {
-      this.parent.finishGame();
+      if (this.mode === "win" && !this.selecting) {
+        this.game.finishGame();
+      }
+    }
+    startPurchaseAnimation() {
+      this.selecting = true;
+      this.timeSinceSelected = 0;
+      const x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
+      const y2 = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
+      this.addChild(new Bullet(this, {
+        team: 2,
+        position: { x: x1, y: y2 },
+        velocity: { x: 50, y: 0 }
+      }));
+    }
+    propagateSelection() {
+      const row = this.rows[this.selectedMenuItem];
+      this.selecting = false;
+      if (!row) {
+        return;
+      }
+      if (row.kind === "continue") {
+        this.game.finishGame();
+        return;
+      }
+      this.applyUpgrade(row.upgrade.id);
+      this.refreshShopRows();
+    }
+    applyUpgrade(id) {
+      switch (id) {
+        case "deathHealth":
+          this.game.player.purchaseDeathHealth();
+          break;
+        case "deathShield":
+          this.game.player.purchaseDeathShield();
+          break;
+      }
     }
     setResult(result) {
       if (result === "win") {
+        this.mode = "win";
         this.themeColor = "green";
         this.result.changeMessage("YOU WIN!");
-      } else if (result === "loss") {
+      } else {
+        this.mode = "loss";
         this.themeColor = "red";
         this.result.changeMessage("GAME OVER");
+        this.selectedMenuItem = 0;
+        this.selecting = false;
       }
-      this.applyThemeColor();
+      this.applyModeChrome();
     }
     setRunStats(stats) {
       this.setRightAlignedValue(this.statValues[0], padScoreDisplay(stats.pointsEarned), STAT_LINE_Y[0]);
       this.setRightAlignedValue(this.statValues[1], String(stats.enemiesDestroyed), STAT_LINE_Y[1]);
-      this.setRightAlignedValue(this.statValues[2], "$" + stats.dollarsCollected.toFixed(2), STAT_LINE_Y[2]);
-      this.setRightAlignedValue(this.statValues[3], "$" + stats.dollarsSpent.toFixed(2), STAT_LINE_Y[3]);
       this.applyThemeColor();
+      if (this.mode === "loss") {
+        this.refreshShopRows();
+      }
     }
     setRightAlignedValue(display, text, y2) {
       display.position = { x: STAT_VALUE_RIGHT, y: y2 };
@@ -3973,11 +4435,18 @@ void main() {
     position;
     velocity;
     shipHangar;
+    technologies;
     activeShipId;
     lifeUpgrades = 0;
     fullHealPurchases = 0;
     energyShield = 0;
+    energyShieldPurchases = 0;
     bombs = 0;
+    runBonusHealth = 0;
+    nextRunBonusHealth = 0;
+    nextRunBonusShield = 0;
+    deathHealthPurchases = 0;
+    deathShieldPurchases = 0;
     armor = 0;
     SPEED = BASE_SPEED;
     BULLET_SPEED = 100;
@@ -3998,16 +4467,10 @@ void main() {
       return this.shipHangar[this.activeShipId];
     }
     get comboSegments() {
-      return this.shipProfile.comboSegments;
-    }
-    set comboSegments(value) {
-      this.shipProfile.comboSegments = value;
+      return this.technologies.comboRanks;
     }
     get comboUpgrades() {
-      return this.shipProfile.comboUpgrades;
-    }
-    set comboUpgrades(value) {
-      this.shipProfile.comboUpgrades = value;
+      return this.technologies.comboRanks;
     }
     isShipUnlocked(shipId) {
       return this.shipHangar[shipId].unlocked;
@@ -4017,7 +4480,16 @@ void main() {
       this.triggerEvent("persistMeta");
     }
     get bombCapacity() {
-      return this.shipProfile.bombCapacityRanks;
+      if (!this.technologies.bombFabricator) {
+        return 0;
+      }
+      return 1 + this.shipProfile.bombCapacityRanks;
+    }
+    bombCapacityFor(shipId) {
+      if (!this.technologies.bombFabricator) {
+        return 0;
+      }
+      return 1 + this.shipHangar[shipId].bombCapacityRanks;
     }
     selectShipForRun(shipId) {
       if (!this.isShipUnlocked(shipId)) {
@@ -4035,8 +4507,13 @@ void main() {
     reset() {
       super.reset();
       this.shipHangar = createStarterHangar();
+      this.technologies = createStarterTechnologies();
       this.activeShipId = defaultActiveShipId();
       this.shieldOutlineApplied = false;
+      this.nextRunBonusHealth = 0;
+      this.nextRunBonusShield = 0;
+      this.deathHealthPurchases = 0;
+      this.deathShieldPurchases = 0;
       this.clearRunCounters();
       this.resetForNewRun();
     }
@@ -4061,11 +4538,13 @@ void main() {
       this.lifeUpgrades = 0;
       this.fullHealPurchases = 0;
       this.energyShield = 0;
+      this.energyShieldPurchases = 0;
       this.bombs = 0;
+      this.runBonusHealth = 0;
     }
     applyPersistentUpgrades() {
       const profile = this.shipProfile;
-      this.maxLife = BASE_MAX_LIFE + profile.maxHealthRanks * 5 + this.lifeUpgrades;
+      this.maxLife = BASE_MAX_LIFE + profile.maxHealthRanks * 5 + this.lifeUpgrades + this.runBonusHealth;
       this.life = this.maxLife;
       this.armor = profile.armorRanks;
       this.SPEED = Math.round(BASE_SPEED * Math.pow(1.1, profile.shipSpeedRanks));
@@ -4076,7 +4555,7 @@ void main() {
     syncStatsFromUpgrades(opts) {
       const profile = this.shipProfile;
       const previousMax = this.maxLife || BASE_MAX_LIFE;
-      this.maxLife = BASE_MAX_LIFE + profile.maxHealthRanks * 5 + this.lifeUpgrades;
+      this.maxLife = BASE_MAX_LIFE + profile.maxHealthRanks * 5 + this.lifeUpgrades + this.runBonusHealth;
       this.armor = profile.armorRanks;
       this.SPEED = Math.round(BASE_SPEED * Math.pow(1.1, profile.shipSpeedRanks));
       this.FIRE_RATE = Math.ceil(BASE_FIRE_RATE * Math.pow(0.9, profile.fireSpeedRanks));
@@ -4108,7 +4587,26 @@ void main() {
     }
     purchaseEnergyShield() {
       this.energyShield++;
+      this.energyShieldPurchases++;
       this.refreshShieldVisual();
+    }
+    purchaseDeathHealth() {
+      this.nextRunBonusHealth += 10;
+      this.deathHealthPurchases++;
+    }
+    purchaseDeathShield() {
+      this.nextRunBonusShield += 3;
+      this.deathShieldPurchases++;
+    }
+    applyNextRunBuffs() {
+      this.runBonusHealth = this.nextRunBonusHealth;
+      const baseShields = this.technologies.energyShieldGenerator ? 3 : 0;
+      this.energyShield = baseShields + this.nextRunBonusShield;
+      this.nextRunBonusHealth = 0;
+      this.nextRunBonusShield = 0;
+      this.deathHealthPurchases = 0;
+      this.deathShieldPurchases = 0;
+      this.applyPersistentUpgrades();
     }
     purchaseBomb() {
       if (this.bombs >= this.bombCapacity) {
@@ -4130,26 +4628,24 @@ void main() {
       }
       this.triggerEvent("persistMeta");
     }
-    purchaseArmor(shipId) {
-      const profile = this.shipHangar[shipId];
-      const cap = playerShipDef(shipId).maxArmor;
-      if (profile.armorRanks >= cap)
-        return;
-      profile.armorRanks++;
-      if (shipId === this.activeShipId) {
-        this.syncStatsFromUpgrades();
-      }
-      this.triggerEvent("persistMeta");
-    }
     purchaseBombCapacity(shipId) {
+      if (!this.technologies.bombFabricator) {
+        return;
+      }
       const profile = this.shipHangar[shipId];
       const cap = playerShipDef(shipId).maxBombCapacity;
       if (profile.bombCapacityRanks >= cap)
         return;
       profile.bombCapacityRanks++;
+      if (shipId === this.activeShipId) {
+        this.bombs = this.bombCapacity;
+      }
       this.triggerEvent("persistMeta");
     }
     purchaseShipSpeed(shipId) {
+      if (!this.technologies.fuelMixingTank) {
+        return;
+      }
       const profile = this.shipHangar[shipId];
       const cap = playerShipDef(shipId).maxShipSpeed;
       if (profile.shipSpeedRanks >= cap)
@@ -4161,6 +4657,9 @@ void main() {
       this.triggerEvent("persistMeta");
     }
     purchaseFireSpeed(shipId) {
+      if (!this.technologies.thermalCooling) {
+        return;
+      }
       const profile = this.shipHangar[shipId];
       const cap = playerShipDef(shipId).maxFireSpeed;
       if (profile.fireSpeedRanks >= cap)
@@ -4172,6 +4671,9 @@ void main() {
       this.triggerEvent("persistMeta");
     }
     purchaseDamage(shipId) {
+      if (!this.technologies.focalLenseGrinder) {
+        return;
+      }
       const profile = this.shipHangar[shipId];
       const cap = playerShipDef(shipId).maxDamage;
       if (profile.damageRanks >= cap)
@@ -4179,13 +4681,77 @@ void main() {
       profile.damageRanks++;
       this.triggerEvent("persistMeta");
     }
-    purchaseCombo(shipId) {
-      const profile = this.shipHangar[shipId];
-      const cap = playerShipDef(shipId).maxCombo;
-      if (profile.comboSegments >= cap)
+    purchaseArmor(shipId) {
+      if (!this.technologies.armorRiveter) {
         return;
-      profile.comboSegments++;
-      profile.comboUpgrades++;
+      }
+      const profile = this.shipHangar[shipId];
+      const cap = playerShipDef(shipId).maxArmor;
+      if (profile.armorRanks >= cap)
+        return;
+      profile.armorRanks++;
+      if (shipId === this.activeShipId) {
+        this.syncStatsFromUpgrades();
+      }
+      this.triggerEvent("persistMeta");
+    }
+    purchaseComboRank() {
+      if (this.technologies.comboRanks >= MAX_COMBO_UPGRADES) {
+        return;
+      }
+      this.technologies.comboRanks++;
+      this.triggerEvent("persistMeta");
+    }
+    purchaseBombFabricator() {
+      if (this.technologies.bombFabricator) {
+        return;
+      }
+      this.technologies.bombFabricator = true;
+      this.refillBombs();
+      this.triggerEvent("persistMeta");
+    }
+    purchaseEnergyShieldGenerator() {
+      if (this.technologies.energyShieldGenerator) {
+        return;
+      }
+      this.technologies.energyShieldGenerator = true;
+      this.energyShield = Math.max(this.energyShield, 3);
+      this.refreshShieldVisual();
+      this.triggerEvent("persistMeta");
+    }
+    purchaseHangarBay() {
+      if (this.technologies.hangarBay) {
+        return;
+      }
+      this.technologies.hangarBay = true;
+      this.triggerEvent("persistMeta");
+    }
+    purchaseArmorRiveter() {
+      if (this.technologies.armorRiveter) {
+        return;
+      }
+      this.technologies.armorRiveter = true;
+      this.triggerEvent("persistMeta");
+    }
+    purchaseFuelMixingTank() {
+      if (this.technologies.fuelMixingTank) {
+        return;
+      }
+      this.technologies.fuelMixingTank = true;
+      this.triggerEvent("persistMeta");
+    }
+    purchaseFocalLenseGrinder() {
+      if (this.technologies.focalLenseGrinder) {
+        return;
+      }
+      this.technologies.focalLenseGrinder = true;
+      this.triggerEvent("persistMeta");
+    }
+    purchaseThermalCooling() {
+      if (this.technologies.thermalCooling) {
+        return;
+      }
+      this.technologies.thermalCooling = true;
       this.triggerEvent("persistMeta");
     }
     applyActiveShipSprite() {
@@ -4399,16 +4965,17 @@ void main() {
       this.isDone = false;
       this.selecting = false;
       this.clearStatRows();
-      const unlocked = this.unlockedShipIds();
-      if (unlocked.length <= 1) {
+      if (!this.player.technologies.hangarBay) {
         this.interactive = false;
         this.hideChrome();
         this.isDone = true;
         return;
       }
+      this.createTabChrome();
       this.interactive = true;
       this.showChrome();
-      const activeIndex = playerShipDefs.findIndex((def) => def.id === this.player.activeShipId);
+      const unlocked = this.unlockedShipIds();
+      const activeIndex = unlocked.findIndex((id) => id === this.player.activeShipId);
       this.activeTabIndex = activeIndex >= 0 ? activeIndex : 0;
       this.refreshTabChrome();
       this.rebuildStatsForActiveTab();
@@ -4431,7 +4998,8 @@ void main() {
       return playerShipDefs.filter((def) => this.player.isShipUnlocked(def.id)).map((def) => def.id);
     }
     activeShipId() {
-      return playerShipDefs[this.activeTabIndex].id;
+      const unlocked = this.unlockedShipIds();
+      return unlocked[this.activeTabIndex] || unlocked[0] || "starter";
     }
     createTitle() {
       this.titleText = new TextDisplay(this, {
@@ -4442,9 +5010,19 @@ void main() {
       });
       this.addChild(this.titleText);
     }
+    clearTabChrome() {
+      this.tabChrome.forEach((tab) => {
+        this.removeChild(tab.shipIcon);
+        this.removeChild(tab.leftBracket);
+        this.removeChild(tab.rightBracket);
+      });
+      this.tabChrome = [];
+    }
     createTabChrome() {
-      this.tabChrome = playerShipDefs.map((def, index) => {
-        const sprite = PlayerControlledShip.spriteForShipId(def.id);
+      this.clearTabChrome();
+      const unlocked = this.unlockedShipIds();
+      this.tabChrome = unlocked.map((shipId, index) => {
+        const sprite = PlayerControlledShip.spriteForShipId(shipId);
         const x = SHIP_TAB_START_X + index * SHIP_TAB_STRIDE;
         const shipIcon = new GameObject;
         shipIcon.sprite = sprite;
@@ -4465,18 +5043,14 @@ void main() {
         });
         this.addChild(leftBracket);
         this.addChild(rightBracket);
-        return { shipId: def.id, shipIcon, leftBracket, rightBracket };
+        return { shipId, shipIcon, leftBracket, rightBracket };
       });
       this.refreshTabChrome();
     }
     refreshTabChrome() {
       this.tabChrome.forEach((tab, index) => {
         const active = index === this.activeTabIndex;
-        const unlocked = this.player.isShipUnlocked(tab.shipId);
         tab.shipIcon.sprite = PlayerControlledShip.spriteForShipId(tab.shipId);
-        if (!unlocked) {
-          tab.shipIcon.sprite.applyColor(this.disabledColor);
-        }
         tab.leftBracket.changeMessage(active ? "[" : " ");
         tab.rightBracket.changeMessage(active ? "]" : " ");
         tab.leftBracket.updateColor(this.game.interfaceColor);
@@ -4562,7 +5136,7 @@ void main() {
       }
       const profile = this.player.profileFor(shipId);
       const def = playerShipDef(shipId);
-      const stats = this.statDescriptors(profile, def);
+      const stats = this.statDescriptors(profile, def, shipId);
       this.statRows = stats.map((stat, index) => {
         const y2 = STAT_BASE_Y + index * STAT_ROW_STRIDE;
         const label = new TextDisplay(this, {
@@ -4578,51 +5152,64 @@ void main() {
         return { label, progressOrbs };
       });
     }
-    statDescriptors(profile, def) {
+    statDescriptors(profile, def, shipId) {
+      const tech = this.player.technologies;
       const health = BASE_MAX_LIFE + profile.maxHealthRanks * 5;
-      const speedPct = profile.shipSpeedRanks * 10;
-      const firePct = profile.fireSpeedRanks * 10;
-      const comboMult = profile.comboSegments + 1;
-      return [
+      const rows = [
         {
-          text: "Health: " + health,
+          text: "Hull: " + health,
           owned: profile.maxHealthRanks,
           max: def.maxHealth
-        },
-        {
+        }
+      ];
+      if (tech.armorRiveter) {
+        rows.push({
           text: "Armor: " + profile.armorRanks,
           owned: profile.armorRanks,
           max: def.maxArmor
-        },
-        {
-          text: "Bombs: " + profile.bombCapacityRanks,
+        });
+      }
+      if (tech.bombFabricator) {
+        const bombs2 = this.player.bombCapacityFor(shipId);
+        rows.push({
+          text: "Bombs: " + bombs2,
           owned: profile.bombCapacityRanks,
           max: def.maxBombCapacity
-        },
-        {
-          text: "Ship Speed: +" + speedPct + "%",
+        });
+      }
+      if (tech.fuelMixingTank) {
+        rows.push({
+          text: "Ship Speed: +" + profile.shipSpeedRanks * 10 + "%",
           owned: profile.shipSpeedRanks,
           max: def.maxShipSpeed
-        },
-        {
-          text: "Fire Rate: +" + firePct + "%",
+        });
+      }
+      if (tech.thermalCooling) {
+        rows.push({
+          text: "Fire Rate: +" + profile.fireSpeedRanks * 10 + "%",
           owned: profile.fireSpeedRanks,
           max: def.maxFireSpeed
-        },
-        {
+        });
+      }
+      if (tech.focalLenseGrinder) {
+        rows.push({
           text: "Damage: " + (1 + profile.damageRanks),
           owned: profile.damageRanks,
           max: def.maxDamage
-        },
-        {
-          text: "Combo: " + comboMult + "x",
-          owned: profile.comboSegments,
-          max: def.maxCombo
-        }
-      ];
+        });
+      }
+      if (tech.comboRanks > 0) {
+        rows.push({
+          text: "Combo: " + (tech.comboRanks + 1) + "x",
+          owned: tech.comboRanks,
+          max: MAX_COMBO_UPGRADES
+        });
+      }
+      return rows;
     }
     setActiveTab(index) {
-      if (index < 0 || index >= playerShipDefs.length || index === this.activeTabIndex || this.selecting) {
+      const unlocked = this.unlockedShipIds();
+      if (index < 0 || index >= unlocked.length || index === this.activeTabIndex || this.selecting) {
         return;
       }
       this.activeTabIndex = index;
@@ -6723,15 +7310,15 @@ void main() {
   }
 
   // src/levels/shop.ts
-  var LIST_BASE_Y = 35;
-  var LIST_ROW_STRIDE = 15;
-  var LIST_LABEL_X = 70;
-  var LIST_COST_X = 40;
+  var LIST_BASE_Y2 = 35;
+  var LIST_ROW_STRIDE2 = 15;
+  var LIST_LABEL_X2 = 70;
+  var LIST_COST_X2 = 40;
   var LEAVE_LABEL_X = 40;
   var PROGRESS_RIGHT_X2 = 182;
   var TAB_Y2 = 12;
-  var SHIP_TAB_START_X2 = 100;
   var SHIP_TAB_STRIDE2 = 22;
+  var TEXT_TAB_GAP = 10;
 
   class Shop extends GameObject {
     isShop = true;
@@ -6763,8 +7350,17 @@ void main() {
       });
       this.reset();
     }
+    visibleTabs() {
+      return visibleShopTabs(this.player.technologies.hangarBay, (shipId) => this.player.isShipUnlocked(shipId));
+    }
     get activeTab() {
-      return shopTabs[this.activeTabIndex].id;
+      return this.visibleTabs()[this.activeTabIndex].id;
+    }
+    upgradesContext() {
+      return {
+        technologies: this.player.technologies,
+        isShipUnlocked: (shipId) => this.player.isShipUnlocked(shipId)
+      };
     }
     reset() {
       super.reset();
@@ -6782,7 +7378,7 @@ void main() {
     start() {
       this.input.reset();
       this.isDoneShopping = false;
-      this.refreshTabChrome();
+      this.rebuildTabChrome();
       this.refreshRows();
     }
     checkIfLevelComplete() {
@@ -6795,12 +7391,41 @@ void main() {
         this.propagateSelection();
       }
     }
+    clearTabChrome() {
+      this.tabChrome.forEach((tab) => {
+        if (tab.label)
+          this.removeChild(tab.label);
+        if (tab.shipIcon)
+          this.removeChild(tab.shipIcon);
+        if (tab.leftBracket)
+          this.removeChild(tab.leftBracket);
+        if (tab.rightBracket)
+          this.removeChild(tab.rightBracket);
+      });
+      this.tabChrome = [];
+    }
+    rebuildTabChrome() {
+      const previousId = this.tabChrome[this.activeTabIndex]?.def.id;
+      this.clearTabChrome();
+      this.createTabChrome();
+      const tabs = this.visibleTabs();
+      const matchIndex = previousId ? tabs.findIndex((tab) => tab.id === previousId) : 0;
+      this.activeTabIndex = matchIndex >= 0 ? matchIndex : 0;
+      if (this.activeTabIndex >= tabs.length) {
+        this.activeTabIndex = 0;
+      }
+      this.refreshTabChrome();
+      this.rebuildRows();
+    }
     createTabChrome() {
+      const tabs = this.visibleTabs();
+      let textCursorX = 8;
       let shipTabIndex = 0;
-      this.tabChrome = shopTabs.map((def) => {
+      let shipStartX = 100;
+      this.tabChrome = tabs.map((def) => {
         if (def.kind === "text") {
           const labelText = def.label || "";
-          const labelX = 8;
+          const labelX = textCursorX;
           const label = new TextDisplay(this, {
             font: "arcade-small",
             message: labelText,
@@ -6825,11 +7450,13 @@ void main() {
           });
           this.addChild(leftBracket2);
           this.addChild(rightBracket2);
+          textCursorX = (rightBracket2.position?.x || labelX) + 6 + TEXT_TAB_GAP;
+          shipStartX = Math.max(shipStartX, textCursorX + 4);
           return { def, label, leftBracket: leftBracket2, rightBracket: rightBracket2 };
         }
         const shipId = def.shipId;
         const sprite = PlayerControlledShip.spriteForShipId(shipId);
-        const x = SHIP_TAB_START_X2 + shipTabIndex * SHIP_TAB_STRIDE2;
+        const x = shipStartX + shipTabIndex * SHIP_TAB_STRIDE2;
         shipTabIndex++;
         const shipIcon = new GameObject;
         shipIcon.sprite = sprite;
@@ -6859,15 +7486,8 @@ void main() {
         const active = index === this.activeTabIndex;
         if (tab.def.kind === "text" && tab.label) {
           tab.label.updateColor(active ? this.game.interfaceColor : this.disabledColor);
-        } else {
-          const shipId = tab.def.shipId;
-          const unlocked = this.player.isShipUnlocked(shipId);
-          if (tab.shipIcon) {
-            tab.shipIcon.sprite = PlayerControlledShip.spriteForShipId(shipId);
-            if (!unlocked) {
-              tab.shipIcon.sprite.applyColor(this.disabledColor);
-            }
-          }
+        } else if (tab.shipIcon && tab.def.shipId) {
+          tab.shipIcon.sprite = PlayerControlledShip.spriteForShipId(tab.def.shipId);
         }
         if (tab.leftBracket && tab.rightBracket) {
           tab.leftBracket.changeMessage(active ? "[" : " ");
@@ -6888,6 +7508,9 @@ void main() {
         if (row.progressOrbs) {
           this.removeChild(row.progressOrbs);
         }
+        if (row.shipIcon) {
+          this.removeChild(row.shipIcon);
+        }
       });
       this.rows = [];
     }
@@ -6896,7 +7519,7 @@ void main() {
     }
     rebuildRows() {
       this.clearRows();
-      const upgrades = upgradesForTab(this.activeTab, (shipId) => this.player.isShipUnlocked(shipId));
+      const upgrades = upgradesForTab(this.activeTab, this.upgradesContext());
       this.rows = [
         ...upgrades.map((upgrade) => ({
           kind: "upgrade",
@@ -6906,8 +7529,8 @@ void main() {
         { kind: "leave", cost: null }
       ];
       this.rows.forEach((row, index) => {
-        const y2 = LIST_BASE_Y + index * LIST_ROW_STRIDE;
-        const labelX = row.kind === "leave" ? LEAVE_LABEL_X : LIST_LABEL_X;
+        const y2 = LIST_BASE_Y2 + index * LIST_ROW_STRIDE2;
+        const labelX = row.kind === "leave" ? LEAVE_LABEL_X : LIST_LABEL_X2;
         row.description = new TextDisplay(this, {
           font: "arcade-small",
           message: " ",
@@ -6920,11 +7543,19 @@ void main() {
           row.costText = new TextDisplay(this, {
             font: "arcade-small",
             message: "",
-            position: { x: LIST_COST_X, y: y2 },
+            position: { x: LIST_COST_X2, y: y2 },
             color: this.game.interfaceColor,
             isPhysicalEntity: true
           });
           this.addChild(row.costText);
+          if (row.upgrade?.id === "unlock" && row.upgrade.unlockShipId) {
+            const icon = new GameObject;
+            icon.sprite = PlayerControlledShip.spriteForShipId(row.upgrade.unlockShipId);
+            icon.position = { x: labelX + 55, y: y2 - 2 };
+            icon.index = 2;
+            this.addChild(icon);
+            row.shipIcon = icon;
+          }
           if (row.upgrade && this.showsProgressOrbs(row.upgrade)) {
             row.progressOrbs = new UpgradeProgressOrbs(this, PROGRESS_RIGHT_X2, y2);
             this.addChild(row.progressOrbs);
@@ -6939,13 +7570,14 @@ void main() {
     }
     ownedRank(upgrade) {
       const player = this.player;
+      const tech = player.technologies;
       switch (upgrade.id) {
         case "fullHeal":
           return player.fullHealPurchases;
         case "health":
           return player.lifeUpgrades;
         case "energyShield":
-          return player.energyShield;
+          return player.energyShieldPurchases;
         case "bomb":
           return player.bombs;
         case "maxHealth":
@@ -6961,21 +7593,32 @@ void main() {
         case "damage":
           return player.profileFor(upgrade.tab).damageRanks;
         case "combo":
-          return player.profileFor(upgrade.tab).comboUpgrades;
+          return tech.comboRanks;
+        case "bombFabricator":
+          return tech.bombFabricator ? 1 : 0;
+        case "shieldGenerator":
+          return tech.energyShieldGenerator ? 1 : 0;
+        case "hangarBay":
+          return tech.hangarBay ? 1 : 0;
+        case "armorRiveter":
+          return tech.armorRiveter ? 1 : 0;
+        case "fuelMixingTank":
+          return tech.fuelMixingTank ? 1 : 0;
+        case "focalLenseGrinder":
+          return tech.focalLenseGrinder ? 1 : 0;
+        case "thermalCooling":
+          return tech.thermalCooling ? 1 : 0;
         case "unlock": {
-          const shipId = upgrade.tab;
+          const shipId = upgrade.unlockShipId || upgrade.tab;
           return player.isShipUnlocked(shipId) ? 1 : 0;
         }
+        case "deathHealth":
+          return player.deathHealthPurchases;
+        case "deathShield":
+          return player.deathShieldPurchases;
       }
     }
     rowLabel(upgrade, owned, maxed) {
-      if (upgrade.id === "combo") {
-        if (maxed)
-          return "Combo maxed";
-        if (owned === 0)
-          return "Unlock Combo";
-        return upgrade.label;
-      }
       if (upgrade.id === "unlock") {
         return maxed ? "Unlocked" : upgrade.label;
       }
@@ -7014,10 +7657,11 @@ void main() {
       this.updateSelectorPosition();
     }
     updateSelectorPosition() {
-      this.selectorShip.position.y = LIST_BASE_Y + this.selectedMenuItem * LIST_ROW_STRIDE;
+      this.selectorShip.position.y = LIST_BASE_Y2 + this.selectedMenuItem * LIST_ROW_STRIDE2;
     }
     setActiveTab(index) {
-      if (index < 0 || index >= shopTabs.length || index === this.activeTabIndex) {
+      const tabs = this.visibleTabs();
+      if (index < 0 || index >= tabs.length || index === this.activeTabIndex) {
         return;
       }
       this.activeTabIndex = index;
@@ -7077,8 +7721,8 @@ void main() {
         velocity: { x: 50, y: 0 }
       }));
     }
-    applyUpgrade(id, tab) {
-      const shipId = tab;
+    applyUpgrade(id, upgrade) {
+      const shipId = upgrade.tab;
       switch (id) {
         case "fullHeal":
           this.player.purchaseFullHeal();
@@ -7111,15 +7755,46 @@ void main() {
           this.player.purchaseDamage(shipId);
           break;
         case "combo":
-          this.player.purchaseCombo(shipId);
-          if (shipId === this.player.activeShipId) {
-            this.game.comboGauge.syncFromPlayer();
-          }
-          break;
-        case "unlock":
-          this.player.unlockShip(shipId);
-          this.refreshTabChrome();
+          this.player.purchaseComboRank();
+          this.game.comboGauge.syncFromPlayer();
           this.rebuildRows();
+          break;
+        case "bombFabricator":
+          this.player.purchaseBombFabricator();
+          this.rebuildRows();
+          break;
+        case "shieldGenerator":
+          this.player.purchaseEnergyShieldGenerator();
+          this.rebuildRows();
+          break;
+        case "hangarBay":
+          this.player.purchaseHangarBay();
+          this.rebuildTabChrome();
+          break;
+        case "armorRiveter":
+          this.player.purchaseArmorRiveter();
+          this.rebuildRows();
+          break;
+        case "fuelMixingTank":
+          this.player.purchaseFuelMixingTank();
+          this.rebuildRows();
+          break;
+        case "focalLenseGrinder":
+          this.player.purchaseFocalLenseGrinder();
+          this.rebuildRows();
+          break;
+        case "thermalCooling":
+          this.player.purchaseThermalCooling();
+          this.rebuildRows();
+          break;
+        case "unlock": {
+          const unlockId = upgrade.unlockShipId || shipId;
+          this.player.unlockShip(unlockId);
+          this.rebuildTabChrome();
+          break;
+        }
+        case "deathHealth":
+        case "deathShield":
           break;
       }
     }
@@ -7132,7 +7807,7 @@ void main() {
       if (row.kind === "leave") {
         this.isDoneShopping = true;
       } else if (row.upgrade) {
-        this.applyUpgrade(row.upgrade.id, row.upgrade.tab);
+        this.applyUpgrade(row.upgrade.id, row.upgrade);
       }
       this.refreshRows();
       this.selecting = false;
@@ -7176,6 +7851,7 @@ void main() {
     loadLevels() {
       this.levels = [
         this.hangar,
+        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
@@ -7323,7 +7999,6 @@ void main() {
       this.runStats = new RunStats;
       this.titleScreen = new SlimTitleScreen(this);
       this.controlsScreen = new ControlsDescription(this);
-      this.gameOverScreen = new GameOverScreen(this);
       this.player = new PlayerControlledShip(this);
       this.inputInterpreter = new InputInterpreter;
       this.pauseInputTracker = new EventedInput({
@@ -7352,6 +8027,7 @@ void main() {
         position: { x: this.width, y: this.height - 6 },
         color: this.interfaceColor
       });
+      this.gameOverScreen = new GameOverScreen(this);
       this.levelManager = new LevelManager(this, this);
       this.reset();
     }
@@ -7373,7 +8049,7 @@ void main() {
       this.addChild(this.pauseInputTracker);
     }
     hasMetaProgress() {
-      return this.runsCompleted > 0 || hangarHasMetaProgress(this.player.shipHangar);
+      return this.runsCompleted > 0 || hangarHasMetaProgress(this.player.shipHangar, this.player.technologies);
     }
     persistMeta() {
       writeSave(captureSave(this));
@@ -7382,6 +8058,7 @@ void main() {
       clearSave();
       this.runsCompleted = 0;
       this.player.shipHangar = createStarterHangar();
+      this.player.technologies = createStarterTechnologies();
       this.titleScreen.reset(0, false);
     }
     clearBullets() {
@@ -7404,6 +8081,7 @@ void main() {
       this.bank.resetForRun();
       this.comboGauge.reset();
       this.player.resetForNewRun();
+      this.player.applyNextRunBuffs();
       this.levelManager.reset();
       this.clearBombs();
       this.lifeMeter.reset();
@@ -7413,6 +8091,7 @@ void main() {
       this.levelManager.start();
     }
     finishGame() {
+      this.bank.resetForRun();
       this.runsCompleted++;
       this.persistMeta();
       if (this.gameOverCallback) {
@@ -7532,6 +8211,18 @@ void main() {
         this.gameOverScreen.setResult(gameResult);
         this.gameOverScreen.setRunStats(this.runStats);
         this.removeChild(this.player);
+        this.removeChild(this.pausedText);
+        this.paused = false;
+        if (gameResult === "loss") {
+          this.levelManager.stop();
+          this.clearBullets();
+          this.clearBombs();
+          this.removeChild(this.comboGauge);
+          this.removeChild(this.lifeMeter);
+          if (!this.children.includes(this.bank)) {
+            this.addChild(this.bank);
+          }
+        }
         this.addChild(this.gameOverScreen);
       }
     }
@@ -7722,8 +8413,11 @@ void main() {
       landscapeFullscreenSettled = true;
     });
   }
-  document.addEventListener("pointerdown", requestLandscapeFullscreen, { passive: true });
-  document.addEventListener("keydown", requestLandscapeFullscreen);
+  var fullScreenButton = document.createElement("button");
+  fullScreenButton.classList.add("fullscreen");
+  fullScreenButton.innerHTML = "[ Fullscreen ]";
+  document.body.appendChild(fullScreenButton);
+  fullScreenButton.addEventListener("click", requestLandscapeFullscreen);
   runLoop.start();
   window.activeGame = phoenix;
 })();
