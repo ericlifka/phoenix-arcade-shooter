@@ -166,7 +166,7 @@ export default class Shop extends GameObject {
 
     private createTabChrome(): void {
         const tabs = this.visibleTabs();
-        let textCursorX = 8;
+        let textCursorX = 15;
         let shipTabIndex = 0;
         let shipStartX = 100;
 

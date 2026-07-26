@@ -382,14 +382,6 @@ export default class Hangar extends GameObject {
             });
         }
 
-        if (tech.comboRanks > 0) {
-            rows.push({
-                text: 'Combo: ' + (tech.comboRanks + 1) + 'x',
-                owned: tech.comboRanks,
-                max: MAX_COMBO_UPGRADES
-            });
-        }
-
         return rows;
     }
 
