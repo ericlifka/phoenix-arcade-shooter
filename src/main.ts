@@ -92,8 +92,12 @@ function requestLandscapeFullscreen(): void {
         });
 }
 
-document.addEventListener('pointerdown', requestLandscapeFullscreen, { passive: true });
-document.addEventListener('keydown', requestLandscapeFullscreen);
+const fullScreenButton = document.createElement('button');
+fullScreenButton.classList.add('fullscreen');
+fullScreenButton.innerHTML = "[ Fullscreen ]";
+document.body.appendChild(fullScreenButton);
+
+fullScreenButton.addEventListener('click', requestLandscapeFullscreen);
 
 runLoop.start();
 window.activeGame = phoenix;
