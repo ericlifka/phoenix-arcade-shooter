@@ -12,6 +12,7 @@ import {
 } from '../balance/player-ships.js';
 import type { PlayerShipProfile } from '../ships/player-ship-profile.js';
 import type { GameForHangar } from '../types/levels.js';
+import { MAX_COMBO_UPGRADES } from '../balance/shop.js';
 
 const TAB_Y = 22;
 const SHIP_TAB_START_X = 100;
@@ -38,7 +39,8 @@ interface HangarStatRow {
 
 /**
  * Pre-run ship picker. Shop-style ship tabs with permanent-stat readout;
- * Select confirms the active tab. Auto-completes when only starter is unlocked.
+ * Select confirms the active tab. Skips entirely until Hangar Bay is owned;
+ * once owned, always shows (even with a single ship).
  */
 export default class Hangar extends GameObject {
     isShop = true;
@@ -99,19 +101,20 @@ export default class Hangar extends GameObject {
         this.selecting = false;
         this.clearStatRows();
 
-        const unlocked = this.unlockedShipIds();
-        if (unlocked.length <= 1) {
+        if (!this.player.technologies.hangarBay) {
             this.interactive = false;
             this.hideChrome();
             this.isDone = true;
             return;
         }
 
+        this.createTabChrome();
         this.interactive = true;
         this.showChrome();
 
-        const activeIndex = playerShipDefs.findIndex(
-            (def) => def.id === this.player.activeShipId
+        const unlocked = this.unlockedShipIds();
+        const activeIndex = unlocked.findIndex(
+            (id) => id === this.player.activeShipId
         );
         this.activeTabIndex = activeIndex >= 0 ? activeIndex : 0;
         this.refreshTabChrome();
@@ -143,7 +146,8 @@ export default class Hangar extends GameObject {
     }
 
     private activeShipId(): PlayerShipId {
-        return playerShipDefs[this.activeTabIndex].id;
+        const unlocked = this.unlockedShipIds();
+        return unlocked[this.activeTabIndex] || unlocked[0] || 'starter';
     }
 
     private createTitle(): void {
@@ -156,9 +160,21 @@ export default class Hangar extends GameObject {
         this.addChild(this.titleText);
     }
 
+    private clearTabChrome(): void {
+        this.tabChrome.forEach((tab) => {
+            this.removeChild(tab.shipIcon);
+            this.removeChild(tab.leftBracket);
+            this.removeChild(tab.rightBracket);
+        });
+        this.tabChrome = [];
+    }
+
     private createTabChrome(): void {
-        this.tabChrome = playerShipDefs.map((def, index) => {
-            const sprite = PlayerControlledShip.spriteForShipId(def.id);
+        this.clearTabChrome();
+        const unlocked = this.unlockedShipIds();
+
+        this.tabChrome = unlocked.map((shipId, index) => {
+            const sprite = PlayerControlledShip.spriteForShipId(shipId);
             const x = SHIP_TAB_START_X + index * SHIP_TAB_STRIDE;
 
             const shipIcon = new GameObject();
@@ -182,7 +198,7 @@ export default class Hangar extends GameObject {
             this.addChild(leftBracket);
             this.addChild(rightBracket);
 
-            return { shipId: def.id, shipIcon, leftBracket, rightBracket };
+            return { shipId, shipIcon, leftBracket, rightBracket };
         });
 
         this.refreshTabChrome();
@@ -191,12 +207,8 @@ export default class Hangar extends GameObject {
     private refreshTabChrome(): void {
         this.tabChrome.forEach((tab, index) => {
             const active = index === this.activeTabIndex;
-            const unlocked = this.player.isShipUnlocked(tab.shipId);
 
             tab.shipIcon.sprite = PlayerControlledShip.spriteForShipId(tab.shipId);
-            if (!unlocked) {
-                tab.shipIcon.sprite.applyColor(this.disabledColor);
-            }
 
             tab.leftBracket.changeMessage(active ? '[' : ' ');
             tab.rightBracket.changeMessage(active ? ']' : ' ');
@@ -294,7 +306,7 @@ export default class Hangar extends GameObject {
 
         const profile = this.player.profileFor(shipId);
         const def = playerShipDef(shipId);
-        const stats = this.statDescriptors(profile, def);
+        const stats = this.statDescriptors(profile, def, shipId);
 
         this.statRows = stats.map((stat, index) => {
             const y = STAT_BASE_Y + index * STAT_ROW_STRIDE;
@@ -316,56 +328,76 @@ export default class Hangar extends GameObject {
 
     private statDescriptors(
         profile: PlayerShipProfile,
-        def: ReturnType<typeof playerShipDef>
+        def: ReturnType<typeof playerShipDef>,
+        shipId: PlayerShipId
     ): { text: string; owned: number; max: number }[] {
+        const tech = this.player.technologies;
         const health = BASE_MAX_LIFE + profile.maxHealthRanks * 5;
-        const speedPct = profile.shipSpeedRanks * 10;
-        const firePct = profile.fireSpeedRanks * 10;
-        const comboMult = profile.comboSegments + 1;
-
-        return [
+        const rows: { text: string; owned: number; max: number }[] = [
             {
-                text: 'Health: ' + health,
+                text: 'Hull: ' + health,
                 owned: profile.maxHealthRanks,
                 max: def.maxHealth
-            },
-            {
+            }
+        ];
+
+        if (tech.armorRiveter) {
+            rows.push({
                 text: 'Armor: ' + profile.armorRanks,
                 owned: profile.armorRanks,
                 max: def.maxArmor
-            },
-            {
-                text: 'Bombs: ' + profile.bombCapacityRanks,
+            });
+        }
+
+        if (tech.bombFabricator) {
+            const bombs = this.player.bombCapacityFor(shipId);
+            rows.push({
+                text: 'Bombs: ' + bombs,
                 owned: profile.bombCapacityRanks,
                 max: def.maxBombCapacity
-            },
-            {
-                text: 'Ship Speed: +' + speedPct + '%',
+            });
+        }
+
+        if (tech.fuelMixingTank) {
+            rows.push({
+                text: 'Ship Speed: +' + profile.shipSpeedRanks * 10 + '%',
                 owned: profile.shipSpeedRanks,
                 max: def.maxShipSpeed
-            },
-            {
-                text: 'Fire Rate: +' + firePct + '%',
+            });
+        }
+
+        if (tech.thermalCooling) {
+            rows.push({
+                text: 'Fire Rate: +' + profile.fireSpeedRanks * 10 + '%',
                 owned: profile.fireSpeedRanks,
                 max: def.maxFireSpeed
-            },
-            {
+            });
+        }
+
+        if (tech.focalLenseGrinder) {
+            rows.push({
                 text: 'Damage: ' + (1 + profile.damageRanks),
                 owned: profile.damageRanks,
                 max: def.maxDamage
-            },
-            {
-                text: 'Combo: ' + comboMult + 'x',
-                owned: profile.comboSegments,
-                max: def.maxCombo
-            }
-        ];
+            });
+        }
+
+        if (tech.comboRanks > 0) {
+            rows.push({
+                text: 'Combo: ' + (tech.comboRanks + 1) + 'x',
+                owned: tech.comboRanks,
+                max: MAX_COMBO_UPGRADES
+            });
+        }
+
+        return rows;
     }
 
     private setActiveTab(index: number): void {
+        const unlocked = this.unlockedShipIds();
         if (
             index < 0 ||
-            index >= playerShipDefs.length ||
+            index >= unlocked.length ||
             index === this.activeTabIndex ||
             this.selecting
         ) {

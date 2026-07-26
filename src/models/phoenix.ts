@@ -15,6 +15,7 @@ import LevelManager from '../levels/level-manager.js';
 import LifeMeter from '../components/life-meter.js';
 import PlayerShip from '../ships/player-controlled-ship.js';
 import { createStarterHangar } from '../ships/player-ship-profile.js';
+import { createStarterTechnologies } from '../ships/player-technologies.js';
 import RunStats from './run-stats.js';
 import TextDisplay from '../components/text-display.js';
 import { BombOptions, BulletOptions, GameOverResult, PhysicalEntity } from '../types/game';
@@ -123,7 +124,10 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
     }
 
     hasMetaProgress(): boolean {
-        return this.runsCompleted > 0 || hangarHasMetaProgress(this.player.shipHangar);
+        return (
+            this.runsCompleted > 0 ||
+            hangarHasMetaProgress(this.player.shipHangar, this.player.technologies)
+        );
     }
 
     /** Snapshot hangar unlocks/ranks + runs completed to localStorage. */
@@ -136,6 +140,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         clearSave();
         this.runsCompleted = 0;
         this.player.shipHangar = createStarterHangar();
+        this.player.technologies = createStarterTechnologies();
         this.titleScreen.reset(0, false);
     }
 

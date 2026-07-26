@@ -9,8 +9,8 @@ import type { GameForShop } from '../types/levels.js';
 import type { PlayerShipId } from '../balance/player-ships.js';
 import {
     nextUpgradeCost,
-    shopTabs,
     upgradesForTab,
+    visibleShopTabs,
     type ShopTabDef,
     type ShopTabId,
     type ShopUpgradeDef,
@@ -24,8 +24,8 @@ const LIST_COST_X = 40;
 const LEAVE_LABEL_X = 40;
 const PROGRESS_RIGHT_X = 182;
 const TAB_Y = 12;
-const SHIP_TAB_START_X = 100;
 const SHIP_TAB_STRIDE = 22;
+const TEXT_TAB_GAP = 10;
 
 interface ShopRow {
     kind: 'upgrade' | 'leave';
@@ -33,6 +33,7 @@ interface ShopRow {
     description?: TextDisplay;
     costText?: TextDisplay;
     progressOrbs?: UpgradeProgressOrbs;
+    shipIcon?: GameObject;
     cost: number | null;
 }
 
@@ -81,8 +82,22 @@ export default class Shop extends GameObject {
         this.reset();
     }
 
+    private visibleTabs(): ShopTabDef[] {
+        return visibleShopTabs(
+            this.player.technologies.hangarBay,
+            (shipId) => this.player.isShipUnlocked(shipId)
+        );
+    }
+
     get activeTab(): ShopTabId {
-        return shopTabs[this.activeTabIndex].id;
+        return this.visibleTabs()[this.activeTabIndex].id;
+    }
+
+    private upgradesContext() {
+        return {
+            technologies: this.player.technologies,
+            isShipUnlocked: (shipId: PlayerShipId) => this.player.isShipUnlocked(shipId)
+        };
     }
 
     reset(): void {
@@ -105,7 +120,7 @@ export default class Shop extends GameObject {
     start(): void {
         this.input.reset();
         this.isDoneShopping = false;
-        this.refreshTabChrome();
+        this.rebuildTabChrome();
         this.refreshRows();
     }
 
@@ -122,13 +137,43 @@ export default class Shop extends GameObject {
         }
     }
 
-    private createTabChrome(): void {
-        let shipTabIndex = 0;
+    private clearTabChrome(): void {
+        this.tabChrome.forEach((tab) => {
+            if (tab.label) this.removeChild(tab.label);
+            if (tab.shipIcon) this.removeChild(tab.shipIcon);
+            if (tab.leftBracket) this.removeChild(tab.leftBracket);
+            if (tab.rightBracket) this.removeChild(tab.rightBracket);
+        });
+        this.tabChrome = [];
+    }
 
-        this.tabChrome = shopTabs.map((def) => {
+    private rebuildTabChrome(): void {
+        const previousId = this.tabChrome[this.activeTabIndex]?.def.id;
+        this.clearTabChrome();
+        this.createTabChrome();
+
+        const tabs = this.visibleTabs();
+        const matchIndex = previousId
+            ? tabs.findIndex((tab) => tab.id === previousId)
+            : 0;
+        this.activeTabIndex = matchIndex >= 0 ? matchIndex : 0;
+        if (this.activeTabIndex >= tabs.length) {
+            this.activeTabIndex = 0;
+        }
+        this.refreshTabChrome();
+        this.rebuildRows();
+    }
+
+    private createTabChrome(): void {
+        const tabs = this.visibleTabs();
+        let textCursorX = 8;
+        let shipTabIndex = 0;
+        let shipStartX = 100;
+
+        this.tabChrome = tabs.map((def) => {
             if (def.kind === 'text') {
                 const labelText = def.label || '';
-                const labelX = 8;
+                const labelX = textCursorX;
                 const label = new TextDisplay(this, {
                     font: 'arcade-small',
                     message: labelText,
@@ -155,12 +200,16 @@ export default class Shop extends GameObject {
                 this.addChild(leftBracket);
                 this.addChild(rightBracket);
 
+                textCursorX =
+                    (rightBracket.position?.x || labelX) + 6 + TEXT_TAB_GAP;
+                shipStartX = Math.max(shipStartX, textCursorX + 4);
+
                 return { def, label, leftBracket, rightBracket };
             }
 
             const shipId = def.shipId!;
             const sprite = PlayerControlledShip.spriteForShipId(shipId);
-            const x = SHIP_TAB_START_X + shipTabIndex * SHIP_TAB_STRIDE;
+            const x = shipStartX + shipTabIndex * SHIP_TAB_STRIDE;
             shipTabIndex++;
 
             const shipIcon = new GameObject();
@@ -198,15 +247,10 @@ export default class Shop extends GameObject {
                 tab.label.updateColor(
                     active ? this.game.interfaceColor : this.disabledColor
                 );
-            } else {
-                const shipId = tab.def.shipId!;
-                const unlocked = this.player.isShipUnlocked(shipId);
-                if (tab.shipIcon) {
-                    tab.shipIcon.sprite = PlayerControlledShip.spriteForShipId(shipId);
-                    if (!unlocked) {
-                        tab.shipIcon.sprite.applyColor(this.disabledColor);
-                    }
-                }
+            } else if (tab.shipIcon && tab.def.shipId) {
+                tab.shipIcon.sprite = PlayerControlledShip.spriteForShipId(
+                    tab.def.shipId
+                );
             }
 
             if (tab.leftBracket && tab.rightBracket) {
@@ -229,6 +273,9 @@ export default class Shop extends GameObject {
             if (row.progressOrbs) {
                 this.removeChild(row.progressOrbs);
             }
+            if (row.shipIcon) {
+                this.removeChild(row.shipIcon);
+            }
         });
         this.rows = [];
     }
@@ -240,9 +287,7 @@ export default class Shop extends GameObject {
     private rebuildRows(): void {
         this.clearRows();
 
-        const upgrades = upgradesForTab(this.activeTab, (shipId) =>
-            this.player.isShipUnlocked(shipId)
-        );
+        const upgrades = upgradesForTab(this.activeTab, this.upgradesContext());
         this.rows = [
             ...upgrades.map((upgrade) => ({
                 kind: 'upgrade' as const,
@@ -275,8 +320,23 @@ export default class Shop extends GameObject {
                 });
                 this.addChild(row.costText);
 
+                if (row.upgrade?.id === 'unlock' && row.upgrade.unlockShipId) {
+                    const icon = new GameObject();
+                    icon.sprite = PlayerControlledShip.spriteForShipId(
+                        row.upgrade.unlockShipId
+                    );
+                    icon.position = { x: labelX + 55, y: y - 2 };
+                    icon.index = 2;
+                    this.addChild(icon);
+                    row.shipIcon = icon;
+                }
+
                 if (row.upgrade && this.showsProgressOrbs(row.upgrade)) {
-                    row.progressOrbs = new UpgradeProgressOrbs(this, PROGRESS_RIGHT_X, y);
+                    row.progressOrbs = new UpgradeProgressOrbs(
+                        this,
+                        PROGRESS_RIGHT_X,
+                        y
+                    );
                     this.addChild(row.progressOrbs);
                 }
             }
@@ -292,11 +352,16 @@ export default class Shop extends GameObject {
 
     private ownedRank(upgrade: ShopUpgradeDef): number {
         const player = this.player;
+        const tech = player.technologies;
         switch (upgrade.id) {
-            case 'fullHeal': return player.fullHealPurchases;
-            case 'health': return player.lifeUpgrades;
-            case 'energyShield': return player.energyShield;
-            case 'bomb': return player.bombs;
+            case 'fullHeal':
+                return player.fullHealPurchases;
+            case 'health':
+                return player.lifeUpgrades;
+            case 'energyShield':
+                return player.energyShieldPurchases;
+            case 'bomb':
+                return player.bombs;
             case 'maxHealth':
                 return player.profileFor(upgrade.tab as PlayerShipId).maxHealthRanks;
             case 'armor':
@@ -310,9 +375,23 @@ export default class Shop extends GameObject {
             case 'damage':
                 return player.profileFor(upgrade.tab as PlayerShipId).damageRanks;
             case 'combo':
-                return player.profileFor(upgrade.tab as PlayerShipId).comboUpgrades;
+                return tech.comboRanks;
+            case 'bombFabricator':
+                return tech.bombFabricator ? 1 : 0;
+            case 'shieldGenerator':
+                return tech.energyShieldGenerator ? 1 : 0;
+            case 'hangarBay':
+                return tech.hangarBay ? 1 : 0;
+            case 'armorRiveter':
+                return tech.armorRiveter ? 1 : 0;
+            case 'fuelMixingTank':
+                return tech.fuelMixingTank ? 1 : 0;
+            case 'focalLenseGrinder':
+                return tech.focalLenseGrinder ? 1 : 0;
+            case 'thermalCooling':
+                return tech.thermalCooling ? 1 : 0;
             case 'unlock': {
-                const shipId = upgrade.tab as PlayerShipId;
+                const shipId = upgrade.unlockShipId || (upgrade.tab as PlayerShipId);
                 return player.isShipUnlocked(shipId) ? 1 : 0;
             }
             case 'deathHealth':
@@ -323,11 +402,6 @@ export default class Shop extends GameObject {
     }
 
     private rowLabel(upgrade: ShopUpgradeDef, owned: number, maxed: boolean): string {
-        if (upgrade.id === 'combo') {
-            if (maxed) return 'Combo maxed';
-            if (owned === 0) return 'Unlock Combo';
-            return upgrade.label;
-        }
         if (upgrade.id === 'unlock') {
             return maxed ? 'Unlocked' : upgrade.label;
         }
@@ -382,11 +456,13 @@ export default class Shop extends GameObject {
     }
 
     private updateSelectorPosition(): void {
-        this.selectorShip.position!.y = LIST_BASE_Y + this.selectedMenuItem * LIST_ROW_STRIDE;
+        this.selectorShip.position!.y =
+            LIST_BASE_Y + this.selectedMenuItem * LIST_ROW_STRIDE;
     }
 
     private setActiveTab(index: number): void {
-        if (index < 0 || index >= shopTabs.length || index === this.activeTabIndex) {
+        const tabs = this.visibleTabs();
+        if (index < 0 || index >= tabs.length || index === this.activeTabIndex) {
             return;
         }
         this.activeTabIndex = index;
@@ -454,17 +530,21 @@ export default class Shop extends GameObject {
         this.timeSinceSelected = 0;
 
         const x1 = this.selectorShip.position!.x + this.selectorShip.sprite.width;
-        const y = this.selectorShip.position!.y + Math.floor(this.selectorShip.sprite.height / 2);
+        const y =
+            this.selectorShip.position!.y +
+            Math.floor(this.selectorShip.sprite.height / 2);
 
-        this.addChild(new Bullet(this, {
-            team: 2,
-            position: { x: x1, y: y },
-            velocity: { x: 50, y: 0 }
-        }));
+        this.addChild(
+            new Bullet(this, {
+                team: 2,
+                position: { x: x1, y: y },
+                velocity: { x: 50, y: 0 }
+            })
+        );
     }
 
-    private applyUpgrade(id: ShopUpgradeId, tab: ShopTabId): void {
-        const shipId = tab as PlayerShipId;
+    private applyUpgrade(id: ShopUpgradeId, upgrade: ShopUpgradeDef): void {
+        const shipId = upgrade.tab as PlayerShipId;
 
         switch (id) {
             case 'fullHeal':
@@ -498,16 +578,44 @@ export default class Shop extends GameObject {
                 this.player.purchaseDamage(shipId);
                 break;
             case 'combo':
-                this.player.purchaseCombo(shipId);
-                if (shipId === this.player.activeShipId) {
-                    this.game.comboGauge.syncFromPlayer();
-                }
-                break;
-            case 'unlock':
-                this.player.unlockShip(shipId);
-                this.refreshTabChrome();
+                this.player.purchaseComboRank();
+                this.game.comboGauge.syncFromPlayer();
                 this.rebuildRows();
                 break;
+            case 'bombFabricator':
+                this.player.purchaseBombFabricator();
+                this.rebuildRows();
+                break;
+            case 'shieldGenerator':
+                this.player.purchaseEnergyShieldGenerator();
+                this.rebuildRows();
+                break;
+            case 'hangarBay':
+                this.player.purchaseHangarBay();
+                this.rebuildTabChrome();
+                break;
+            case 'armorRiveter':
+                this.player.purchaseArmorRiveter();
+                this.rebuildRows();
+                break;
+            case 'fuelMixingTank':
+                this.player.purchaseFuelMixingTank();
+                this.rebuildRows();
+                break;
+            case 'focalLenseGrinder':
+                this.player.purchaseFocalLenseGrinder();
+                this.rebuildRows();
+                break;
+            case 'thermalCooling':
+                this.player.purchaseThermalCooling();
+                this.rebuildRows();
+                break;
+            case 'unlock': {
+                const unlockId = upgrade.unlockShipId || shipId;
+                this.player.unlockShip(unlockId);
+                this.rebuildTabChrome();
+                break;
+            }
             case 'deathHealth':
             case 'deathShield':
                 break;
@@ -524,7 +632,7 @@ export default class Shop extends GameObject {
         if (row.kind === 'leave') {
             this.isDoneShopping = true;
         } else if (row.upgrade) {
-            this.applyUpgrade(row.upgrade.id, row.upgrade.tab);
+            this.applyUpgrade(row.upgrade.id, row.upgrade);
         }
 
         this.refreshRows();

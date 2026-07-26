@@ -10,8 +10,6 @@ import {
 export interface PlayerShipProfile {
     id: PlayerShipId;
     unlocked: boolean;
-    comboSegments: number;
-    comboUpgrades: number;
     maxHealthRanks: number;
     armorRanks: number;
     bombCapacityRanks: number;
@@ -26,8 +24,6 @@ export function createShipProfile(id: PlayerShipId, unlocked: boolean): PlayerSh
     return {
         id,
         unlocked,
-        comboSegments: 0,
-        comboUpgrades: 0,
         maxHealthRanks: 0,
         armorRanks: 0,
         bombCapacityRanks: 0,

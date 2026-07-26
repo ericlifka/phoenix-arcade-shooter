@@ -3,27 +3,34 @@ import {
     type PlayerShipHangar,
     type PlayerShipProfile
 } from '../ships/player-ship-profile.js';
+import {
+    cloneTechnologies,
+    createStarterTechnologies,
+    technologiesHaveProgress,
+    type PlayerTechnologies
+} from '../ships/player-technologies.js';
 import { playerShipDefs, type PlayerShipId } from '../balance/player-ships.js';
+import { MAX_COMBO_UPGRADES } from '../balance/shop.js';
 
-export const SAVE_VERSION = 1 as const;
-export const SAVE_STORAGE_KEY = 'phoenix-arcade-shooter-save-v1';
+export const SAVE_VERSION = 2 as const;
+export const SAVE_STORAGE_KEY = 'phoenix-arcade-shooter-save-v2';
 
 export interface SaveData {
     version: typeof SAVE_VERSION;
     runsCompleted: number;
     shipHangar: PlayerShipHangar;
+    technologies: PlayerTechnologies;
 }
 
 export interface SaveHost {
     runsCompleted: number;
     player: {
         shipHangar: PlayerShipHangar;
+        technologies: PlayerTechnologies;
     };
 }
 
 const RANK_KEYS: (keyof PlayerShipProfile)[] = [
-    'comboSegments',
-    'comboUpgrades',
     'maxHealthRanks',
     'armorRanks',
     'bombCapacityRanks',
@@ -44,8 +51,6 @@ function cloneProfile(profile: PlayerShipProfile): PlayerShipProfile {
     return {
         id: profile.id,
         unlocked: profile.unlocked,
-        comboSegments: profile.comboSegments,
-        comboUpgrades: profile.comboUpgrades,
         maxHealthRanks: profile.maxHealthRanks,
         armorRanks: profile.armorRanks,
         bombCapacityRanks: profile.bombCapacityRanks,
@@ -84,10 +89,6 @@ function validateProfile(id: PlayerShipId, raw: unknown): PlayerShipProfile | nu
     }
 
     for (const key of RANK_KEYS) {
-        // Old saves omit damageRanks — treat as 0 so existing meta still loads.
-        if (key === 'damageRanks' && profile[key] === undefined) {
-            continue;
-        }
         if (!isNonNegativeInt(profile[key])) {
             return null;
         }
@@ -96,14 +97,50 @@ function validateProfile(id: PlayerShipId, raw: unknown): PlayerShipProfile | nu
     return {
         id,
         unlocked: profile.unlocked,
-        comboSegments: profile.comboSegments as number,
-        comboUpgrades: profile.comboUpgrades as number,
         maxHealthRanks: profile.maxHealthRanks as number,
         armorRanks: profile.armorRanks as number,
         bombCapacityRanks: profile.bombCapacityRanks as number,
         shipSpeedRanks: profile.shipSpeedRanks as number,
         fireSpeedRanks: profile.fireSpeedRanks as number,
-        damageRanks: isNonNegativeInt(profile.damageRanks) ? profile.damageRanks : 0
+        damageRanks: profile.damageRanks as number
+    };
+}
+
+function validateTechnologies(raw: unknown): PlayerTechnologies | null {
+    if (!raw || typeof raw !== 'object') {
+        return null;
+    }
+
+    const tech = raw as Record<string, unknown>;
+    if (!isNonNegativeInt(tech.comboRanks) || tech.comboRanks > MAX_COMBO_UPGRADES) {
+        return null;
+    }
+
+    const flags: (keyof PlayerTechnologies)[] = [
+        'bombFabricator',
+        'energyShieldGenerator',
+        'hangarBay',
+        'armorRiveter',
+        'fuelMixingTank',
+        'focalLenseGrinder',
+        'thermalCooling'
+    ];
+
+    for (const key of flags) {
+        if (typeof tech[key] !== 'boolean') {
+            return null;
+        }
+    }
+
+    return {
+        comboRanks: tech.comboRanks,
+        bombFabricator: tech.bombFabricator as boolean,
+        energyShieldGenerator: tech.energyShieldGenerator as boolean,
+        hangarBay: tech.hangarBay as boolean,
+        armorRiveter: tech.armorRiveter as boolean,
+        fuelMixingTank: tech.fuelMixingTank as boolean,
+        focalLenseGrinder: tech.focalLenseGrinder as boolean,
+        thermalCooling: tech.thermalCooling as boolean
     };
 }
 
@@ -123,6 +160,11 @@ function validateSave(raw: unknown): SaveData | null {
         return null;
     }
 
+    const technologies = validateTechnologies(data.technologies);
+    if (!technologies) {
+        return null;
+    }
+
     const hangarRaw = data.shipHangar as Record<string, unknown>;
     const hangar = {} as PlayerShipHangar;
 
@@ -133,13 +175,11 @@ function validateSave(raw: unknown): SaveData | null {
 
         hangar[def.id] = validated || createShipProfile(def.id, def.unlockCost === null);
 
-        // Known id present but corrupt → treat whole save as bad
         if (hangarRaw[def.id] && !validated) {
             return null;
         }
     }
 
-    // Reject unknown ship ids with corrupt data; ignore extras that validate as objects
     for (const key of Object.keys(hangarRaw)) {
         if (!isPlayerShipId(key)) {
             continue;
@@ -149,7 +189,8 @@ function validateSave(raw: unknown): SaveData | null {
     return {
         version: SAVE_VERSION,
         runsCompleted: data.runsCompleted,
-        shipHangar: hangar
+        shipHangar: hangar,
+        technologies
     };
 }
 
@@ -176,12 +217,21 @@ export function writeSave(data: SaveData): void {
 export function clearSave(): void {
     try {
         localStorage.removeItem(SAVE_STORAGE_KEY);
+        // Drop legacy v1 key so old progress does not linger.
+        localStorage.removeItem('phoenix-arcade-shooter-save-v1');
     } catch {
         // ignore
     }
 }
 
-export function hangarHasMetaProgress(hangar: PlayerShipHangar): boolean {
+export function hangarHasMetaProgress(
+    hangar: PlayerShipHangar,
+    technologies?: PlayerTechnologies
+): boolean {
+    if (technologies && technologiesHaveProgress(technologies)) {
+        return true;
+    }
+
     for (const def of playerShipDefs) {
         const profile = hangar[def.id];
         if (!profile) {
@@ -196,9 +246,7 @@ export function hangarHasMetaProgress(hangar: PlayerShipHangar): boolean {
             profile.bombCapacityRanks > 0 ||
             profile.shipSpeedRanks > 0 ||
             profile.fireSpeedRanks > 0 ||
-            profile.damageRanks > 0 ||
-            profile.comboSegments > 0 ||
-            profile.comboUpgrades > 0
+            profile.damageRanks > 0
         ) {
             return true;
         }
@@ -210,11 +258,15 @@ export function captureSave(host: SaveHost): SaveData {
     return {
         version: SAVE_VERSION,
         runsCompleted: host.runsCompleted,
-        shipHangar: cloneHangar(host.player.shipHangar)
+        shipHangar: cloneHangar(host.player.shipHangar),
+        technologies: cloneTechnologies(host.player.technologies)
     };
 }
 
 export function applySave(host: SaveHost, data: SaveData): void {
     host.runsCompleted = data.runsCompleted;
     host.player.shipHangar = mergeHangarWithDefs(data.shipHangar);
+    host.player.technologies = cloneTechnologies(data.technologies);
 }
+
+export { createStarterTechnologies };

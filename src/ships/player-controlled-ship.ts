@@ -13,6 +13,11 @@ import {
     type PlayerShipHangar,
     type PlayerShipProfile
 } from './player-ship-profile.js';
+import {
+    createStarterTechnologies,
+    type PlayerTechnologies
+} from './player-technologies.js';
+import { MAX_COMBO_UPGRADES } from '../balance/shop.js';
 import { InputState } from '../types/game';
 import { Position } from '../types/rendering';
 
@@ -36,6 +41,8 @@ export default class PlayerControlledShip extends GameObject {
 
     /** All unlockable ships and their permanent upgrades. */
     shipHangar!: PlayerShipHangar;
+    /** Permanent technology unlocks (saved with meta). */
+    technologies!: PlayerTechnologies;
     /** Ship used for the current run (picker comes later; defaults to starter). */
     activeShipId!: PlayerShipId;
 
@@ -43,6 +50,8 @@ export default class PlayerControlledShip extends GameObject {
     lifeUpgrades = 0;
     fullHealPurchases = 0;
     energyShield = 0;
+    /** Supplies +1 shield buys this run (excludes free generator shields). */
+    energyShieldPurchases = 0;
     bombs = 0;
     /** Health from death-shop buffs, applied for the current run only. */
     runBonusHealth = 0;
@@ -79,19 +88,11 @@ export default class PlayerControlledShip extends GameObject {
     }
 
     get comboSegments(): number {
-        return this.shipProfile.comboSegments;
-    }
-
-    set comboSegments(value: number) {
-        this.shipProfile.comboSegments = value;
+        return this.technologies.comboRanks;
     }
 
     get comboUpgrades(): number {
-        return this.shipProfile.comboUpgrades;
-    }
-
-    set comboUpgrades(value: number) {
-        this.shipProfile.comboUpgrades = value;
+        return this.technologies.comboRanks;
     }
 
     isShipUnlocked(shipId: PlayerShipId): boolean {
@@ -104,7 +105,17 @@ export default class PlayerControlledShip extends GameObject {
     }
 
     get bombCapacity(): number {
-        return this.shipProfile.bombCapacityRanks;
+        if (!this.technologies.bombFabricator) {
+            return 0;
+        }
+        return 1 + this.shipProfile.bombCapacityRanks;
+    }
+
+    bombCapacityFor(shipId: PlayerShipId): number {
+        if (!this.technologies.bombFabricator) {
+            return 0;
+        }
+        return 1 + this.shipHangar[shipId].bombCapacityRanks;
     }
 
     selectShipForRun(shipId: PlayerShipId): void {
@@ -127,6 +138,7 @@ export default class PlayerControlledShip extends GameObject {
         super.reset();
 
         this.shipHangar = createStarterHangar();
+        this.technologies = createStarterTechnologies();
         this.activeShipId = defaultActiveShipId();
         this.shieldOutlineApplied = false;
         this.nextRunBonusHealth = 0;
@@ -163,6 +175,7 @@ export default class PlayerControlledShip extends GameObject {
         this.lifeUpgrades = 0;
         this.fullHealPurchases = 0;
         this.energyShield = 0;
+        this.energyShieldPurchases = 0;
         this.bombs = 0;
         this.runBonusHealth = 0;
     }
@@ -231,6 +244,7 @@ export default class PlayerControlledShip extends GameObject {
 
     purchaseEnergyShield(): void {
         this.energyShield++;
+        this.energyShieldPurchases++;
         this.refreshShieldVisual();
     }
 
@@ -250,7 +264,8 @@ export default class PlayerControlledShip extends GameObject {
      */
     applyNextRunBuffs(): void {
         this.runBonusHealth = this.nextRunBonusHealth;
-        this.energyShield = this.nextRunBonusShield;
+        const baseShields = this.technologies.energyShieldGenerator ? 3 : 0;
+        this.energyShield = baseShields + this.nextRunBonusShield;
         this.nextRunBonusHealth = 0;
         this.nextRunBonusShield = 0;
         this.deathHealthPurchases = 0;
@@ -280,26 +295,24 @@ export default class PlayerControlledShip extends GameObject {
         this.triggerEvent('persistMeta');
     }
 
-    purchaseArmor(shipId: PlayerShipId): void {
-        const profile = this.shipHangar[shipId];
-        const cap = playerShipDef(shipId).maxArmor;
-        if (profile.armorRanks >= cap) return;
-        profile.armorRanks++;
-        if (shipId === this.activeShipId) {
-            this.syncStatsFromUpgrades();
-        }
-        this.triggerEvent('persistMeta');
-    }
-
     purchaseBombCapacity(shipId: PlayerShipId): void {
+        if (!this.technologies.bombFabricator) {
+            return;
+        }
         const profile = this.shipHangar[shipId];
         const cap = playerShipDef(shipId).maxBombCapacity;
         if (profile.bombCapacityRanks >= cap) return;
         profile.bombCapacityRanks++;
+        if (shipId === this.activeShipId) {
+            this.bombs = this.bombCapacity;
+        }
         this.triggerEvent('persistMeta');
     }
 
     purchaseShipSpeed(shipId: PlayerShipId): void {
+        if (!this.technologies.fuelMixingTank) {
+            return;
+        }
         const profile = this.shipHangar[shipId];
         const cap = playerShipDef(shipId).maxShipSpeed;
         if (profile.shipSpeedRanks >= cap) return;
@@ -311,6 +324,9 @@ export default class PlayerControlledShip extends GameObject {
     }
 
     purchaseFireSpeed(shipId: PlayerShipId): void {
+        if (!this.technologies.thermalCooling) {
+            return;
+        }
         const profile = this.shipHangar[shipId];
         const cap = playerShipDef(shipId).maxFireSpeed;
         if (profile.fireSpeedRanks >= cap) return;
@@ -322,6 +338,9 @@ export default class PlayerControlledShip extends GameObject {
     }
 
     purchaseDamage(shipId: PlayerShipId): void {
+        if (!this.technologies.focalLenseGrinder) {
+            return;
+        }
         const profile = this.shipHangar[shipId];
         const cap = playerShipDef(shipId).maxDamage;
         if (profile.damageRanks >= cap) return;
@@ -329,12 +348,84 @@ export default class PlayerControlledShip extends GameObject {
         this.triggerEvent('persistMeta');
     }
 
-    purchaseCombo(shipId: PlayerShipId): void {
+    purchaseArmor(shipId: PlayerShipId): void {
+        if (!this.technologies.armorRiveter) {
+            return;
+        }
         const profile = this.shipHangar[shipId];
-        const cap = playerShipDef(shipId).maxCombo;
-        if (profile.comboSegments >= cap) return;
-        profile.comboSegments++;
-        profile.comboUpgrades++;
+        const cap = playerShipDef(shipId).maxArmor;
+        if (profile.armorRanks >= cap) return;
+        profile.armorRanks++;
+        if (shipId === this.activeShipId) {
+            this.syncStatsFromUpgrades();
+        }
+        this.triggerEvent('persistMeta');
+    }
+
+    purchaseComboRank(): void {
+        if (this.technologies.comboRanks >= MAX_COMBO_UPGRADES) {
+            return;
+        }
+        this.technologies.comboRanks++;
+        this.triggerEvent('persistMeta');
+    }
+
+    purchaseBombFabricator(): void {
+        if (this.technologies.bombFabricator) {
+            return;
+        }
+        this.technologies.bombFabricator = true;
+        this.refillBombs();
+        this.triggerEvent('persistMeta');
+    }
+
+    purchaseEnergyShieldGenerator(): void {
+        if (this.technologies.energyShieldGenerator) {
+            return;
+        }
+        this.technologies.energyShieldGenerator = true;
+        this.energyShield = Math.max(this.energyShield, 3);
+        this.refreshShieldVisual();
+        this.triggerEvent('persistMeta');
+    }
+
+    purchaseHangarBay(): void {
+        if (this.technologies.hangarBay) {
+            return;
+        }
+        this.technologies.hangarBay = true;
+        this.triggerEvent('persistMeta');
+    }
+
+    purchaseArmorRiveter(): void {
+        if (this.technologies.armorRiveter) {
+            return;
+        }
+        this.technologies.armorRiveter = true;
+        this.triggerEvent('persistMeta');
+    }
+
+    purchaseFuelMixingTank(): void {
+        if (this.technologies.fuelMixingTank) {
+            return;
+        }
+        this.technologies.fuelMixingTank = true;
+        this.triggerEvent('persistMeta');
+    }
+
+    purchaseFocalLenseGrinder(): void {
+        if (this.technologies.focalLenseGrinder) {
+            return;
+        }
+        this.technologies.focalLenseGrinder = true;
+        this.triggerEvent('persistMeta');
+    }
+
+    purchaseThermalCooling(): void {
+        if (this.technologies.thermalCooling) {
+            return;
+        }
+        this.technologies.thermalCooling = true;
         this.triggerEvent('persistMeta');
     }
 
