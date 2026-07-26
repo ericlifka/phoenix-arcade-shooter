@@ -20,7 +20,9 @@ export type ShopUpgradeId =
     | 'fireSpeed'
     | 'damage'
     | 'combo'
-    | 'unlock';
+    | 'unlock'
+    | 'deathHealth'
+    | 'deathShield';
 
 export type CostFormula =
     | { kind: 'linear'; base: number; perRank: number }
@@ -98,6 +100,26 @@ export const runShopUpgrades: ReadonlyArray<Omit<ShopUpgradeDef, 'tab'> & { tab:
         label: '+1 Bomb',
         maxRanks: null,
         cost: { kind: 'linear', base: 25, perRank: 15 }
+    }
+];
+
+/** Death-screen next-run buffs (not shown in the mid-run shop). */
+export const deathShopUpgrades: ReadonlyArray<ShopUpgradeDef> = [
+    {
+        id: 'deathHealth',
+        tab: 'run',
+        permanent: false,
+        label: '+10 Health',
+        maxRanks: null,
+        cost: { kind: 'linear', base: 50, perRank: 25 }
+    },
+    {
+        id: 'deathShield',
+        tab: 'run',
+        permanent: false,
+        label: '+3 Energy Shield',
+        maxRanks: null,
+        cost: { kind: 'linear', base: 50, perRank: 25 }
     }
 ];
 

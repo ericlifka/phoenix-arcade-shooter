@@ -315,6 +315,10 @@ export default class Shop extends GameObject {
                 const shipId = upgrade.tab as PlayerShipId;
                 return player.isShipUnlocked(shipId) ? 1 : 0;
             }
+            case 'deathHealth':
+                return player.deathHealthPurchases;
+            case 'deathShield':
+                return player.deathShieldPurchases;
         }
     }
 
@@ -503,6 +507,9 @@ export default class Shop extends GameObject {
                 this.player.unlockShip(shipId);
                 this.refreshTabChrome();
                 this.rebuildRows();
+                break;
+            case 'deathHealth':
+            case 'deathShield':
                 break;
         }
     }

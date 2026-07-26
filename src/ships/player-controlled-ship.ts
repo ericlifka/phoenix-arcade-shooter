@@ -44,6 +44,17 @@ export default class PlayerControlledShip extends GameObject {
     fullHealPurchases = 0;
     energyShield = 0;
     bombs = 0;
+    /** Health from death-shop buffs, applied for the current run only. */
+    runBonusHealth = 0;
+
+    /**
+     * Death-shop stash for the upcoming run (survives resetForNewRun until
+     * applyNextRunBuffs).
+     */
+    nextRunBonusHealth = 0;
+    nextRunBonusShield = 0;
+    deathHealthPurchases = 0;
+    deathShieldPurchases = 0;
 
     armor = 0;
     SPEED = BASE_SPEED;
@@ -118,6 +129,10 @@ export default class PlayerControlledShip extends GameObject {
         this.shipHangar = createStarterHangar();
         this.activeShipId = defaultActiveShipId();
         this.shieldOutlineApplied = false;
+        this.nextRunBonusHealth = 0;
+        this.nextRunBonusShield = 0;
+        this.deathHealthPurchases = 0;
+        this.deathShieldPurchases = 0;
         this.clearRunCounters();
 
         this.resetForNewRun();
@@ -149,11 +164,16 @@ export default class PlayerControlledShip extends GameObject {
         this.fullHealPurchases = 0;
         this.energyShield = 0;
         this.bombs = 0;
+        this.runBonusHealth = 0;
     }
 
     applyPersistentUpgrades(): void {
         const profile = this.shipProfile;
-        this.maxLife = BASE_MAX_LIFE + profile.maxHealthRanks * 5 + this.lifeUpgrades;
+        this.maxLife =
+            BASE_MAX_LIFE +
+            profile.maxHealthRanks * 5 +
+            this.lifeUpgrades +
+            this.runBonusHealth;
         this.life = this.maxLife;
         this.armor = profile.armorRanks;
         this.SPEED = Math.round(BASE_SPEED * Math.pow(1.1, profile.shipSpeedRanks));
@@ -166,7 +186,11 @@ export default class PlayerControlledShip extends GameObject {
     syncStatsFromUpgrades(opts?: { healBy?: number }): void {
         const profile = this.shipProfile;
         const previousMax = this.maxLife || BASE_MAX_LIFE;
-        this.maxLife = BASE_MAX_LIFE + profile.maxHealthRanks * 5 + this.lifeUpgrades;
+        this.maxLife =
+            BASE_MAX_LIFE +
+            profile.maxHealthRanks * 5 +
+            this.lifeUpgrades +
+            this.runBonusHealth;
         this.armor = profile.armorRanks;
         this.SPEED = Math.round(BASE_SPEED * Math.pow(1.1, profile.shipSpeedRanks));
         this.FIRE_RATE = Math.ceil(BASE_FIRE_RATE * Math.pow(0.9, profile.fireSpeedRanks));
@@ -208,6 +232,30 @@ export default class PlayerControlledShip extends GameObject {
     purchaseEnergyShield(): void {
         this.energyShield++;
         this.refreshShieldVisual();
+    }
+
+    purchaseDeathHealth(): void {
+        this.nextRunBonusHealth += 10;
+        this.deathHealthPurchases++;
+    }
+
+    purchaseDeathShield(): void {
+        this.nextRunBonusShield += 3;
+        this.deathShieldPurchases++;
+    }
+
+    /**
+     * Move death-shop stash onto the current run. Call after resetForNewRun
+     * at the start of a new game.
+     */
+    applyNextRunBuffs(): void {
+        this.runBonusHealth = this.nextRunBonusHealth;
+        this.energyShield = this.nextRunBonusShield;
+        this.nextRunBonusHealth = 0;
+        this.nextRunBonusShield = 0;
+        this.deathHealthPurchases = 0;
+        this.deathShieldPurchases = 0;
+        this.applyPersistentUpgrades();
     }
 
     purchaseBomb(): void {

@@ -60,7 +60,6 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
 
         this.titleScreen = new EmbeddedTitleScreen(this);
         this.controlsScreen = new ControlsScreen(this);
-        this.gameOverScreen = new GameOverScreen(this);
         this.player = new PlayerShip(this);
         this.inputInterpreter = new InputInterpreter();
 
@@ -92,6 +91,8 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
             position: { x: this.width, y: this.height - 6 },
             color: this.interfaceColor
         });
+
+        this.gameOverScreen = new GameOverScreen(this);
 
         this.levelManager = new LevelManager(this, this);
 
@@ -168,6 +169,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         this.bank.resetForRun();
         this.comboGauge.reset();
         this.player.resetForNewRun();
+        this.player.applyNextRunBuffs();
         this.levelManager.reset();
         this.clearBombs();
 
@@ -181,6 +183,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
     }
 
     finishGame(): void {
+        this.bank.resetForRun();
         this.runsCompleted++;
         this.persistMeta();
 
@@ -219,6 +222,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
             this.addChild(this.titleScreen);
         }
 
+        // Preserve next-run death-shop stash; only clear mid-run counters.
         this.player.resetForNewRun();
     }
 
@@ -348,6 +352,21 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
             this.gameOverScreen.setRunStats(this.runStats);
 
             this.removeChild(this.player);
+            this.removeChild(this.pausedText);
+            this.paused = false;
+
+            if (gameResult === 'loss') {
+                this.levelManager.stop();
+                this.clearBullets();
+                this.clearBombs();
+                this.removeChild(this.comboGauge);
+                this.removeChild(this.lifeMeter);
+                // Keep bank for death-shop spending.
+                if (!this.children.includes(this.bank)) {
+                    this.addChild(this.bank);
+                }
+            }
+
             this.addChild(this.gameOverScreen);
         }
     }
