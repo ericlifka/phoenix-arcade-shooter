@@ -2217,7 +2217,7 @@ void main() {
       this.resetForRun();
     }
     resetForRun() {
-      this.value = 1e4;
+      this.value = 0;
       this.updateDisplay();
     }
     addMoney(value) {
@@ -5198,13 +5198,6 @@ void main() {
           max: def.maxDamage
         });
       }
-      if (tech.comboRanks > 0) {
-        rows.push({
-          text: "Combo: " + (tech.comboRanks + 1) + "x",
-          owned: tech.comboRanks,
-          max: MAX_COMBO_UPGRADES
-        });
-      }
       return rows;
     }
     setActiveTab(index) {
@@ -7419,7 +7412,7 @@ void main() {
     }
     createTabChrome() {
       const tabs = this.visibleTabs();
-      let textCursorX = 8;
+      let textCursorX = 15;
       let shipTabIndex = 0;
       let shipStartX = 100;
       this.tabChrome = tabs.map((def) => {
@@ -7851,7 +7844,6 @@ void main() {
     loadLevels() {
       this.levels = [
         this.hangar,
-        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
