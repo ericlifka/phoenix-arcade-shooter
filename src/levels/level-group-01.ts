@@ -119,7 +119,10 @@ export default class LevelGroup01 extends GameObject {
         ship.position!.x = startX;
         ship.position!.y = startY;
 
-        this.scripts.push(new FireSingleGunRandomRate(this, ship));
+        this.scripts.push(new FireSingleGunRandomRate(this, ship, {
+            thresholdMin: group01.randomFire.thresholdMinMs,
+            thresholdMax: group01.randomFire.thresholdMaxMs
+        }));
         this.scripts.push(new ScriptChain(this, false, [
             new MoveObjectToPoint(null, ship, { x: startX, y: endY }, time * 2),
             new MoveObjectToPoint(null, ship, { x: startX - swayX, y: endY }, time),
@@ -151,9 +154,23 @@ export default class LevelGroup01 extends GameObject {
             horizontal: true
         }));
 
-        this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));
-        this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
-        this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
+        this.scripts.push(new FireSingleGunRandomRate(this, boss, {
+            gunIndex: 0,
+            thresholdMin: group01.randomFire.thresholdMinMs,
+            thresholdMax: group01.randomFire.thresholdMaxMs
+        }));
+        this.scripts.push(new FireSingleGunRandomRate(this, boss, {
+            gunIndex: 2,
+            thresholdMin: group01.randomFire.thresholdMinMs,
+            thresholdMax: group01.randomFire.thresholdMaxMs
+        }));
+        this.scripts.push(new ChainGunFire(this, boss, {
+            gunIndex: 1,
+            fireRate: group01.bossChainGun.fireRateMs,
+            thresholdMin: group01.bossChainGun.thresholdMinMs,
+            thresholdMax: group01.bossChainGun.thresholdMaxMs,
+            burstSize: group01.bossChainGun.burstSize
+        }));
 
         this.scripts.push(new ScriptChain(this, true, [
             new MoveObjectToPoint(null, boss, { x: group01.bossPatrolLeftX, y: patrolY }, patrolSeconds),

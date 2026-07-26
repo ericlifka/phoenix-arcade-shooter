@@ -26,7 +26,19 @@ export const group01 = {
     bossPatrolY: 1,
     bossPatrolLeftX: 1,
     bossPatrolRightMargin: 5,
-    bossPatrolSeconds: 8
+    bossPatrolSeconds: 8,
+
+    /** Slower than global defaults so early levels are less bullet-dense. */
+    randomFire: {
+        thresholdMinMs: 1000,
+        thresholdMaxMs: 6000
+    },
+    bossChainGun: {
+        fireRateMs: 200,
+        thresholdMinMs: 3000,
+        thresholdMaxMs: 8000,
+        burstSize: 6
+    }
 };
 
 export function group01ColumnRange(difficultyMultiplier: number): { start: number; end: number } {

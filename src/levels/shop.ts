@@ -17,13 +17,13 @@ import {
     type ShopUpgradeId
 } from '../balance/shop.js';
 
-const LIST_BASE_Y = 35;
+const LIST_BASE_Y = 20;
 const LIST_ROW_STRIDE = 15;
 const LIST_LABEL_X = 70;
 const LIST_COST_X = 40;
 const LEAVE_LABEL_X = 40;
 const PROGRESS_RIGHT_X = 182;
-const TAB_Y = 12;
+const TAB_Y = 5;
 const SHIP_TAB_STRIDE = 22;
 const TEXT_TAB_GAP = 10;
 
