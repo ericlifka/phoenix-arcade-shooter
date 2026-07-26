@@ -6032,7 +6032,17 @@ void main() {
     bossPatrolY: 1,
     bossPatrolLeftX: 1,
     bossPatrolRightMargin: 5,
-    bossPatrolSeconds: 8
+    bossPatrolSeconds: 8,
+    randomFire: {
+      thresholdMinMs: 1000,
+      thresholdMaxMs: 6000
+    },
+    bossChainGun: {
+      fireRateMs: 200,
+      thresholdMinMs: 3000,
+      thresholdMaxMs: 8000,
+      burstSize: 6
+    }
   };
 
   // src/scripts/watch-for-death.ts
@@ -6134,7 +6144,10 @@ void main() {
       const swayY = group01.swayOffsetY;
       ship.position.x = startX;
       ship.position.y = startY;
-      this.scripts.push(new FireSingleGunRandomRate(this, ship));
+      this.scripts.push(new FireSingleGunRandomRate(this, ship, {
+        thresholdMin: group01.randomFire.thresholdMinMs,
+        thresholdMax: group01.randomFire.thresholdMaxMs
+      }));
       this.scripts.push(new ScriptChain(this, false, [
         new MoveObjectToPoint(null, ship, { x: startX, y: endY }, time * 2),
         new MoveObjectToPoint(null, ship, { x: startX - swayX, y: endY }, time),
@@ -6161,9 +6174,23 @@ void main() {
         width: 1,
         horizontal: true
       }));
-      this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 0 }));
-      this.scripts.push(new FireSingleGunRandomRate(this, boss, { gunIndex: 2 }));
-      this.scripts.push(new ChainGunFire(this, boss, { gunIndex: 1 }));
+      this.scripts.push(new FireSingleGunRandomRate(this, boss, {
+        gunIndex: 0,
+        thresholdMin: group01.randomFire.thresholdMinMs,
+        thresholdMax: group01.randomFire.thresholdMaxMs
+      }));
+      this.scripts.push(new FireSingleGunRandomRate(this, boss, {
+        gunIndex: 2,
+        thresholdMin: group01.randomFire.thresholdMinMs,
+        thresholdMax: group01.randomFire.thresholdMaxMs
+      }));
+      this.scripts.push(new ChainGunFire(this, boss, {
+        gunIndex: 1,
+        fireRate: group01.bossChainGun.fireRateMs,
+        thresholdMin: group01.bossChainGun.thresholdMinMs,
+        thresholdMax: group01.bossChainGun.thresholdMaxMs,
+        burstSize: group01.bossChainGun.burstSize
+      }));
       this.scripts.push(new ScriptChain(this, true, [
         new MoveObjectToPoint(null, boss, { x: group01.bossPatrolLeftX, y: patrolY }, patrolSeconds),
         new MoveObjectToPoint(null, boss, {
@@ -7303,13 +7330,13 @@ void main() {
   }
 
   // src/levels/shop.ts
-  var LIST_BASE_Y2 = 35;
+  var LIST_BASE_Y2 = 20;
   var LIST_ROW_STRIDE2 = 15;
   var LIST_LABEL_X2 = 70;
   var LIST_COST_X2 = 40;
   var LEAVE_LABEL_X = 40;
   var PROGRESS_RIGHT_X2 = 182;
-  var TAB_Y2 = 12;
+  var TAB_Y2 = 5;
   var SHIP_TAB_STRIDE2 = 22;
   var TEXT_TAB_GAP = 10;
 
