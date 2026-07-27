@@ -15,7 +15,7 @@ export interface PlayerShipDef {
     maxShipSpeed: number;
     maxFireSpeed: number;
     maxDamage: number;
-    maxCombo: number;
+    maxEnergyShield: number;
 }
 
 /**
@@ -36,7 +36,7 @@ export const playerShipDefs: ReadonlyArray<PlayerShipDef> = [
         maxShipSpeed: 10,
         maxFireSpeed: 10,
         maxDamage: 3,
-        maxCombo: 10
+        maxEnergyShield: 3
     },
     {
         // Archetype: Mid-range, medium speed, medium damage, medium bomb capacity.
@@ -48,7 +48,7 @@ export const playerShipDefs: ReadonlyArray<PlayerShipDef> = [
         maxShipSpeed: 5,
         maxFireSpeed: 5,
         maxDamage: 4,
-        maxCombo: 10
+        maxEnergyShield: 3
     },
     {
         // Archetype: Tank, slow speed, high damage, large bomb capacity.
@@ -60,7 +60,7 @@ export const playerShipDefs: ReadonlyArray<PlayerShipDef> = [
         maxShipSpeed: 1,
         maxFireSpeed: 1,
         maxDamage: 10,
-        maxCombo: 10
+        maxEnergyShield: 3
     },
     {
         // Archetype: Spread, slow speed, medium damage, medium bomb capacity.
@@ -72,7 +72,7 @@ export const playerShipDefs: ReadonlyArray<PlayerShipDef> = [
         maxShipSpeed: 3,
         maxFireSpeed: 3,
         maxDamage: 1,
-        maxCombo: 10
+        maxEnergyShield: 3
     }
 ];
 

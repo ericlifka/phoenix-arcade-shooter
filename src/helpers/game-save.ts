@@ -12,8 +12,8 @@ import {
 import { playerShipDefs, type PlayerShipId } from '../balance/player-ships.js';
 import { MAX_COMBO_UPGRADES } from '../balance/shop.js';
 
-export const SAVE_VERSION = 2 as const;
-export const SAVE_STORAGE_KEY = 'phoenix-arcade-shooter-save-v2';
+export const SAVE_VERSION = 3 as const;
+export const SAVE_STORAGE_KEY = 'phoenix-arcade-shooter-save-v3';
 
 export interface SaveData {
     version: typeof SAVE_VERSION;
@@ -36,7 +36,8 @@ const RANK_KEYS: (keyof PlayerShipProfile)[] = [
     'bombCapacityRanks',
     'shipSpeedRanks',
     'fireSpeedRanks',
-    'damageRanks'
+    'damageRanks',
+    'energyShieldRanks'
 ];
 
 function isPlayerShipId(id: string): id is PlayerShipId {
@@ -56,7 +57,8 @@ function cloneProfile(profile: PlayerShipProfile): PlayerShipProfile {
         bombCapacityRanks: profile.bombCapacityRanks,
         shipSpeedRanks: profile.shipSpeedRanks,
         fireSpeedRanks: profile.fireSpeedRanks,
-        damageRanks: profile.damageRanks
+        damageRanks: profile.damageRanks,
+        energyShieldRanks: profile.energyShieldRanks
     };
 }
 
@@ -102,7 +104,8 @@ function validateProfile(id: PlayerShipId, raw: unknown): PlayerShipProfile | nu
         bombCapacityRanks: profile.bombCapacityRanks as number,
         shipSpeedRanks: profile.shipSpeedRanks as number,
         fireSpeedRanks: profile.fireSpeedRanks as number,
-        damageRanks: profile.damageRanks as number
+        damageRanks: profile.damageRanks as number,
+        energyShieldRanks: profile.energyShieldRanks as number
     };
 }
 
@@ -217,8 +220,9 @@ export function writeSave(data: SaveData): void {
 export function clearSave(): void {
     try {
         localStorage.removeItem(SAVE_STORAGE_KEY);
-        // Drop legacy v1 key so old progress does not linger.
+        // Drop legacy keys so old progress does not linger.
         localStorage.removeItem('phoenix-arcade-shooter-save-v1');
+        localStorage.removeItem('phoenix-arcade-shooter-save-v2');
     } catch {
         // ignore
     }
@@ -246,7 +250,8 @@ export function hangarHasMetaProgress(
             profile.bombCapacityRanks > 0 ||
             profile.shipSpeedRanks > 0 ||
             profile.fireSpeedRanks > 0 ||
-            profile.damageRanks > 0
+            profile.damageRanks > 0 ||
+            profile.energyShieldRanks > 0
         ) {
             return true;
         }

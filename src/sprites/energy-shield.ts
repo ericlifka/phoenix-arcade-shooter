@@ -33,6 +33,11 @@ export function energyShieldOrbSprite(): Sprite {
     return orbSprite(ENERGY_SHIELD_COLOR);
 }
 
+/** Empty energy shield HUD orb — white outline only. */
+export function energyShieldOrbEmptySprite(): Sprite {
+    return orbSprite(null);
+}
+
 /** Shop upgrade rank orb — green fill when owned, empty outline when not. */
 export function upgradeRankOrbSprite(filled: boolean): Sprite {
     return orbSprite(filled ? UPGRADE_RANK_FILL_COLOR : null);

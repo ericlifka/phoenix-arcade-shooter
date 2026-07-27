@@ -5,6 +5,7 @@ import bombSprite from '../sprites/bomb.js';
 import {
     ENERGY_SHIELD_ORB_SIZE,
     ENERGY_SHIELD_ORB_STRIDE,
+    energyShieldOrbEmptySprite,
     energyShieldOrbSprite
 } from '../sprites/energy-shield.js';
 import { LifeMeterOptions } from '../types/game';
@@ -35,6 +36,7 @@ export default class LifeMeter extends GameObject {
     private currentLife?: number;
     private maxLife?: number;
     private currentShield?: number;
+    private maxShield?: number;
     private currentBombs?: number;
     private shieldOrbs: GameObject[] = [];
     private bombIcons: GameObject[] = [];
@@ -63,6 +65,7 @@ export default class LifeMeter extends GameObject {
         this.currentLife = undefined;
         this.maxLife = undefined;
         this.currentShield = undefined;
+        this.maxShield = undefined;
         this.currentBombs = undefined;
         this.shieldOrbs = [];
         this.bombIcons = [];
@@ -74,6 +77,10 @@ export default class LifeMeter extends GameObject {
 
     private entityShield(): number {
         return (this.entity as GameObject & { energyShield?: number }).energyShield || 0;
+    }
+
+    private entityMaxShield(): number {
+        return (this.entity as GameObject & { maxEnergyShield?: number }).maxEnergyShield || 0;
     }
 
     private entityBombs(): number {
@@ -89,8 +96,11 @@ export default class LifeMeter extends GameObject {
         const lifeChanged =
             this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife;
         const shield = this.entityShield();
+        const maxShield = this.entityMaxShield();
         const bombs = this.entityBombs();
-        const shieldChanged = this.showsPlayerHudExtras() && shield !== this.currentShield;
+        const shieldChanged =
+            this.showsPlayerHudExtras() &&
+            (shield !== this.currentShield || maxShield !== this.maxShield);
         const bombsChanged = this.showsPlayerHudExtras() && bombs !== this.currentBombs;
 
         if (lifeChanged) {
@@ -109,6 +119,7 @@ export default class LifeMeter extends GameObject {
 
         if (lifeChanged || shieldChanged) {
             this.currentShield = shield;
+            this.maxShield = maxShield;
             this.syncShieldOrbs();
         }
 
@@ -174,7 +185,8 @@ export default class LifeMeter extends GameObject {
             return;
         }
 
-        const count = this.currentShield || 0;
+        const current = this.currentShield || 0;
+        const max = this.maxShield || 0;
         this.shieldOrbs = [];
 
         const barWidth = this.sprite.width;
@@ -182,9 +194,9 @@ export default class LifeMeter extends GameObject {
         // First orb bottom overlaps the top of the health bar by one pixel row.
         const firstOrbY = this.position.y - ENERGY_SHIELD_ORB_SIZE + 1;
 
-        for (let i = 0; i < count; i++) {
+        for (let i = 0; i < max; i++) {
             const orb = new GameObject();
-            orb.sprite = energyShieldOrbSprite();
+            orb.sprite = i < current ? energyShieldOrbSprite() : energyShieldOrbEmptySprite();
             orb.position = {
                 x: orbX,
                 y: firstOrbY - i * ENERGY_SHIELD_ORB_STRIDE

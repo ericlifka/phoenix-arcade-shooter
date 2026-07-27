@@ -349,6 +349,14 @@ export default class Hangar extends GameObject {
             });
         }
 
+        if (tech.energyShieldGenerator) {
+            rows.push({
+                text: 'Shields: ' + this.player.permanentShieldMaxFor(shipId),
+                owned: profile.energyShieldRanks,
+                max: def.maxEnergyShield
+            });
+        }
+
         if (tech.bombFabricator) {
             const bombs = this.player.bombCapacityFor(shipId);
             rows.push({

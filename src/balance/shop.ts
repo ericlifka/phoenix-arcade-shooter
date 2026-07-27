@@ -10,6 +10,7 @@ export type ShopTabId = 'run' | 'technology' | PlayerShipId;
 
 export type ShopUpgradeId =
     | 'fullHeal'
+    | 'rechargeShield'
     | 'health'
     | 'energyShield'
     | 'bomb'
@@ -19,6 +20,7 @@ export type ShopUpgradeId =
     | 'shipSpeed'
     | 'fireSpeed'
     | 'damage'
+    | 'energyShieldCapacity'
     | 'combo'
     | 'bombFabricator'
     | 'shieldGenerator'
@@ -111,13 +113,21 @@ export const runShopUpgrades: ReadonlyArray<Omit<ShopUpgradeDef, 'tab'> & { tab:
         permanent: false,
         label: 'Repair Hull',
         maxRanks: null,
-        cost: { kind: 'linear', base: 25, perRank: 10 }
+        cost: { kind: 'linear', base: 25, perRank: 25 }
+    },
+    {
+        id: 'rechargeShield',
+        tab: 'run',
+        permanent: false,
+        label: 'Recharge Shield',
+        maxRanks: null,
+        cost: { kind: 'linear', base: 25, perRank: 25 }
     },
     {
         id: 'health',
         tab: 'run',
         permanent: false,
-        label: '+1 Hull',
+        label: 'Reinforce Hull (+1 Health)',
         maxRanks: null,
         cost: { kind: 'linear', base: 5, perRank: 5 }
     },
@@ -125,9 +135,9 @@ export const runShopUpgrades: ReadonlyArray<Omit<ShopUpgradeDef, 'tab'> & { tab:
         id: 'energyShield',
         tab: 'run',
         permanent: false,
-        label: '+1 Energy Shield',
+        label: 'Expand Shield (+1 shield)',
         maxRanks: null,
-        cost: { kind: 'linear', base: 15, perRank: 10 }
+        cost: { kind: 'linear', base: 25, perRank: 25 }
     },
     {
         id: 'bomb',
@@ -135,7 +145,7 @@ export const runShopUpgrades: ReadonlyArray<Omit<ShopUpgradeDef, 'tab'> & { tab:
         permanent: false,
         label: '+1 Bomb',
         maxRanks: null,
-        cost: { kind: 'linear', base: 25, perRank: 15 }
+        cost: { kind: 'linear', base: 15, perRank: 15 }
     }
 ];
 
@@ -171,14 +181,14 @@ export const shipShopUpgradeTemplates: ReadonlyArray<ShipUpgradeTemplate> = [
         id: 'maxHealth',
         permanent: true,
         label: '+5 Hull',
-        cost: { kind: 'linear', base: 100, perRank: 50 },
+        cost: { kind: 'linear', base: 100, perRank: 75 },
         maxRanksForShip: (shipId) => playerShipDef(shipId).maxHealth
     },
     {
         id: 'armor',
         permanent: true,
         label: '+1 Armor',
-        cost: { kind: 'linear', base: 75, perRank: 75 },
+        cost: { kind: 'linear', base: 150, perRank: 125 },
         maxRanksForShip: (shipId) => playerShipDef(shipId).maxArmor,
         requiresTech: 'armorRiveter'
     },
@@ -186,15 +196,23 @@ export const shipShopUpgradeTemplates: ReadonlyArray<ShipUpgradeTemplate> = [
         id: 'bombCapacity',
         permanent: true,
         label: '+1 Bomb Capacity',
-        cost: { kind: 'linear', base: 50, perRank: 100 },
+        cost: { kind: 'linear', base: 75, perRank: 75 },
         maxRanksForShip: (shipId) => playerShipDef(shipId).maxBombCapacity,
         requiresTech: 'bombFabricator'
+    },
+    {
+        id: 'energyShieldCapacity',
+        permanent: true,
+        label: '+1 Energy Shield',
+        cost: { kind: 'linear', base: 100, perRank: 100 },
+        maxRanksForShip: (shipId) => playerShipDef(shipId).maxEnergyShield,
+        requiresTech: 'energyShieldGenerator'
     },
     {
         id: 'shipSpeed',
         permanent: true,
         label: '+10% Ship Speed',
-        cost: { kind: 'linear', base: 100, perRank: 100 },
+        cost: { kind: 'linear', base: 200, perRank: 25 },
         maxRanksForShip: (shipId) => playerShipDef(shipId).maxShipSpeed,
         requiresTech: 'fuelMixingTank'
     },
@@ -202,7 +220,7 @@ export const shipShopUpgradeTemplates: ReadonlyArray<ShipUpgradeTemplate> = [
         id: 'fireSpeed',
         permanent: true,
         label: '+10% Fire Speed',
-        cost: { kind: 'linear', base: 100, perRank: 100 },
+        cost: { kind: 'linear', base: 100, perRank: 50 },
         maxRanksForShip: (shipId) => playerShipDef(shipId).maxFireSpeed,
         requiresTech: 'thermalCooling'
     },
@@ -343,7 +361,7 @@ export function runUpgradesFor(tech: PlayerTechnologies): ShopUpgradeDef[] {
         if (upgrade.id === 'bomb') {
             return tech.bombFabricator;
         }
-        if (upgrade.id === 'energyShield') {
+        if (upgrade.id === 'energyShield' || upgrade.id === 'rechargeShield') {
             return tech.energyShieldGenerator;
         }
         return true;

@@ -18,6 +18,7 @@ export interface GameObjectLike {
     life?: number;
     maxLife?: number;
     energyShield?: number;
+    maxEnergyShield?: number;
 
     update?(dtime: number): void;
     processInput?(input: any): void;

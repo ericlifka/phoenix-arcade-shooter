@@ -49,9 +49,16 @@ export default class PlayerControlledShip extends GameObject {
     /** Run-only counters (cleared on resetForNewRun). */
     lifeUpgrades = 0;
     fullHealPurchases = 0;
+    /** Current energy shield charges (run state). */
     energyShield = 0;
-    /** Supplies +1 shield buys this run (excludes free generator shields). */
+    /** Computed max energy shields for the active ship this run. */
+    maxEnergyShield = 0;
+    /** Supplies Expand (+1 shield) buys this run. */
     energyShieldPurchases = 0;
+    /** Supplies Recharge Shield buys this run. */
+    shieldRechargePurchases = 0;
+    /** Death-shop +3 shield bonus applied for the current run only. */
+    runBonusShield = 0;
     bombs = 0;
     /** Health from death-shop buffs, applied for the current run only. */
     runBonusHealth = 0;
@@ -118,6 +125,36 @@ export default class PlayerControlledShip extends GameObject {
         return 1 + this.shipHangar[shipId].bombCapacityRanks;
     }
 
+    /** Permanent shield capacity for a hull (generator base + ship ranks). */
+    permanentShieldMaxFor(shipId: PlayerShipId): number {
+        if (!this.technologies.energyShieldGenerator) {
+            return 0;
+        }
+        return 1 + this.shipHangar[shipId].energyShieldRanks;
+    }
+
+    computeMaxEnergyShield(): number {
+        if (!this.technologies.energyShieldGenerator) {
+            return 0;
+        }
+        return (
+            1 +
+            this.shipProfile.energyShieldRanks +
+            this.energyShieldPurchases +
+            this.runBonusShield
+        );
+    }
+
+    /** Recompute max shields and optionally fill or clamp current. */
+    syncEnergyShields(opts?: { fill?: boolean }): void {
+        this.maxEnergyShield = this.computeMaxEnergyShield();
+        if (opts?.fill) {
+            this.energyShield = this.maxEnergyShield;
+        } else if (this.energyShield > this.maxEnergyShield) {
+            this.energyShield = this.maxEnergyShield;
+        }
+    }
+
     selectShipForRun(shipId: PlayerShipId): void {
         if (!this.isShipUnlocked(shipId)) {
             return;
@@ -175,9 +212,12 @@ export default class PlayerControlledShip extends GameObject {
         this.lifeUpgrades = 0;
         this.fullHealPurchases = 0;
         this.energyShield = 0;
+        this.maxEnergyShield = 0;
         this.energyShieldPurchases = 0;
+        this.shieldRechargePurchases = 0;
         this.bombs = 0;
         this.runBonusHealth = 0;
+        this.runBonusShield = 0;
     }
 
     applyPersistentUpgrades(): void {
@@ -192,6 +232,7 @@ export default class PlayerControlledShip extends GameObject {
         this.SPEED = Math.round(BASE_SPEED * Math.pow(1.1, profile.shipSpeedRanks));
         this.FIRE_RATE = Math.ceil(BASE_FIRE_RATE * Math.pow(0.9, profile.fireSpeedRanks));
         this.refillBombs();
+        this.syncEnergyShields({ fill: true });
         this.refreshShieldVisual();
     }
 
@@ -243,8 +284,22 @@ export default class PlayerControlledShip extends GameObject {
     }
 
     purchaseEnergyShield(): void {
-        this.energyShield++;
         this.energyShieldPurchases++;
+        this.syncEnergyShields();
+        this.energyShield = Math.min(this.maxEnergyShield, this.energyShield + 1);
+        this.refreshShieldVisual();
+    }
+
+    canRechargeShield(): boolean {
+        return this.maxEnergyShield > 0 && this.energyShield < this.maxEnergyShield;
+    }
+
+    purchaseRechargeShield(): void {
+        if (!this.canRechargeShield()) {
+            return;
+        }
+        this.shieldRechargePurchases++;
+        this.energyShield = this.maxEnergyShield;
         this.refreshShieldVisual();
     }
 
@@ -264,8 +319,7 @@ export default class PlayerControlledShip extends GameObject {
      */
     applyNextRunBuffs(): void {
         this.runBonusHealth = this.nextRunBonusHealth;
-        const baseShields = this.technologies.energyShieldGenerator ? 3 : 0;
-        this.energyShield = baseShields + this.nextRunBonusShield;
+        this.runBonusShield = this.nextRunBonusShield;
         this.nextRunBonusHealth = 0;
         this.nextRunBonusShield = 0;
         this.deathHealthPurchases = 0;
@@ -384,8 +438,24 @@ export default class PlayerControlledShip extends GameObject {
             return;
         }
         this.technologies.energyShieldGenerator = true;
-        this.energyShield = Math.max(this.energyShield, 3);
+        this.syncEnergyShields({ fill: true });
         this.refreshShieldVisual();
+        this.triggerEvent('persistMeta');
+    }
+
+    purchaseEnergyShieldRanks(shipId: PlayerShipId): void {
+        if (!this.technologies.energyShieldGenerator) {
+            return;
+        }
+        const profile = this.shipHangar[shipId];
+        const cap = playerShipDef(shipId).maxEnergyShield;
+        if (profile.energyShieldRanks >= cap) {
+            return;
+        }
+        profile.energyShieldRanks++;
+        if (shipId === this.activeShipId) {
+            this.syncEnergyShields();
+        }
         this.triggerEvent('persistMeta');
     }
 

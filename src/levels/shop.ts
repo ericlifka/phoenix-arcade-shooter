@@ -356,6 +356,8 @@ export default class Shop extends GameObject {
         switch (upgrade.id) {
             case 'fullHeal':
                 return player.fullHealPurchases;
+            case 'rechargeShield':
+                return player.shieldRechargePurchases;
             case 'health':
                 return player.lifeUpgrades;
             case 'energyShield':
@@ -374,6 +376,8 @@ export default class Shop extends GameObject {
                 return player.profileFor(upgrade.tab as PlayerShipId).fireSpeedRanks;
             case 'damage':
                 return player.profileFor(upgrade.tab as PlayerShipId).damageRanks;
+            case 'energyShieldCapacity':
+                return player.profileFor(upgrade.tab as PlayerShipId).energyShieldRanks;
             case 'combo':
                 return tech.comboRanks;
             case 'bombFabricator':
@@ -424,7 +428,9 @@ export default class Shop extends GameObject {
                 upgrade.id === 'bomb' && !this.player.canPurchaseBomb();
             const fullHealUnavailable =
                 upgrade.id === 'fullHeal' && !this.player.canPurchaseFullHeal();
-            const maxed = cost === null || bombUnavailable || fullHealUnavailable;
+            const rechargeUnavailable =
+                upgrade.id === 'rechargeShield' && !this.player.canRechargeShield();
+            const maxed = cost === null || bombUnavailable || fullHealUnavailable || rechargeUnavailable;
 
             row.description!.changeMessage(this.rowLabel(upgrade, owned, maxed));
             row.description!.updateColor(
@@ -517,7 +523,8 @@ export default class Shop extends GameObject {
             cost !== null &&
             this.bank.value >= cost &&
             !(row.upgrade?.id === 'bomb' && !this.player.canPurchaseBomb()) &&
-            !(row.upgrade?.id === 'fullHeal' && !this.player.canPurchaseFullHeal())
+            !(row.upgrade?.id === 'fullHeal' && !this.player.canPurchaseFullHeal()) &&
+            !(row.upgrade?.id === 'rechargeShield' && !this.player.canRechargeShield())
         ) {
             this.bank.removeMoney(cost);
             this.game.recordDollarsSpent(cost);
@@ -550,6 +557,9 @@ export default class Shop extends GameObject {
             case 'fullHeal':
                 this.player.purchaseFullHeal();
                 break;
+            case 'rechargeShield':
+                this.player.purchaseRechargeShield();
+                break;
             case 'health':
                 this.player.purchaseRunHealth();
                 break;
@@ -576,6 +586,9 @@ export default class Shop extends GameObject {
                 break;
             case 'damage':
                 this.player.purchaseDamage(shipId);
+                break;
+            case 'energyShieldCapacity':
+                this.player.purchaseEnergyShieldRanks(shipId);
                 break;
             case 'combo':
                 this.player.purchaseComboRank();
