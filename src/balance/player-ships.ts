@@ -31,36 +31,36 @@ export const playerShipDefs: ReadonlyArray<PlayerShipDef> = [
         id: 'starter',
         unlockCost: null,
         maxHealth: 8,
-        maxArmor: 2,
-        maxBombCapacity: 3,
+        maxArmor: 4,
+        maxBombCapacity: 4,
         maxShipSpeed: 10,
         maxFireSpeed: 10,
-        maxDamage: 3,
-        maxEnergyShield: 3
+        maxDamage: 4,
+        maxEnergyShield: 5
     },
     {
         // Archetype: Mid-range, medium speed, medium damage, medium bomb capacity.
         id: 'double',
         unlockCost: 500,
         maxHealth: 12,
-        maxArmor: 5,
-        maxBombCapacity: 3,
-        maxShipSpeed: 5,
-        maxFireSpeed: 5,
-        maxDamage: 4,
-        maxEnergyShield: 3
+        maxArmor: 6,
+        maxBombCapacity: 6,
+        maxShipSpeed: 6,
+        maxFireSpeed: 6,
+        maxDamage: 6,
+        maxEnergyShield: 7
     },
     {
         // Archetype: Tank, slow speed, high damage, large bomb capacity.
         id: 'triple',
         unlockCost: 1000,
         maxHealth: 16,
-        maxArmor: 9,
-        maxBombCapacity: 6,
-        maxShipSpeed: 1,
-        maxFireSpeed: 1,
-        maxDamage: 10,
-        maxEnergyShield: 3
+        maxArmor: 8,
+        maxBombCapacity: 8,
+        maxShipSpeed: 2,
+        maxFireSpeed: 2,
+        maxDamage: 12,
+        maxEnergyShield: 2
     },
     {
         // Archetype: Spread, slow speed, medium damage, medium bomb capacity.
@@ -69,9 +69,9 @@ export const playerShipDefs: ReadonlyArray<PlayerShipDef> = [
         maxHealth: 6,
         maxArmor: 2,
         maxBombCapacity: 2,
-        maxShipSpeed: 3,
-        maxFireSpeed: 3,
-        maxDamage: 1,
+        maxShipSpeed: 4,
+        maxFireSpeed: 4,
+        maxDamage: 2,
         maxEnergyShield: 3
     }
 ];

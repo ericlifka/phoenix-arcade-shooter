@@ -281,7 +281,9 @@ export default class Shop extends GameObject {
     }
 
     private showsProgressOrbs(upgrade: ShopUpgradeDef): boolean {
-        return upgrade.maxRanks !== null && upgrade.id !== 'unlock';
+        // Only multi-rank upgrades (e.g. combo) need orbs; single-purchase
+        // rows are removed once bought, so a lone empty orb is noise.
+        return upgrade.maxRanks !== null && upgrade.maxRanks > 1;
     }
 
     private rebuildRows(): void {
