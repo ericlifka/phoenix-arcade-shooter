@@ -2226,7 +2226,7 @@ void main() {
       this.resetForRun();
     }
     resetForRun() {
-      this.value = 50000;
+      this.value = 0;
       this.updateDisplay();
     }
     addMoney(value) {
@@ -6121,10 +6121,10 @@ void main() {
     bannerMs: 2000,
     columnStartBase: 3,
     columnStartMin: 1,
-    columnEndBase: 8,
-    columnEndMax: 10,
+    columnEndBase: 10,
+    columnEndMax: 12,
     columnSpacing: 10,
-    columnOffsetX: 39,
+    columnOffsetX: 31,
     enterY: [-40, -30, -20, -10],
     restY: [45, 55, 65, 75],
     moveTimeSeconds: 3,
@@ -7983,9 +7983,7 @@ void main() {
     loadLevels() {
       this.levels = [
         this.hangar,
-        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 4),
