@@ -1842,12 +1842,21 @@ void main() {
     "[": new Sprite([
       [w2, w2, w2, w2, w2],
       [w2, n3, n3, n3, w2],
-      [w2, n3, n3, n3, w2]
+      [n3, n3, n3, n3, n3]
     ]),
     "]": new Sprite([
-      [w2, n3, n3, n3, w2],
+      [n3, n3, n3, n3, n3],
+      [n3, n3, n3, n3, n3],
       [w2, n3, n3, n3, w2],
       [w2, w2, w2, w2, w2]
+    ]),
+    "(": new Sprite([
+      [n3, w2, w2, w2, n3],
+      [w2, n3, n3, n3, w2]
+    ]),
+    ")": new Sprite([
+      [w2, n3, n3, n3, w2],
+      [n3, w2, w2, w2, n3]
     ]),
     "-": new Sprite([
       [n3, n3, w2, n3, n3],
@@ -2217,7 +2226,7 @@ void main() {
       this.resetForRun();
     }
     resetForRun() {
-      this.value = 0;
+      this.value = 50000;
       this.updateDisplay();
     }
     addMoney(value) {
@@ -2394,10 +2403,10 @@ void main() {
       if (this.sprite) {
         switch (this.team) {
           case 0:
-            this.sprite.applyColor("#B1D8AD");
+            this.sprite.applyColor("#90fa84");
             break;
           case 1:
-            this.sprite.applyColor("#F7BEBE");
+            this.sprite.applyColor("#f78383");
             break;
           default:
             break;
@@ -2486,34 +2495,34 @@ void main() {
       id: "starter",
       unlockCost: null,
       maxHealth: 8,
-      maxArmor: 2,
-      maxBombCapacity: 3,
+      maxArmor: 4,
+      maxBombCapacity: 4,
       maxShipSpeed: 10,
       maxFireSpeed: 10,
-      maxDamage: 3,
-      maxCombo: 10
+      maxDamage: 4,
+      maxEnergyShield: 5
     },
     {
       id: "double",
       unlockCost: 500,
       maxHealth: 12,
-      maxArmor: 5,
-      maxBombCapacity: 3,
-      maxShipSpeed: 5,
-      maxFireSpeed: 5,
-      maxDamage: 4,
-      maxCombo: 10
+      maxArmor: 6,
+      maxBombCapacity: 6,
+      maxShipSpeed: 6,
+      maxFireSpeed: 6,
+      maxDamage: 6,
+      maxEnergyShield: 7
     },
     {
       id: "triple",
       unlockCost: 1000,
       maxHealth: 16,
-      maxArmor: 9,
-      maxBombCapacity: 6,
-      maxShipSpeed: 1,
-      maxFireSpeed: 1,
-      maxDamage: 10,
-      maxCombo: 10
+      maxArmor: 8,
+      maxBombCapacity: 8,
+      maxShipSpeed: 2,
+      maxFireSpeed: 2,
+      maxDamage: 12,
+      maxEnergyShield: 2
     },
     {
       id: "radial",
@@ -2521,10 +2530,10 @@ void main() {
       maxHealth: 6,
       maxArmor: 2,
       maxBombCapacity: 2,
-      maxShipSpeed: 3,
-      maxFireSpeed: 3,
-      maxDamage: 1,
-      maxCombo: 10
+      maxShipSpeed: 4,
+      maxFireSpeed: 4,
+      maxDamage: 2,
+      maxEnergyShield: 3
     }
   ];
   var DEFAULT_PLAYER_SHIP_ID = "starter";
@@ -2546,7 +2555,8 @@ void main() {
       bombCapacityRanks: 0,
       shipSpeedRanks: 0,
       fireSpeedRanks: 0,
-      damageRanks: 0
+      damageRanks: 0,
+      energyShieldRanks: 0
     };
   }
   function createStarterHangar() {
@@ -2638,13 +2648,21 @@ void main() {
       permanent: false,
       label: "Repair Hull",
       maxRanks: null,
-      cost: { kind: "linear", base: 25, perRank: 10 }
+      cost: { kind: "linear", base: 25, perRank: 25 }
+    },
+    {
+      id: "rechargeShield",
+      tab: "run",
+      permanent: false,
+      label: "Recharge Shield",
+      maxRanks: null,
+      cost: { kind: "linear", base: 25, perRank: 25 }
     },
     {
       id: "health",
       tab: "run",
       permanent: false,
-      label: "+1 Hull",
+      label: "Reinforce Hull (+1 Health)",
       maxRanks: null,
       cost: { kind: "linear", base: 5, perRank: 5 }
     },
@@ -2652,9 +2670,9 @@ void main() {
       id: "energyShield",
       tab: "run",
       permanent: false,
-      label: "+1 Energy Shield",
+      label: "Expand Shield (+1 shield)",
       maxRanks: null,
-      cost: { kind: "linear", base: 15, perRank: 10 }
+      cost: { kind: "linear", base: 25, perRank: 25 }
     },
     {
       id: "bomb",
@@ -2662,7 +2680,7 @@ void main() {
       permanent: false,
       label: "+1 Bomb",
       maxRanks: null,
-      cost: { kind: "linear", base: 25, perRank: 15 }
+      cost: { kind: "linear", base: 15, perRank: 15 }
     }
   ];
   var deathShopUpgrades = [
@@ -2688,14 +2706,14 @@ void main() {
       id: "maxHealth",
       permanent: true,
       label: "+5 Hull",
-      cost: { kind: "linear", base: 100, perRank: 50 },
+      cost: { kind: "linear", base: 100, perRank: 75 },
       maxRanksForShip: (shipId) => playerShipDef(shipId).maxHealth
     },
     {
       id: "armor",
       permanent: true,
       label: "+1 Armor",
-      cost: { kind: "linear", base: 75, perRank: 75 },
+      cost: { kind: "linear", base: 150, perRank: 125 },
       maxRanksForShip: (shipId) => playerShipDef(shipId).maxArmor,
       requiresTech: "armorRiveter"
     },
@@ -2703,15 +2721,23 @@ void main() {
       id: "bombCapacity",
       permanent: true,
       label: "+1 Bomb Capacity",
-      cost: { kind: "linear", base: 50, perRank: 100 },
+      cost: { kind: "linear", base: 75, perRank: 75 },
       maxRanksForShip: (shipId) => playerShipDef(shipId).maxBombCapacity,
       requiresTech: "bombFabricator"
+    },
+    {
+      id: "energyShieldCapacity",
+      permanent: true,
+      label: "+1 Energy Shield",
+      cost: { kind: "linear", base: 100, perRank: 100 },
+      maxRanksForShip: (shipId) => playerShipDef(shipId).maxEnergyShield,
+      requiresTech: "energyShieldGenerator"
     },
     {
       id: "shipSpeed",
       permanent: true,
       label: "+10% Ship Speed",
-      cost: { kind: "linear", base: 100, perRank: 100 },
+      cost: { kind: "linear", base: 200, perRank: 25 },
       maxRanksForShip: (shipId) => playerShipDef(shipId).maxShipSpeed,
       requiresTech: "fuelMixingTank"
     },
@@ -2719,7 +2745,7 @@ void main() {
       id: "fireSpeed",
       permanent: true,
       label: "+10% Fire Speed",
-      cost: { kind: "linear", base: 100, perRank: 100 },
+      cost: { kind: "linear", base: 100, perRank: 50 },
       maxRanksForShip: (shipId) => playerShipDef(shipId).maxFireSpeed,
       requiresTech: "thermalCooling"
     },
@@ -2845,7 +2871,7 @@ void main() {
       if (upgrade.id === "bomb") {
         return tech.bombFabricator;
       }
-      if (upgrade.id === "energyShield") {
+      if (upgrade.id === "energyShield" || upgrade.id === "rechargeShield") {
         return tech.energyShieldGenerator;
       }
       return true;
@@ -2900,15 +2926,16 @@ void main() {
   }
 
   // src/helpers/game-save.ts
-  var SAVE_VERSION = 2;
-  var SAVE_STORAGE_KEY = "phoenix-arcade-shooter-save-v2";
+  var SAVE_VERSION = 3;
+  var SAVE_STORAGE_KEY = "phoenix-arcade-shooter-save-v3";
   var RANK_KEYS = [
     "maxHealthRanks",
     "armorRanks",
     "bombCapacityRanks",
     "shipSpeedRanks",
     "fireSpeedRanks",
-    "damageRanks"
+    "damageRanks",
+    "energyShieldRanks"
   ];
   function isPlayerShipId(id) {
     return playerShipDefs.some((def) => def.id === id);
@@ -2925,7 +2952,8 @@ void main() {
       bombCapacityRanks: profile.bombCapacityRanks,
       shipSpeedRanks: profile.shipSpeedRanks,
       fireSpeedRanks: profile.fireSpeedRanks,
-      damageRanks: profile.damageRanks
+      damageRanks: profile.damageRanks,
+      energyShieldRanks: profile.energyShieldRanks
     };
   }
   function cloneHangar(hangar) {
@@ -2960,7 +2988,8 @@ void main() {
       bombCapacityRanks: profile.bombCapacityRanks,
       shipSpeedRanks: profile.shipSpeedRanks,
       fireSpeedRanks: profile.fireSpeedRanks,
-      damageRanks: profile.damageRanks
+      damageRanks: profile.damageRanks,
+      energyShieldRanks: profile.energyShieldRanks
     };
   }
   function validateTechnologies(raw) {
@@ -3055,6 +3084,7 @@ void main() {
     try {
       localStorage.removeItem(SAVE_STORAGE_KEY);
       localStorage.removeItem("phoenix-arcade-shooter-save-v1");
+      localStorage.removeItem("phoenix-arcade-shooter-save-v2");
     } catch {}
   }
   function hangarHasMetaProgress(hangar, technologies) {
@@ -3069,7 +3099,7 @@ void main() {
       if (def.unlockCost !== null && profile.unlocked) {
         return true;
       }
-      if (profile.maxHealthRanks > 0 || profile.armorRanks > 0 || profile.bombCapacityRanks > 0 || profile.shipSpeedRanks > 0 || profile.fireSpeedRanks > 0 || profile.damageRanks > 0) {
+      if (profile.maxHealthRanks > 0 || profile.armorRanks > 0 || profile.bombCapacityRanks > 0 || profile.shipSpeedRanks > 0 || profile.fireSpeedRanks > 0 || profile.damageRanks > 0 || profile.energyShieldRanks > 0) {
         return true;
       }
     }
@@ -4184,6 +4214,9 @@ void main() {
   function energyShieldOrbSprite() {
     return orbSprite(ENERGY_SHIELD_COLOR);
   }
+  function energyShieldOrbEmptySprite() {
+    return orbSprite(null);
+  }
   function upgradeRankOrbSprite(filled) {
     return orbSprite(filled ? UPGRADE_RANK_FILL_COLOR : null);
   }
@@ -4440,7 +4473,10 @@ void main() {
     lifeUpgrades = 0;
     fullHealPurchases = 0;
     energyShield = 0;
+    maxEnergyShield = 0;
     energyShieldPurchases = 0;
+    shieldRechargePurchases = 0;
+    runBonusShield = 0;
     bombs = 0;
     runBonusHealth = 0;
     nextRunBonusHealth = 0;
@@ -4491,6 +4527,26 @@ void main() {
       }
       return 1 + this.shipHangar[shipId].bombCapacityRanks;
     }
+    permanentShieldMaxFor(shipId) {
+      if (!this.technologies.energyShieldGenerator) {
+        return 0;
+      }
+      return 1 + this.shipHangar[shipId].energyShieldRanks;
+    }
+    computeMaxEnergyShield() {
+      if (!this.technologies.energyShieldGenerator) {
+        return 0;
+      }
+      return 1 + this.shipProfile.energyShieldRanks + this.energyShieldPurchases + this.runBonusShield;
+    }
+    syncEnergyShields(opts) {
+      this.maxEnergyShield = this.computeMaxEnergyShield();
+      if (opts?.fill) {
+        this.energyShield = this.maxEnergyShield;
+      } else if (this.energyShield > this.maxEnergyShield) {
+        this.energyShield = this.maxEnergyShield;
+      }
+    }
     selectShipForRun(shipId) {
       if (!this.isShipUnlocked(shipId)) {
         return;
@@ -4538,9 +4594,12 @@ void main() {
       this.lifeUpgrades = 0;
       this.fullHealPurchases = 0;
       this.energyShield = 0;
+      this.maxEnergyShield = 0;
       this.energyShieldPurchases = 0;
+      this.shieldRechargePurchases = 0;
       this.bombs = 0;
       this.runBonusHealth = 0;
+      this.runBonusShield = 0;
     }
     applyPersistentUpgrades() {
       const profile = this.shipProfile;
@@ -4550,6 +4609,7 @@ void main() {
       this.SPEED = Math.round(BASE_SPEED * Math.pow(1.1, profile.shipSpeedRanks));
       this.FIRE_RATE = Math.ceil(BASE_FIRE_RATE * Math.pow(0.9, profile.fireSpeedRanks));
       this.refillBombs();
+      this.syncEnergyShields({ fill: true });
       this.refreshShieldVisual();
     }
     syncStatsFromUpgrades(opts) {
@@ -4586,8 +4646,20 @@ void main() {
       this.life = (this.life || 0) + 1;
     }
     purchaseEnergyShield() {
-      this.energyShield++;
       this.energyShieldPurchases++;
+      this.syncEnergyShields();
+      this.energyShield = Math.min(this.maxEnergyShield, this.energyShield + 1);
+      this.refreshShieldVisual();
+    }
+    canRechargeShield() {
+      return this.maxEnergyShield > 0 && this.energyShield < this.maxEnergyShield;
+    }
+    purchaseRechargeShield() {
+      if (!this.canRechargeShield()) {
+        return;
+      }
+      this.shieldRechargePurchases++;
+      this.energyShield = this.maxEnergyShield;
       this.refreshShieldVisual();
     }
     purchaseDeathHealth() {
@@ -4600,8 +4672,7 @@ void main() {
     }
     applyNextRunBuffs() {
       this.runBonusHealth = this.nextRunBonusHealth;
-      const baseShields = this.technologies.energyShieldGenerator ? 3 : 0;
-      this.energyShield = baseShields + this.nextRunBonusShield;
+      this.runBonusShield = this.nextRunBonusShield;
       this.nextRunBonusHealth = 0;
       this.nextRunBonusShield = 0;
       this.deathHealthPurchases = 0;
@@ -4715,8 +4786,23 @@ void main() {
         return;
       }
       this.technologies.energyShieldGenerator = true;
-      this.energyShield = Math.max(this.energyShield, 3);
+      this.syncEnergyShields({ fill: true });
       this.refreshShieldVisual();
+      this.triggerEvent("persistMeta");
+    }
+    purchaseEnergyShieldRanks(shipId) {
+      if (!this.technologies.energyShieldGenerator) {
+        return;
+      }
+      const profile = this.shipHangar[shipId];
+      const cap = playerShipDef(shipId).maxEnergyShield;
+      if (profile.energyShieldRanks >= cap) {
+        return;
+      }
+      profile.energyShieldRanks++;
+      if (shipId === this.activeShipId) {
+        this.syncEnergyShields();
+      }
       this.triggerEvent("persistMeta");
     }
     purchaseHangarBay() {
@@ -5167,6 +5253,13 @@ void main() {
           text: "Armor: " + profile.armorRanks,
           owned: profile.armorRanks,
           max: def.maxArmor
+        });
+      }
+      if (tech.energyShieldGenerator) {
+        rows.push({
+          text: "Shields: " + this.player.permanentShieldMaxFor(shipId),
+          owned: profile.energyShieldRanks,
+          max: def.maxEnergyShield
         });
       }
       if (tech.bombFabricator) {
@@ -5668,6 +5761,7 @@ void main() {
     currentLife;
     maxLife;
     currentShield;
+    maxShield;
     currentBombs;
     shieldOrbs = [];
     bombIcons = [];
@@ -5691,6 +5785,7 @@ void main() {
       this.currentLife = undefined;
       this.maxLife = undefined;
       this.currentShield = undefined;
+      this.maxShield = undefined;
       this.currentBombs = undefined;
       this.shieldOrbs = [];
       this.bombIcons = [];
@@ -5700,6 +5795,9 @@ void main() {
     }
     entityShield() {
       return this.entity.energyShield || 0;
+    }
+    entityMaxShield() {
+      return this.entity.maxEnergyShield || 0;
     }
     entityBombs() {
       return this.entity.bombs || 0;
@@ -5711,8 +5809,9 @@ void main() {
       }
       const lifeChanged = this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife;
       const shield = this.entityShield();
+      const maxShield = this.entityMaxShield();
       const bombs2 = this.entityBombs();
-      const shieldChanged = this.showsPlayerHudExtras() && shield !== this.currentShield;
+      const shieldChanged = this.showsPlayerHudExtras() && (shield !== this.currentShield || maxShield !== this.maxShield);
       const bombsChanged = this.showsPlayerHudExtras() && bombs2 !== this.currentBombs;
       if (lifeChanged) {
         this.currentLife = this.entity.life;
@@ -5727,6 +5826,7 @@ void main() {
       }
       if (lifeChanged || shieldChanged) {
         this.currentShield = shield;
+        this.maxShield = maxShield;
         this.syncShieldOrbs();
       }
       if (lifeChanged || bombsChanged) {
@@ -5765,14 +5865,15 @@ void main() {
         this.shieldOrbs = [];
         return;
       }
-      const count = this.currentShield || 0;
+      const current = this.currentShield || 0;
+      const max = this.maxShield || 0;
       this.shieldOrbs = [];
       const barWidth = this.sprite.width;
       const orbX = this.position.x + Math.floor((barWidth - ENERGY_SHIELD_ORB_SIZE) / 2);
       const firstOrbY = this.position.y - ENERGY_SHIELD_ORB_SIZE + 1;
-      for (let i = 0;i < count; i++) {
+      for (let i = 0;i < max; i++) {
         const orb = new GameObject;
-        orb.sprite = energyShieldOrbSprite();
+        orb.sprite = i < current ? energyShieldOrbSprite() : energyShieldOrbEmptySprite();
         orb.position = {
           x: orbX,
           y: firstOrbY - i * ENERGY_SHIELD_ORB_STRIDE
@@ -7535,7 +7636,7 @@ void main() {
       this.rows = [];
     }
     showsProgressOrbs(upgrade) {
-      return upgrade.maxRanks !== null && upgrade.id !== "unlock";
+      return upgrade.maxRanks !== null && upgrade.maxRanks > 1;
     }
     rebuildRows() {
       this.clearRows();
@@ -7594,6 +7695,8 @@ void main() {
       switch (upgrade.id) {
         case "fullHeal":
           return player.fullHealPurchases;
+        case "rechargeShield":
+          return player.shieldRechargePurchases;
         case "health":
           return player.lifeUpgrades;
         case "energyShield":
@@ -7612,6 +7715,8 @@ void main() {
           return player.profileFor(upgrade.tab).fireSpeedRanks;
         case "damage":
           return player.profileFor(upgrade.tab).damageRanks;
+        case "energyShieldCapacity":
+          return player.profileFor(upgrade.tab).energyShieldRanks;
         case "combo":
           return tech.comboRanks;
         case "bombFabricator":
@@ -7657,7 +7762,8 @@ void main() {
         row.cost = cost;
         const bombUnavailable = upgrade.id === "bomb" && !this.player.canPurchaseBomb();
         const fullHealUnavailable = upgrade.id === "fullHeal" && !this.player.canPurchaseFullHeal();
-        const maxed = cost === null || bombUnavailable || fullHealUnavailable;
+        const rechargeUnavailable = upgrade.id === "rechargeShield" && !this.player.canRechargeShield();
+        const maxed = cost === null || bombUnavailable || fullHealUnavailable || rechargeUnavailable;
         row.description.changeMessage(this.rowLabel(upgrade, owned, maxed));
         row.description.updateColor(maxed ? this.disabledColor : this.game.interfaceColor);
         if (row.costText) {
@@ -7724,7 +7830,7 @@ void main() {
         return;
       }
       const cost = row.cost;
-      if (cost !== null && this.bank.value >= cost && !(row.upgrade?.id === "bomb" && !this.player.canPurchaseBomb()) && !(row.upgrade?.id === "fullHeal" && !this.player.canPurchaseFullHeal())) {
+      if (cost !== null && this.bank.value >= cost && !(row.upgrade?.id === "bomb" && !this.player.canPurchaseBomb()) && !(row.upgrade?.id === "fullHeal" && !this.player.canPurchaseFullHeal()) && !(row.upgrade?.id === "rechargeShield" && !this.player.canRechargeShield())) {
         this.bank.removeMoney(cost);
         this.game.recordDollarsSpent(cost);
         this.startPurchaseAnimation();
@@ -7746,6 +7852,9 @@ void main() {
       switch (id) {
         case "fullHeal":
           this.player.purchaseFullHeal();
+          break;
+        case "rechargeShield":
+          this.player.purchaseRechargeShield();
           break;
         case "health":
           this.player.purchaseRunHealth();
@@ -7773,6 +7882,9 @@ void main() {
           break;
         case "damage":
           this.player.purchaseDamage(shipId);
+          break;
+        case "energyShieldCapacity":
+          this.player.purchaseEnergyShieldRanks(shipId);
           break;
         case "combo":
           this.player.purchaseComboRank();
@@ -7871,7 +7983,9 @@ void main() {
     loadLevels() {
       this.levels = [
         this.hangar,
+        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+        this.shop,
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 4),
