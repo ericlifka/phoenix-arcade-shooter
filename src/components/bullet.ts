@@ -61,8 +61,8 @@ export default class Bullet extends GameObject {
     private updateColor(): void {
         if (this.sprite) {
             switch (this.team) {
-                case 0: this.sprite.applyColor("#B1D8AD"); break;
-                case 1: this.sprite.applyColor("#F7BEBE"); break;
+                case 0: this.sprite.applyColor("#90fa84"); break;
+                case 1: this.sprite.applyColor("#f78383"); break;
                 default: break;
             }
         }
