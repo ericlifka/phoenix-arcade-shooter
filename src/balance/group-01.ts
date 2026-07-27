@@ -6,12 +6,12 @@ export const group01 = {
     /** Column index range vs difficultyMultiplier (inclusive). */
     columnStartBase: 3,
     columnStartMin: 1,
-    columnEndBase: 8,
-    columnEndMax: 10,
+    columnEndBase: 10,
+    columnEndMax: 12,
 
     /** X = columnSpacing * i + columnOffsetX */
     columnSpacing: 10,
-    columnOffsetX: 39,
+    columnOffsetX: 31,
 
     /** Enter-from-top Y per row (index 0 = rowCount 1). */
     enterY: [-40, -30, -20, -10] as const,
@@ -42,9 +42,12 @@ export const group01 = {
 };
 
 export function group01ColumnRange(difficultyMultiplier: number): { start: number; end: number } {
-    let start = group01.columnStartBase - difficultyMultiplier;
-    if (start < group01.columnStartMin) start = group01.columnStartMin;
-    let end = group01.columnEndBase + difficultyMultiplier;
-    if (end > group01.columnEndMax) end = group01.columnEndMax;
-    return { start, end };
+    // let start = group01.columnStartBase - difficultyMultiplier;
+    // if (start < group01.columnStartMin) start = group01.columnStartMin;
+    // let end = group01.columnEndBase + difficultyMultiplier;
+    // if (end > group01.columnEndMax) end = group01.columnEndMax;
+    return {
+        start: group01.columnStartMin,
+        end: group01.columnEndMax
+    };
 }

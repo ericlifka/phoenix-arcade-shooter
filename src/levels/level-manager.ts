@@ -60,10 +60,10 @@ export default class LevelManager extends GameObject {
     loadLevels(): void {
         this.levels = [
             this.hangar,
-            this.shop,
+            // this.shop,
             // Standard Enemy Ship
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-            this.shop,
+            // this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 4),
