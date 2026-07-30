@@ -5,9 +5,10 @@ import LevelGroup01 from './level-group-01.js';
 import LevelGroup02 from './level-group-02.js';
 import LevelGroup03 from './level-group-03.js';
 import LevelGroup04 from './level-group-04.js';
+import LevelSelect from './level-select.js';
 import Shop from './shop.js';
 import type PlayerControlledShip from '../ships/player-controlled-ship.js';
-import type { GameForLevels } from '../types/levels.js';
+import type { GameForLevels, HubDestination, LevelGroupKey } from '../types/levels.js';
 
 interface LevelLike extends GameObject {
     checkIfLevelComplete(): boolean;
@@ -16,8 +17,10 @@ interface LevelLike extends GameObject {
     levelName?: string;
 }
 
-export type LevelGroupKey = 'standard' | 'slim' | 'dash';
-
+/**
+ * Runs the hub loop: the level select map picks a destination, the manager
+ * queues that destination's levels, and finishing the queue returns to the map.
+ */
 export default class LevelManager extends GameObject {
     game: GameForLevels;
     width: number;
@@ -29,11 +32,14 @@ export default class LevelManager extends GameObject {
     running!: boolean;
     complete!: boolean;
     currentLevel: LevelLike | null = null;
+    previousLevel: LevelLike | null = null;
     hangar!: Hangar;
     shop!: Shop;
+    levelSelect!: LevelSelect;
+    /** Levels queued for the destination currently being played. */
     levels!: LevelLike[];
     levelIndex!: number;
-    activeLevelGroup!: LevelGroupKey;
+    activeDestination: HubDestination | null = null;
 
     constructor(parent: GameObject | null | undefined, game: GameForLevels) {
         super(parent);
@@ -54,15 +60,37 @@ export default class LevelManager extends GameObject {
         this.running = false;
         this.complete = false;
         this.currentLevel = null;
+        this.previousLevel = null;
+        this.activeDestination = null;
         this.hangar = new Hangar(this, this.game);
         this.shop = new Shop(this, this.game);
-        this.activeLevelGroup = 'standard';
+        this.levelSelect = new LevelSelect(this, this.game);
 
-        this.loadLevels();
+        this.loadHub();
     }
 
-    loadLevels(): void {
-        this.levels = [this.hangar, ...this.buildLevelGroup(this.activeLevelGroup)];
+    /** Queue the level select map itself — the run always comes back here. */
+    loadHub(): void {
+        this.activeDestination = null;
+        this.levels = [this.levelSelect];
+        this.levelIndex = -1;
+    }
+
+    loadDestination(destination: HubDestination): void {
+        this.activeDestination = destination;
+
+        switch (destination) {
+            case 'shop':
+                this.levels = [this.shop];
+                break;
+            case 'hangar':
+                this.levels = [this.hangar];
+                break;
+            default:
+                this.levels = this.buildLevelGroup(destination);
+                break;
+        }
+
         this.levelIndex = -1;
     }
 
@@ -144,20 +172,22 @@ export default class LevelManager extends GameObject {
             this.removeChild(this.currentLevel);
         }
         this.currentLevel = null;
+        this.previousLevel = null;
     }
 
     loadNextLevel(): void {
         if (this.levelIndex >= this.levels.length - 1) {
-            // last level was completed
-            this.difficultyMultiplier++;
-            this.loadLevels();
+            // Backstop: nothing left in the queue, so head back to the map.
+            this.loadHub();
         }
 
         this.levelIndex++;
+        this.previousLevel = this.currentLevel;
         this.currentLevel = this.levels[this.levelIndex];
 
-        const previousLevel = this.levelIndex > 0 ? this.levels[this.levelIndex - 1] : null;
-        const cameFromShop = !!previousLevel?.isShop;
+        // Tracked on the manager rather than read back out of `levels`, since
+        // the previous level often lives in a queue we have already swapped out.
+        const cameFromShop = !!this.previousLevel?.isShop;
 
         if (this.currentLevel.isShop) {
             // Hangar/shop: keep the combat ship off-screen and input-locked.
@@ -178,14 +208,40 @@ export default class LevelManager extends GameObject {
         super.update(dtime);
 
         if (this.currentLevel && this.currentLevel.checkIfLevelComplete()) {
-            if (this.currentLevel.isShop) {
-                this.removeChild(this.currentLevel);
+            const finishedLevel = this.currentLevel;
+
+            if (finishedLevel.isShop) {
+                this.removeChild(finishedLevel);
             } else {
-                this.currentLevel.destroy();
+                finishedLevel.destroy();
+            }
+
+            if (finishedLevel === this.levelSelect) {
+                this.loadDestination(this.levelSelect.destination);
+            } else if (this.levelIndex >= this.levels.length - 1) {
+                this.finishDestination();
             }
 
             this.loadNextLevel();
         }
+    }
+
+    /**
+     * A queued destination ran out of levels. Clearing a combat set makes the
+     * next run through any set harder, the same way wrapping the old linear
+     * level list used to; shop and hangar visits are free.
+     */
+    private finishDestination(): void {
+        const clearedCombatSet =
+            this.activeDestination !== null &&
+            this.activeDestination !== 'shop' &&
+            this.activeDestination !== 'hangar';
+
+        if (clearedCombatSet) {
+            this.difficultyMultiplier++;
+        }
+
+        this.loadHub();
     }
 
     private clearFlyInScripts(): void {
