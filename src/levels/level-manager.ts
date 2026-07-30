@@ -16,6 +16,8 @@ interface LevelLike extends GameObject {
     levelName?: string;
 }
 
+export type LevelGroupKey = 'standard' | 'slim' | 'dash';
+
 export default class LevelManager extends GameObject {
     game: GameForLevels;
     width: number;
@@ -31,6 +33,7 @@ export default class LevelManager extends GameObject {
     shop!: Shop;
     levels!: LevelLike[];
     levelIndex!: number;
+    activeLevelGroup!: LevelGroupKey;
 
     constructor(parent: GameObject | null | undefined, game: GameForLevels) {
         super(parent);
@@ -53,17 +56,31 @@ export default class LevelManager extends GameObject {
         this.currentLevel = null;
         this.hangar = new Hangar(this, this.game);
         this.shop = new Shop(this, this.game);
+        this.activeLevelGroup = 'standard';
 
         this.loadLevels();
     }
 
     loadLevels(): void {
-        this.levels = [
-            this.hangar,
-            // this.shop,
-            // Standard Enemy Ship
+        this.levels = [this.hangar, ...this.buildLevelGroup(this.activeLevelGroup)];
+        this.levelIndex = -1;
+    }
+
+    buildLevelGroup(group: LevelGroupKey): LevelLike[] {
+        switch (group) {
+            case 'slim':
+                return this.slimShipLevels();
+            case 'dash':
+                return this.dashShipLevels();
+            case 'standard':
+            default:
+                return this.standardShipLevels();
+        }
+    }
+
+    standardShipLevels(): LevelLike[] {
+        return [
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-            // this.shop,
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
             new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 4),
@@ -79,9 +96,12 @@ export default class LevelManager extends GameObject {
             new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 2),
             new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 3),
             new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 'boss'),
-            this.shop,
+            this.shop
+        ];
+    }
 
-            // Slim Enemy Ship
+    slimShipLevels(): LevelLike[] {
+        return [
             new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
             new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 2),
             new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 3),
@@ -98,9 +118,12 @@ export default class LevelManager extends GameObject {
             new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 2),
             new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 3),
             new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 'boss'),
-            this.shop,
+            this.shop
+        ];
+    }
 
-            // Dash and Pause Ship
+    dashShipLevels(): LevelLike[] {
+        return [
             new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
             new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 2),
             new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 3),
@@ -108,7 +131,6 @@ export default class LevelManager extends GameObject {
             new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 'boss'),
             this.shop
         ];
-        this.levelIndex = -1;
     }
 
     start(): void {
