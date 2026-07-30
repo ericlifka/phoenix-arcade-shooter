@@ -124,6 +124,14 @@ export const runShopUpgrades: ReadonlyArray<Omit<ShopUpgradeDef, 'tab'> & { tab:
         cost: { kind: 'linear', base: 25, perRank: 25 }
     },
     {
+        id: 'bomb',
+        tab: 'run',
+        permanent: false,
+        label: 'Replenish Bombs',
+        maxRanks: null,
+        cost: { kind: 'linear', base: 25, perRank: 25 }
+    },
+    {
         id: 'health',
         tab: 'run',
         permanent: false,
@@ -138,14 +146,6 @@ export const runShopUpgrades: ReadonlyArray<Omit<ShopUpgradeDef, 'tab'> & { tab:
         label: 'Expand Shield (+1 shield)',
         maxRanks: null,
         cost: { kind: 'linear', base: 25, perRank: 25 }
-    },
-    {
-        id: 'bomb',
-        tab: 'run',
-        permanent: false,
-        label: '+1 Bomb',
-        maxRanks: null,
-        cost: { kind: 'linear', base: 15, perRank: 15 }
     }
 ];
 

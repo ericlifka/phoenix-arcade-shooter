@@ -41,6 +41,7 @@ export default class Bank extends GameObject {
 
     resetForRun(): void {
         this.value = 0;
+        // this.value = 50000;
         this.updateDisplay();
     }
 

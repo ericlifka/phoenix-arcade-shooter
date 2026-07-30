@@ -327,11 +327,8 @@ export default class PlayerControlledShip extends GameObject {
         this.applyPersistentUpgrades();
     }
 
-    purchaseBomb(): void {
-        if (this.bombs >= this.bombCapacity) {
-            return;
-        }
-        this.bombs++;
+    replenishBombs(): void {
+        this.bombs = this.bombCapacity;
     }
 
     canPurchaseBomb(): boolean {
@@ -454,6 +451,7 @@ export default class PlayerControlledShip extends GameObject {
         }
         profile.energyShieldRanks++;
         if (shipId === this.activeShipId) {
+            this.energyShield++;
             this.syncEnergyShields();
         }
         this.triggerEvent('persistMeta');

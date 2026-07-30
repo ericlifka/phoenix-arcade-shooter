@@ -12,7 +12,7 @@ import {
     nextUpgradeCost,
     type ShopUpgradeDef,
     type ShopUpgradeId
-} from '../balance/shop.js';
+} from '../balance';
 
 interface GameOverParent extends GameObject {
     finishGame(): void;

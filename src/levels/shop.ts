@@ -6,7 +6,7 @@ import TextDisplay from '../components/text-display.js';
 import UpgradeProgressOrbs from '../components/upgrade-progress-orbs.js';
 import PlayerControlledShip from '../ships/player-controlled-ship.js';
 import type { GameForShop } from '../types/levels.js';
-import type { PlayerShipId } from '../balance/player-ships.js';
+import type { PlayerShipId } from '../balance';
 import {
     nextUpgradeCost,
     upgradesForTab,
@@ -15,7 +15,7 @@ import {
     type ShopTabId,
     type ShopUpgradeDef,
     type ShopUpgradeId
-} from '../balance/shop.js';
+} from '../balance';
 
 const LIST_BASE_Y = 20;
 const LIST_ROW_STRIDE = 15;
@@ -569,7 +569,7 @@ export default class Shop extends GameObject {
                 this.player.purchaseEnergyShield();
                 break;
             case 'bomb':
-                this.player.purchaseBomb();
+                this.player.replenishBombs();
                 break;
             case 'maxHealth':
                 this.player.purchaseMaxHealth(shipId);
