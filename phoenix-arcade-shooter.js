@@ -3,20 +3,26 @@
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
-  var __moduleCache = /* @__PURE__ */ new WeakMap;
+  function __accessProp(key) {
+    return this[key];
+  }
   var __toCommonJS = (from) => {
-    var entry = __moduleCache.get(from), desc;
+    var entry = (__moduleCache ??= new WeakMap).get(from), desc;
     if (entry)
       return entry;
     entry = __defProp({}, "__esModule", { value: true });
-    if (from && typeof from === "object" || typeof from === "function")
-      __getOwnPropNames(from).map((key) => !__hasOwnProp.call(entry, key) && __defProp(entry, key, {
-        get: () => from[key],
-        enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
-      }));
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (var key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(entry, key))
+          __defProp(entry, key, {
+            get: __accessProp.bind(from, key),
+            enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
+          });
+    }
     __moduleCache.set(from, entry);
     return entry;
   };
+  var __moduleCache;
 
   // src/main.ts
   var exports_main = {};
@@ -2659,6 +2665,14 @@ void main() {
       cost: { kind: "linear", base: 25, perRank: 25 }
     },
     {
+      id: "bomb",
+      tab: "run",
+      permanent: false,
+      label: "Replenish Bombs",
+      maxRanks: null,
+      cost: { kind: "linear", base: 25, perRank: 25 }
+    },
+    {
       id: "health",
       tab: "run",
       permanent: false,
@@ -2673,14 +2687,6 @@ void main() {
       label: "Expand Shield (+1 shield)",
       maxRanks: null,
       cost: { kind: "linear", base: 25, perRank: 25 }
-    },
-    {
-      id: "bomb",
-      tab: "run",
-      permanent: false,
-      label: "+1 Bomb",
-      maxRanks: null,
-      cost: { kind: "linear", base: 15, perRank: 15 }
     }
   ];
   var deathShopUpgrades = [
@@ -3743,6 +3749,192 @@ void main() {
     }
   }
 
+  // src/balance/enemies.ts
+  var arrowScout = {
+    contactDamage: (dm) => 30 + dm,
+    life: (dm) => dm,
+    bulletDamage: (dm) => 4 + dm,
+    bulletSpeed: 100
+  };
+  var arrowBoss = {
+    contactDamage: (dm) => 50 * dm,
+    life: (dm) => 75 + 25 * dm,
+    bulletDamage: (dm) => 9 + dm,
+    bulletSpeed: 125
+  };
+  var dashScout = {
+    contactDamage: (dm) => 15 + dm,
+    life: (dm) => dm + 2,
+    bulletDamage: (dm) => 3 + dm * 2,
+    bulletSpeed: 125
+  };
+  var dashBoss = {
+    contactDamage: (dm) => 40 * dm,
+    life: (dm) => 100 + 50 * dm,
+    bulletDamage: (dm) => 5 + dm * 2,
+    bulletSpeed: 150
+  };
+  // src/balance/fire.ts
+  var randomRateFire = {
+    thresholdMinMs: 500,
+    thresholdMaxMs: 3500,
+    initialDelayMs: 0
+  };
+  var chainGunFire = {
+    fireRateMs: 150,
+    burstSize: 5,
+    thresholdMinMs: 2000,
+    thresholdMaxMs: 6000
+  };
+  var burstOnPause = {
+    burstSize: 3,
+    fireRateMs: 120,
+    windupMs: 80
+  };
+  var dashAndPause = {
+    dashSpeed: 120,
+    pauseSecondsMin: 0.8,
+    pauseSecondsMax: 1.6,
+    telegraphSeconds: 0.38,
+    minDashDistance: 25,
+    maxDashDistance: 70,
+    initialWaitSecondsMin: 1,
+    initialWaitSecondsMax: 10
+  };
+  // src/balance/economy.ts
+  var MONEY_DROP_VALUE = 5;
+  var MONEY_DROP_FALL_SPEED = 50;
+  function moneyDropDivisor(difficultyMultiplier) {
+    return difficultyMultiplier > 5 ? 3 : 4;
+  }
+  function moneyDropCount(shipCount, difficultyMultiplier) {
+    return Math.floor(shipCount / moneyDropDivisor(difficultyMultiplier));
+  }
+  var BOSS_MONEY_OFFSETS = [
+    { x: 0, y: 0 },
+    { x: 7, y: 0 },
+    { x: 4, y: 8 }
+  ];
+  function bossMoneyPositions(origin) {
+    return BOSS_MONEY_OFFSETS.map((offset) => ({
+      x: origin.x + offset.x,
+      y: origin.y + offset.y
+    }));
+  }
+  // src/balance/group-01.ts
+  var group01 = {
+    bannerMs: 2000,
+    columnStartBase: 3,
+    columnStartMin: 1,
+    columnEndBase: 10,
+    columnEndMax: 12,
+    columnSpacing: 10,
+    columnOffsetX: 31,
+    enterY: [-40, -30, -20, -10],
+    restY: [45, 55, 65, 75],
+    moveTimeSeconds: 3,
+    swayOffsetX: 40,
+    swayOffsetY: 30,
+    bossPatrolY: 1,
+    bossPatrolLeftX: 1,
+    bossPatrolRightMargin: 5,
+    bossPatrolSeconds: 8,
+    randomFire: {
+      thresholdMinMs: 1000,
+      thresholdMaxMs: 6000
+    },
+    bossChainGun: {
+      fireRateMs: 200,
+      thresholdMinMs: 3000,
+      thresholdMaxMs: 8000,
+      burstSize: 6
+    }
+  };
+  // src/balance/group-02.ts
+  var group02 = {
+    bannerMs: 2000,
+    pathLeft: 4,
+    pathInner: 20,
+    pathRight: 182,
+    pathTop: 4,
+    laneGap: 14,
+    enterX: -24,
+    pathSpeed: 40,
+    staggerSeconds: 0.45,
+    shipsPerTierBase: 8,
+    laneBase: 2,
+    laneStep: 2,
+    laneMax: 8,
+    fireDelayPaddingSeconds: -3
+  };
+  function group02ShipCount(rowCount) {
+    return group02.shipsPerTierBase * (rowCount + 1);
+  }
+  function group02LaneCount(rowCount) {
+    return Math.min(group02.laneBase + rowCount * group02.laneStep, group02.laneMax);
+  }
+  // src/balance/group-03.ts
+  var group03 = {
+    bannerMs: 2000,
+    centerX: 100,
+    splitY: 60,
+    leftOrbit: { x: 55, y: 60 },
+    rightOrbit: { x: 145, y: 60 },
+    orbitRadius: 45,
+    innerOrbitRadius: 33,
+    innermostOrbitRadius: 21,
+    staggerSeconds: 0.5,
+    descentSeconds: 3,
+    peelSeconds: 2,
+    orbitPeriodSeconds: 8,
+    centerProcessionShipCount: 16,
+    outerProcessionShipCount: 8,
+    innermostProcessionShipCount: 8,
+    bossOrbitRadius: 36,
+    bossEnterSeconds: 2,
+    bossOrbitPeriodSeconds: 6,
+    fireDelaySlackSeconds: 2
+  };
+  // src/balance/group-04.ts
+  var group04 = {
+    bannerMs: 2000,
+    shipCountBase: 4,
+    shipCountPerTier: 3,
+    boundsLeft: 8,
+    boundsRightInset: 8,
+    boundsTop: 12,
+    boundsBottomFraction: 0.55,
+    bossBoundsBottomFraction: 0.45,
+    scout: {
+      dashSpeed: 130,
+      pauseSecondsMin: 0.55,
+      pauseSecondsMax: 1.2,
+      minDashDistance: 28,
+      maxDashDistance: 75,
+      burstFireRateMs: 110,
+      burstSizeRowBonus: 3
+    },
+    boss: {
+      dashSpeed: 95,
+      pauseSecondsMin: 0.8,
+      pauseSecondsMax: 1.6,
+      minDashDistance: 35,
+      maxDashDistance: 90,
+      spawnY: -30,
+      bursts: [
+        { gunIndex: 0, burstSize: 4, fireRateMs: 90 },
+        { gunIndex: 1, burstSize: 5, fireRateMs: 70, windupMs: 40 },
+        { gunIndex: 2, burstSize: 4, fireRateMs: 90 }
+      ]
+    },
+    entryWaitOpenerMin: 1,
+    entryWaitOpenerMax: 10,
+    entryWaitFollowUpMin: 0.5,
+    entryWaitFollowUpMax: 5
+  };
+  function group04ShipCount(rowCount) {
+    return group04.shipCountBase + rowCount * group04.shipCountPerTier;
+  }
   // src/screens/game-over-screen.ts
   var STAT_LABELS = ["Score", "Kills"];
   var STAT_LINE_Y = [40, 52];
@@ -4679,11 +4871,8 @@ void main() {
       this.deathShieldPurchases = 0;
       this.applyPersistentUpgrades();
     }
-    purchaseBomb() {
-      if (this.bombs >= this.bombCapacity) {
-        return;
-      }
-      this.bombs++;
+    replenishBombs() {
+      this.bombs = this.bombCapacity;
     }
     canPurchaseBomb() {
       return this.bombCapacity > 0 && this.bombs < this.bombCapacity;
@@ -4801,6 +4990,7 @@ void main() {
       }
       profile.energyShieldRanks++;
       if (shipId === this.activeShipId) {
+        this.energyShield++;
         this.syncEnergyShields();
       }
       this.triggerEvent("persistMeta");
@@ -5263,9 +5453,9 @@ void main() {
         });
       }
       if (tech.bombFabricator) {
-        const bombs2 = this.player.bombCapacityFor(shipId);
+        const bombs3 = this.player.bombCapacityFor(shipId);
         rows.push({
-          text: "Bombs: " + bombs2,
+          text: "Bombs: " + bombs3,
           owned: profile.bombCapacityRanks,
           max: def.maxBombCapacity
         });
@@ -5425,32 +5615,6 @@ void main() {
     });
   }
 
-  // src/balance/enemies.ts
-  var arrowScout = {
-    contactDamage: (dm) => 30 + dm,
-    life: (dm) => dm,
-    bulletDamage: (dm) => 4 + dm,
-    bulletSpeed: 100
-  };
-  var arrowBoss = {
-    contactDamage: (dm) => 50 * dm,
-    life: (dm) => 75 + 25 * dm,
-    bulletDamage: (dm) => 9 + dm,
-    bulletSpeed: 125
-  };
-  var dashScout = {
-    contactDamage: (dm) => 15 + dm,
-    life: (dm) => dm + 2,
-    bulletDamage: (dm) => 3 + dm * 2,
-    bulletSpeed: 125
-  };
-  var dashBoss = {
-    contactDamage: (dm) => 40 * dm,
-    life: (dm) => 100 + 50 * dm,
-    bulletDamage: (dm) => 5 + dm * 2,
-    bulletSpeed: 150
-  };
-
   // src/ships/arrow-boss.ts
   var ENEMY_ORBIT_SPRITE_WIDTH = 8;
   var ENEMY_ORBIT_SPRITE_HEIGHT = 7;
@@ -5516,34 +5680,6 @@ void main() {
       super.destroy();
     }
   }
-
-  // src/balance/fire.ts
-  var randomRateFire = {
-    thresholdMinMs: 500,
-    thresholdMaxMs: 3500,
-    initialDelayMs: 0
-  };
-  var chainGunFire = {
-    fireRateMs: 150,
-    burstSize: 5,
-    thresholdMinMs: 2000,
-    thresholdMaxMs: 6000
-  };
-  var burstOnPause = {
-    burstSize: 3,
-    fireRateMs: 120,
-    windupMs: 80
-  };
-  var dashAndPause = {
-    dashSpeed: 120,
-    pauseSecondsMin: 0.8,
-    pauseSecondsMax: 1.6,
-    telegraphSeconds: 0.38,
-    minDashDistance: 25,
-    maxDashDistance: 70,
-    initialWaitSecondsMin: 1,
-    initialWaitSecondsMax: 10
-  };
 
   // src/scripts/chain-gun-fire.ts
   class ChainGunFire extends GameObject {
@@ -5810,9 +5946,9 @@ void main() {
       const lifeChanged = this.entity.life !== this.currentLife || this.entity.maxLife !== this.maxLife;
       const shield = this.entityShield();
       const maxShield = this.entityMaxShield();
-      const bombs2 = this.entityBombs();
+      const bombs3 = this.entityBombs();
       const shieldChanged = this.showsPlayerHudExtras() && (shield !== this.currentShield || maxShield !== this.maxShield);
-      const bombsChanged = this.showsPlayerHudExtras() && bombs2 !== this.currentBombs;
+      const bombsChanged = this.showsPlayerHudExtras() && bombs3 !== this.currentBombs;
       if (lifeChanged) {
         this.currentLife = this.entity.life;
         this.maxLife = this.entity.maxLife;
@@ -5830,7 +5966,7 @@ void main() {
         this.syncShieldOrbs();
       }
       if (lifeChanged || bombsChanged) {
-        this.currentBombs = bombs2;
+        this.currentBombs = bombs3;
         this.syncBombIcons();
       }
     }
@@ -5971,27 +6107,6 @@ void main() {
     }
   }
 
-  // src/balance/economy.ts
-  var MONEY_DROP_VALUE = 5;
-  var MONEY_DROP_FALL_SPEED = 50;
-  function moneyDropDivisor(difficultyMultiplier) {
-    return difficultyMultiplier > 5 ? 3 : 4;
-  }
-  function moneyDropCount(shipCount, difficultyMultiplier) {
-    return Math.floor(shipCount / moneyDropDivisor(difficultyMultiplier));
-  }
-  var BOSS_MONEY_OFFSETS = [
-    { x: 0, y: 0 },
-    { x: 7, y: 0 },
-    { x: 4, y: 8 }
-  ];
-  function bossMoneyPositions(origin) {
-    return BOSS_MONEY_OFFSETS.map((offset) => ({
-      x: origin.x + offset.x,
-      y: origin.y + offset.y
-    }));
-  }
-
   // src/components/money-drop.ts
   class MoneyDrop extends GameObject {
     isPhysicalEntity = true;
@@ -6115,36 +6230,6 @@ void main() {
       this.activeScript.start();
     }
   }
-
-  // src/balance/group-01.ts
-  var group01 = {
-    bannerMs: 2000,
-    columnStartBase: 3,
-    columnStartMin: 1,
-    columnEndBase: 10,
-    columnEndMax: 12,
-    columnSpacing: 10,
-    columnOffsetX: 31,
-    enterY: [-40, -30, -20, -10],
-    restY: [45, 55, 65, 75],
-    moveTimeSeconds: 3,
-    swayOffsetX: 40,
-    swayOffsetY: 30,
-    bossPatrolY: 1,
-    bossPatrolLeftX: 1,
-    bossPatrolRightMargin: 5,
-    bossPatrolSeconds: 8,
-    randomFire: {
-      thresholdMinMs: 1000,
-      thresholdMaxMs: 6000
-    },
-    bossChainGun: {
-      fireRateMs: 200,
-      thresholdMinMs: 3000,
-      thresholdMaxMs: 8000,
-      burstSize: 6
-    }
-  };
 
   // src/scripts/watch-for-death.ts
   class WatchForDeath extends GameObject {
@@ -6334,30 +6419,6 @@ void main() {
         this.parent.removeChild();
       }
     }
-  }
-
-  // src/balance/group-02.ts
-  var group02 = {
-    bannerMs: 2000,
-    pathLeft: 4,
-    pathInner: 20,
-    pathRight: 182,
-    pathTop: 4,
-    laneGap: 14,
-    enterX: -24,
-    pathSpeed: 40,
-    staggerSeconds: 0.45,
-    shipsPerTierBase: 8,
-    laneBase: 2,
-    laneStep: 2,
-    laneMax: 8,
-    fireDelayPaddingSeconds: -3
-  };
-  function group02ShipCount(rowCount) {
-    return group02.shipsPerTierBase * (rowCount + 1);
-  }
-  function group02LaneCount(rowCount) {
-    return Math.min(group02.laneBase + rowCount * group02.laneStep, group02.laneMax);
   }
 
   // src/levels/level-group-02.ts
@@ -6567,29 +6628,6 @@ void main() {
       this.object.position.y = this.centerY + this.radius * Math.sin(this.angle) + offset.y;
     }
   }
-
-  // src/balance/group-03.ts
-  var group03 = {
-    bannerMs: 2000,
-    centerX: 100,
-    splitY: 60,
-    leftOrbit: { x: 55, y: 60 },
-    rightOrbit: { x: 145, y: 60 },
-    orbitRadius: 45,
-    innerOrbitRadius: 33,
-    innermostOrbitRadius: 21,
-    staggerSeconds: 0.5,
-    descentSeconds: 3,
-    peelSeconds: 2,
-    orbitPeriodSeconds: 8,
-    centerProcessionShipCount: 16,
-    outerProcessionShipCount: 8,
-    innermostProcessionShipCount: 8,
-    bossOrbitRadius: 36,
-    bossEnterSeconds: 2,
-    bossOrbitPeriodSeconds: 6,
-    fireDelaySlackSeconds: 2
-  };
 
   // src/levels/level-group-03.ts
   function orbitCenter(orbit) {
@@ -7245,47 +7283,6 @@ void main() {
     }
   }
 
-  // src/balance/group-04.ts
-  var group04 = {
-    bannerMs: 2000,
-    shipCountBase: 4,
-    shipCountPerTier: 3,
-    boundsLeft: 8,
-    boundsRightInset: 8,
-    boundsTop: 12,
-    boundsBottomFraction: 0.55,
-    bossBoundsBottomFraction: 0.45,
-    scout: {
-      dashSpeed: 130,
-      pauseSecondsMin: 0.55,
-      pauseSecondsMax: 1.2,
-      minDashDistance: 28,
-      maxDashDistance: 75,
-      burstFireRateMs: 110,
-      burstSizeRowBonus: 3
-    },
-    boss: {
-      dashSpeed: 95,
-      pauseSecondsMin: 0.8,
-      pauseSecondsMax: 1.6,
-      minDashDistance: 35,
-      maxDashDistance: 90,
-      spawnY: -30,
-      bursts: [
-        { gunIndex: 0, burstSize: 4, fireRateMs: 90 },
-        { gunIndex: 1, burstSize: 5, fireRateMs: 70, windupMs: 40 },
-        { gunIndex: 2, burstSize: 4, fireRateMs: 90 }
-      ]
-    },
-    entryWaitOpenerMin: 1,
-    entryWaitOpenerMax: 10,
-    entryWaitFollowUpMin: 0.5,
-    entryWaitFollowUpMax: 5
-  };
-  function group04ShipCount(rowCount) {
-    return group04.shipCountBase + rowCount * group04.shipCountPerTier;
-  }
-
   // src/levels/level-group-04.ts
   class LevelGroup04 extends GameObject {
     difficultyMultiplier;
@@ -7863,7 +7860,7 @@ void main() {
           this.player.purchaseEnergyShield();
           break;
         case "bomb":
-          this.player.purchaseBomb();
+          this.player.replenishBombs();
           break;
         case "maxHealth":
           this.player.purchaseMaxHealth(shipId);
