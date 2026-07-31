@@ -7427,6 +7427,349 @@ void main() {
     }
   }
 
+  // src/sprites/char-map.ts
+  function spriteFromCharMap(rows, palette) {
+    const height = rows.length;
+    const width = rows.reduce((max, row) => Math.max(max, row.length), 0);
+    const pixels = [];
+    for (let x = 0;x < width; x++) {
+      pixels[x] = [];
+      for (let y2 = 0;y2 < height; y2++) {
+        const char = rows[y2][x];
+        if (char === undefined) {
+          pixels[x][y2] = null;
+          continue;
+        }
+        if (!(char in palette)) {
+          console.error("Char map used a character with no palette entry: '" + char + "'");
+          pixels[x][y2] = null;
+          continue;
+        }
+        pixels[x][y2] = palette[char];
+      }
+    }
+    return new Sprite(pixels);
+  }
+
+  // src/sprites/planets.ts
+  var n6 = null;
+  function earthSprite() {
+    return spriteFromCharMap([
+      "..........iiiiiiiii..........",
+      "........oiiiiiiiiiiio........",
+      "......ooooiiiiiiiiioood......",
+      ".....oolLLLloooooooooood.....",
+      "....ooLLLLLLLoooooooooodd....",
+      "...ooOLLLLLLLLoooooooooodd...",
+      "..ooOOOLLLLLLLOoolllooooddd..",
+      "..ooOOOOLLLLLOOollllloooddd..",
+      ".ooOOOOOOLLLLOOLlllllloooddd.",
+      ".ooOOOOOOOLLLOOLlllllloooddd.",
+      "oooOOOOOOOOLLLLLllllloooodddd",
+      "ooooOOOOOOOLLLLlllllooooodddd",
+      "ooooOOOOOOOOLLOlllllloooodddd",
+      "oooooOOOOOOOLLlollllllooodddd",
+      "ooooooOOOOOLLloollllllloodddd",
+      "ooooooooOOLllloollllllloodddd",
+      "oooooooooollllolllllllooodddd",
+      "ooooooooooolllolllllloooddddd",
+      "ooooooooooollloollllooooddddd",
+      ".ooooooooooolllolllooooodddd.",
+      ".ooooooooooolllooooooooddddd.",
+      "..ooooooooooolllooooooodddd..",
+      "..ooooooooooolllooooooddddd..",
+      "...oooooooooollllooooddddd...",
+      "....oooooooooollloooddddd....",
+      ".....ooooooooooooooddddd.....",
+      "......ooooiiiiiiiiIdddd......",
+      "........oiiiiiiiiIIId........",
+      "..........iiiiiIIII.........."
+    ], {
+      ".": n6,
+      o: "#2a6bb0",
+      O: "#4a92d8",
+      d: "#16406f",
+      l: "#3f8f4c",
+      L: "#63bd64",
+      k: "#265b31",
+      i: "#dbeef5",
+      I: "#8fb2c4"
+    });
+  }
+  function moonSprite() {
+    return spriteFromCharMap([
+      ".....ggggg.....",
+      "...GGGgggggg...",
+      "..GGGGccggggd..",
+      ".GGccccccggggd.",
+      ".Gccccccgggggd.",
+      "gGGccGGGgggggdd",
+      "ggGGGGGgcccggdd",
+      "gggGGGggccccgdd",
+      "gggccggggccggdd",
+      "gggcccgggggggdd",
+      ".gggccggccggdd.",
+      ".gggggggccggdd.",
+      "..gggggggggdd..",
+      "...gggggggdd...",
+      ".....ggggd....."
+    ], {
+      ".": n6,
+      g: "#9a9a93",
+      G: "#c9c9c0",
+      c: "#6f6f6a",
+      d: "#4e4e4c",
+      k: "#3a3a38"
+    });
+  }
+
+  // src/levels/level-select.ts
+  var TITLE_X = 64;
+  var TITLE_Y = 4;
+  var EARTH_POSITION = { x: 30, y: 44 };
+  var MOON_POSITION = { x: 138, y: 26 };
+  var EARTH_LABEL = { x: 34, y: 78 };
+  var MOON_LABEL = { x: 137, y: 48 };
+  var SHOP_LABEL = { x: 58, y: 112 };
+  var HANGAR_LABEL = { x: 112, y: 112 };
+  var SELECTOR_GAP = 12;
+  var ORBIT_FROM = { x: 64, y: 52 };
+  var ORBIT_TO = { x: 132, y: 34 };
+  var ORBIT_CONTROL = { x: 100, y: 20 };
+  var ORBIT_COLOR = "#4b5a86";
+
+  class LevelSelect extends GameObject {
+    isShop = true;
+    index = 1;
+    disabledColor = "#777";
+    game;
+    player;
+    input;
+    destination = "standard";
+    titleText;
+    selectorShip;
+    rows = [];
+    rowIndex = 0;
+    columnIndex = 0;
+    timeSinceSelected = 0;
+    selecting = false;
+    isDone = false;
+    constructor(parent, game) {
+      super(parent);
+      this.game = game;
+      this.player = game.player;
+      this.input = new EventedInput({
+        onUp: this.onUp.bind(this),
+        onDown: this.onDown.bind(this),
+        onLeft: this.onLeft.bind(this),
+        onRight: this.onRight.bind(this),
+        onSelect: this.onSelect.bind(this)
+      });
+      this.reset();
+    }
+    reset() {
+      super.reset();
+      this.input.reset();
+      this.isDone = false;
+      this.selecting = false;
+      this.rowIndex = 0;
+      this.columnIndex = 0;
+      this.rows = [];
+      this.createTitle();
+      this.createOrbitTrack();
+      this.createBodies();
+      this.createTargets();
+      this.createSelectorShip();
+      this.refreshTargets();
+      this.updateSelectorPosition();
+      this.addChild(this.input);
+    }
+    start() {
+      this.input.reset();
+      this.isDone = false;
+      this.selecting = false;
+      if (!this.isEnabled(this.activeTarget())) {
+        this.moveTo(0, 0);
+      }
+      this.refreshTargets();
+      this.updateSelectorPosition();
+    }
+    checkIfLevelComplete() {
+      return this.isDone;
+    }
+    update(dtime) {
+      super.update(dtime);
+      this.timeSinceSelected += dtime;
+      if (this.selecting && this.timeSinceSelected > 595) {
+        this.propagateSelection();
+      }
+    }
+    createTitle() {
+      this.titleText = new TextDisplay(this, {
+        font: "arcade-small",
+        message: "Select Destination",
+        position: { x: TITLE_X, y: TITLE_Y },
+        color: this.game.interfaceColor
+      });
+      this.addChild(this.titleText);
+    }
+    createBodies() {
+      const earth = new GameObject;
+      earth.sprite = earthSprite();
+      earth.position = { ...EARTH_POSITION };
+      earth.index = 2;
+      this.addChild(earth);
+      const moon = new GameObject;
+      moon.sprite = moonSprite();
+      moon.position = { ...MOON_POSITION };
+      moon.index = 2;
+      this.addChild(moon);
+    }
+    createOrbitTrack() {
+      const track = new GameObject;
+      const arc = dottedArc(ORBIT_FROM, ORBIT_CONTROL, ORBIT_TO, ORBIT_COLOR);
+      track.sprite = arc.sprite;
+      track.position = arc.position;
+      track.index = 1;
+      this.addChild(track);
+    }
+    createTargets() {
+      this.rows = [
+        [
+          { destination: "standard", message: "Earth", labelPosition: EARTH_LABEL },
+          { destination: "slim", message: "Luna", labelPosition: MOON_LABEL }
+        ],
+        [
+          { destination: "shop", message: "Shop", labelPosition: SHOP_LABEL },
+          { destination: "hangar", message: "Hangar", labelPosition: HANGAR_LABEL }
+        ]
+      ];
+      this.eachTarget((target) => {
+        target.label = new TextDisplay(this, {
+          font: "arcade-small",
+          message: target.message,
+          position: { ...target.labelPosition },
+          color: this.game.interfaceColor,
+          isPhysicalEntity: true
+        });
+        this.addChild(target.label);
+      });
+    }
+    createSelectorShip() {
+      this.selectorShip = new GameObject;
+      this.selectorShip.sprite = arrowShipSprite();
+      this.selectorShip.position = { x: 0, y: 0 };
+      this.addChild(this.selectorShip);
+    }
+    eachTarget(handler) {
+      this.rows.forEach((row) => row.forEach(handler));
+    }
+    activeTarget() {
+      return this.rows[this.rowIndex][this.columnIndex];
+    }
+    isEnabled(target) {
+      if (target.destination === "hangar") {
+        return this.player.technologies.hangarBay;
+      }
+      return true;
+    }
+    refreshTargets() {
+      this.eachTarget((target) => {
+        target.label.updateColor(this.isEnabled(target) ? this.game.interfaceColor : this.disabledColor);
+      });
+    }
+    updateSelectorPosition() {
+      const { x, y: y2 } = this.activeTarget().labelPosition;
+      this.selectorShip.position.x = x - SELECTOR_GAP;
+      this.selectorShip.position.y = y2 - 1;
+    }
+    moveTo(rowIndex, columnIndex) {
+      const row = this.rows[rowIndex];
+      if (!row) {
+        return;
+      }
+      this.rowIndex = rowIndex;
+      this.columnIndex = Math.min(columnIndex, row.length - 1);
+      this.refreshTargets();
+      this.updateSelectorPosition();
+    }
+    onUp() {
+      if (!this.selecting && this.rowIndex > 0) {
+        this.moveTo(this.rowIndex - 1, this.columnIndex);
+      }
+    }
+    onDown() {
+      if (!this.selecting && this.rowIndex < this.rows.length - 1) {
+        this.moveTo(this.rowIndex + 1, this.columnIndex);
+      }
+    }
+    onLeft() {
+      if (!this.selecting && this.columnIndex > 0) {
+        this.moveTo(this.rowIndex, this.columnIndex - 1);
+      }
+    }
+    onRight() {
+      if (!this.selecting && this.columnIndex < this.rows[this.rowIndex].length - 1) {
+        this.moveTo(this.rowIndex, this.columnIndex + 1);
+      }
+    }
+    onSelect() {
+      if (this.selecting || !this.isEnabled(this.activeTarget())) {
+        return;
+      }
+      this.selecting = true;
+      this.timeSinceSelected = 0;
+      const x1 = this.selectorShip.position.x + this.selectorShip.sprite.width;
+      const y2 = this.selectorShip.position.y + Math.floor(this.selectorShip.sprite.height / 2);
+      this.addChild(new Bullet(this, {
+        team: 2,
+        position: { x: x1, y: y2 },
+        velocity: { x: 50, y: 0 }
+      }));
+    }
+    propagateSelection() {
+      this.destination = this.activeTarget().destination;
+      this.selecting = false;
+      this.isDone = true;
+    }
+  }
+  function dottedArc(from, control, to, color) {
+    const samples = 400;
+    const dotSpacing = 5;
+    const points = [];
+    let distanceSinceDot = dotSpacing;
+    let previousX = from.x;
+    let previousY = from.y;
+    for (let i = 0;i <= samples; i++) {
+      const t = i / samples;
+      const inverse = 1 - t;
+      const x = inverse * inverse * from.x + 2 * inverse * t * control.x + t * t * to.x;
+      const y2 = inverse * inverse * from.y + 2 * inverse * t * control.y + t * t * to.y;
+      distanceSinceDot += Math.hypot(x - previousX, y2 - previousY);
+      previousX = x;
+      previousY = y2;
+      if (distanceSinceDot >= dotSpacing) {
+        distanceSinceDot = 0;
+        points.push({ x: Math.round(x), y: Math.round(y2) });
+      }
+    }
+    const minX = Math.min(...points.map((point) => point.x));
+    const minY = Math.min(...points.map((point) => point.y));
+    const width = Math.max(...points.map((point) => point.x)) - minX + 1;
+    const height = Math.max(...points.map((point) => point.y)) - minY + 1;
+    const pixels = [];
+    for (let x = 0;x < width; x++) {
+      pixels[x] = [];
+      for (let y2 = 0;y2 < height; y2++) {
+        pixels[x][y2] = null;
+      }
+    }
+    points.forEach((point) => {
+      pixels[point.x - minX][point.y - minY] = color;
+    });
+    return { sprite: new Sprite(pixels), position: { x: minX, y: minY } };
+  }
+
   // src/levels/shop.ts
   var LIST_BASE_Y2 = 20;
   var LIST_ROW_STRIDE2 = 15;
@@ -7954,10 +8297,13 @@ void main() {
     running;
     complete;
     currentLevel = null;
+    previousLevel = null;
     hangar;
     shop;
+    levelSelect;
     levels;
     levelIndex;
+    activeDestination = null;
     constructor(parent, game) {
       super(parent);
       this.game = game;
@@ -7973,13 +8319,47 @@ void main() {
       this.running = false;
       this.complete = false;
       this.currentLevel = null;
+      this.previousLevel = null;
+      this.activeDestination = null;
       this.hangar = new Hangar(this, this.game);
       this.shop = new Shop(this, this.game);
-      this.loadLevels();
+      this.levelSelect = new LevelSelect(this, this.game);
+      this.loadHub();
     }
-    loadLevels() {
-      this.levels = [
-        this.hangar,
+    loadHub() {
+      this.activeDestination = null;
+      this.levels = [this.levelSelect];
+      this.levelIndex = -1;
+      this.levelSelect.reset();
+    }
+    loadDestination(destination) {
+      this.activeDestination = destination;
+      switch (destination) {
+        case "shop":
+          this.levels = [this.shop];
+          break;
+        case "hangar":
+          this.levels = [this.hangar];
+          break;
+        default:
+          this.levels = this.buildLevelGroup(destination);
+          break;
+      }
+      this.levelIndex = -1;
+    }
+    buildLevelGroup(group) {
+      switch (group) {
+        case "slim":
+          return this.slimShipLevels();
+        case "dash":
+          return this.dashShipLevels();
+        case "standard":
+        default:
+          return this.standardShipLevels();
+      }
+    }
+    standardShipLevels() {
+      return [
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
@@ -7996,7 +8376,11 @@ void main() {
         new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 2),
         new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 3),
         new LevelGroup03(this, this.game, this.difficultyMultiplier, false, "boss"),
-        this.shop,
+        this.shop
+      ];
+    }
+    slimShipLevels() {
+      return [
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 2),
         new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 3),
@@ -8013,7 +8397,11 @@ void main() {
         new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 2),
         new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 3),
         new LevelGroup03(this, this.game, this.difficultyMultiplier, true, "boss"),
-        this.shop,
+        this.shop
+      ];
+    }
+    dashShipLevels() {
+      return [
         new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
         new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 2),
         new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 3),
@@ -8021,7 +8409,6 @@ void main() {
         new LevelGroup04(this, this.game, this.difficultyMultiplier, false, "boss"),
         this.shop
       ];
-      this.levelIndex = -1;
     }
     start() {
       this.running = true;
@@ -8033,16 +8420,16 @@ void main() {
         this.removeChild(this.currentLevel);
       }
       this.currentLevel = null;
+      this.previousLevel = null;
     }
     loadNextLevel() {
       if (this.levelIndex >= this.levels.length - 1) {
-        this.difficultyMultiplier++;
-        this.loadLevels();
+        this.loadHub();
       }
       this.levelIndex++;
+      this.previousLevel = this.currentLevel;
       this.currentLevel = this.levels[this.levelIndex];
-      const previousLevel = this.levelIndex > 0 ? this.levels[this.levelIndex - 1] : null;
-      const cameFromShop = !!previousLevel?.isShop;
+      const cameFromShop = !!this.previousLevel?.isShop;
       if (this.currentLevel.isShop) {
         this.game.clearBullets();
         this.clearFlyInScripts();
@@ -8056,13 +8443,26 @@ void main() {
     update(dtime) {
       super.update(dtime);
       if (this.currentLevel && this.currentLevel.checkIfLevelComplete()) {
-        if (this.currentLevel.isShop) {
-          this.removeChild(this.currentLevel);
+        const finishedLevel = this.currentLevel;
+        if (finishedLevel.isShop) {
+          this.removeChild(finishedLevel);
         } else {
-          this.currentLevel.destroy();
+          finishedLevel.destroy();
+        }
+        if (finishedLevel === this.levelSelect) {
+          this.loadDestination(this.levelSelect.destination);
+        } else if (this.levelIndex >= this.levels.length - 1) {
+          this.finishDestination();
         }
         this.loadNextLevel();
       }
+    }
+    finishDestination() {
+      const clearedCombatSet = this.activeDestination !== null && this.activeDestination !== "shop" && this.activeDestination !== "hangar";
+      if (clearedCombatSet) {
+        this.difficultyMultiplier++;
+      }
+      this.loadHub();
     }
     clearFlyInScripts() {
       this.children.filter((child) => child instanceof FlyPlayerInFromBottom).forEach((child) => {
