@@ -65,7 +65,7 @@ else
 fi
 
 echo "🧹 Replacing site files..."
-find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name 'old-versions' -exec rm -rf {} +
 cp -a "$STAGING/." .
 
 git add -A
