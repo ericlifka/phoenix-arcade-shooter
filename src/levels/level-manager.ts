@@ -74,6 +74,7 @@ export default class LevelManager extends GameObject {
         this.activeDestination = null;
         this.levels = [this.levelSelect];
         this.levelIndex = -1;
+        this.levelSelect.reset();
     }
 
     loadDestination(destination: HubDestination): void {

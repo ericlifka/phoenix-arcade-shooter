@@ -32,8 +32,6 @@ interface SelectTarget {
     message: string;
     labelPosition: Position;
     label?: TextDisplay;
-    leftBracket?: TextDisplay;
-    rightBracket?: TextDisplay;
 }
 
 /**
@@ -172,30 +170,14 @@ export default class LevelSelect extends GameObject {
         ];
 
         this.eachTarget((target) => {
-            const { x, y } = target.labelPosition;
-
             target.label = new TextDisplay(this, {
                 font: 'arcade-small',
                 message: target.message,
-                position: { x, y },
-                color: this.game.interfaceColor
+                position: { ...target.labelPosition },
+                color: this.game.interfaceColor,
+                isPhysicalEntity: true
             });
             this.addChild(target.label);
-
-            target.leftBracket = new TextDisplay(this, {
-                font: 'arcade-small',
-                message: ' ',
-                position: { x: x - 5, y },
-                color: this.game.interfaceColor
-            });
-            target.rightBracket = new TextDisplay(this, {
-                font: 'arcade-small',
-                message: ' ',
-                position: { x: x + (target.label.width || 0) + 1, y },
-                color: this.game.interfaceColor
-            });
-            this.addChild(target.leftBracket);
-            this.addChild(target.rightBracket);
         });
     }
 
@@ -223,19 +205,10 @@ export default class LevelSelect extends GameObject {
     }
 
     private refreshTargets(): void {
-        const active = this.activeTarget();
-
         this.eachTarget((target) => {
-            const isActive = target === active;
-            const enabled = this.isEnabled(target);
-
             target.label!.updateColor(
-                enabled ? this.game.interfaceColor : this.disabledColor
+                this.isEnabled(target) ? this.game.interfaceColor : this.disabledColor
             );
-            target.leftBracket!.changeMessage(isActive ? '[' : ' ');
-            target.rightBracket!.changeMessage(isActive ? ']' : ' ');
-            target.leftBracket!.updateColor(this.game.interfaceColor);
-            target.rightBracket!.updateColor(this.game.interfaceColor);
         });
     }
 
