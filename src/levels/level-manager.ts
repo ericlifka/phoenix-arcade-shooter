@@ -201,6 +201,13 @@ export default class LevelManager extends GameObject {
             this.addChild(new FlyPlayerInFromBottom(this, this.game).start());
         }
 
+        // The planet map stands alone; every other screen shows the run HUD.
+        if (this.currentLevel === this.levelSelect) {
+            this.game.hideRunHud();
+        } else {
+            this.game.showRunHud();
+        }
+
         this.addChild(this.currentLevel);
         this.currentLevel.start();
     }

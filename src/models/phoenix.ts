@@ -232,6 +232,26 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         this.player.resetForNewRun();
     }
 
+    /** Detach the run HUD (bank, combo gauge, life meter) for screens that shouldn't show it. */
+    hideRunHud(): void {
+        this.removeChild(this.bank);
+        this.removeChild(this.comboGauge);
+        this.removeChild(this.lifeMeter);
+    }
+
+    /** Re-attach the run HUD, guarding against duplicate children. */
+    showRunHud(): void {
+        if (!this.children.includes(this.bank)) {
+            this.addChild(this.bank);
+        }
+        if (!this.children.includes(this.comboGauge)) {
+            this.addChild(this.comboGauge);
+        }
+        if (!this.children.includes(this.lifeMeter)) {
+            this.addChild(this.lifeMeter);
+        }
+    }
+
     recordDollarsSpent(amount: number): void {
         this.runStats.dollarsSpent += amount;
     }

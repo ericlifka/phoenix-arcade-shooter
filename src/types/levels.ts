@@ -39,4 +39,6 @@ export interface GameForLevels extends GameForShop, GameForHangar, GameForLevelS
     width: number;
     height: number;
     clearBullets(): void;
+    hideRunHud(): void;
+    showRunHud(): void;
 }
