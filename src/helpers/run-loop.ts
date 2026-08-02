@@ -32,23 +32,23 @@ function now(): number {
 }
 
 function fpsTracker(): FPSTracker {
-    const frameTimes: any[] = [];
+    const frameTimes = [] as FPSTracker;
 
     for (let i = 0; i < 100; i++) {
         frameTimes.push(20);
     }
-    (frameTimes as FPSTracker).totalTime = 20 * 100;
+    frameTimes.totalTime = 20 * 100;
 
-    (frameTimes as FPSTracker).push = function (ftime: number): number {
+    frameTimes.push = function (ftime: number): number {
         const overflow = this.shift();
         this.totalTime += ftime - overflow;
         return Array.prototype.push.call(this, ftime);
     };
-    (frameTimes as FPSTracker).average = function (): number {
+    frameTimes.average = function (): number {
         return this.totalTime / this.length;
     };
 
-    return frameTimes as FPSTracker;
+    return frameTimes;
 }
 
 /**

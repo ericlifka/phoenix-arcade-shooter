@@ -13,6 +13,9 @@ export interface GameObjectLike {
     velocity?: Velocity;
     acceleration?: Acceleration;
     sprite?: any;
+    type?: string;
+    isPhysicalEntity?: boolean;
+    exploding?: boolean;
     index?: number;
     damage?: number;
     life?: number;
@@ -121,7 +124,12 @@ export interface GameOverResult {
 // Collision detection
 export interface PhysicalEntity extends GameObjectLike {
     isPhysicalEntity: boolean;
+    position: Position;
+    sprite: { width: number; height: number };
+    renderToFrame(frame: any): void;
+    applyDamage(damage: number, sourceEntity?: GameObjectLike): void;
     team?: number;
-    type?: string;
     exploding?: boolean;
 }
+
+export type { Position } from './rendering';

@@ -1,5 +1,5 @@
 interface KeyboardState {
-    INPUT_TYPE: string;
+    INPUT_TYPE: 'keyboard';
     W: boolean;
     A: boolean;
     S: boolean;

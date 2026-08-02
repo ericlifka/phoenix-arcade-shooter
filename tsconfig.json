@@ -8,6 +8,7 @@
         ],
         "module": "ESNext",
         "moduleResolution": "bundler",
+        "types": ["bun", "node"],
         /* Type Checking */
         "strict": false, // Start lenient, will enable gradually
         "noImplicitAny": false, // Will enable after initial conversion

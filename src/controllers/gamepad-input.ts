@@ -1,5 +1,5 @@
 interface GamepadState {
-    INPUT_TYPE: string;
+    INPUT_TYPE: 'gamepad';
     A: boolean;
     B: boolean;
     X: boolean;

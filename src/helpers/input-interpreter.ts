@@ -1,6 +1,7 @@
-import { InputState, Position } from '../types/game';
+import { InputState } from '../types/game';
+import { Position } from '../types/rendering';
 
-interface RawInputSource {
+export interface RawInputSource {
     INPUT_TYPE: 'keyboard' | 'gamepad';
     [key: string]: any;
 }

@@ -19,6 +19,7 @@ export default class GameObject {
     velocity?: Velocity;
     acceleration?: Acceleration;
     sprite?: any; // Complex type, using any for now
+    type?: string;
     index?: number;
     exploding?: boolean;
     explosion?: () => any;

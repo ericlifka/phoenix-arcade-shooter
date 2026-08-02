@@ -34,7 +34,7 @@ export default class LifeMeter extends GameObject {
     private borderColor: string;
     private mirror: boolean;
     private currentLife?: number;
-    private maxLife?: number;
+    maxLife?: number;
     private currentShield?: number;
     private maxShield?: number;
     private currentBombs?: number;

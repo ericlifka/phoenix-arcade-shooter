@@ -57,7 +57,7 @@ export default class LevelGroup02 extends GameObject {
 
         this.game = game;
         this.levelName = levelName;
-        this.rowCount = rowCount === 'boss' ? 1 : rowCount;
+        this.rowCount = typeof rowCount === 'number' ? rowCount : 1;
 
         this.reset();
     }

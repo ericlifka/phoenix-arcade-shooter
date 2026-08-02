@@ -9,6 +9,7 @@ import MoneyDrop from '../components/money-drop.js';
 import MoveObjectInCircle from '../scripts/move-object-in-circle.js';
 import MoveObjectToPoint from '../scripts/move-object-to-point.js';
 import ScriptChain from '../models/script-chain.js';
+import type { Script } from '../models/script-chain.js';
 import Wait from '../scripts/wait.js';
 import { bossMoneyPositions, moneyDropCount } from '../balance/economy.js';
 import { group03 } from '../balance/group-03.js';
@@ -88,7 +89,7 @@ export default class LevelGroup03 extends GameObject {
 
         this.game = game;
         this.levelName = levelName;
-        this.rowCount = rowCount === 'boss' ? 1 : rowCount;
+        this.rowCount = typeof rowCount === 'number' ? rowCount : 1;
 
         this.reset();
     }
@@ -251,8 +252,8 @@ export default class LevelGroup03 extends GameObject {
         orbitRadius: number,
         clockwise: boolean,
         needsPeel: boolean
-    ): GameObject[] {
-        const steps: GameObject[] = [];
+    ): Script[] {
+        const steps: Script[] = [];
 
         if (staggerSeconds > 0) {
             steps.push(new Wait(null, staggerSeconds));

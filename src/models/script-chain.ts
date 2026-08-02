@@ -1,7 +1,7 @@
 import GameObject from './game-object.js';
 
-interface Script {
-    parent?: ScriptChain;
+export interface Script {
+    parent?: GameObject | null;
     start(): void;
     update(dtime: number): void;
 }

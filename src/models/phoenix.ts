@@ -18,7 +18,8 @@ import { createStarterHangar } from '../ships/player-ship-profile.js';
 import { createStarterTechnologies } from '../ships/player-technologies.js';
 import RunStats from './run-stats.js';
 import TextDisplay from '../components/text-display.js';
-import { BombOptions, BulletOptions, GameOverResult, PhysicalEntity } from '../types/game';
+import { BombOptions, BulletOptions, GameObjectLike, GameOverResult, InputState, PhysicalEntity } from '../types/game';
+import type { RawInputSource } from '../helpers/input-interpreter.js';
 import type { GameForLevels, GameForShop } from '../types/levels.js';
 
 export interface PhoenixOptions {
@@ -239,8 +240,10 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         this.addChild(this.controlsScreen);
     }
 
-    processInput(rawInput: Parameters<InputInterpreter['interpret']>[0]): void {
-        super.processInput(this.inputInterpreter.interpret(rawInput));
+    processInput(rawInput: RawInputSource[]): void;
+    processInput(input: InputState): void;
+    processInput(input: RawInputSource[] | InputState): void {
+        super.processInput(Array.isArray(input) ? this.inputInterpreter.interpret(input) : input);
     }
 
     update(dtime: number): void {
@@ -279,12 +282,14 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
     }
 
     checkCollisions(): void {
-        const physicalEntities = collectEntities(this, this.physicalEntityMatcher);
+        const physicalEntities = collectEntities(this, (entity) =>
+            this.physicalEntityMatcher(entity as GameObjectLike)
+        ) as unknown as PhysicalEntity[];
         const collisionPairs = this.findBoxCollisions(physicalEntities);
         this.checkPairsForCollision(collisionPairs);
     }
 
-    physicalEntityMatcher(entity: PhysicalEntity): boolean {
+    physicalEntityMatcher(entity: GameObjectLike): boolean {
         return !!(entity.isPhysicalEntity && !entity.exploding);
     }
 
@@ -408,7 +413,9 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         damage: number;
         source: Bomb;
     }): void {
-        const entities = collectEntities(this, this.physicalEntityMatcher) as PhysicalEntity[];
+        const entities = collectEntities(this, (entity) =>
+            this.physicalEntityMatcher(entity as GameObjectLike)
+        ) as unknown as PhysicalEntity[];
 
         entities.forEach((entity) => {
             if (entity === data.source) {

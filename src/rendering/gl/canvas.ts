@@ -72,7 +72,7 @@ export default class CanvasRenderer {
         const frame = this.frames[this.nextFrame];
         const pixelSize = this.pixelSize;
         const ctx = this.canvasDrawContext;
-        const fillColor = frame.fillColor;
+        const fillColor = frame.fillColor || '#000000';
 
         ctx.fillStyle = fillColor;
         ctx.fillRect(0, 0, this.fullWidth, this.fullHeight);
