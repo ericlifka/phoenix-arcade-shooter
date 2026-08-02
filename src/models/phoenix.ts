@@ -3,7 +3,7 @@ import Bomb from '../components/bomb.js';
 import Bullet from '../components/bullet.js';
 import collectEntities from '../helpers/collect-entities.js';
 import { boxCollision, circleIntersectsBox, spriteCollision } from '../helpers/collisions.js';
-import { applySave, captureSave, clearSave, hangarHasMetaProgress, loadSave, writeSave } from '../helpers/game-save.js';
+import { applySave, captureSave, clearSave, createStarterLevelCompletions, hangarHasMetaProgress, loadSave, writeSave } from '../helpers/game-save.js';
 import ComboGauge from '../components/combo-gauge.js';
 import ControlsScreen from '../screens/controls-description.js';
 import EmbeddedTitleScreen from '../screens/slim-title-screen.js';
@@ -20,7 +20,7 @@ import RunStats from './run-stats.js';
 import TextDisplay from '../components/text-display.js';
 import { BombOptions, BulletOptions, GameObjectLike, GameOverResult, InputState, PhysicalEntity } from '../types/game';
 import type { RawInputSource } from '../helpers/input-interpreter.js';
-import type { GameForLevels, GameForShop } from '../types/levels.js';
+import type { GameForLevels, GameForShop, LevelCompletions, LevelGroupKey } from '../types/levels.js';
 
 export interface PhoenixOptions {
     width: number;
@@ -50,6 +50,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
     gameOver = false;
     paused = false;
     runsCompleted = 0;
+    levelCompletions: LevelCompletions = createStarterLevelCompletions();
     gameOverCallback?: (result: GameOverResult) => void;
     activeBomb: Bomb | null = null;
 
@@ -108,6 +109,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         this.paused = false;
 
         this.player.reset();
+        this.levelCompletions = createStarterLevelCompletions();
 
         const save = loadSave();
         if (save) {
@@ -136,10 +138,17 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
         writeSave(captureSave(this));
     }
 
+    /** Bump a level set's completion count and save (finished set → back to map). */
+    recordLevelSetCompletion(set: LevelGroupKey): void {
+        this.levelCompletions[set] = (this.levelCompletions[set] ?? 0) + 1;
+        this.persistMeta();
+    }
+
     /** Wipe localStorage meta and restore starter hangar / title. */
     resetMetaProgress(): void {
         clearSave();
         this.runsCompleted = 0;
+        this.levelCompletions = createStarterLevelCompletions();
         this.player.shipHangar = createStarterHangar();
         this.player.technologies = createStarterTechnologies();
         this.titleScreen.reset(0, false);

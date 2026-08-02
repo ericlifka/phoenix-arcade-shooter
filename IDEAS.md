@@ -1,12 +1,12 @@
 ### General 
 
-* Don't show combo meter and life bar on screens like the map
-* Don't show Hangar on map until it's unlocked, not just disable it
+* Don't show Hangar on map until it's unlocked, not just disable it (or make hangar be unlocked by beating earth and change the way map works before then)
 * tutorial pop up when new technology is purchased
 * clean up title / slim-title
 * re-add controls screen
 * save slot management?
 * improve planet sprites
+* change the name of earth to terra
 
 ### Progression system
 

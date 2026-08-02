@@ -237,16 +237,15 @@ export default class LevelManager extends GameObject {
     /**
      * A queued destination ran out of levels. Clearing a combat set makes the
      * next run through any set harder, the same way wrapping the old linear
-     * level list used to; shop and hangar visits are free.
+     * level list used to; shop and hangar visits are free. Combat clears also
+     * tick the save file's completion counter for that level set.
      */
     private finishDestination(): void {
-        const clearedCombatSet =
-            this.activeDestination !== null &&
-            this.activeDestination !== 'shop' &&
-            this.activeDestination !== 'hangar';
+        const destination = this.activeDestination;
 
-        if (clearedCombatSet) {
+        if (destination !== null && destination !== 'shop' && destination !== 'hangar') {
             this.difficultyMultiplier++;
+            this.game.recordLevelSetCompletion(destination);
         }
 
         this.loadHub();

@@ -8,6 +8,14 @@ export type LevelGroupKey = 'standard' | 'slim' | 'dash';
 /** Everything the level select map can send the player to. */
 export type HubDestination = LevelGroupKey | 'shop' | 'hangar';
 
+/**
+ * Per-level-set completion counts persisted in the save file. Keyed by
+ * LevelGroupKey ('standard' = Earth, 'slim' = Luna). Partial on purpose:
+ * a missing key means the set has never been completed (read as 0), so new
+ * planets can be tracked without touching old saves.
+ */
+export type LevelCompletions = Partial<Record<LevelGroupKey, number>>;
+
 /** Subset used by the shop screen. */
 export interface GameForShop {
     bank: Bank;
@@ -41,4 +49,5 @@ export interface GameForLevels extends GameForShop, GameForHangar, GameForLevelS
     clearBullets(): void;
     hideRunHud(): void;
     showRunHud(): void;
+    recordLevelSetCompletion(set: LevelGroupKey): void;
 }

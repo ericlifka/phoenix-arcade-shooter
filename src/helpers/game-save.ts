@@ -11,6 +11,7 @@ import {
 } from '../ships/player-technologies.js';
 import { playerShipDefs, type PlayerShipId } from '../balance/player-ships.js';
 import { MAX_COMBO_UPGRADES } from '../balance/shop.js';
+import type { LevelCompletions } from '../types/levels.js';
 
 export const SAVE_VERSION = 3 as const;
 export const SAVE_STORAGE_KEY = 'phoenix-arcade-shooter-save-v3';
@@ -20,10 +21,12 @@ export interface SaveData {
     runsCompleted: number;
     shipHangar: PlayerShipHangar;
     technologies: PlayerTechnologies;
+    levelCompletions: LevelCompletions;
 }
 
 export interface SaveHost {
     runsCompleted: number;
+    levelCompletions: LevelCompletions;
     player: {
         shipHangar: PlayerShipHangar;
         technologies: PlayerTechnologies;
@@ -147,6 +150,42 @@ function validateTechnologies(raw: unknown): PlayerTechnologies | null {
     };
 }
 
+/**
+ * Fresh completion record for a new save: every trackable level set at 0.
+ * New planets/level sets get added here as they ship.
+ */
+export function createStarterLevelCompletions(): LevelCompletions {
+    return {
+        standard: 0, // Earth
+        slim: 0 // Luna
+    };
+}
+
+/**
+ * Deliberately lenient — unlike the hangar/tech validators this never
+ * rejects the save. A missing or malformed section yields starter zeroes;
+ * individual entries that aren't non-negative integers fall back to 0.
+ * Valid entries under unknown keys are kept so data written by a newer
+ * build (e.g. a planet this version doesn't know) survives a load/save.
+ */
+function validateLevelCompletions(raw: unknown): LevelCompletions {
+    const completions = createStarterLevelCompletions();
+
+    if (!raw || typeof raw !== 'object') {
+        return completions;
+    }
+
+    for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+        // Stricter than isNonNegativeInt: completion counts must be whole
+        // numbers, and bad values here fall back to 0 instead of rejecting.
+        if (typeof value === 'number' && Number.isInteger(value) && value >= 0) {
+            completions[key as keyof LevelCompletions] = value;
+        }
+    }
+
+    return completions;
+}
+
 function validateSave(raw: unknown): SaveData | null {
     if (!raw || typeof raw !== 'object') {
         return null;
@@ -167,6 +206,8 @@ function validateSave(raw: unknown): SaveData | null {
     if (!technologies) {
         return null;
     }
+
+    const levelCompletions = validateLevelCompletions(data.levelCompletions);
 
     const hangarRaw = data.shipHangar as Record<string, unknown>;
     const hangar = {} as PlayerShipHangar;
@@ -193,7 +234,8 @@ function validateSave(raw: unknown): SaveData | null {
         version: SAVE_VERSION,
         runsCompleted: data.runsCompleted,
         shipHangar: hangar,
-        technologies
+        technologies,
+        levelCompletions
     };
 }
 
@@ -264,7 +306,8 @@ export function captureSave(host: SaveHost): SaveData {
         version: SAVE_VERSION,
         runsCompleted: host.runsCompleted,
         shipHangar: cloneHangar(host.player.shipHangar),
-        technologies: cloneTechnologies(host.player.technologies)
+        technologies: cloneTechnologies(host.player.technologies),
+        levelCompletions: { ...host.levelCompletions }
     };
 }
 
@@ -272,6 +315,7 @@ export function applySave(host: SaveHost, data: SaveData): void {
     host.runsCompleted = data.runsCompleted;
     host.player.shipHangar = mergeHangarWithDefs(data.shipHangar);
     host.player.technologies = cloneTechnologies(data.technologies);
+    host.levelCompletions = { ...data.levelCompletions };
 }
 
 export { createStarterTechnologies };
