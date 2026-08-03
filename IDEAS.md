@@ -9,8 +9,8 @@
 
 ### Progression system
 
-* too many levels before completing earth, should break up the level groups
-* Other Inner Planets show up after Moon
+* Change death shop so that each item is single purchase to prevent ridiculous stacking
+* Add more items to the death shop in increasing expensiveness
 
 ### Concepts
 
@@ -21,3 +21,4 @@
 
 ### Bugs
 
+* Death shop seems to not apply things purchased anymore

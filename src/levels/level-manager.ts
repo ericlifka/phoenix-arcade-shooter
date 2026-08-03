@@ -110,55 +110,47 @@ export default class LevelManager extends GameObject {
 
     private earthLevels(): LevelLike[] {
         return [
-            new ColumnLevel(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-            new ColumnLevel(this, this.game, this.difficultyMultiplier, false, 2),
-            new ColumnLevel(this, this.game, this.difficultyMultiplier, false, 3),
-            new ColumnLevel(this, this.game, this.difficultyMultiplier, false, 4),
-            new ColumnLevel(this, this.game, this.difficultyMultiplier, false, 'boss'),
-            this.shop,
-            new SerpentineLevel(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-            new SerpentineLevel(this, this.game, this.difficultyMultiplier, false, 2),
-            new SerpentineLevel(this, this.game, this.difficultyMultiplier, false, 3),
-            new SerpentineLevel(this, this.game, this.difficultyMultiplier, false, 4),
-            new SerpentineLevel(this, this.game, this.difficultyMultiplier, false, 'boss'),
-            this.shop,
-            new OrbitLevel(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-            new OrbitLevel(this, this.game, this.difficultyMultiplier, false, 2),
-            new OrbitLevel(this, this.game, this.difficultyMultiplier, false, 3),
-            new OrbitLevel(this, this.game, this.difficultyMultiplier, false, 'boss'),
-            this.shop
+            new ColumnLevel(this, this.game, 1, false, 1, "Get Ready!"),
+            new SerpentineLevel(this, this.game, 1, false, 1),
+            new OrbitLevel(this, this.game, 1, false, 1),
+            new ColumnLevel(this, this.game, 1, false, 2),
+            new SerpentineLevel(this, this.game, 1, false, 2),
+            new OrbitLevel(this, this.game, 1, false, 2),
+            new ColumnLevel(this, this.game, 1, false, 'boss'),
         ];
     }
 
     private lunaLevels(): LevelLike[] {
         return [
-            new ColumnLevel(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
-            new ColumnLevel(this, this.game, this.difficultyMultiplier, true, 2),
-            new ColumnLevel(this, this.game, this.difficultyMultiplier, true, 3),
-            new ColumnLevel(this, this.game, this.difficultyMultiplier, true, 4),
-            new ColumnLevel(this, this.game, this.difficultyMultiplier, true, 'boss'),
-            this.shop,
-            new SerpentineLevel(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
-            new SerpentineLevel(this, this.game, this.difficultyMultiplier, true, 2),
-            new SerpentineLevel(this, this.game, this.difficultyMultiplier, true, 3),
-            new SerpentineLevel(this, this.game, this.difficultyMultiplier, true, 4),
-            new SerpentineLevel(this, this.game, this.difficultyMultiplier, true, 'boss'),
-            this.shop,
-            new OrbitLevel(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
-            new OrbitLevel(this, this.game, this.difficultyMultiplier, true, 2),
-            new OrbitLevel(this, this.game, this.difficultyMultiplier, true, 3),
-            new OrbitLevel(this, this.game, this.difficultyMultiplier, true, 'boss'),
-            this.shop
+            new ColumnLevel(this, this.game, 2, true, 1, "Incoming!"),
+            new SerpentineLevel(this, this.game, 2, true, 1),
+            new OrbitLevel(this, this.game, 2, true, 1),
+            new ColumnLevel(this, this.game, 2, true, 2),
+            new SerpentineLevel(this, this.game, 2, true, 2),
+            new OrbitLevel(this, this.game, 2, true, 2),
+            new ColumnLevel(this, this.game, 2, true, 'boss'),
         ];
     }
 
     private marsLevels(): LevelLike[] {
         return [
-            new DashAndPauseLevel(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-            new DashAndPauseLevel(this, this.game, this.difficultyMultiplier, false, 2),
-            new DashAndPauseLevel(this, this.game, this.difficultyMultiplier, false, 3),
-            new DashAndPauseLevel(this, this.game, this.difficultyMultiplier, false, 4),
-            new DashAndPauseLevel(this, this.game, this.difficultyMultiplier, false, 'boss'),
+            new ColumnLevel(this, this.game, 3, true, 3, "Look Out!"),
+            new SerpentineLevel(this, this.game, 3, false, 3),
+            new OrbitLevel(this, this.game, 3, true, 3),
+            new ColumnLevel(this, this.game, 3, false, 4),
+            new SerpentineLevel(this, this.game, 3, true, 4),
+            new OrbitLevel(this, this.game, 3, false, 4),
+            new ColumnLevel(this, this.game, 3, true, 'boss'),
+        ];
+    }
+
+    private marsLevelsOld(): LevelLike[] {
+        return [
+            new DashAndPauseLevel(this, this.game, 1, false, 1, "Look Out!"),
+            new DashAndPauseLevel(this, this.game, 1, false, 2),
+            new DashAndPauseLevel(this, this.game, 1, false, 3),
+            new DashAndPauseLevel(this, this.game, 1, false, 4),
+            new DashAndPauseLevel(this, this.game, 1, false, 'boss'),
             this.shop
         ];
     }
