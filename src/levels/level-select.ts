@@ -160,7 +160,7 @@ export default class LevelSelect extends GameObject {
     private createTargets(): void {
         this.rows = [
             [
-                { destination: 'standard', message: 'Earth', labelPosition: EARTH_LABEL },
+                { destination: 'standard', message: 'Terra', labelPosition: EARTH_LABEL },
                 { destination: 'slim', message: 'Luna', labelPosition: MOON_LABEL }
             ],
             [

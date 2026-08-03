@@ -6,7 +6,6 @@
 * re-add controls screen
 * save slot management?
 * improve planet sprites
-* change the name of earth to terra
 
 ### Progression system
 
@@ -18,10 +17,9 @@
 ### Concepts
 
 * New mechanics after each planet? 
-  * Earth -> Hangar
-  * Moon -> Defense base?
+  * Terra -> Hangar
+  * Luna -> Defense base?
   * others -> ???
 
 ### Bugs
 
-* Hangar select button doesn't recreate, so re-entering lacks a visible button
