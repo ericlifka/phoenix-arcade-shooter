@@ -20,7 +20,7 @@ import RunStats from './run-stats.js';
 import TextDisplay from '../components/text-display.js';
 import { BombOptions, BulletOptions, GameObjectLike, GameOverResult, InputState, PhysicalEntity } from '../types/game';
 import type { RawInputSource } from '../helpers/input-interpreter.js';
-import type { GameForLevels, GameForShop, LevelCompletions, LevelGroupKey } from '../types/levels.js';
+import type { BodyKey, GameForLevels, GameForShop, LevelCompletions } from '../types/levels.js';
 
 export interface PhoenixOptions {
     width: number;
@@ -139,7 +139,7 @@ export default class Phoenix extends GameObject implements GameForLevels, GameFo
     }
 
     /** Bump a level set's completion count and save (finished set → back to map). */
-    recordLevelSetCompletion(set: LevelGroupKey): void {
+    recordLevelSetCompletion(set: BodyKey): void {
         this.levelCompletions[set] = (this.levelCompletions[set] ?? 0) + 1;
         this.persistMeta();
     }

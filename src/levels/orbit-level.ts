@@ -49,12 +49,12 @@ function innermostOrbitEntryPoint(orbit: OrbitSide): { x: number; y: number } {
 }
 
 /**
- * Level group 03 — dual orbits with concentric rings unlocking outward.
+ * Orbit level — dual orbits with concentric rings unlocking outward.
  * rowCount 1: innermost ring only.
  * rowCount >= 2: + middle ring (opposite rotation from outer).
  * rowCount >= 3: + outermost ring via center-line procession.
  */
-export default class LevelGroup03 extends GameObject {
+export default class OrbitLevel extends GameObject {
     alternateShip: boolean;
     difficultyMultiplier: number;
     width: number;

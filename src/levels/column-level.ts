@@ -14,7 +14,7 @@ import { sample } from '../helpers/random.js';
 import WatchForDeath from '../scripts/watch-for-death.js';
 import type { GameForLevels } from '../types/levels.js';
 
-export default class LevelGroup01 extends GameObject {
+export default class ColumnLevel extends GameObject {
     alternateShip: boolean;
     difficultyMultiplier: number;
     width: number;

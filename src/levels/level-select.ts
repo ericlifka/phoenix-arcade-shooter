@@ -4,7 +4,7 @@ import EventedInput from '../models/evented-input.js';
 import GameObject from '../models/game-object.js';
 import Sprite from '../rendering/core/sprite.js';
 import TextDisplay from '../components/text-display.js';
-import { earthSprite, moonSprite } from '../sprites/planets.js';
+import { earthSprite, marsSprite, moonSprite } from '../sprites/planets.js';
 import type { GameForLevelSelect, HubDestination } from '../types/levels.js';
 import type { Position } from '../types/rendering';
 
@@ -12,19 +12,21 @@ const TITLE_X = 64;
 const TITLE_Y = 4;
 
 const EARTH_POSITION: Position = { x: 30, y: 44 };
-const MOON_POSITION: Position = { x: 138, y: 26 };
+const MOON_POSITION: Position = { x: 84, y: 44 };
+const MARS_POSITION: Position = { x: 138, y: 26 };
 
 const EARTH_LABEL: Position = { x: 34, y: 78 };
-const MOON_LABEL: Position = { x: 137, y: 48 };
+const MOON_LABEL: Position = { x: 76, y: 78 };
+const MARS_LABEL: Position = { x: 130, y: 48 };
 const SHOP_LABEL: Position = { x: 58, y: 112 };
 const HANGAR_LABEL: Position = { x: 112, y: 112 };
 
 /** Selector sits this far left of the label it points at. */
 const SELECTOR_GAP = 12;
 
-const ORBIT_FROM: Position = { x: 64, y: 52 };
-const ORBIT_TO: Position = { x: 132, y: 34 };
-const ORBIT_CONTROL: Position = { x: 100, y: 20 };
+const ORBIT_FROM: Position = { x: 50, y: 62 };
+const ORBIT_TO: Position = { x: 88, y: 48 };
+const ORBIT_CONTROL: Position = { x: 70, y: 34 };
 const ORBIT_COLOR = '#4b5a86';
 
 const STORY_X = 70;
@@ -37,11 +39,11 @@ interface SelectTarget {
     label?: TextDisplay;
 }
 
-/**
- * Run hub. A small Earth/Luna system map: each body launches its level set, and
- * a facility row underneath opens the shop or the hangar. Returned to between
- * every set, so it is the place a future progression system will gate things.
- */
+    /**
+     * Run hub. A small Earth/Luna/Mars system map: each body launches its level set,
+     * and a facility row underneath opens the shop or the hangar. Returned to between
+     * every set, so it is the place a future progression system will gate things.
+     */
 export default class LevelSelect extends GameObject {
     isShop = true;
     index = 1;
@@ -52,7 +54,7 @@ export default class LevelSelect extends GameObject {
     input: EventedInput;
 
     /** Read by `LevelManager` once `checkIfLevelComplete()` goes true. */
-    destination: HubDestination = 'standard';
+    destination: HubDestination = 'earth';
 
     titleText!: TextDisplay;
     selectorShip!: GameObject;
@@ -63,7 +65,7 @@ export default class LevelSelect extends GameObject {
     timeSinceSelected = 0;
     selecting = false;
     isDone = false;
-    mapMode: 'intro' | 'expanded' | 'full' = 'intro';
+    mapMode: 'phase1' | 'phase2' | 'phase3' | 'phase4' | 'phase5' = 'phase1';
 
     constructor(parent: GameObject | null | undefined, game: GameForLevelSelect) {
         super(parent);
@@ -98,7 +100,7 @@ export default class LevelSelect extends GameObject {
         this.createOrbitTrack();
         this.createBodies();
         this.createTargets();
-        if (this.mapMode === 'intro') {
+        if (this.mapMode === 'phase1') {
             this.createStoryText();
         }
         this.createSelectorShip();
@@ -134,17 +136,32 @@ export default class LevelSelect extends GameObject {
         }
     }
 
-    private determineMapMode(): 'intro' | 'expanded' | 'full' {
-        const earth = this.game.levelCompletions.standard ?? 0;
-        const moon = this.game.levelCompletions.slim ?? 0;
+    private determineMapMode(): 'phase1' | 'phase2' | 'phase3' | 'phase4' | 'phase5' {
+        const c = this.game.levelCompletions;
+        const earth = c.earth ?? 0;
+        const luna = c.luna ?? 0;
+        const mars = c.mars ?? 0;
+        const sol = c.sol ?? 0;
+        const mercury = c.mercury ?? 0;
+        const venus = c.venus ?? 0;
+        const jupiter = c.jupiter ?? 0;
+        const saturn = c.saturn ?? 0;
+        const uranus = c.uranus ?? 0;
+        const neptune = c.neptune ?? 0;
 
         if (earth === 0) {
-            return 'intro';
+            return 'phase1';
         }
-        if (moon === 0) {
-            return 'expanded';
+        if (luna === 0 || mars === 0) {
+            return 'phase2';
         }
-        return 'full';
+        if (sol === 0 || mercury === 0 || venus === 0) {
+            return 'phase3';
+        }
+        if (jupiter === 0 || saturn === 0 || uranus === 0) {
+            return 'phase4';
+        }
+        return 'phase5';
     }
 
     private createTitle(): void {
@@ -164,7 +181,7 @@ export default class LevelSelect extends GameObject {
         earth.index = 2;
         this.addChild(earth);
 
-        if (this.mapMode === 'intro') {
+        if (this.mapMode === 'phase1') {
             return;
         }
 
@@ -173,10 +190,16 @@ export default class LevelSelect extends GameObject {
         moon.position = { ...MOON_POSITION };
         moon.index = 2;
         this.addChild(moon);
+
+        const mars = new GameObject();
+        mars.sprite = marsSprite();
+        mars.position = { ...MARS_POSITION };
+        mars.index = 2;
+        this.addChild(mars);
     }
 
     private createOrbitTrack(): void {
-        if (this.mapMode === 'intro') {
+        if (this.mapMode === 'phase1') {
             return;
         }
 
@@ -189,17 +212,18 @@ export default class LevelSelect extends GameObject {
     }
 
     private createTargets(): void {
-        if (this.mapMode === 'intro') {
+        if (this.mapMode === 'phase1') {
             this.rows = [
                 [
-                    { destination: 'standard', message: 'Terra', labelPosition: EARTH_LABEL }
+                    { destination: 'earth', message: 'Terra', labelPosition: EARTH_LABEL }
                 ]
             ];
         } else {
             this.rows = [
                 [
-                    { destination: 'standard', message: 'Terra', labelPosition: EARTH_LABEL },
-                    { destination: 'slim', message: 'Luna', labelPosition: MOON_LABEL }
+                    { destination: 'earth', message: 'Terra', labelPosition: EARTH_LABEL },
+                    { destination: 'luna', message: 'Luna', labelPosition: MOON_LABEL },
+                    { destination: 'mars', message: 'Mars', labelPosition: MARS_LABEL }
                 ],
                 [
                     { destination: 'shop', message: 'Shop', labelPosition: SHOP_LABEL },
@@ -339,6 +363,7 @@ export default class LevelSelect extends GameObject {
 /**
  * Dotted quadratic-bezier arc, used for the Earth-Luna transfer track. Returns
  * a sprite cropped to the arc's bounding box plus the position to draw it at.
+ * (Future phases will add more arcs as the rest of the solar system opens up.)
  */
 function dottedArc(
     from: Position,

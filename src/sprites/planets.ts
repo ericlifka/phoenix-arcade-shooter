@@ -88,5 +88,33 @@ export function moonSprite(): Sprite {
     });
 }
 
+/**
+ * Mars, 15x15. Placeholder red sphere with a darker crater/limb shadow.
+ */
+export function marsSprite(): Sprite {
+    return spriteFromCharMap([
+        '.....rrrrr.....',
+        '...RRRrrrrrr...',
+        '..RRRRrrrrrrr..',
+        '.RRRRRRrrrrrrr.',
+        '.RRRRRRrrrrrrr.',
+        'rRRRRRRrrrrrrrr',
+        'rrRRRRRrrrrrrrr',
+        'rrrrrrrrrrrrrrr',
+        'rrrrrrrrrrrrrrr',
+        'rrrrrrrrrrrrrrr',
+        '.rrrrrrrrrrrrr.',
+        '.rrrrrrrrrrrrr.',
+        '..rrrrrrrrrrr..',
+        '...rrrrrrrrr...',
+        '.....rrrrr.....'
+    ], {
+        '.': n,
+        r: '#a53a2a',
+        R: '#c44a36'
+    });
+}
+
 export const EARTH_SIZE = 29;
 export const MOON_SIZE = 15;
+export const MARS_SIZE = 15;

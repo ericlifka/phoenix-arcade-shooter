@@ -19,10 +19,10 @@ import type { Position } from '../types/rendering';
 type EnemyShipLike = EnemyShip | BossShip;
 
 /**
- * Level group 02 — a long line of enemies enters from the left and follows an
+ * Serpentine level — a long line of enemies enters from the left and follows an
  * infinite serpentine path. Tunables live in src/balance/group-02.ts.
  */
-export default class LevelGroup02 extends GameObject {
+export default class SerpentineLevel extends GameObject {
     alternateShip: boolean;
     difficultyMultiplier: number;
     width: number;

@@ -2,19 +2,21 @@ import type Bank from '../components/bank.js';
 import type ComboGauge from '../components/combo-gauge.js';
 import type PlayerControlledShip from '../ships/player-controlled-ship.js';
 
-/** A discrete set of levels themed around one enemy ship type. */
-export type LevelGroupKey = 'standard' | 'slim' | 'dash';
+/** Bodies of the solar system that host level sets. */
+export type BodyKey =
+    'sol' | 'mercury' | 'venus' | 'earth' | 'luna' | 'mars' |
+    'jupiter' | 'saturn' | 'uranus' | 'neptune';
 
 /** Everything the level select map can send the player to. */
-export type HubDestination = LevelGroupKey | 'shop' | 'hangar';
+export type HubDestination = BodyKey | 'shop' | 'hangar';
 
 /**
  * Per-level-set completion counts persisted in the save file. Keyed by
- * LevelGroupKey ('standard' = Earth, 'slim' = Luna). Partial on purpose:
- * a missing key means the set has never been completed (read as 0), so new
- * planets can be tracked without touching old saves.
+ * BodyKey ('earth' = Earth, 'luna' = Luna, etc.). Partial on purpose: a
+ * missing key means the set has never been completed (read as 0), so new
+ * bodies can be tracked without touching old saves.
  */
-export type LevelCompletions = Partial<Record<LevelGroupKey, number>>;
+export type LevelCompletions = Partial<Record<BodyKey, number>>;
 
 /** Subset used by the shop screen. */
 export interface GameForShop {
@@ -50,5 +52,5 @@ export interface GameForLevels extends GameForShop, GameForHangar, GameForLevelS
     clearBullets(): void;
     hideRunHud(): void;
     showRunHud(): void;
-    recordLevelSetCompletion(set: LevelGroupKey): void;
+    recordLevelSetCompletion(set: BodyKey): void;
 }

@@ -9,9 +9,7 @@
 
 ### Progression system
 
-* Track progression through levels in the save file so it applies to the map when loaded
-* Intro screen for a new save file that's different
-* Don't show the moon until earth mission set is beaten.
+* too many levels before completing earth, should break up the level groups
 * Other Inner Planets show up after Moon
 
 ### Concepts

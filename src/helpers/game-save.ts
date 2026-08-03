@@ -13,8 +13,8 @@ import { playerShipDefs, type PlayerShipId } from '../balance/player-ships.js';
 import { MAX_COMBO_UPGRADES } from '../balance/shop.js';
 import type { LevelCompletions } from '../types/levels.js';
 
-export const SAVE_VERSION = 3 as const;
-export const SAVE_STORAGE_KEY = 'phoenix-arcade-shooter-save-v3';
+export const SAVE_VERSION = 4 as const;
+export const SAVE_STORAGE_KEY = 'phoenix-arcade-shooter-save-v4';
 
 export interface SaveData {
     version: typeof SAVE_VERSION;
@@ -151,13 +151,21 @@ function validateTechnologies(raw: unknown): PlayerTechnologies | null {
 }
 
 /**
- * Fresh completion record for a new save: every trackable level set at 0.
- * New planets/level sets get added here as they ship.
+ * Fresh completion record for a new save: every trackable body at 0.
+ * New bodies get added here as they ship.
  */
 export function createStarterLevelCompletions(): LevelCompletions {
     return {
-        standard: 0, // Earth
-        slim: 0 // Luna
+        sol: 0,
+        mercury: 0,
+        venus: 0,
+        earth: 0,
+        luna: 0,
+        mars: 0,
+        jupiter: 0,
+        saturn: 0,
+        uranus: 0,
+        neptune: 0
     };
 }
 
@@ -166,7 +174,7 @@ export function createStarterLevelCompletions(): LevelCompletions {
  * rejects the save. A missing or malformed section yields starter zeroes;
  * individual entries that aren't non-negative integers fall back to 0.
  * Valid entries under unknown keys are kept so data written by a newer
- * build (e.g. a planet this version doesn't know) survives a load/save.
+ * build (e.g. a body this version doesn't know) survives a load/save.
  */
 function validateLevelCompletions(raw: unknown): LevelCompletions {
     const completions = createStarterLevelCompletions();
@@ -265,6 +273,7 @@ export function clearSave(): void {
         // Drop legacy keys so old progress does not linger.
         localStorage.removeItem('phoenix-arcade-shooter-save-v1');
         localStorage.removeItem('phoenix-arcade-shooter-save-v2');
+        localStorage.removeItem('phoenix-arcade-shooter-save-v3');
     } catch {
         // ignore
     }

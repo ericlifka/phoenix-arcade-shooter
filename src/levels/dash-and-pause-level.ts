@@ -15,10 +15,10 @@ import type { GameForLevels } from '../types/levels.js';
 type DashShipLike = DashShip | DashBoss;
 
 /**
- * Level group 04 — dash-and-pause scouts.
+ * Dash-and-pause level — dash-and-pause scouts.
  * Tunables live in src/balance/group-04.ts.
  */
-export default class LevelGroup04 extends GameObject {
+export default class DashAndPauseLevel extends GameObject {
     difficultyMultiplier: number;
     width: number;
     height: number;

@@ -1,14 +1,14 @@
 import FlyPlayerInFromBottom from '../scripts/fly-player-in-from-bottom.js';
 import GameObject from '../models/game-object.js';
 import Hangar from './hangar.js';
-import LevelGroup01 from './level-group-01.js';
-import LevelGroup02 from './level-group-02.js';
-import LevelGroup03 from './level-group-03.js';
-import LevelGroup04 from './level-group-04.js';
+import ColumnLevel from './column-level.js';
+import SerpentineLevel from './serpentine-level.js';
+import OrbitLevel from './orbit-level.js';
+import DashAndPauseLevel from './dash-and-pause-level.js';
 import LevelSelect from './level-select.js';
 import Shop from './shop.js';
 import type PlayerControlledShip from '../ships/player-controlled-ship.js';
-import type { GameForLevels, HubDestination, LevelGroupKey } from '../types/levels.js';
+import type { BodyKey, GameForLevels, HubDestination } from '../types/levels.js';
 
 interface LevelLike extends GameObject {
     checkIfLevelComplete(): boolean;
@@ -95,69 +95,70 @@ export default class LevelManager extends GameObject {
         this.levelIndex = -1;
     }
 
-    buildLevelGroup(group: LevelGroupKey): LevelLike[] {
+    buildLevelGroup(group: BodyKey): LevelLike[] {
         switch (group) {
-            case 'slim':
-                return this.slimShipLevels();
-            case 'dash':
-                return this.dashShipLevels();
-            case 'standard':
+            case 'earth':
+                return this.earthLevels();
+            case 'luna':
+                return this.lunaLevels();
+            case 'mars':
+                return this.marsLevels();
             default:
-                return this.standardShipLevels();
+                return [];
         }
     }
 
-    standardShipLevels(): LevelLike[] {
+    private earthLevels(): LevelLike[] {
         return [
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 2),
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 3),
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 4),
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, false, 'boss'),
+            new ColumnLevel(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+            new ColumnLevel(this, this.game, this.difficultyMultiplier, false, 2),
+            new ColumnLevel(this, this.game, this.difficultyMultiplier, false, 3),
+            new ColumnLevel(this, this.game, this.difficultyMultiplier, false, 4),
+            new ColumnLevel(this, this.game, this.difficultyMultiplier, false, 'boss'),
             this.shop,
-            new LevelGroup02(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-            new LevelGroup02(this, this.game, this.difficultyMultiplier, false, 2),
-            new LevelGroup02(this, this.game, this.difficultyMultiplier, false, 3),
-            new LevelGroup02(this, this.game, this.difficultyMultiplier, false, 4),
-            new LevelGroup02(this, this.game, this.difficultyMultiplier, false, 'boss'),
+            new SerpentineLevel(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+            new SerpentineLevel(this, this.game, this.difficultyMultiplier, false, 2),
+            new SerpentineLevel(this, this.game, this.difficultyMultiplier, false, 3),
+            new SerpentineLevel(this, this.game, this.difficultyMultiplier, false, 4),
+            new SerpentineLevel(this, this.game, this.difficultyMultiplier, false, 'boss'),
             this.shop,
-            new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-            new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 2),
-            new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 3),
-            new LevelGroup03(this, this.game, this.difficultyMultiplier, false, 'boss'),
+            new OrbitLevel(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+            new OrbitLevel(this, this.game, this.difficultyMultiplier, false, 2),
+            new OrbitLevel(this, this.game, this.difficultyMultiplier, false, 3),
+            new OrbitLevel(this, this.game, this.difficultyMultiplier, false, 'boss'),
             this.shop
         ];
     }
 
-    slimShipLevels(): LevelLike[] {
+    private lunaLevels(): LevelLike[] {
         return [
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 2),
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 3),
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 4),
-            new LevelGroup01(this, this.game, this.difficultyMultiplier, true, 'boss'),
+            new ColumnLevel(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
+            new ColumnLevel(this, this.game, this.difficultyMultiplier, true, 2),
+            new ColumnLevel(this, this.game, this.difficultyMultiplier, true, 3),
+            new ColumnLevel(this, this.game, this.difficultyMultiplier, true, 4),
+            new ColumnLevel(this, this.game, this.difficultyMultiplier, true, 'boss'),
             this.shop,
-            new LevelGroup02(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
-            new LevelGroup02(this, this.game, this.difficultyMultiplier, true, 2),
-            new LevelGroup02(this, this.game, this.difficultyMultiplier, true, 3),
-            new LevelGroup02(this, this.game, this.difficultyMultiplier, true, 4),
-            new LevelGroup02(this, this.game, this.difficultyMultiplier, true, 'boss'),
+            new SerpentineLevel(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
+            new SerpentineLevel(this, this.game, this.difficultyMultiplier, true, 2),
+            new SerpentineLevel(this, this.game, this.difficultyMultiplier, true, 3),
+            new SerpentineLevel(this, this.game, this.difficultyMultiplier, true, 4),
+            new SerpentineLevel(this, this.game, this.difficultyMultiplier, true, 'boss'),
             this.shop,
-            new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
-            new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 2),
-            new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 3),
-            new LevelGroup03(this, this.game, this.difficultyMultiplier, true, 'boss'),
+            new OrbitLevel(this, this.game, this.difficultyMultiplier, true, 1, this.levelName()),
+            new OrbitLevel(this, this.game, this.difficultyMultiplier, true, 2),
+            new OrbitLevel(this, this.game, this.difficultyMultiplier, true, 3),
+            new OrbitLevel(this, this.game, this.difficultyMultiplier, true, 'boss'),
             this.shop
         ];
     }
 
-    dashShipLevels(): LevelLike[] {
+    private marsLevels(): LevelLike[] {
         return [
-            new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
-            new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 2),
-            new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 3),
-            new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 4),
-            new LevelGroup04(this, this.game, this.difficultyMultiplier, false, 'boss'),
+            new DashAndPauseLevel(this, this.game, this.difficultyMultiplier, false, 1, this.levelName()),
+            new DashAndPauseLevel(this, this.game, this.difficultyMultiplier, false, 2),
+            new DashAndPauseLevel(this, this.game, this.difficultyMultiplier, false, 3),
+            new DashAndPauseLevel(this, this.game, this.difficultyMultiplier, false, 4),
+            new DashAndPauseLevel(this, this.game, this.difficultyMultiplier, false, 'boss'),
             this.shop
         ];
     }
