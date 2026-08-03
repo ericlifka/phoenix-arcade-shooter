@@ -27,6 +27,9 @@ const ORBIT_TO: Position = { x: 132, y: 34 };
 const ORBIT_CONTROL: Position = { x: 100, y: 20 };
 const ORBIT_COLOR = '#4b5a86';
 
+const STORY_X = 70;
+const STORY_Y = 36;
+
 interface SelectTarget {
     destination: HubDestination;
     message: string;
@@ -53,12 +56,14 @@ export default class LevelSelect extends GameObject {
 
     titleText!: TextDisplay;
     selectorShip!: GameObject;
+    storyText?: TextDisplay;
     rows: SelectTarget[][] = [];
     rowIndex = 0;
     columnIndex = 0;
     timeSinceSelected = 0;
     selecting = false;
     isDone = false;
+    mapMode: 'intro' | 'expanded' | 'full' = 'intro';
 
     constructor(parent: GameObject | null | undefined, game: GameForLevelSelect) {
         super(parent);
@@ -86,11 +91,16 @@ export default class LevelSelect extends GameObject {
         this.rowIndex = 0;
         this.columnIndex = 0;
         this.rows = [];
+        this.storyText = undefined;
+        this.mapMode = this.determineMapMode();
 
         this.createTitle();
         this.createOrbitTrack();
         this.createBodies();
         this.createTargets();
+        if (this.mapMode === 'intro') {
+            this.createStoryText();
+        }
         this.createSelectorShip();
         this.refreshTargets();
         this.updateSelectorPosition();
@@ -124,6 +134,19 @@ export default class LevelSelect extends GameObject {
         }
     }
 
+    private determineMapMode(): 'intro' | 'expanded' | 'full' {
+        const earth = this.game.levelCompletions.standard ?? 0;
+        const moon = this.game.levelCompletions.slim ?? 0;
+
+        if (earth === 0) {
+            return 'intro';
+        }
+        if (moon === 0) {
+            return 'expanded';
+        }
+        return 'full';
+    }
+
     private createTitle(): void {
         this.titleText = new TextDisplay(this, {
             font: 'arcade-small',
@@ -141,6 +164,10 @@ export default class LevelSelect extends GameObject {
         earth.index = 2;
         this.addChild(earth);
 
+        if (this.mapMode === 'intro') {
+            return;
+        }
+
         const moon = new GameObject();
         moon.sprite = moonSprite();
         moon.position = { ...MOON_POSITION };
@@ -149,6 +176,10 @@ export default class LevelSelect extends GameObject {
     }
 
     private createOrbitTrack(): void {
+        if (this.mapMode === 'intro') {
+            return;
+        }
+
         const track = new GameObject();
         const arc = dottedArc(ORBIT_FROM, ORBIT_CONTROL, ORBIT_TO, ORBIT_COLOR);
         track.sprite = arc.sprite;
@@ -158,16 +189,24 @@ export default class LevelSelect extends GameObject {
     }
 
     private createTargets(): void {
-        this.rows = [
-            [
-                { destination: 'standard', message: 'Terra', labelPosition: EARTH_LABEL },
-                { destination: 'slim', message: 'Luna', labelPosition: MOON_LABEL }
-            ],
-            [
-                { destination: 'shop', message: 'Shop', labelPosition: SHOP_LABEL },
-                { destination: 'hangar', message: 'Hangar', labelPosition: HANGAR_LABEL }
-            ]
-        ];
+        if (this.mapMode === 'intro') {
+            this.rows = [
+                [
+                    { destination: 'standard', message: 'Terra', labelPosition: EARTH_LABEL }
+                ]
+            ];
+        } else {
+            this.rows = [
+                [
+                    { destination: 'standard', message: 'Terra', labelPosition: EARTH_LABEL },
+                    { destination: 'slim', message: 'Luna', labelPosition: MOON_LABEL }
+                ],
+                [
+                    { destination: 'shop', message: 'Shop', labelPosition: SHOP_LABEL },
+                    { destination: 'hangar', message: 'Hangar', labelPosition: HANGAR_LABEL }
+                ]
+            ];
+        }
 
         this.eachTarget((target) => {
             target.label = new TextDisplay(this, {
@@ -179,6 +218,22 @@ export default class LevelSelect extends GameObject {
             });
             this.addChild(target.label);
         });
+    }
+
+    private createStoryText(): void {
+        this.storyText = new TextDisplay(this, {
+            font: 'arcade-small',
+            message: [
+                'Aliens are invading',
+                'our planet!',
+                'Phoenix, you are the',
+                'only pilot who can',
+                'save us!'
+            ],
+            position: { x: STORY_X, y: STORY_Y },
+            color: this.game.interfaceColor
+        });
+        this.addChild(this.storyText);
     }
 
     private createSelectorShip(): void {

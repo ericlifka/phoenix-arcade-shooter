@@ -36,6 +36,7 @@ export interface GameForHangar {
 export interface GameForLevelSelect {
     player: PlayerControlledShip;
     interfaceColor: string;
+    levelCompletions: LevelCompletions;
 }
 
 /**
