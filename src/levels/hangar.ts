@@ -119,6 +119,7 @@ export default class Hangar extends GameObject {
         this.activeTabIndex = activeIndex >= 0 ? activeIndex : 0;
         this.refreshTabChrome();
         this.rebuildStatsForActiveTab();
+        this.rebuildSelectRow();
         this.refreshSelectRow();
     }
 
@@ -240,6 +241,16 @@ export default class Hangar extends GameObject {
         this.selectText.updateColor(
             unlocked ? this.game.interfaceColor : this.disabledColor
         );
+    }
+
+    /**
+     * Confirming a selection shoots the "Select" label, which swaps its
+     * letter sprites for the explosion animation. Rebuild it from scratch
+     * each visit so re-entering the hangar shows the button again.
+     */
+    private rebuildSelectRow(): void {
+        this.removeChild(this.selectText);
+        this.createSelectRow();
     }
 
     private hideChrome(): void {
